@@ -20,12 +20,12 @@ const services = [
   {
     title: "Equivalent Sourcing",
     description: "Review current products against compatible alternatives, critical specifications, and sample needs.",
-    href: "/request-quote?inquiryType=equivalent"
+    href: "/request-quote?requestType=equivalent"
   },
   {
     title: "Sample Coordination",
     description: "Prepare sample requests for products that need evaluation before switching or scaling.",
-    href: "/request-quote?inquiryType=sample"
+    href: "/request-quote?requestType=sample"
   },
   {
     title: "Documentation Support",
@@ -35,17 +35,17 @@ const services = [
   {
     title: "Quote Preparation",
     description: "Turn product families, quantities, target dates, and documentation needs into sourcing-ready RFQs.",
-    href: "/request-quote?inquiryType=quote"
+    href: "/request-quote?requestType=quote"
   },
   {
     title: "Recurring Supply Planning",
     description: "Share usage rhythm, quantities, and delivery timing for recurring sourcing support.",
-    href: "/request-quote?inquiryType=recurring"
+    href: "/request-quote?requestType=recurring"
   },
   {
     title: "Product List Review",
     description: "Submit a product list for BioAxis to organize by segment, family, equivalent path, and documentation need.",
-    href: "/request-quote?inquiryType=product-list"
+    href: "/request-quote?requestType=product-list"
   },
   {
     title: "Automation Compatibility Review",

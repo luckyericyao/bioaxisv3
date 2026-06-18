@@ -69,9 +69,8 @@ export default function EquivalentsPage() {
         title="Ready to compare equivalents?"
         body="Start with the product your lab already uses. BioAxis helps organize alternatives without claiming live inventory or guaranteed fulfillment."
         primaryLabel="Submit equivalent request"
-        primaryHref="/request-quote"
+        primaryHref="/request-quote?requestType=equivalent"
       />
     </>
   );
 }
-

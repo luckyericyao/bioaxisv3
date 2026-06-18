@@ -51,7 +51,7 @@ const fieldLabels: Record<keyof QuoteFormState, string> = {
   name: "Name",
   organization: "Organization",
   email: "Email",
-  phone: "Phone optional",
+  phone: "Role / title optional",
   shippingRegion: "Shipping region",
   productCategory: "Product segment / category",
   productName: "Product or equivalent product",
@@ -86,6 +86,12 @@ const fieldOrder: Array<keyof QuoteFormState> = [
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
+type SubmitState = {
+  mode: "email" | "captured";
+  message: string;
+  referenceId?: string;
+};
+
 type QuoteRequestFormProps = {
   initialValues?: Partial<QuoteFormState>;
 };
@@ -94,7 +100,9 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   const startingState = useMemo(() => ({ ...initialState, ...initialValues }), [initialValues]);
   const [formState, setFormState] = useState<QuoteFormState>(startingState);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<SubmitState | null>(null);
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const selectedRequestType = getRequestTypeById(formState.requestType);
   const visibleFields = useMemo(() => {
@@ -105,6 +113,7 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   function updateField<K extends keyof QuoteFormState>(field: K, value: QuoteFormState[K]) {
     setFormState((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
+    setSubmitError("");
   }
 
   function validate() {
@@ -124,33 +133,78 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
     return nextErrors;
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validate();
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      setSubmitted(false);
+      setSubmitted(null);
       return;
     }
 
     setErrors({});
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch("/api/request-quote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          company: formState.organization,
+          roleTitle: formState.phone,
+          requestType: formState.requestType,
+          productCategory: formState.productCategory,
+          productName: formState.productName,
+          catalogNumber: formState.catalogNumber,
+          currentSupplier: formState.currentSupplier,
+          quantity: formState.quantity,
+          timeline: formState.targetTimeline,
+          documentationNeeds: formState.needDocumentation === "yes" ? "Documentation requested" : "",
+          sterileStatus: formState.sterility,
+          message: [formState.requiredSpecification, formState.monthlyUsage, formState.notes].filter(Boolean).join("\n\n")
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setSubmitError(payload?.error ?? "Unable to submit the request. Please review the required fields.");
+        setSubmitted(null);
+        return;
+      }
+
+      setSubmitted({
+        mode: payload.mode ?? "captured",
+        message: payload.message ?? "Your BioAxis sourcing request has been received.",
+        referenceId: payload.referenceId
+      });
+    } catch {
+      setSubmitError("Unable to reach the request endpoint. Please try again.");
+      setSubmitted(null);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
     return (
       <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request captured locally for demo</p>
-        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Your request details are prepared.</h2>
+        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request received</p>
+        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Your sourcing request is ready for BioAxis review.</h2>
         <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          Backend or email environment variables are not configured in this static form, so this demo state does not claim the request was sent. The entered fields are ready to connect to a server-side submission path when configured.
+          {submitted.message}
         </p>
+        {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
         <button
           type="button"
           onClick={() => {
             setFormState(startingState);
-            setSubmitted(false);
+            setSubmitted(null);
           }}
           className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
@@ -173,7 +227,7 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
             selectedId={formState.requestType}
             onSelect={(id) => {
               updateField("requestType", id);
-              setSubmitted(false);
+              setSubmitted(null);
             }}
           />
         </div>
@@ -242,15 +296,17 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
 
         <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
-            This form prepares the request details on the client. It does not send data until backend or email integration is added.
+            BioAxis reviews quote-ready product details including current supplier, catalog number, quantity, timeline, sterility, documentation, and sample needs.
           </p>
           <button
             type="submit"
+            disabled={submitting}
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
-            Submit request
+            {submitting ? "Submitting..." : "Submit request"}
           </button>
         </div>
+        {submitError ? <p className="mt-4 text-sm text-bioaxis-accent">{submitError}</p> : null}
       </section>
     </form>
   );

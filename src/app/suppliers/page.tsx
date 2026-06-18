@@ -54,7 +54,7 @@ export default function SuppliersPage() {
         primaryLabel="Submit supplier list for review"
         primaryHref="/request-quote"
         secondaryLabel="Find equivalents across suppliers"
-        secondaryHref="/equivalents"
+        secondaryHref="/equivalent-finder"
       />
     </>
   );

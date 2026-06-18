@@ -4,10 +4,12 @@ import { buildRequestHref } from "@/data/productTaxonomy";
 type SourcingRequestButtonGroupProps = {
   segment?: string;
   category?: string;
+  subcategory?: string;
   family?: string;
   size?: "sm" | "md";
   layout?: "grid" | "inline";
   includeSupport?: boolean;
+  includeDocumentation?: boolean;
 };
 
 const baseClass =
@@ -21,24 +23,27 @@ const sizeClass = {
 export function SourcingRequestButtonGroup({
   segment,
   category,
+  subcategory,
   family,
   size = "sm",
   layout = "grid",
-  includeSupport = false
+  includeSupport = false,
+  includeDocumentation = false
 }: SourcingRequestButtonGroupProps) {
   const requests = [
-    { label: "Request quote", inquiryType: "quote", primary: true },
-    { label: "Find equivalent", inquiryType: "equivalent", primary: false },
-    { label: "Request sample", inquiryType: "sample", primary: false },
-    ...(includeSupport ? [{ label: "Ask support", inquiryType: "support", primary: false }] : [])
+    { label: "Request quote", requestType: "quote", primary: true },
+    { label: "Find equivalent", requestType: "equivalent", primary: false },
+    { label: "Request sample", requestType: "sample", primary: false },
+    ...(includeDocumentation ? [{ label: "Ask for documentation", requestType: "documentation", primary: false }] : []),
+    ...(includeSupport ? [{ label: "Ask support", requestType: "support", primary: false }] : [])
   ];
 
   return (
     <div className={layout === "grid" ? "grid gap-2 sm:grid-cols-3" : "flex flex-col gap-2 sm:flex-row"}>
       {requests.map((request) => (
         <Link
-          key={request.inquiryType}
-          href={buildRequestHref({ segment, category, family, inquiryType: request.inquiryType })}
+          key={request.requestType}
+          href={buildRequestHref({ segment, category, subcategory, family, requestType: request.requestType })}
           className={[
             baseClass,
             sizeClass[size],

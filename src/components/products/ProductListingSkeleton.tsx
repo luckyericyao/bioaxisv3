@@ -41,13 +41,13 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.documentationNeeds.slice(0, 2).join(", ")}</td>
                   <td className="px-4 py-4 align-top">
                     <div className="flex flex-wrap gap-2">
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "quote" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "quote" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Quote
                       </Link>
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "equivalent" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "equivalent" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Equivalent
                       </Link>
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "sample" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "sample" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Sample
                       </Link>
                     </div>

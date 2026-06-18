@@ -53,7 +53,7 @@ export function HowBioAxisWorksSection() {
         <Link href="/products" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
           Search product universe
         </Link>
-        <Link href="/equivalents" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        <Link href="/equivalent-finder" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           Find equivalents
         </Link>
         <Link href="/request-quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
@@ -114,7 +114,7 @@ export function EquivalentSourcingHomeSection() {
       title="Find equivalent consumables and sourcing alternatives"
       body="Already using a specific supplier or catalog number? BioAxis helps identify equivalent and compatible consumables across multiple suppliers. Enter a product name, supplier, catalog number, format, or specification, and we will organize your alternatives."
       primaryLabel="Find an equivalent"
-      primaryHref="/equivalents"
+      primaryHref="/equivalent-finder"
     />
   );
 }
@@ -176,4 +176,3 @@ export function PopularStartingPointsSection() {
     </section>
   );
 }
-

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
 import { PageHero } from "@/components/ui/PageHero";
+import { labelFromProductContext } from "@/data/productTaxonomy";
 
 export const metadata: Metadata = {
   title: "Request Quote | BioAxis",
@@ -32,11 +33,12 @@ function labelize(value: string | undefined) {
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
-  const category = first(params?.category);
+  const subcategory = first(params?.subcategory) ?? first(params?.category);
   const family = first(params?.family);
-  const inquiryType = first(params?.inquiryType);
+  const requestType = first(params?.requestType) ?? first(params?.inquiryType);
   const query = first(params?.q);
-  const productCategory = [labelize(segment), labelize(category)].filter(Boolean).join(" / ");
+  const labels = labelFromProductContext({ segment, subcategory, family });
+  const productCategory = [labels.segmentName || labelize(segment), labels.subcategoryName || labelize(subcategory)].filter(Boolean).join(" / ");
 
   return (
     <>
@@ -48,9 +50,9 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <QuoteRequestForm
           initialValues={{
-            requestType: inquiryType ?? "quote",
+            requestType: requestType ?? "quote",
             productCategory,
-            productName: labelize(family) || query || ""
+            productName: labels.familyName || labelize(family) || query || ""
           }}
         />
       </section>

@@ -53,7 +53,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               </p>
             </div>
             <Link
-              href={`/request-quote?q=${encodeURIComponent(trimmedQuery)}&inquiryType=quote`}
+              href={`/request-quote?q=${encodeURIComponent(trimmedQuery)}&requestType=quote`}
               className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
               Prepare request

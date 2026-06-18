@@ -27,12 +27,11 @@ export default function ResourcesPage() {
         ))}
       </section>
       <CTASection
-        title="Need sourcing support before the guide is published?"
+        title="Need sourcing support for a live product request?"
         body="Send your product names, catalog numbers, specifications, and workflow context. BioAxis helps organize quote, sample, equivalent, and documentation support where applicable."
         primaryLabel="Request sourcing support"
-        primaryHref="/request-quote"
+        primaryHref="/request-quote?requestType=quote"
       />
     </>
   );
 }
-

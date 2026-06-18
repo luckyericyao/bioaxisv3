@@ -4,19 +4,23 @@ export type NavigationItem = {
 };
 
 export const navigationItems: NavigationItem[] = [
+  { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Workflows", href: "/workflows" },
-  { label: "Equivalents", href: "/equivalents" },
+  { label: "Equivalent Finder", href: "/equivalent-finder" },
+  { label: "Quality", href: "/quality" },
   { label: "Samples", href: "/samples" },
   { label: "Resources", href: "/resources" },
-  { label: "Support", href: "/support" },
   { label: "Request Quote", href: "/request-quote" }
 ];
 
 export const footerNavigationItems: NavigationItem[] = [
-  ...navigationItems,
-  { label: "Applications", href: "/applications" },
-  { label: "Services", href: "/services" },
+  { label: "Products", href: "/products" },
+  { label: "Request Quote", href: "/request-quote" },
+  { label: "Equivalent Finder", href: "/equivalent-finder" },
+  { label: "Samples", href: "/samples" },
   { label: "Quality", href: "/quality" },
-  { label: "Suppliers", href: "/suppliers" }
+  { label: "Resources", href: "/resources" },
+  { label: "Support", href: "/support" },
+  { label: "Applications", href: "/applications" }
 ];

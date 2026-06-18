@@ -25,6 +25,33 @@ const documentationExamples = [
   "Compatibility notes where available"
 ];
 
+const trustSections = [
+  {
+    title: "Supplier qualification",
+    body: "BioAxis supports review of supplier options by product category, documentation path, responsiveness, and suitability for the requested workflow."
+  },
+  {
+    title: "COA/SDS availability",
+    body: "Common documentation requests include CoA, SDS, sterility statements, DNase/RNase-free information, material declarations, and storage conditions."
+  },
+  {
+    title: "Sterility and clean claims",
+    body: "For sterile, PCR-clean, endotoxin-sensitive, or cell culture workflows, BioAxis helps organize the supporting statements buyers need to review."
+  },
+  {
+    title: "Lot traceability",
+    body: "Where available, BioAxis helps request lot-level documentation so procurement and lab teams can connect received products to the relevant records."
+  },
+  {
+    title: "Equivalent product validation",
+    body: "Equivalent review compares format, material, dimensions, workflow fit, documentation, packaging, and sample testing needs before a switch."
+  },
+  {
+    title: "Sample-first switching",
+    body: "For critical consumables, BioAxis encourages sample-first evaluation before larger-volume purchasing or recurring supply planning."
+  }
+];
+
 export default function QualityPage() {
   return (
     <>
@@ -53,6 +80,19 @@ export default function QualityPage() {
             { label: "Human review", value: "A sourcing specialist can help review product matching, equivalent sourcing, and documentation needs with careful platform language." }
           ]}
         />
+      </section>
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Quality support areas</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {trustSections.map((section) => (
+            <article key={section.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
+              <h3 className="text-lg font-bold uppercase text-bioaxis-text">{section.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{section.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <ProcessSteps

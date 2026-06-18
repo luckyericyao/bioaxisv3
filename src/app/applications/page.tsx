@@ -16,7 +16,7 @@ const applications = [
     id: "cell-culture",
     title: "Cell Culture",
     description: "Media, supplements, cultureware, sterile filtration, cryopreservation, and analysis consumables.",
-    href: "/products/cell-culture-analysis"
+    href: "/products/cell-culture"
   },
   {
     id: "molecular-biology-pcr",
@@ -28,7 +28,7 @@ const applications = [
     id: "protein-immunology",
     title: "Protein & Immunology",
     description: "Antibodies, Western blotting, protein electrophoresis, ELISA, protein prep, and immunoassay workflows.",
-    href: "/products/protein-biology-immunoassays"
+    href: "/products/proteins-antibodies-immunology"
   },
   {
     id: "sample-preparation",
@@ -40,7 +40,7 @@ const applications = [
     id: "analytical-workflows",
     title: "Analytical Workflows",
     description: "Chromatography vials, sample prep, standards, rapid tests, and QC documentation support.",
-    href: "/products/analytical-qc-consumables"
+    href: "/products/sample-prep-filtration"
   },
   {
     id: "automation-hts",
@@ -58,7 +58,7 @@ const applications = [
     id: "early-bioprocess",
     title: "Early Bioprocess",
     description: "Single-use fluid management, upstream consumables, sterile filtration, sampling, and process QC.",
-    href: "/products/bioprocessing-consumables"
+    href: "/products/early-bioprocess-single-use"
   }
 ];
 

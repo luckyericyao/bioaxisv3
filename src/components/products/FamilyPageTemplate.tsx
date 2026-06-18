@@ -37,7 +37,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         ]}
       />
       <PageHero eyebrow={`${segment.title} / ${category.title}`} title={family.title} subtitle={family.longDescription}>
-        <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" />
+        <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" includeDocumentation />
       </PageHero>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
@@ -45,6 +45,18 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         <InfoCard title="Common formats" items={family.commonFormats} />
         <InfoCard title="How to select" items={family.selectionCriteria} />
         <InfoCard title="Equivalent switching considerations" items={family.equivalentSwitchingConsiderations} />
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <InfoCard
+          title="How BioAxis helps source this"
+          items={[
+            "Convert product descriptions, current supplier details, and catalog numbers into quote-ready product specifications.",
+            "Compare equivalent options by format, material, sterility, packaging, documentation, and application fit.",
+            "Coordinate sample-first evaluation when switching could affect cells, assays, automation decks, or QC workflows.",
+            "Organize documentation requests including CoA, SDS, sterility statements, material declarations, and lot traceability where available."
+          ]}
+        />
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
@@ -67,7 +79,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
             ))}
           </div>
           <Link
-            href={buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, inquiryType: "quote" })}
+            href={buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, requestType: "quote" })}
             className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Open prefilled RFQ
