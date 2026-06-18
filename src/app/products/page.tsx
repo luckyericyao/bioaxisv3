@@ -39,27 +39,37 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">One stop for life science consumables</p>
             <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-              Search anything. Source everything. Browse a BioAxis-owned product taxonomy across segments, categories, product families, equivalents, samples, quotes, and documentation support without fake inventory or pricing claims.
+              Browse BioAxis product segments, drill into category and family pages, prepare equivalent reviews, request samples, and submit quote-ready sourcing requests. Availability and pricing are confirmed through sourcing review.
             </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                { title: "Browse by category", body: "Start with a product segment and drill into family-level sourcing paths." },
+                { title: "Find an equivalent", body: "Use a current supplier, catalog number, or specification to prepare a review." },
+                { title: "Request quote or sample", body: "Send quantity, timeline, packaging, and documentation needs for follow-up." }
+              ].map((mode) => (
+                <article key={mode.title} className="border border-bioaxis-line bg-bioaxis-panel/70 p-4">
+                  <h2 className="text-sm font-bold uppercase text-bioaxis-text">{mode.title}</h2>
+                  <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{mode.body}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+                Browse categories
+              </Link>
+              <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                Find equivalent
+              </Link>
+              <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                Request quote
+              </Link>
+            </div>
           </div>
           <ProductSearch initialQuery={query} />
         </div>
-
-        <section className="mt-10 grid gap-4 md:grid-cols-3">
-          {[
-            { title: "Browse by Product Category", body: "Start with 12 product segments, then drill into category and family pages." },
-            { title: "Find an Equivalent", body: "Submit a current brand, catalog number, and critical specifications for review." },
-            { title: "Request Quote / Sample", body: "Prepare a sourcing request with quantity, sterile status, documentation, and target date." }
-          ].map((mode) => (
-            <article key={mode.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
-              <h2 className="text-lg font-bold uppercase text-bioaxis-text">{mode.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{mode.body}</p>
-            </article>
-          ))}
-        </section>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+      <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">Browse the BioAxis product universe</h2>
@@ -78,10 +88,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="border border-bioaxis-line bg-bioaxis-panel p-6 sm:p-8">
           <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">How BioAxis sourcing works</p>
           <div className="grid gap-3 md:grid-cols-5">
-            {["Search", "Match", "Quote", "Sample", "Supply"].map((step, index) => (
-              <div key={step} className="border border-bioaxis-line bg-bioaxis-black p-4">
+            {[
+              { title: "Search", body: "Start from product category, existing catalog number, supplier name, specification, or workflow." },
+              { title: "Match", body: "BioAxis reviews fit, format, sterility, material, compatibility, and documentation needs." },
+              { title: "Quote", body: "Submit quantity, target date, packaging preference, and required documents." },
+              { title: "Sample", body: "Request samples for fit, workflow compatibility, and switching evaluation." },
+              { title: "Supply", body: "Support recurring sourcing needs once specs and documentation are aligned." }
+            ].map((step, index) => (
+              <div key={step.title} className="border border-bioaxis-line bg-bioaxis-black p-4">
                 <span className="text-xs font-bold text-bioaxis-dim">{String(index + 1).padStart(2, "0")}</span>
-                <h2 className="mt-3 text-lg font-bold uppercase text-bioaxis-text">{step}</h2>
+                <h2 className="mt-3 text-lg font-bold uppercase text-bioaxis-text">{step.title}</h2>
+                <p className="mt-3 text-xs leading-5 text-bioaxis-muted">{step.body}</p>
               </div>
             ))}
           </div>
@@ -93,10 +110,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <div>
             <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">Not sure where to start?</p>
             <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
-              Start with a product, supplier, specification, or workflow.
+              Not sure where to start?
             </h2>
             <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-              BioAxis helps organize equivalent sourcing support, quote options, samples, and documentation paths without presenting inventory counts, pricing, or cart behavior.
+              Send a product name, catalog number, supplier, workflow, or specification. BioAxis can help structure the request, compare equivalent options, prepare documentation needs, and support quote or sample follow-up.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">

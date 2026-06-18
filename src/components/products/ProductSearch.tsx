@@ -9,6 +9,15 @@ type ProductSearchProps = {
   initialQuery?: string;
 };
 
+const quickSearches = [
+  { label: "filtered 200 µL tips", href: "/products/liquid-handling/pipette-tips?q=filtered%20200%20%C2%B5L%20tips" },
+  { label: "serum-free media", href: "/products/cell-culture/media-and-supplements/serum-free-media" },
+  { label: "96-well PCR plates", href: "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates" },
+  { label: "PES 0.22 µm syringe filters", href: "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters" },
+  { label: "Hamilton-compatible tips", href: "/products/automation-consumables/robotic-pipette-tips?q=Hamilton-compatible%20tips" },
+  { label: "cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials" }
+];
+
 export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -31,7 +40,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             id="product-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search product, catalog number, brand equivalent, or workflow…"
+            placeholder="Search pipette tips, serum-free media, PCR plates, PES syringe filters..."
             className="field-focus min-h-12 min-w-0 flex-1 border-0 bg-transparent text-xl font-semibold text-bioaxis-text placeholder:text-bioaxis-dim sm:text-2xl"
           />
           <button
@@ -42,6 +51,21 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </button>
         </div>
       </form>
+
+      <div className="mt-4">
+        <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Quick searches</p>
+        <div className="flex flex-wrap gap-2">
+          {quickSearches.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {trimmedQuery ? (
         <section className="mt-5 border border-bioaxis-line bg-bioaxis-panel p-4">
