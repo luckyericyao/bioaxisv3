@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProductSubcategory } from "@/data/productTaxonomy";
-import { buildRequestHref } from "@/data/productTaxonomy";
+import { buildEquivalentFinderHref, buildRequestHref } from "@/data/productTaxonomy";
 
 type ProductListingSkeletonProps = {
   segmentSlug: string;
@@ -44,7 +44,7 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
                       <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "quote" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Quote
                       </Link>
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "equivalent" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildEquivalentFinderHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Equivalent
                       </Link>
                       <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "sample" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">

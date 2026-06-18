@@ -99,7 +99,7 @@ function InfoCard({ title, items }: { title: string; items: string[] }) {
       </div>
       {title === "Equivalent-switching guidance" ? (
         <Link
-          href="/request-quote?requestType=equivalent"
+          href="/equivalent-finder?requestType=equivalent"
           className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Start equivalent request

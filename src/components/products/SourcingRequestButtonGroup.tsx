@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buildRequestHref } from "@/data/productTaxonomy";
+import { buildEquivalentFinderHref, buildRequestHref } from "@/data/productTaxonomy";
 
 type SourcingRequestButtonGroupProps = {
   segment?: string;
@@ -43,7 +43,11 @@ export function SourcingRequestButtonGroup({
       {requests.map((request) => (
         <Link
           key={request.requestType}
-          href={buildRequestHref({ segment, category, subcategory, family, requestType: request.requestType })}
+          href={
+            request.requestType === "equivalent"
+              ? buildEquivalentFinderHref({ segment, category, subcategory, family })
+              : buildRequestHref({ segment, category, subcategory, family, requestType: request.requestType })
+          }
           className={[
             baseClass,
             sizeClass[size],

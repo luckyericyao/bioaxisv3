@@ -715,6 +715,37 @@ export function buildRequestHref({
   return `/request-quote?${params.toString()}`;
 }
 
+export function buildEquivalentFinderHref({
+  segment,
+  category,
+  subcategory,
+  family
+}: {
+  segment?: string;
+  category?: string;
+  subcategory?: string;
+  family?: string;
+}) {
+  const params = new URLSearchParams();
+  const resolvedSubcategory = subcategory ?? category;
+
+  params.set("requestType", "equivalent");
+
+  if (segment) {
+    params.set("segment", segment);
+  }
+
+  if (resolvedSubcategory) {
+    params.set("subcategory", resolvedSubcategory);
+  }
+
+  if (family) {
+    params.set("family", family);
+  }
+
+  return `/equivalent-finder?${params.toString()}`;
+}
+
 export function getProductSearchResults(query: string): ProductSearchResult[] {
   const normalizedQuery = query.trim().toLowerCase();
 
