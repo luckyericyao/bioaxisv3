@@ -40,7 +40,7 @@ export const requestTypes: RequestType[] = [
     optionalFields: ["currentSupplier", "catalogNumber", "productCategory", "sterility", "notes"]
   },
   {
-    id: "recurring",
+    id: "recurring-supply",
     label: "Recurring supply request",
     description:
       "Share expected usage, timing, and shipping region so BioAxis can help plan recurring sourcing support.",
@@ -48,23 +48,34 @@ export const requestTypes: RequestType[] = [
     optionalFields: ["quantity", "sterility", "currentSupplier", "requiredSpecification", "notes"]
   },
   {
-    id: "product-list",
+    id: "product-list-review",
     label: "Product list review",
     description:
-      "Upload support can be added in a future version. For now, paste your product list in the Notes field so BioAxis can help organize review.",
+      "Paste a product list in the Notes field so BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation requirement.",
     requiredFields: ["notes"],
     optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline"]
   },
   {
-    id: "support",
-    label: "Sourcing support request",
+    id: "contact",
+    label: "Contact request",
     description:
-      "Ask BioAxis to review product fit, documentation needs, supplier equivalents, sample path, or recurring supply planning.",
-    requiredFields: ["productName", "requiredSpecification"],
-    optionalFields: ["productCategory", "currentSupplier", "catalogNumber", "quantity", "sterility", "needSample", "needDocumentation", "targetTimeline", "notes"]
+      "Send a general sourcing question, documentation note, equivalent matching request, or procurement-support message to BioAxis.",
+    requiredFields: ["notes"],
+    optionalFields: ["productCategory", "productName", "currentSupplier", "catalogNumber", "quantity", "sterility", "needSample", "needDocumentation", "targetTimeline"]
   }
 ];
 
+const requestTypeAliases: Record<string, string> = {
+  recurring: "recurring-supply",
+  "product-list": "product-list-review",
+  support: "contact"
+};
+
+export function normalizeRequestType(id: string) {
+  return requestTypeAliases[id] ?? id;
+}
+
 export function getRequestTypeById(id: string) {
-  return requestTypes.find((requestType) => requestType.id === id) ?? requestTypes[0];
+  const normalizedId = normalizeRequestType(id);
+  return requestTypes.find((requestType) => requestType.id === normalizedId) ?? requestTypes[0];
 }

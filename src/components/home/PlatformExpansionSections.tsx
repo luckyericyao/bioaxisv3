@@ -112,7 +112,7 @@ export function EquivalentSourcingHomeSection() {
   return (
     <CTASection
       title="Find equivalent consumables and sourcing alternatives"
-      body="Already using a specific supplier or catalog number? BioAxis helps identify equivalent and compatible consumables across multiple suppliers. Enter a product name, supplier, catalog number, format, or specification, and we will organize your alternatives."
+      body="Already using a specific supplier or catalog number? BioAxis helps review equivalent and compatible consumables across supplier options. Enter a product name, supplier, catalog number, format, or specification, and BioAxis will organize the comparison path without claiming automatic one-to-one equivalence."
       primaryLabel="Find an equivalent"
       primaryHref="/equivalent-finder"
     />
@@ -140,8 +140,8 @@ export function DocumentationSupportHomeSection() {
       body="BioAxis supports sourcing decisions with supplier screening, documentation organization, and specification review. Where available, we help request COA, SDS, sterility information, material information, and lot-level documentation."
       primaryLabel="Learn about documentation support"
       primaryHref="/quality"
-      secondaryLabel="Review supplier coverage"
-      secondaryHref="/suppliers"
+      secondaryLabel="Supplier qualification"
+      secondaryHref="/supplier-qualification"
     />
   );
 }
@@ -150,11 +150,11 @@ export function HumanSupportHomeSection() {
   return (
     <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
       <SectionHeader
-        title="Talk to BioAxis sourcing support"
-        subtitle="Need help selecting the right consumables, finding equivalents, organizing documentation, or planning recurring supply? BioAxis provides human support for product matching, alternative sourcing, and procurement questions."
+        title="Support recurring supply"
+        subtitle="Need help selecting consumables, finding compatible alternatives, organizing documentation, or planning repeat purchasing? BioAxis supports product matching, sample evaluation, documentation requests, and recurring supply conversations."
       />
-      <Link href="/support" className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
-        Ask BioAxis support
+      <Link href="/request-quote?requestType=recurring-supply" className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+        Plan recurring supply
       </Link>
     </section>
   );

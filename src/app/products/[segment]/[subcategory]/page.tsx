@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryPageTemplate } from "@/components/products/CategoryPageTemplate";
 import { getAllSubcategoryPaths, getSubcategoryBySlug } from "@/data/productTaxonomy";
+import { getPriorityProductContent } from "@/data/priorityProductContent";
 
 type SubcategoryPageProps = {
   params: Promise<{
@@ -24,9 +25,11 @@ export async function generateMetadata({ params }: SubcategoryPageProps): Promis
     };
   }
 
+  const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug);
+
   return {
-    title: match.subcategory.seoTitle,
-    description: match.subcategory.metaDescription,
+    title: priorityContent?.metaTitle ?? match.subcategory.seoTitle,
+    description: priorityContent?.metaDescription ?? match.subcategory.metaDescription,
     alternates: {
       canonical: `/products/${match.segment.slug}/${match.subcategory.slug}`
     }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FamilyPageTemplate } from "@/components/products/FamilyPageTemplate";
 import { getAllFamilyPaths, getFamilyBySlug } from "@/data/productTaxonomy";
+import { getPriorityProductContent } from "@/data/priorityProductContent";
 
 type FamilyPageProps = {
   params: Promise<{
@@ -25,9 +26,11 @@ export async function generateMetadata({ params }: FamilyPageProps): Promise<Met
     };
   }
 
+  const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug, match.family.slug);
+
   return {
-    title: match.family.seoTitle,
-    description: match.family.metaDescription,
+    title: priorityContent?.metaTitle ?? match.family.seoTitle,
+    description: priorityContent?.metaDescription ?? match.family.metaDescription,
     alternates: {
       canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}`
     }

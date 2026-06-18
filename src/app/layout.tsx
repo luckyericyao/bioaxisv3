@@ -4,9 +4,9 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 
 export const metadata: Metadata = {
-  title: "BioAxis | Search anything. Source everything.",
+  title: "BioAxis | One-Stop Life Science Consumables Sourcing",
   description:
-    "BioAxis is a one-stop life science consumables sourcing platform for products, suppliers, equivalents, samples, quotes, and support.",
+    "Source life science consumables, request equivalent options, compare specifications, request samples, and organize documentation for biotech, pharma, and research labs.",
   metadataBase: new URL("https://bioaxisv3.vercel.app")
 };
 
@@ -25,4 +25,3 @@ export default function RootLayout({
     </html>
   );
 }
-

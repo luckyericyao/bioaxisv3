@@ -40,12 +40,12 @@ const services = [
   {
     title: "Recurring Supply Planning",
     description: "Share usage rhythm, quantities, and delivery timing for recurring sourcing support.",
-    href: "/request-quote?requestType=recurring"
+    href: "/request-quote?requestType=recurring-supply"
   },
   {
     title: "Product List Review",
     description: "Submit a product list for BioAxis to organize by segment, family, equivalent path, and documentation need.",
-    href: "/request-quote?requestType=product-list"
+    href: "/request-quote?requestType=product-list-review"
   },
   {
     title: "Automation Compatibility Review",

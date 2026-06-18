@@ -35,7 +35,7 @@ export function SourcingRequestButtonGroup({
     { label: "Find equivalent", requestType: "equivalent", primary: false },
     { label: "Request sample", requestType: "sample", primary: false },
     ...(includeDocumentation ? [{ label: "Ask for documentation", requestType: "documentation", primary: false }] : []),
-    ...(includeSupport ? [{ label: "Ask support", requestType: "support", primary: false }] : [])
+    ...(includeSupport ? [{ label: "Recurring supply", requestType: "recurring-supply", primary: false }] : [])
   ];
 
   return (

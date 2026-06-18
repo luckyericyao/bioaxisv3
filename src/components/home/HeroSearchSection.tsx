@@ -25,6 +25,9 @@ export function HeroSearchSection() {
             {brand.headline}
           </h1>
           <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">{brand.tagline}</p>
+          <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+            BioAxis helps biotech, pharma, academic, and research labs source consumables, compare compatible options, request samples before switching, and organize supplier documentation.
+          </p>
         </div>
 
         <div className="mt-10 max-w-5xl">
@@ -32,9 +35,12 @@ export function HeroSearchSection() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <CTAButton href="/products">Search</CTAButton>
+          <CTAButton href="/products">Start with Products</CTAButton>
           <CTAButton href="/request-quote" variant="secondary">
             Request Quote
+          </CTAButton>
+          <CTAButton href="/equivalent-finder" variant="secondary">
+            Find Equivalent
           </CTAButton>
         </div>
       </div>

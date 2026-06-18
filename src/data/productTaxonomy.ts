@@ -410,7 +410,7 @@ const rawSegments: RawSegment[] = [
     headline: "Source culture vessels, media, sera, dissociation products, freezing supplies, coatings, and stem cell culture reagents.",
     shortDescription: "Cell culture products organized by sterility, cell-type compatibility, formulation, surface treatment, and documentation needs.",
     buyerUseCases: ["2D cell culture", "stem cell culture", "primary cell workflows", "passaging", "cell freezing and recovery"],
-    buyerSpecs: ["sterility", "cell-type compatibility", "serum-free/xeno-free/animal-origin-free", "endotoxin", "mycoplasma testing", "lot-to-lot consistency", "GMP-like documentation if applicable"],
+    buyerSpecs: ["sterility", "cell-type compatibility", "serum-free/xeno-free/animal-origin-free", "endotoxin", "mycoplasma testing", "lot-to-lot consistency", "enhanced documentation where applicable"],
     commonFormats: ["sterile bottle", "treated vessel", "culture plate", "cryovial", "coating reagent", "ready-to-use solution"],
     applications: ["cell expansion", "media preparation", "passaging", "cryopreservation", "cell attachment"],
     documentationNeeds: ["CoA where available", "sterility statement", "mycoplasma information where available", "endotoxin information", "origin and treatment documentation"],

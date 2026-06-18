@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ProductCategory, ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { productTaxonomy } from "@/data/productTaxonomy";
+import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -8,6 +9,7 @@ import { DocumentationChecklist } from "./DocumentationChecklist";
 import { FilterSidebar } from "./FilterSidebar";
 import { ProductFamilyCard } from "./ProductFamilyCard";
 import { ProductListingSkeleton } from "./ProductListingSkeleton";
+import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
 import { RelatedCategoryLinks } from "./RelatedCategoryLinks";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
@@ -20,6 +22,7 @@ type CategoryPageTemplateProps = {
 
 export function CategoryPageTemplate({ segment, category }: CategoryPageTemplateProps) {
   const relatedSegments = productTaxonomy.filter((item) => category.relatedSegments.includes(item.slug)).slice(0, 4);
+  const priorityContent = getPriorityProductContent(segment.slug, category.slug);
 
   return (
     <>
@@ -51,6 +54,8 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
           ))}
         </div>
       </section>
+
+      {priorityContent ? <PriorityProductContentSection content={priorityContent} /> : null}
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[280px_1fr] lg:px-10">
         <FilterSidebar subcategory={category} />

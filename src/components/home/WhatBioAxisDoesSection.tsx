@@ -4,15 +4,15 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const cards = [
   {
     title: "Search Everything",
-    body: "Search products, catalog numbers, suppliers, equivalents, and workflows from one place."
+    body: "Search product families, catalog numbers, suppliers, equivalent options, and workflows from one place."
   },
   {
-    title: "Source Faster",
-    body: "Request quotes, samples, and supplier options without jumping between fragmented catalogs."
+    title: "Source With Context",
+    body: "Request quotes, sample evaluation, documentation support, recurring supply review, and product-list review without starting from a blank email."
   },
   {
-    title: "Support Stronger",
-    body: "Get support for product matching, alternatives, documentation, and sourcing questions."
+    title: "Switch Carefully",
+    body: "Compare compatible options by specification, format, documentation, and sample-first testing before changing suppliers."
   }
 ];
 
@@ -28,4 +28,3 @@ export function WhatBioAxisDoesSection() {
     </section>
   );
 }
-

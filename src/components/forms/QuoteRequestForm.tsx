@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { getRequestTypeById, requestTypes } from "@/data/requestTypes";
+import Link from "next/link";
+import { getRequestTypeById, normalizeRequestType, requestTypes } from "@/data/requestTypes";
 import { RequestTypeSelector } from "./RequestTypeSelector";
 
 type QuoteFormState = {
@@ -97,7 +98,14 @@ type QuoteRequestFormProps = {
 };
 
 export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) {
-  const startingState = useMemo(() => ({ ...initialState, ...initialValues }), [initialValues]);
+  const startingState = useMemo(
+    () => ({
+      ...initialState,
+      ...initialValues,
+      requestType: normalizeRequestType(initialValues.requestType ?? initialState.requestType)
+    }),
+    [initialValues]
+  );
   const [formState, setFormState] = useState<QuoteFormState>(startingState);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
@@ -200,16 +208,29 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
           {submitted.message}
         </p>
         {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
-        <button
-          type="button"
-          onClick={() => {
-            setFormState(startingState);
-            setSubmitted(null);
-          }}
-          className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-        >
-          Start another request
-        </button>
+        <div className="mt-6 grid gap-3 text-sm leading-6 text-bioaxis-muted">
+          <p>- BioAxis can review the product details, current supplier context, specifications, and documentation needs you sent.</p>
+          <p>- If your request involves switching, sample-first evaluation or additional documentation may be useful before a larger purchase.</p>
+          <p>- For recurring supply, usage rhythm, shipping region, and packaging requirements help shape the next sourcing step.</p>
+        </div>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => {
+              setFormState(startingState);
+              setSubmitted(null);
+            }}
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+          >
+            Start another request
+          </button>
+          <Link
+            href="/products"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          >
+            Go to products
+          </Link>
+        </div>
       </div>
     );
   }
@@ -254,9 +275,9 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
         <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{selectedRequestType.label}</h2>
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{selectedRequestType.description}</p>
-        {selectedRequestType.id === "product-list" ? (
+        {selectedRequestType.id === "product-list-review" ? (
           <p className="mt-3 text-sm leading-6 text-bioaxis-accent">
-            Upload support can be added in a future version. For now, paste your product list in the Notes field.
+            Paste product names, current suppliers, catalog numbers, quantities, and documentation needs in the Notes field.
           </p>
         ) : null}
 

@@ -21,10 +21,24 @@ const requiredFields: Array<keyof RequestQuotePayload> = [
   "name",
   "email",
   "company",
-  "requestType",
-  "productCategory",
-  "productName"
+  "requestType"
 ];
+
+const supportedRequestTypes = new Set([
+  "quote",
+  "equivalent",
+  "sample",
+  "documentation",
+  "recurring-supply",
+  "contact",
+  "product-list-review"
+]);
+
+const requestTypeAliases: Record<string, string> = {
+  recurring: "recurring-supply",
+  "product-list": "product-list-review",
+  support: "contact"
+};
 
 function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -52,7 +66,7 @@ export async function POST(request: Request) {
     email: clean(payload.email),
     company: clean(payload.company),
     roleTitle: clean(payload.roleTitle),
-    requestType: clean(payload.requestType),
+    requestType: requestTypeAliases[clean(payload.requestType)] ?? clean(payload.requestType),
     productCategory: clean(payload.productCategory),
     productName: clean(payload.productName || payload.catalogNumber),
     catalogNumber: clean(payload.catalogNumber),
@@ -75,6 +89,33 @@ export async function POST(request: Request) {
 
   if (!isValidEmail(normalized.email ?? "")) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+  }
+
+  if (!supportedRequestTypes.has(normalized.requestType ?? "")) {
+    return NextResponse.json(
+      {
+        error:
+          "Unsupported request type. Use quote, equivalent, sample, documentation, recurring-supply, contact, or product-list-review."
+      },
+      { status: 400 }
+    );
+  }
+
+  const hasProductDetail = Boolean(
+    normalized.productCategory ||
+      normalized.productName ||
+      normalized.catalogNumber ||
+      normalized.currentSupplier ||
+      normalized.quantity ||
+      normalized.documentationNeeds ||
+      normalized.message
+  );
+
+  if (!hasProductDetail) {
+    return NextResponse.json(
+      { error: "Provide a message, product detail, catalog number, supplier, quantity, or documentation need." },
+      { status: 400 }
+    );
   }
 
   const referenceId = `BIOAXIS-${Date.now().toString(36).toUpperCase()}`;
@@ -122,7 +163,7 @@ export async function POST(request: Request) {
       from: "BioAxis RFQ <onboarding@resend.dev>",
       to: [toEmail],
       reply_to: normalized.email,
-      subject: `BioAxis RFQ: ${normalized.productName} (${referenceId})`,
+      subject: `BioAxis request: ${normalized.productName || normalized.requestType} (${referenceId})`,
       text: bodyLines.join("\n")
     })
   });

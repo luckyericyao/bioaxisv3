@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { ProductCategory, ProductFamily, ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { buildRequestHref } from "@/data/productTaxonomy";
+import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { DocumentationChecklist } from "./DocumentationChecklist";
+import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
 import { RelatedProducts } from "./RelatedProducts";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
@@ -17,6 +19,7 @@ type FamilyPageTemplateProps = {
 };
 
 export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemplateProps) {
+  const priorityContent = getPriorityProductContent(segment.slug, category.slug, family.slug);
   const relatedFamilies = category.productFamilies
     .filter((item) => family.relatedFamilies.includes(item.slug))
     .map((item) => ({
@@ -46,6 +49,8 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         <InfoCard title="How to select" items={family.selectionCriteria} />
         <InfoCard title="Equivalent switching considerations" items={family.equivalentSwitchingConsiderations} />
       </section>
+
+      {priorityContent ? <PriorityProductContentSection content={priorityContent} /> : null}
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <InfoCard

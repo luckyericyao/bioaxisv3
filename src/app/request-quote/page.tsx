@@ -4,9 +4,9 @@ import { PageHero } from "@/components/ui/PageHero";
 import { labelFromProductContext } from "@/data/productTaxonomy";
 
 export const metadata: Metadata = {
-  title: "Request Quote | BioAxis",
+  title: "Request Quote | BioAxis Consumables Sourcing",
   description:
-    "Submit quote, equivalent, sample, documentation, recurring supply, or product list review requests through BioAxis.",
+    "Submit quote, equivalent, sample, documentation, recurring supply, contact, or product-list review requests through BioAxis.",
   alternates: {
     canonical: "/request-quote"
   }
@@ -44,8 +44,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     <>
       <PageHero
         eyebrow="Request quote"
-        title="Source products, equivalents, samples, and support from one platform."
-        subtitle="Tell BioAxis what you need. We organize quotes, equivalent options, samples, documentation support, and recurring supply requests across suppliers."
+        title="Turn product details into a quote-ready sourcing request."
+        subtitle="Use BioAxis for quote requests, equivalent review, sample evaluation, documentation requests, recurring supply planning, contact messages, and product-list review. Include the current supplier, catalog number, quantity, sterile status, documentation needs, and target timeline where available."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <QuoteRequestForm
