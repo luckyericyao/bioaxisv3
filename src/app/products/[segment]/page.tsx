@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductSegmentBySlug, productSegments } from "@/data/productSegments";
+import { getTaxonomySegmentBySlug, productTaxonomy } from "@/data/productTaxonomy";
 import { SegmentPageTemplate } from "@/components/products/SegmentPageTemplate";
 
 type SegmentPageProps = {
@@ -10,22 +10,22 @@ type SegmentPageProps = {
 };
 
 export function generateStaticParams() {
-  return productSegments.map((segment) => ({ segment: segment.slug }));
+  return productTaxonomy.map((segment) => ({ segment: segment.slug }));
 }
 
 export async function generateMetadata({ params }: SegmentPageProps): Promise<Metadata> {
   const { segment: segmentSlug } = await params;
-  const segment = getProductSegmentBySlug(segmentSlug);
+  const segment = getTaxonomySegmentBySlug(segmentSlug);
 
   if (!segment) {
     return {
-      title: "Product segment | BioAxis"
+      title: "Product category | BioAxis"
     };
   }
 
   return {
-    title: `${segment.title} | BioAxis Products`,
-    description: segment.hero,
+    title: segment.seoTitle,
+    description: segment.metaDescription,
     alternates: {
       canonical: `/products/${segment.slug}`
     }
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: SegmentPageProps): Promise<Me
 
 export default async function ProductSegmentPage({ params }: SegmentPageProps) {
   const { segment: segmentSlug } = await params;
-  const segment = getProductSegmentBySlug(segmentSlug);
+  const segment = getTaxonomySegmentBySlug(segmentSlug);
 
   if (!segment) {
     notFound();

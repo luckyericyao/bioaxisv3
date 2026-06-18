@@ -1,104 +1,78 @@
 import Link from "next/link";
-import type { ProductSegment } from "@/data/productSegments";
-import { workflows } from "@/data/workflows";
+import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
+import { productTaxonomy } from "@/data/productTaxonomy";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
-import { RelatedLinks } from "@/components/ui/RelatedLinks";
-import { SpecTag } from "@/components/ui/SpecTag";
+import { Breadcrumbs } from "./Breadcrumbs";
+import { ExploreByCategoryRail } from "./ExploreByCategoryRail";
+import { ProductListingSkeleton } from "./ProductListingSkeleton";
+import { RelatedCategoryLinks } from "./RelatedCategoryLinks";
+import { SubcategoryPreviewSection } from "./SubcategoryPreviewSection";
 
 type SegmentPageTemplateProps = {
-  segment: ProductSegment;
+  segment: ProductTaxonomySegment;
 };
 
-function TagPanel({ title, tags }: { title: string; tags: string[] }) {
-  return (
-    <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-xl font-bold uppercase text-bioaxis-text">{title}</h2>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <SpecTag key={tag}>{tag}</SpecTag>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function BulletPanel({ title, items }: { title: string; items: string[] }) {
-  return (
-    <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-xl font-bold uppercase text-bioaxis-text">{title}</h2>
-      <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
-        {items.map((item) => (
-          <li key={item}>- {item}</li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
-  const relatedWorkflowLinks = segment.relatedWorkflows.map((workflowName) => {
-    const workflow = workflows.find((item) => item.title === workflowName);
-
-    return {
-      label: workflowName,
-      href: workflow ? `/workflows#${workflow.slug}` : "/workflows"
-    };
-  });
+  const firstSubcategory = segment.subcategories[0];
+  const relatedSegments = productTaxonomy.filter((item) => segment.relatedSegments.includes(item.slug)).slice(0, 6);
 
   return (
     <>
-      <PageHero eyebrow={`Product segment ${String(segment.index).padStart(2, "0")}`} title={segment.title} subtitle={segment.hero}>
+      <Breadcrumbs items={[{ label: "Products", href: "/products" }, { label: segment.title }]} />
+      <PageHero eyebrow={`Product category ${String(segment.index).padStart(2, "0")}`} title={segment.title} subtitle={segment.heroDescription}>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link href="/request-quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+          <Link href={`/request-quote?category=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+            View all sourcing options
+          </Link>
+          <Link href={`/request-quote?category=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
             Request quote
-          </Link>
-          <Link href={`/equivalents?segment=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-            Find equivalent
-          </Link>
-          <Link href={`/samples?segment=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-            Request sample
           </Link>
         </div>
       </PageHero>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <TagPanel title="Product families" tags={segment.productFamilies} />
-        <TagPanel title="Common applications" tags={segment.applications} />
-        <TagPanel title="Key specifications" tags={segment.specifications} />
-        <TagPanel title="Representative formats" tags={segment.formats} />
-        <BulletPanel title="Common sourcing questions" items={segment.sourcingQuestions} />
-        <BulletPanel title="Documentation support" items={segment.documentationNeeds} />
-      </div>
-
-      <div className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.72fr] lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Equivalent and sample support</h2>
-          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            {segment.ctaCopy} BioAxis can help organize product families, specifications, equivalent paths, documentation requests, and sample-first evaluation where available.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link href={`/equivalents?segment=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
-              Find equivalent
-            </Link>
-            <Link href={`/samples?segment=${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-              Request sample
-            </Link>
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Explore by Category</p>
+            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Browse {segment.shortTitle} subcategories.</h2>
           </div>
+          <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
+            Category rails link to real subcategory pages with featured families, sourcing skeletons, filters, and request CTAs.
+          </p>
+        </div>
+        <ExploreByCategoryRail segmentSlug={segment.slug} subcategories={segment.subcategories} />
+      </section>
+
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:px-10">
+        {segment.subcategories.map((subcategory) => (
+          <SubcategoryPreviewSection key={subcategory.slug} segmentSlug={segment.slug} subcategory={subcategory} />
+        ))}
+      </section>
+
+      {firstSubcategory ? (
+        <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+          <ProductListingSkeleton segmentSlug={segment.slug} subcategory={firstSubcategory} />
         </section>
-        <RelatedLinks
-          title="Related workflows"
-          links={relatedWorkflowLinks}
+      ) : null}
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <RelatedCategoryLinks
+          links={segment.subcategories.slice(0, 6).map((subcategory) => ({
+            label: subcategory.title,
+            href: `/products/${segment.slug}/${subcategory.slug}`
+          }))}
+          relatedSegments={relatedSegments}
         />
-      </div>
+      </section>
 
       <CTASection
-        title={`Source ${segment.title} with BioAxis.`}
-        body="Send product names, catalog numbers, required specifications, usage, and timeline. BioAxis helps organize quote options, equivalents, sample requests, and documentation support where applicable."
-        primaryLabel="Request quote"
-        primaryHref="/request-quote"
-        secondaryLabel="View all products"
-        secondaryHref="/products"
+        title="Need help matching specifications?"
+        body="Submit a product name, supplier, catalog number, format, or workflow. BioAxis will help organize sourcing options, equivalent products, samples, and documentation where available."
+        primaryLabel="Request sourcing support"
+        primaryHref={`/request-quote?category=${segment.slug}`}
+        secondaryLabel="Find equivalent"
+        secondaryHref={`/equivalents?category=${segment.slug}`}
       />
     </>
   );
