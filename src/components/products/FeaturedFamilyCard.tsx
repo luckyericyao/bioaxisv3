@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { FeaturedFamily } from "@/data/productTaxonomy";
 import { SpecTag } from "@/components/ui/SpecTag";
+import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 
 type FeaturedFamilyCardProps = {
   family: FeaturedFamily;
@@ -9,8 +10,6 @@ type FeaturedFamilyCardProps = {
 };
 
 export function FeaturedFamilyCard({ family, segmentSlug, subcategorySlug }: FeaturedFamilyCardProps) {
-  const query = `category=${segmentSlug}&subcategory=${subcategorySlug}&family=${family.slug}`;
-
   return (
     <article id={family.slug} className="scroll-mt-24 border border-bioaxis-line bg-bioaxis-panel p-6">
       <h3 className="text-xl font-bold uppercase text-bioaxis-text">{family.title}</h3>
@@ -21,16 +20,11 @@ export function FeaturedFamilyCard({ family, segmentSlug, subcategorySlug }: Fea
         <TagBlock title="Representative formats" tags={family.representativeFormats} />
         <TagBlock title="Documentation needs" tags={family.documentationNeeds} />
       </div>
-      <div className="mt-6 grid gap-2 sm:grid-cols-3">
-        <Link href={`/request-quote?${query}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
-          Request quote
+      <div className="mt-6 grid gap-2">
+        <Link href={`/products/${segmentSlug}/${subcategorySlug}/${family.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+          View product family
         </Link>
-        <Link href={`/equivalents?${query}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-          Find equivalent
-        </Link>
-        <Link href={`/samples?${query}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-          Request sample
-        </Link>
+        <SourcingRequestButtonGroup segment={segmentSlug} category={subcategorySlug} family={family.slug} />
       </div>
     </article>
   );
@@ -48,4 +42,3 @@ function TagBlock({ title, tags }: { title: string; tags: string[] }) {
     </div>
   );
 }
-

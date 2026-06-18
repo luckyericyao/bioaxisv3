@@ -1,7 +1,8 @@
 import Link from "next/link";
-import type { ProductSegment } from "@/data/productSegments";
+import type { ProductSegment } from "@/data/productTaxonomy";
 import { ProductFamilyList } from "./ProductFamilyList";
 import { ProductTagList } from "./ProductTagList";
+import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 
 type ProductSegmentCardProps = {
   segment: ProductSegment;
@@ -33,16 +34,11 @@ export function ProductSegmentCard({ segment, index, mode = "preview" }: Product
         )}
       </div>
 
-      <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
+      <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5">
         <Link href={`/products/${segment.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           View segment
         </Link>
-        <Link href={`/equivalents?segment=${segment.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-          Find equivalent
-        </Link>
-        <Link href={`/samples?segment=${segment.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-          Request sample
-        </Link>
+        <SourcingRequestButtonGroup segment={segment.slug} />
       </div>
     </article>
   );

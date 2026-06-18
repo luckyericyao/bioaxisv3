@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { productSegments, type ProductSegment } from "@/data/productSegments";
+import { productTaxonomy, type ProductSegment } from "@/data/productTaxonomy";
 import { ProductSegmentCard } from "./ProductSegmentCard";
 
 type ProductSegmentGridProps = {
@@ -13,12 +13,13 @@ function segmentMatchesQuery(segment: ProductSegment, query: string) {
   const searchableText = [
     segment.title,
     segment.description,
-    segment.hero,
+    segment.heroStatement,
     ...segment.productFamilies,
     ...segment.applications,
     ...segment.specifications,
     ...segment.formats,
-    ...segment.relatedWorkflows
+    ...segment.primaryApplications,
+    ...segment.categories.map((category) => category.title)
   ]
     .join(" ")
     .toLowerCase();
@@ -27,7 +28,7 @@ function segmentMatchesQuery(segment: ProductSegment, query: string) {
 }
 
 export function ProductSegmentGrid({ limit, query = "", mode = "preview" }: ProductSegmentGridProps) {
-  const baseSegments = typeof limit === "number" ? productSegments.slice(0, limit) : productSegments;
+  const baseSegments = typeof limit === "number" ? productTaxonomy.slice(0, limit) : productTaxonomy;
   const normalizedQuery = query.trim();
   const visibleSegments = normalizedQuery
     ? baseSegments.filter((segment) => segmentMatchesQuery(segment, normalizedQuery))

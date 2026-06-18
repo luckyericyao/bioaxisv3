@@ -15,6 +15,8 @@ export const navigationItems: NavigationItem[] = [
 
 export const footerNavigationItems: NavigationItem[] = [
   ...navigationItems,
+  { label: "Applications", href: "/applications" },
+  { label: "Services", href: "/services" },
   { label: "Quality", href: "/quality" },
   { label: "Suppliers", href: "/suppliers" }
 ];

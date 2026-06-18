@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
+import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 
 type ProductCategoryCardProps = {
   segment: ProductTaxonomySegment;
@@ -16,8 +17,16 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       <div className="mt-6">
         <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Representative families</p>
         <ul className="grid gap-2 text-sm text-bioaxis-steel">
-          {segment.subcategories.slice(0, 6).map((subcategory) => (
-            <li key={subcategory.slug}>- {subcategory.title}</li>
+          {segment.productFamilies.slice(0, 6).map((family) => (
+            <li key={family}>- {family}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-6">
+        <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Applications</p>
+        <ul className="grid gap-2 text-sm text-bioaxis-muted">
+          {segment.primaryApplications.slice(0, 4).map((application) => (
+            <li key={application}>- {application}</li>
           ))}
         </ul>
       </div>
@@ -27,7 +36,9 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       >
         View category
       </Link>
+      <div className="mt-3">
+        <SourcingRequestButtonGroup segment={segment.slug} />
+      </div>
     </article>
   );
 }
-

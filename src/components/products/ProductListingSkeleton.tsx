@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ProductSubcategory } from "@/data/productTaxonomy";
+import { buildRequestHref } from "@/data/productTaxonomy";
 
 type ProductListingSkeletonProps = {
   segmentSlug: string;
@@ -29,8 +30,6 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
           </thead>
           <tbody>
             {subcategory.featuredFamilies.map((family) => {
-              const query = `category=${segmentSlug}&subcategory=${subcategory.slug}&family=${family.slug}`;
-
               return (
                 <tr key={family.slug} className="border-b border-bioaxis-line last:border-b-0">
                   <td className="px-4 py-4 align-top">
@@ -42,13 +41,13 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.documentationNeeds.slice(0, 2).join(", ")}</td>
                   <td className="px-4 py-4 align-top">
                     <div className="flex flex-wrap gap-2">
-                      <Link href={`/request-quote?${query}`} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "quote" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Quote
                       </Link>
-                      <Link href={`/equivalents?${query}`} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "equivalent" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Equivalent
                       </Link>
-                      <Link href={`/samples?${query}`} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, inquiryType: "sample" })} className="border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Sample
                       </Link>
                     </div>

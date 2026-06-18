@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 type SearchBoxProps = {
   initialQuery?: string;
   helperText?: string;
+  placeholder?: string;
   variant?: "hero" | "page";
   className?: string;
 };
@@ -13,6 +14,7 @@ type SearchBoxProps = {
 export function SearchBox({
   initialQuery = "",
   helperText,
+  placeholder = "search anything",
   variant = "hero",
   className = ""
 }: SearchBoxProps) {
@@ -52,7 +54,7 @@ export function SearchBox({
           id={inputId}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="search anything"
+          placeholder={placeholder}
           className={[
             "field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold lowercase text-bioaxis-text placeholder:text-bioaxis-dim",
             inputClass

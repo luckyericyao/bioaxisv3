@@ -17,6 +17,7 @@ type QuoteFormState = {
   catalogNumber: string;
   requiredSpecification: string;
   quantity: string;
+  sterility: string;
   monthlyUsage: string;
   needSample: "yes" | "no";
   needDocumentation: "yes" | "no";
@@ -37,6 +38,7 @@ const initialState: QuoteFormState = {
   catalogNumber: "",
   requiredSpecification: "",
   quantity: "",
+  sterility: "",
   monthlyUsage: "",
   needSample: "no",
   needDocumentation: "no",
@@ -51,16 +53,17 @@ const fieldLabels: Record<keyof QuoteFormState, string> = {
   email: "Email",
   phone: "Phone optional",
   shippingRegion: "Shipping region",
-  productCategory: "Product category",
-  productName: "Product name",
-  currentSupplier: "Current supplier",
-  catalogNumber: "Catalog number",
+  productCategory: "Product segment / category",
+  productName: "Product or equivalent product",
+  currentSupplier: "Current brand / supplier",
+  catalogNumber: "Current catalog number",
   requiredSpecification: "Required specification",
-  quantity: "Quantity",
+  quantity: "Desired quantity",
+  sterility: "Sterile / non-sterile",
   monthlyUsage: "Monthly or annual usage",
   needSample: "Need sample?",
-  needDocumentation: "Need documentation?",
-  targetTimeline: "Target timeline",
+  needDocumentation: "Documentation required?",
+  targetTimeline: "Target delivery date",
   notes: "Notes"
 };
 
@@ -73,6 +76,7 @@ const fieldOrder: Array<keyof QuoteFormState> = [
   "catalogNumber",
   "requiredSpecification",
   "quantity",
+  "sterility",
   "monthlyUsage",
   "needSample",
   "needDocumentation",
@@ -82,8 +86,13 @@ const fieldOrder: Array<keyof QuoteFormState> = [
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
-export function QuoteRequestForm() {
-  const [formState, setFormState] = useState<QuoteFormState>(initialState);
+type QuoteRequestFormProps = {
+  initialValues?: Partial<QuoteFormState>;
+};
+
+export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) {
+  const startingState = useMemo(() => ({ ...initialState, ...initialValues }), [initialValues]);
+  const [formState, setFormState] = useState<QuoteFormState>(startingState);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -132,15 +141,15 @@ export function QuoteRequestForm() {
   if (submitted) {
     return (
       <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request received</p>
-        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Thank you for your request.</h2>
+        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request captured locally for demo</p>
+        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Your request details are prepared.</h2>
         <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          A BioAxis sourcing specialist will review your information and follow up with sourcing options, equivalent products, sample availability, or documentation support where applicable.
+          Backend or email environment variables are not configured in this static form, so this demo state does not claim the request was sent. The entered fields are ready to connect to a server-side submission path when configured.
         </p>
         <button
           type="button"
           onClick={() => {
-            setFormState(initialState);
+            setFormState(startingState);
             setSubmitted(false);
           }}
           className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
@@ -337,4 +346,3 @@ function Select({
     </div>
   );
 }
-

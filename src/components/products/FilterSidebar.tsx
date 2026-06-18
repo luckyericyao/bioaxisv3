@@ -1,4 +1,5 @@
 import type { ProductSubcategory } from "@/data/productTaxonomy";
+import { FilterChip } from "./FilterChip";
 
 type FilterSidebarProps = {
   subcategory: ProductSubcategory;
@@ -27,10 +28,7 @@ export function FilterSidebar({ subcategory }: FilterSidebarProps) {
             <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">{group.title}</p>
             <div className="grid gap-2">
               {group.values.slice(0, 5).map((value) => (
-                <label key={value} className="flex items-start gap-2 text-xs leading-5 text-bioaxis-muted">
-                  <input type="checkbox" className="mt-1 accent-bioaxis-accent" />
-                  <span>{value}</span>
-                </label>
+                <FilterChip key={value} name={group.title} label={value} />
               ))}
             </div>
           </div>
@@ -39,4 +37,3 @@ export function FilterSidebar({ subcategory }: FilterSidebarProps) {
     </aside>
   );
 }
-
