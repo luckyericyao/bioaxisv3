@@ -1,28 +1,84 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { getRequestTypeById, requestTypes } from "@/data/requestTypes";
+import { RequestTypeSelector } from "./RequestTypeSelector";
 
 type QuoteFormState = {
+  requestType: string;
   name: string;
   organization: string;
   email: string;
-  product: string;
-  lookingFor: string;
-  volume: string;
+  phone: string;
+  shippingRegion: string;
+  productCategory: string;
+  productName: string;
+  currentSupplier: string;
+  catalogNumber: string;
+  requiredSpecification: string;
+  quantity: string;
+  monthlyUsage: string;
   needSample: "yes" | "no";
+  needDocumentation: "yes" | "no";
+  targetTimeline: string;
   notes: string;
 };
 
 const initialState: QuoteFormState = {
+  requestType: requestTypes[0].id,
   name: "",
   organization: "",
   email: "",
-  product: "",
-  lookingFor: "",
-  volume: "",
+  phone: "",
+  shippingRegion: "",
+  productCategory: "",
+  productName: "",
+  currentSupplier: "",
+  catalogNumber: "",
+  requiredSpecification: "",
+  quantity: "",
+  monthlyUsage: "",
   needSample: "no",
+  needDocumentation: "no",
+  targetTimeline: "",
   notes: ""
 };
+
+const fieldLabels: Record<keyof QuoteFormState, string> = {
+  requestType: "Request type",
+  name: "Name",
+  organization: "Organization",
+  email: "Email",
+  phone: "Phone optional",
+  shippingRegion: "Shipping region",
+  productCategory: "Product category",
+  productName: "Product name",
+  currentSupplier: "Current supplier",
+  catalogNumber: "Catalog number",
+  requiredSpecification: "Required specification",
+  quantity: "Quantity",
+  monthlyUsage: "Monthly or annual usage",
+  needSample: "Need sample?",
+  needDocumentation: "Need documentation?",
+  targetTimeline: "Target timeline",
+  notes: "Notes"
+};
+
+const universalRequired: Array<keyof QuoteFormState> = ["name", "organization", "email", "shippingRegion"];
+const alwaysVisible: Array<keyof QuoteFormState> = ["name", "organization", "email", "phone", "shippingRegion"];
+const fieldOrder: Array<keyof QuoteFormState> = [
+  "productCategory",
+  "productName",
+  "currentSupplier",
+  "catalogNumber",
+  "requiredSpecification",
+  "quantity",
+  "monthlyUsage",
+  "needSample",
+  "needDocumentation",
+  "targetTimeline",
+  "notes"
+];
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
@@ -31,16 +87,11 @@ export function QuoteRequestForm() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const requiredFields = useMemo(
-    () => [
-      ["name", "Name is required."],
-      ["organization", "Organization is required."],
-      ["email", "Email is required."],
-      ["product", "Product, catalog number, or supplier is required."],
-      ["lookingFor", "Tell BioAxis what you are looking for."]
-    ] as const,
-    []
-  );
+  const selectedRequestType = getRequestTypeById(formState.requestType);
+  const visibleFields = useMemo(() => {
+    const requested = [...selectedRequestType.requiredFields, ...selectedRequestType.optionalFields, "notes"];
+    return fieldOrder.filter((field) => requested.includes(field));
+  }, [selectedRequestType]);
 
   function updateField<K extends keyof QuoteFormState>(field: K, value: QuoteFormState[K]) {
     setFormState((current) => ({ ...current, [field]: value }));
@@ -49,10 +100,11 @@ export function QuoteRequestForm() {
 
   function validate() {
     const nextErrors: FieldErrors = {};
+    const requiredFields = [...universalRequired, ...selectedRequestType.requiredFields] as Array<keyof QuoteFormState>;
 
-    requiredFields.forEach(([field, message]) => {
-      if (!formState[field].trim()) {
-        nextErrors[field] = message;
+    requiredFields.forEach((field) => {
+      if (!String(formState[field]).trim()) {
+        nextErrors[field] = `${fieldLabels[field]} is required.`;
       }
     });
 
@@ -80,10 +132,10 @@ export function QuoteRequestForm() {
   if (submitted) {
     return (
       <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request prepared</p>
-        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">BioAxis sourcing details are ready.</h2>
+        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request received</p>
+        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Thank you for your request.</h2>
         <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          Your request has been prepared. A BioAxis sourcing specialist can use this information to follow up on products, equivalents, samples, and quote options.
+          A BioAxis sourcing specialist will review your information and follow up with sourcing options, equivalent products, sample availability, or documentation support where applicable.
         </p>
         <button
           type="button"
@@ -100,85 +152,97 @@ export function QuoteRequestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-      <div className="grid gap-5 md:grid-cols-2">
-        <Field
-          id="name"
-          label="Name"
-          value={formState.name}
-          error={errors.name}
-          onChange={(value) => updateField("name", value)}
-        />
-        <Field
-          id="organization"
-          label="Organization"
-          value={formState.organization}
-          error={errors.organization}
-          onChange={(value) => updateField("organization", value)}
-        />
-        <Field
-          id="email"
-          label="Email"
-          type="email"
-          value={formState.email}
-          error={errors.email}
-          onChange={(value) => updateField("email", value)}
-        />
-        <Field
-          id="product"
-          label="Product / catalog number / supplier"
-          value={formState.product}
-          error={errors.product}
-          onChange={(value) => updateField("product", value)}
-        />
-        <TextArea
-          id="lookingFor"
-          label="What are you looking for?"
-          value={formState.lookingFor}
-          error={errors.lookingFor}
-          onChange={(value) => updateField("lookingFor", value)}
-        />
-        <Field
-          id="volume"
-          label="Monthly usage / expected volume"
-          value={formState.volume}
-          error={errors.volume}
-          onChange={(value) => updateField("volume", value)}
-        />
-        <div>
-          <label htmlFor="needSample" className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
-            Need sample? yes/no
-          </label>
-          <select
-            id="needSample"
-            value={formState.needSample}
-            onChange={(event) => updateField("needSample", event.target.value as QuoteFormState["needSample"])}
-            className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
-          >
-            <option value="no">no</option>
-            <option value="yes">yes</option>
-          </select>
-        </div>
-        <TextArea
-          id="notes"
-          label="Notes"
-          value={formState.notes}
-          error={errors.notes}
-          onChange={(value) => updateField("notes", value)}
-        />
-      </div>
-
-      <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
-          This client-side form prepares the request details only. BioAxis can connect the request to sourcing workflow infrastructure when backend services are added.
+    <form onSubmit={handleSubmit} noValidate className="grid gap-8">
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Select request type</h2>
+        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+          Choose the request that best matches the sourcing support you need. Fields update based on request type.
         </p>
-        <button
-          type="submit"
-          className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-        >
-          Prepare request
-        </button>
-      </div>
+        <div className="mt-6">
+          <RequestTypeSelector
+            requestTypes={requestTypes}
+            selectedId={formState.requestType}
+            onSelect={(id) => {
+              updateField("requestType", id);
+              setSubmitted(false);
+            }}
+          />
+        </div>
+      </section>
+
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact and shipping</h2>
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          {alwaysVisible.map((field) => (
+            <Field
+              key={field}
+              id={field}
+              label={fieldLabels[field]}
+              value={String(formState[field])}
+              type={field === "email" ? "email" : "text"}
+              error={errors[field]}
+              required={universalRequired.includes(field)}
+              onChange={(value) => updateField(field, value)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{selectedRequestType.label}</h2>
+        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{selectedRequestType.description}</p>
+        {selectedRequestType.id === "product-list" ? (
+          <p className="mt-3 text-sm leading-6 text-bioaxis-accent">
+            Upload support can be added in a future version. For now, paste your product list in the Notes field.
+          </p>
+        ) : null}
+
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          {visibleFields.map((field) =>
+            field === "notes" || field === "requiredSpecification" ? (
+              <TextArea
+                key={field}
+                id={field}
+                label={fieldLabels[field]}
+                value={String(formState[field])}
+                error={errors[field]}
+                required={selectedRequestType.requiredFields.includes(field)}
+                onChange={(value) => updateField(field, value)}
+              />
+            ) : field === "needSample" || field === "needDocumentation" ? (
+              <Select
+                key={field}
+                id={field}
+                label={fieldLabels[field]}
+                value={formState[field]}
+                onChange={(value) => updateField(field, value as QuoteFormState[typeof field])}
+              />
+            ) : (
+              <Field
+                key={field}
+                id={field}
+                label={fieldLabels[field]}
+                value={String(formState[field])}
+                error={errors[field]}
+                required={selectedRequestType.requiredFields.includes(field)}
+                onChange={(value) => updateField(field, value)}
+              />
+            )
+          )}
+        </div>
+
+        <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
+            This form prepares the request details on the client. It does not send data until backend or email integration is added.
+          </p>
+          <button
+            type="submit"
+            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          >
+            Submit request
+          </button>
+        </div>
+      </section>
     </form>
   );
 }
@@ -189,14 +253,16 @@ type FieldProps = {
   value: string;
   type?: "email" | "text";
   error?: string;
+  required?: boolean;
   onChange: (value: string) => void;
 };
 
-function Field({ id, label, value, type = "text", error, onChange }: FieldProps) {
+function Field({ id, label, value, type = "text", error, required = false, onChange }: FieldProps) {
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
         {label}
+        {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
       <input
         id={id}
@@ -218,11 +284,12 @@ function Field({ id, label, value, type = "text", error, onChange }: FieldProps)
 
 type TextAreaProps = Omit<FieldProps, "type">;
 
-function TextArea({ id, label, value, error, onChange }: TextAreaProps) {
+function TextArea({ id, label, value, error, required = false, onChange }: TextAreaProps) {
   return (
     <div className="md:col-span-2">
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
         {label}
+        {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
       <textarea
         id={id}
@@ -238,6 +305,35 @@ function TextArea({ id, label, value, error, onChange }: TextAreaProps) {
           {error}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+function Select({
+  id,
+  label,
+  value,
+  onChange
+}: {
+  id: "needSample" | "needDocumentation";
+  label: string;
+  value: "yes" | "no";
+  onChange: (value: "yes" | "no") => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value as "yes" | "no")}
+        className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
+      >
+        <option value="no">no</option>
+        <option value="yes">yes</option>
+      </select>
     </div>
   );
 }

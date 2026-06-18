@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/data/brand";
-import { navigationItems } from "@/data/navigation";
+import { footerNavigationItems } from "@/data/navigation";
 
 export function Footer() {
   return (
@@ -16,7 +16,7 @@ export function Footer() {
         </div>
 
         <nav aria-label="Footer navigation" className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-4">
-          {navigationItems.map((item) => (
+          {footerNavigationItems.map((item) => (
             <Link key={item.label} href={item.href} className="uppercase text-bioaxis-muted transition hover:text-bioaxis-text">
               {item.label}
             </Link>
@@ -26,4 +26,3 @@ export function Footer() {
     </footer>
   );
 }
-

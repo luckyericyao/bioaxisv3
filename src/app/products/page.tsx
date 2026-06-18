@@ -1,6 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ProductSegmentGrid } from "@/components/products/ProductSegmentGrid";
-import { SearchBox } from "@/components/ui/SearchBox";
+import { SearchBar } from "@/components/ui/SearchBar";
+
+export const metadata: Metadata = {
+  title: "Products | BioAxis",
+  description:
+    "Search the BioAxis product universe across life science consumables, product families, workflows, equivalents, samples, and quote support.",
+  alternates: {
+    canonical: "/products"
+  }
+};
 
 type ProductsPageProps = {
   searchParams?: Promise<{
@@ -33,10 +43,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               Search by product family, catalog number, supplier, equivalent, workflow, or consumable type. BioAxis organizes the first sourcing map without inventing results.
             </p>
           </div>
-          <SearchBox
+          <SearchBar
             initialQuery={query}
             helperText="Product name, catalog number, supplier, equivalent, workflow, or consumable type."
-            variant="page"
           />
         </div>
       </section>
@@ -57,9 +66,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       ) : null}
 
       <section className="pt-12">
+        <div className="mb-8 grid gap-5 border border-bioaxis-line bg-bioaxis-panel p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            Browse by product category or by workflow. Each segment page organizes product families, applications, specifications, representative formats, equivalent sourcing support, sample request support, and documentation needs.
+          </p>
+          <Link href="/workflows" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            Browse workflows
+          </Link>
+        </div>
         <ProductSegmentGrid query={query} mode="full" />
       </section>
     </div>
   );
 }
-

@@ -12,11 +12,13 @@ function segmentMatchesQuery(segment: ProductSegment, query: string) {
   const normalizedQuery = query.toLowerCase();
   const searchableText = [
     segment.title,
-    segment.shortDescription,
+    segment.description,
+    segment.hero,
     ...segment.productFamilies,
-    ...segment.applicationTags,
-    ...segment.specificationTags,
-    ...segment.representativeFormats
+    ...segment.applications,
+    ...segment.specifications,
+    ...segment.formats,
+    ...segment.relatedWorkflows
   ]
     .join(" ")
     .toLowerCase();
@@ -57,4 +59,3 @@ export function ProductSegmentGrid({ limit, query = "", mode = "preview" }: Prod
     </div>
   );
 }
-
