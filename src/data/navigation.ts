@@ -14,13 +14,4 @@ export const navigationItems: NavigationItem[] = [
   { label: "Request Quote", href: "/request-quote" }
 ];
 
-export const footerNavigationItems: NavigationItem[] = [
-  { label: "Products", href: "/products" },
-  { label: "Request Quote", href: "/request-quote" },
-  { label: "Equivalent Finder", href: "/equivalent-finder" },
-  { label: "Samples", href: "/samples" },
-  { label: "Quality", href: "/quality" },
-  { label: "Resources", href: "/resources" },
-  { label: "Support", href: "/support" },
-  { label: "Applications", href: "/applications" }
-];
+export const footerNavigationItems: NavigationItem[] = navigationItems;

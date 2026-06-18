@@ -150,6 +150,12 @@ const buyerTypes = [
 const defaultRequestTypes = ["quote", "equivalent", "sample", "documentation"];
 
 const familyNameOverrides: Record<string, string> = {
+  "universal-pipette-tips": "Universal Pipette Tips",
+  "filtered-pipette-tips": "Filtered Pipette Tips",
+  "low-retention-pipette-tips": "Low Retention Pipette Tips",
+  "extended-length-pipette-tips": "Extended Length Pipette Tips",
+  "sterile-pipette-tips": "Sterile Pipette Tips",
+  "reload-and-bulk-pipette-tips": "Reload and Bulk Pipette Tips",
   "1ml-serological-pipettes": "1 mL Serological Pipettes",
   "5ml-serological-pipettes": "5 mL Serological Pipettes",
   "10ml-serological-pipettes": "10 mL Serological Pipettes",
