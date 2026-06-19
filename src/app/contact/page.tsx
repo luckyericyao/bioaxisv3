@@ -16,7 +16,7 @@ const contactPaths = [
   { title: "For quotes", body: "Send product category, product name, quantity, sterile status, target date, and any current supplier or catalog number." },
   { title: "For equivalent product matching", body: "Include the current supplier, catalog number, required specifications, documentation constraints, and whether sample testing is needed." },
   { title: "For sample evaluation", body: "Share the workflow, acceptance criteria, quantity needed for testing, and timeline for switching or scale-up." },
-  { title: "For documentation requests", body: "List the documents needed, such as COA, SDS, sterility statement, DNase/RNase-free statement, material declaration, or lot traceability." },
+  { title: "For documentation requests", body: "List the documents needed, such as CoA, SDS, sterility statement, DNase/RNase-free statement, material declaration, or lot traceability." },
   { title: "For recurring supply support", body: "Provide monthly or annual usage, shipping region, packaging preference, documentation requirements, and timing constraints." }
 ];
 

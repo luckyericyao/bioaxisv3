@@ -31,7 +31,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     summary:
       "Pipette tip sourcing should start with volume range, pipette fit, sterility, filter barrier, packaging format, documentation, and sample testing requirements before comparing supplier options.",
     specifications: [
-      { specification: "Volume range", whyItMatters: "Ensures the tip fits the pipette and the assay transfer volume.", exampleValues: "10 uL, 20 uL, 200 uL, 1000 uL" },
+      { specification: "Volume range", whyItMatters: "Ensures the tip fits the pipette and the assay transfer volume.", exampleValues: "10 µL, 20 µL, 200 µL, 1000 µL" },
       { specification: "Filtered or non-filtered", whyItMatters: "Reduces aerosol contamination risk in sensitive workflows.", exampleValues: "filtered, non-filtered" },
       { specification: "Sterility", whyItMatters: "Required for cell culture and contamination-sensitive workflows.", exampleValues: "sterile, non-sterile" },
       { specification: "Retention profile", whyItMatters: "Low-retention surfaces can reduce sample loss for viscous liquids, proteins, and nucleic acids.", exampleValues: "standard, low retention" },
@@ -39,9 +39,9 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
       { specification: "Cleanliness claims", whyItMatters: "Molecular biology workflows often require nuclease-free or PCR-clean documentation.", exampleValues: "DNase/RNase-free, PCR-clean" }
     ],
     typicalSpecifications: ["manual pipette compatibility", "single-channel or multichannel use", "racked/reload/bulk packaging", "sterile vs non-sterile", "filtered vs non-filtered", "DNase/RNase-free documentation"],
-    commonFormats: ["10 uL tips", "20 uL tips", "200 uL tips", "1000 uL tips", "low-retention tips", "sterile filtered racks", "reload inserts", "bulk packs"],
+    commonFormats: ["10 µL tips", "20 µL tips", "200 µL tips", "1000 µL tips", "low-retention tips", "sterile filtered racks", "reload inserts", "bulk packs"],
     compatibilityConsiderations: ["Confirm fit on manual pipettes before switching.", "Review multichannel seating consistency across all channels.", "For automation-adjacent workflows, confirm rack geometry and tip pickup behavior.", "Check whether extended length is needed for tubes, reservoirs, or deep-well plates."],
-    documentationRequested: ["COA where available", "sterility statement", "DNase/RNase-free statement", "material declaration", "lot traceability"],
+    documentationRequested: ["CoA where available", "sterility statement", "DNase/RNase-free statement", "material declaration", "lot traceability"],
     equivalentChecklist: ["Current supplier and catalog number", "Volume range and maximum volume", "Filter barrier requirement", "Low-retention requirement", "Packaging format", "Pipette or automation platform compatibility"],
     sampleChecklist: ["Current tip used as control", "Pipette models to test", "Target transfer volumes", "Sample type or assay context", "Acceptance criteria for fit, retention, and contamination risk"],
     sourcingSupport: ["Organize a quote-ready pipette tip request.", "Compare compatible options by specification rather than product title alone.", "Coordinate sample-first review when switching could affect assay or cell culture work."],
@@ -56,7 +56,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     specifications: [
       { specification: "Aerosol barrier", whyItMatters: "Protects pipette shafts and samples in contamination-sensitive transfers.", exampleValues: "filtered, aerosol barrier" },
       { specification: "Workflow sensitivity", whyItMatters: "PCR, qPCR, cell culture, and low-volume assays often require stricter cleanliness review.", exampleValues: "PCR/qPCR, cell culture, sample prep" },
-      { specification: "Volume range", whyItMatters: "The filter should not reduce usable volume below the method requirement.", exampleValues: "10 uL, 20 uL, 200 uL, 1000 uL" },
+      { specification: "Volume range", whyItMatters: "The filter should not reduce usable volume below the method requirement.", exampleValues: "10 µL, 20 µL, 200 µL, 1000 µL" },
       { specification: "Sterile and nuclease-free status", whyItMatters: "Supports contamination control and molecular biology use.", exampleValues: "sterile, DNase/RNase-free, PCR-clean" },
       { specification: "Rack or reload format", whyItMatters: "Determines fit with bench workflows and storage constraints.", exampleValues: "racked, reload, bulk" }
     ],
@@ -80,12 +80,12 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
       { specification: "Formulation status", whyItMatters: "Serum-free, xeno-free, and animal-origin-free needs change supplier and documentation review.", exampleValues: "serum-free, xeno-free, animal-origin-free" },
       { specification: "Supplement requirements", whyItMatters: "Growth factors, glutamine, antibiotics, and sera affect performance and comparability.", exampleValues: "L-glutamine, growth factors, antibiotics" },
       { specification: "Lot consistency", whyItMatters: "Media changes can affect growth, viability, assay signal, and reproducibility.", exampleValues: "lot hold, same-lot request, sample lot testing" },
-      { specification: "Documentation", whyItMatters: "Cell culture workflows often require sterility, mycoplasma, endotoxin, and origin information.", exampleValues: "COA, sterility, mycoplasma, endotoxin" }
+      { specification: "Documentation", whyItMatters: "Cell culture workflows often require sterility, mycoplasma, endotoxin, and origin information.", exampleValues: "CoA, sterility, mycoplasma, endotoxin" }
     ],
     typicalSpecifications: ["cell type", "serum-free/xeno-free/animal-origin-free", "supplement needs", "sterility", "mycoplasma and endotoxin information", "storage temperature", "lot consistency"],
     commonFormats: ["basal media bottles", "serum-free media", "classical media", "supplements", "antibiotics and antimycotics", "ready-to-use solutions"],
     compatibilityConsiderations: ["Compare formulation changes before switching.", "Request samples when growth, viability, assay signal, or differentiation behavior matters.", "Confirm storage and handling conditions.", "Review whether supplements must be sourced together."],
-    documentationRequested: ["COA where available", "sterility statement", "mycoplasma information where available", "endotoxin information", "origin and formulation information"],
+    documentationRequested: ["CoA where available", "sterility statement", "mycoplasma information where available", "endotoxin information", "origin and formulation information"],
     equivalentChecklist: ["Current media or supplement name", "Cell type and application", "Required serum-free or xeno-free status", "Supplement dependencies", "Lot consistency requirements", "Sample-first testing plan"],
     sampleChecklist: ["Cells and passage range", "Control product and lot", "Growth or assay metrics", "Testing duration", "Acceptance criteria", "Documentation required before adoption"],
     sourcingSupport: ["Organize media and supplement requests by formulation and workflow.", "Support equivalent review without claiming guaranteed interchangeability.", "Coordinate sample testing context before larger-volume purchasing."],
@@ -107,7 +107,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     typicalSpecifications: ["cell type", "serum-free/xeno-free/animal-origin-free", "supplement requirements", "sterility", "mycoplasma information", "endotoxin information", "lot consistency"],
     commonFormats: ["ready-to-use bottles", "complete serum-free media", "basal serum-free systems", "media plus supplement kits"],
     compatibilityConsiderations: ["Do not switch media based on product title alone.", "Run sample-first testing with the current product as control.", "Confirm whether adaptation is required.", "Track growth rate, viability, morphology, and assay output."],
-    documentationRequested: ["COA where available", "sterility statement", "mycoplasma information where available", "endotoxin information", "origin information"],
+    documentationRequested: ["CoA where available", "sterility statement", "mycoplasma information where available", "endotoxin information", "origin information"],
     equivalentChecklist: ["Current product and supplier", "Cell type", "Required origin status", "Supplement list", "Storage condition", "Acceptance criteria for sample testing"],
     sampleChecklist: ["Control product and lot", "Cells and passage range", "Culture duration", "Viability and growth metrics", "Assay readout if relevant", "Documentation required before scale"],
     sourcingSupport: ["Prepare serum-free media requests with the right cell culture context.", "Compare compatible candidates by formulation, documentation, and sample testing needs.", "Support recurring supply review after sample evaluation."],
@@ -129,7 +129,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     typicalSpecifications: ["skirted/semi-skirted/non-skirted", "low profile vs standard profile", "optical sealing compatibility", "qPCR instrument compatibility", "evaporation control", "DNase/RNase-free/PCR-clean"],
     commonFormats: ["PCR tubes", "PCR strips", "96-well PCR plates", "384-well PCR plates", "optical PCR seals"],
     compatibilityConsiderations: ["Confirm fit with the thermal cycler or qPCR instrument.", "Check sealing method and heated-lid settings.", "Review optical clarity for qPCR.", "For automation, verify plate footprint and handling geometry."],
-    documentationRequested: ["DNase/RNase-free statement", "PCR-clean information where available", "COA where available", "lot traceability", "instrument compatibility notes"],
+    documentationRequested: ["DNase/RNase-free statement", "PCR-clean information where available", "CoA where available", "lot traceability", "instrument compatibility notes"],
     equivalentChecklist: ["Current plate or tube catalog number", "Instrument model", "Skirt and profile", "Seal type", "Optical requirement", "Cleanliness documentation"],
     sampleChecklist: ["Thermal cycler or qPCR instrument", "Seal to be used", "Evaporation acceptance criteria", "qPCR signal consistency if applicable", "Current product control"],
     sourcingSupport: ["Organize PCR plastics requests by instrument and format.", "Compare equivalent candidates by geometry, seal fit, optical needs, and documentation.", "Coordinate sample testing before switching assay-critical plastics."],
@@ -151,7 +151,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     typicalSpecifications: ["skirted/semi-skirted/non-skirted", "low profile vs standard profile", "optical sealing compatibility", "qPCR instrument compatibility", "evaporation control", "DNase/RNase-free/PCR-clean"],
     commonFormats: ["clear 96-well PCR plates", "white qPCR plates", "skirted plates", "semi-skirted plates", "low-profile plates"],
     compatibilityConsiderations: ["Verify the exact thermal cycler or qPCR model.", "Confirm plate height and seal type.", "Check evaporation control for low-volume reactions.", "Test optical signal if switching qPCR plates."],
-    documentationRequested: ["DNase/RNase-free statement", "PCR-clean information where available", "COA where available", "lot traceability", "instrument compatibility notes"],
+    documentationRequested: ["DNase/RNase-free statement", "PCR-clean information where available", "CoA where available", "lot traceability", "instrument compatibility notes"],
     equivalentChecklist: ["Current plate catalog number", "Instrument model", "Skirt and profile", "Seal type", "Reaction volume", "Optical requirement"],
     sampleChecklist: ["Run current and candidate plates side by side.", "Track evaporation, amplification consistency, and seal performance.", "Confirm handling fit if automation is used."],
     sourcingSupport: ["Prepare 96-well PCR plate requests with instrument and seal context.", "Review compatible options without claiming guaranteed equivalence.", "Coordinate samples for assay-critical plate switching."],
@@ -165,42 +165,42 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
       "Syringe filter sourcing should compare membrane chemistry, pore size, diameter, sample volume, sterility, protein binding, flow rate, and documentation before selecting options.",
     specifications: [
       { specification: "Membrane material", whyItMatters: "Material drives chemical compatibility, protein binding, and sample recovery.", exampleValues: "PES, PVDF, PTFE, nylon" },
-      { specification: "Pore size", whyItMatters: "Controls clarification or sterile filtration target.", exampleValues: "0.22 um, 0.45 um" },
+      { specification: "Pore size", whyItMatters: "Controls clarification or sterile filtration target.", exampleValues: "0.22 µm, 0.45 µm" },
       { specification: "Sterility", whyItMatters: "Cell culture and sterile sample workflows may require sterile units.", exampleValues: "sterile, non-sterile" },
       { specification: "Diameter and volume", whyItMatters: "Filter diameter should match sample volume and hold-up tolerance.", exampleValues: "13 mm, 25 mm, 30 mm" },
       { specification: "Binding profile", whyItMatters: "Low protein binding can protect protein samples and assay recovery.", exampleValues: "low protein binding, low extractables" }
     ],
-    typicalSpecifications: ["membrane material", "pore size 0.22 um / 0.45 um", "sterile vs non-sterile", "diameter", "sample volume", "flow rate", "low protein binding"],
+    typicalSpecifications: ["membrane material", "pore size 0.22 µm / 0.45 µm", "sterile vs non-sterile", "diameter", "sample volume", "flow rate", "low protein binding"],
     commonFormats: ["PES syringe filters", "PVDF syringe filters", "PTFE syringe filters", "nylon syringe filters", "sterile syringe filters"],
     compatibilityConsiderations: ["Match membrane to aqueous or solvent compatibility.", "Review hold-up volume for limited samples.", "Choose diameter based on sample volume.", "Check housing and luer fit with the syringe setup."],
-    documentationRequested: ["membrane material information", "sterility statement", "COA where available", "chemical compatibility guidance", "extractables/leachables information where relevant"],
+    documentationRequested: ["membrane material information", "sterility statement", "CoA where available", "chemical compatibility guidance", "extractables/leachables information where relevant"],
     equivalentChecklist: ["Current filter material and pore size", "Sample matrix", "Sterile requirement", "Sample volume", "Diameter", "Protein binding concern", "Flow-rate needs"],
     sampleChecklist: ["Test flow rate and recovery.", "Compare sample loss or protein binding.", "Confirm clarity or sterility target.", "Review extractables concerns if the method is sensitive."],
     sourcingSupport: ["Organize filter requests by membrane, pore size, diameter, and workflow.", "Compare equivalent candidates by compatibility and documentation.", "Support sample testing for sensitive sample prep or cell culture filtration."],
     metaTitle: "Syringe Filters Sourcing | BioAxis",
-    metaDescription: "Source syringe filters by membrane, 0.22 um or 0.45 um pore size, sterility, diameter, sample volume, flow rate, and documentation."
+    metaDescription: "Source syringe filters by membrane, 0.22 µm or 0.45 µm pore size, sterility, diameter, sample volume, flow rate, and documentation."
   },
   [key("sample-prep-filtration", "syringe-filters", "pes-syringe-filters")]: {
     route: "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters",
     title: "PES syringe filters sourcing checklist",
     summary:
-      "PES syringe filters are commonly reviewed for aqueous compatibility, low protein binding, 0.22 um or 0.45 um pore size, sterile status, membrane diameter, flow rate, and sample volume.",
+      "PES syringe filters are commonly reviewed for aqueous compatibility, low protein binding, 0.22 µm or 0.45 µm pore size, sterile status, membrane diameter, flow rate, and sample volume.",
     specifications: [
-      { specification: "Pore size", whyItMatters: "Separates sterile filtration from clarification-style use.", exampleValues: "0.22 um, 0.45 um" },
+      { specification: "Pore size", whyItMatters: "Separates sterile filtration from clarification-style use.", exampleValues: "0.22 µm, 0.45 µm" },
       { specification: "Sterile status", whyItMatters: "Cell culture and sterile media workflows may require sterile packaging.", exampleValues: "sterile, non-sterile" },
       { specification: "Protein binding", whyItMatters: "PES is often selected where low protein binding matters.", exampleValues: "low protein binding" },
       { specification: "Aqueous compatibility", whyItMatters: "PES is commonly selected for aqueous samples and media.", exampleValues: "aqueous buffers, media, protein solutions" },
       { specification: "Diameter", whyItMatters: "Diameter affects throughput, hold-up volume, and sample volume range.", exampleValues: "13 mm, 25 mm, 30 mm" }
     ],
-    typicalSpecifications: ["pore size 0.22 um / 0.45 um", "sterile vs non-sterile", "low protein binding", "aqueous compatibility", "membrane diameter", "sample volume", "flow rate"],
-    commonFormats: ["sterile PES syringe filters", "non-sterile PES syringe filters", "13 mm PES filters", "25 mm PES filters", "0.22 um PES filters", "0.45 um PES filters"],
+    typicalSpecifications: ["pore size 0.22 µm / 0.45 µm", "sterile vs non-sterile", "low protein binding", "aqueous compatibility", "membrane diameter", "sample volume", "flow rate"],
+    commonFormats: ["sterile PES syringe filters", "non-sterile PES syringe filters", "13 mm PES filters", "25 mm PES filters", "0.22 µm PES filters", "0.45 µm PES filters"],
     compatibilityConsiderations: ["Confirm the sample is compatible with PES.", "Choose pore size by filtration goal.", "Match diameter to sample volume.", "Review hold-up volume for limited or expensive samples."],
-    documentationRequested: ["membrane material information", "sterility statement", "COA where available", "chemical compatibility information", "extractables/leachables information where relevant"],
+    documentationRequested: ["membrane material information", "sterility statement", "CoA where available", "chemical compatibility information", "extractables/leachables information where relevant"],
     equivalentChecklist: ["Current filter catalog number", "Pore size", "Diameter", "Sterile requirement", "Sample matrix", "Sample volume", "Binding sensitivity"],
     sampleChecklist: ["Compare flow rate and recovery.", "Check protein loss if relevant.", "Track hold-up volume.", "Review clarity or sterility outcome.", "Confirm documentation before purchasing volume."],
     sourcingSupport: ["Prepare PES filter requests with membrane and sample context.", "Compare compatible options by pore size, diameter, sterility, and documentation.", "Support sample-first testing for sensitive samples."],
     metaTitle: "PES Syringe Filters | BioAxis",
-    metaDescription: "Source PES syringe filters by 0.22 um or 0.45 um pore size, sterile status, low protein binding, aqueous compatibility, diameter, and sample volume."
+    metaDescription: "Source PES syringe filters by 0.22 µm or 0.45 µm pore size, sterile status, low protein binding, aqueous compatibility, diameter, and sample volume."
   },
   [key("automation-consumables", "robotic-pipette-tips")]: {
     route: "/products/automation-consumables/robotic-pipette-tips",
@@ -217,7 +217,7 @@ const priorityProductContent: Record<string, PriorityProductContent> = {
     typicalSpecifications: ["Hamilton/Tecan/Beckman/Opentrons-style compatibility", "conductive vs non-conductive", "filtered vs non-filtered", "nested racks", "deck format", "lot consistency"],
     commonFormats: ["Hamilton-style robotic tips", "Tecan-style robotic tips", "Beckman-style robotic tips", "Opentrons-compatible tips", "conductive filtered tips"],
     compatibilityConsiderations: ["Confirm platform, head type, and method requirements.", "Test pickup, seal, liquid detection, dispense accuracy, and ejection.", "Review rack footprint and nesting behavior.", "Document any deck adapters or carrier constraints."],
-    documentationRequested: ["platform fit information", "sterility statement where relevant", "barcode or rack specification", "COA where available", "lot traceability"],
+    documentationRequested: ["platform fit information", "sterility statement where relevant", "barcode or rack specification", "CoA where available", "lot traceability"],
     equivalentChecklist: ["Current tip and rack catalog number", "Robot platform and model", "Conductive requirement", "Filter requirement", "Rack footprint", "Deck position and adapter context", "Validation plan"],
     sampleChecklist: ["Run pickup/eject testing.", "Check liquid detection if conductive.", "Test dispense behavior across volumes.", "Evaluate rack handling.", "Confirm lot consistency requirements before recurring supply."],
     sourcingSupport: ["Organize robotic tip requests by platform and deck requirement.", "Support compatibility review without claiming exact replacement.", "Coordinate sample testing before a method or supply switch."],

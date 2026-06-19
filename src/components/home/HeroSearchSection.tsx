@@ -1,7 +1,16 @@
 import Image from "next/image";
+import Link from "next/link";
 import { brand } from "@/data/brand";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SearchBox } from "@/components/ui/SearchBox";
+
+const heroTasks = [
+  { label: "Find equivalent", href: "/equivalent-finder?requestType=equivalent" },
+  { label: "Request quote", href: "/request-quote?requestType=quote" },
+  { label: "Request sample", href: "/request-quote?requestType=sample" },
+  { label: "Paste product list", href: "/request-quote?requestType=product-list-review" },
+  { label: "Request documentation", href: "/request-quote?requestType=documentation" }
+];
 
 export function HeroSearchSection() {
   return (
@@ -32,6 +41,18 @@ export function HeroSearchSection() {
 
         <div className="mt-10 max-w-5xl">
           <SearchBox helperText={brand.searchHelper} />
+        </div>
+
+        <div className="mt-5 flex max-w-5xl flex-wrap gap-2">
+          {heroTasks.map((task) => (
+            <Link
+              key={task.label}
+              href={task.href}
+              className="border border-white/[0.16] bg-bioaxis-black/65 px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel backdrop-blur transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              {task.label}
+            </Link>
+          ))}
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">

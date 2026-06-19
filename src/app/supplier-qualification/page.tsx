@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 const documents = [
-  "COA",
+  "CoA",
   "SDS",
   "Sterility statement",
   "DNase/RNase-free statement",
@@ -56,9 +56,9 @@ export default function SupplierQualificationPage() {
   return (
     <>
       <PageHero
-        eyebrow="Supplier qualification"
+        eyebrow="Trust Center"
         title="Procurement confidence starts with clearer sourcing evidence."
-        subtitle="BioAxis supports supplier and product review with documentation requests, specification matching, sample-first evaluation, equivalent review, and recurring supply context. Certification claims remain tied to verified supplier or product documentation."
+        subtitle="BioAxis helps buyers review supplier-provided evidence through documentation requests, specification matching, sample-first evaluation, equivalent review, and recurring supply context. Certification, sterility, and quality claims remain tied to supplier-provided product documentation."
       />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <div>
@@ -75,7 +75,7 @@ export default function SupplierQualificationPage() {
         <ProcessSteps
           steps={[
             { title: "Define the requirement", body: "Share product family, current supplier, catalog number, application, and non-negotiable specifications." },
-            { title: "Request evidence", body: "Ask for documents such as COA, SDS, sterility, material, endotoxin, or lot information where available." },
+            { title: "Request evidence", body: "Ask for documents such as CoA, SDS, sterility, material, endotoxin, or lot information where available." },
             { title: "Evaluate before scale", body: "Use documentation review and sample testing to support switching, qualification, or recurring supply decisions." }
           ]}
         />
@@ -95,8 +95,8 @@ export default function SupplierQualificationPage() {
         body="Send the product, supplier or catalog number if known, required documents, and intended workflow. BioAxis helps organize the documentation request and compatible sourcing path."
         primaryLabel="Request documentation"
         primaryHref="/request-quote?requestType=documentation"
-        secondaryLabel="Contact BioAxis"
-        secondaryHref="/contact"
+        secondaryLabel="Submit current supplier/catalog number"
+        secondaryHref="/equivalent-finder?requestType=equivalent"
       />
     </>
   );

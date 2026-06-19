@@ -142,15 +142,15 @@ type RawSegment = {
   relatedSegments: string[];
 };
 
-type SearchResultType = "segment" | "subcategory" | "family" | "product";
+type SearchResultType = "segment" | "subcategory" | "family" | "product" | "workflow" | "resource";
 
 export type ProductSearchResult = {
   type: SearchResultType;
   title: string;
   description: string;
   href: string;
-  segmentTitle: string;
-  segmentSlug: string;
+  segmentTitle?: string;
+  segmentSlug?: string;
   categoryTitle?: string;
   categorySlug?: string;
   subcategoryTitle?: string;
@@ -196,7 +196,8 @@ const familyNameOverrides: Record<string, string> = {
   "2d-barcoded-tubes": "2D Barcoded Tubes",
   "2d-coded-storage-tubes": "2D Coded Storage Tubes",
   "dna-rna-concentrators": "DNA/RNA Concentrators",
-  "dnase-rnase-free": "DNase/RNase-Free"
+  "dnase-rnase-free": "DNase/RNase-Free",
+  "tpe-tubing": "TPE Tubing"
 };
 
 function titleize(slug: string) {
@@ -208,7 +209,7 @@ function titleize(slug: string) {
     .split("-")
     .map((word) => {
       const upper = word.toUpperCase();
-      if (["pcr", "qpcr", "dna", "rna", "fbs", "edta", "pbs", "tbs", "dmso", "spe", "usp", "pvdf", "pes", "ptfe", "sds", "chaps", "facs", "coa"].includes(word)) {
+      if (["pcr", "qpcr", "dna", "rna", "fbs", "edta", "pbs", "tbs", "dmso", "spe", "usp", "pvdf", "pes", "ptfe", "sds", "chaps", "facs", "coa", "tpe"].includes(word)) {
         return upper === "QPCR" ? "qPCR" : upper;
       }
       if (word === "and") {

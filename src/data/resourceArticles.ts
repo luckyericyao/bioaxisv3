@@ -2,143 +2,230 @@ export type ResourceArticle = {
   slug: string;
   title: string;
   description: string;
+  productHref: string;
+  equivalentHref: string;
+  sampleHref: string;
+  rfqHref: string;
   sections: Array<{
     heading: string;
     body: string[];
   }>;
 };
 
-export const resourceArticles: ResourceArticle[] = [
+type GuideConfig = {
+  slug: string;
+  title: string;
+  description: string;
+  productHref: string;
+  equivalentHref?: string;
+  sampleHref?: string;
+  rfqHref?: string;
+  selectionFocus: string[];
+  documentationFocus: string[];
+  sampleFocus: string[];
+};
+
+const guideConfigs: GuideConfig[] = [
   {
-    slug: "how-to-choose-pipette-tips",
-    title: "How to choose pipette tips",
-    description:
-      "A practical guide to pipette tip selection for manual pipetting, molecular biology, cell culture, assay setup, and automation workflows.",
-    sections: [
-      {
-        heading: "Start with volume range and pipette fit",
-        body: [
-          "The first filter for pipette tips is the working volume range. Match the tip to the pipette channel and the actual transfer volume, not just the nominal maximum volume. A 10 uL tip, 200 uL tip, 300 uL tip, 1000 uL tip, or extended-length tip can all be correct depending on the transfer geometry, sample depth, and dead-volume tolerance. For multichannel pipettes, also check rack geometry and tip spacing so the tips seat consistently across all channels.",
-          "When requesting a quote, include the current pipette brand or model, current tip catalog number if known, volume range, and whether you use single-channel, multichannel, electronic, or robotic platforms. This helps BioAxis narrow the equivalent review to tips that are physically compatible before considering price or pack size."
-        ]
-      },
-      {
-        heading: "Filtered vs non-filtered",
-        body: [
-          "Filtered tips add an aerosol barrier between the sample and pipette shaft. They are common for PCR, qPCR, nucleic acid extraction, infectious sample handling, and workflows where carryover could compromise downstream results. Non-filtered tips can be appropriate for routine buffer transfer, non-sensitive assays, or applications where the lab has already validated contamination controls.",
-          "Do not treat filtered and non-filtered tips as interchangeable without checking the workflow. A filtered equivalent should match the required volume range, seating fit, packaging, sterility status, and low-retention requirement. For PCR-clean work, ask for DNase/RNase-free or PCR-clean documentation where available."
-        ]
-      },
-      {
-        heading: "Sterile status and clean claims",
-        body: [
-          "Sterile tips are commonly requested for cell culture, microbiology-adjacent work, sterile sample handling, and sensitive assay setup. Non-sterile tips are often acceptable for routine bench work, reagent preparation, and analytical workflows where sterility is not part of the method. The important point is to specify the requirement clearly instead of assuming all racked tips are sterile.",
-          "Common documentation requests include sterility statement, DNase/RNase-free statement, pyrogen or endotoxin information where relevant, material declaration, and lot traceability. BioAxis can help organize these requests, but final suitability depends on the customer's application and validation."
-        ]
-      },
-      {
-        heading: "Low retention, extended length, and packaging",
-        body: [
-          "Low-retention tips can reduce sample loss for viscous liquids, protein solutions, nucleic acids, enzymes, detergents, and low-volume assays. Extended-length tips are useful when reaching into deep plates, tubes, reservoirs, or containers while minimizing shaft contact. If low-retention performance matters, request a sample-first evaluation instead of relying only on the product name.",
-          "Packaging affects both workflow speed and procurement cost. Racked tips support clean, ready-to-use operation. Reload systems reduce plastic waste and storage volume. Bulk tips can work for high-volume non-sterile workflows when the lab manages loading and cleanliness. Include racked, reload, or bulk preference in the RFQ."
-        ]
-      },
-      {
-        heading: "Automation compatibility",
-        body: [
-          "Robotic tips require stricter matching than manual tips. The RFQ should include the liquid handler platform, whether conductive tips are required, filter status, rack format, nested packaging, sterile status, and barcode or lot traceability requirements. Small differences in tip length, collar geometry, rack height, or conductivity can affect liquid-level sensing and deck performance.",
-          "A good pipette tip request includes volume range, filtered or non-filtered, sterile or non-sterile, low-retention requirement, DNase/RNase-free requirement, racked/reload/bulk packaging, robotic platform compatibility, current catalog number, estimated monthly or annual volume, and whether samples are needed for validation."
-        ]
-      }
-    ]
+    slug: "filtered-vs-non-filtered-pipette-tips",
+    title: "Filtered vs non-filtered pipette tips",
+    description: "A practical guide to choosing filtered or non-filtered pipette tips for contamination-sensitive workflows.",
+    productHref: "/products/liquid-handling/pipette-tips",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=filtered%20pipette%20tips",
+    sampleHref: "/request-quote?requestType=sample&productName=filtered%20pipette%20tips",
+    rfqHref: "/request-quote?requestType=quote&productName=filtered%20pipette%20tips",
+    selectionFocus: ["volume range", "filter barrier", "sterile status", "low-retention option", "rack or reload packaging"],
+    documentationFocus: ["sterility statement", "DNase/RNase-free statement", "PCR-clean information", "material declaration", "lot traceability"],
+    sampleFocus: ["pipette fit", "seal on manual or multichannel pipettes", "liquid retention", "PCR or qPCR contamination control"]
   },
   {
-    slug: "how-to-evaluate-equivalent-consumables",
-    title: "How to evaluate equivalent consumables",
-    description:
-      "A buyer-focused method for comparing alternative lab consumables by fit, material, sterility, documentation, sample testing, and lot consistency.",
-    sections: [
-      {
-        heading: "Define what must be equivalent",
-        body: [
-          "Equivalent consumables are not evaluated by product title alone. Start with the current supplier, catalog number, product description, and the reason you are considering an alternative. The critical comparison points usually include dimensions, material, volume, surface treatment, color, sterility, packaging, instrument fit, and documentation. For tubes and plates, small changes in geometry can affect centrifuge rotors, plate seals, readers, automation grippers, and freezer racks.",
-          "Separate hard requirements from preferences. Hard requirements might include sterile packaging, DNase/RNase-free status, SBS footprint, low-binding surface, vapor-phase liquid nitrogen compatibility, or robotic platform fit. Preferences might include case quantity, rack color, cap style, or packaging format."
-        ]
-      },
-      {
-        heading: "Compare material and format",
-        body: [
-          "Material matters because consumables contact samples, reagents, cells, solvents, or analytical methods. Polypropylene, polystyrene, polycarbonate, PETG, glass, PVDF, PES, PTFE, nylon, nitrocellulose, and silicone all behave differently. For filtration products, membrane chemistry, pore size, diameter, hold-up volume, protein binding, and chemical compatibility should be reviewed together.",
-          "Format matters just as much. A 96-well plate may be clear, white, black, deep-well, V-bottom, U-bottom, tissue-culture treated, low-bind, PCR-clean, or automation-compatible. A product that looks close on a web page may fail if the bottom geometry, height, or sealing compatibility differs from the current item."
-        ]
-      },
-      {
-        heading: "Check sterility and clean claims",
-        body: [
-          "Sterility, DNase/RNase-free, endotoxin, pyrogen, animal-origin-free, xeno-free, and low-bind claims should be checked against the application. Cell culture and molecular biology workflows often need more documentation than routine bench handling. If the product touches cells, nucleic acids, proteins, sterile media, or regulated QC workflows, ask for the supporting documents early.",
-          "Common documents include CoA, SDS, sterility statement, DNase/RNase-free statement, endotoxin information, material declaration, lot traceability, and storage condition. BioAxis can help request and organize documentation where available, but the customer is responsible for final validation in the intended workflow."
-        ]
-      },
-      {
-        heading: "Use samples before switching critical workflows",
-        body: [
-          "A sample-first evaluation reduces switching risk. Test the equivalent in the actual workflow, not only on the bench. For pipette tips, check seating, leakage, retention, and ergonomics. For automation tips and plates, check deck fit, liquid-level sensing, gripper handling, sealing, and barcode readability. For filters, check recovery, flow rate, binding, extractables/leachables where relevant, and compatibility with the sample matrix.",
-          "Document the evaluation criteria before requesting samples. This keeps the test focused and makes it easier to compare alternatives. Include the current product, proposed equivalent, application, sample quantity needed, and acceptance criteria."
-        ]
-      },
-      {
-        heading: "Plan for lot consistency and supply",
-        body: [
-          "Equivalent review should include availability of documentation and lot-to-lot consistency, not just the first sample result. For recurring supply, ask about pack size, case quantity, lead time expectations, lot reservation options where available, and whether future lots can provide the same documentation set.",
-          "A strong equivalent request includes the current catalog number, supplier, product description, required dimensions, material, sterility, packaging, documentation needs, estimated usage, delivery timeline, and whether sample testing is required before switching."
-        ]
-      }
-    ]
+    slug: "low-retention-pipette-tips-when-to-use",
+    title: "Low-retention pipette tips: when to use",
+    description: "How to decide when low-retention surfaces are useful for recovery-sensitive liquid handling.",
+    productHref: "/products/liquid-handling/pipette-tips/low-retention-pipette-tips",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=low%20retention%20tips",
+    sampleHref: "/request-quote?requestType=sample&productName=low%20retention%20pipette%20tips",
+    rfqHref: "/request-quote?requestType=quote&productName=low%20retention%20pipette%20tips",
+    selectionFocus: ["sample viscosity", "protein or nucleic acid recovery", "low-volume transfer", "filtered option", "racked or reload format"],
+    documentationFocus: ["DNase/RNase-free statement", "low-retention surface description", "sterility statement where needed", "material declaration"],
+    sampleFocus: ["recovery comparison", "repeat pipetting performance", "fit on current pipettes", "assay impact before switching"]
   },
   {
-    slug: "how-to-prepare-a-consumables-rfq",
-    title: "How to prepare a consumables RFQ",
-    description:
-      "A practical RFQ checklist for life science consumables sourcing, equivalent review, documentation support, sample requests, and recurring supply.",
-    sections: [
-      {
-        heading: "Start with the current product context",
-        body: [
-          "A consumables RFQ moves faster when the requester includes the current supplier, catalog number, product description, and intended application. If the item is a direct reorder, the catalog number may be enough to identify the product family. If the request is for an equivalent, the catalog number should be paired with specifications that cannot change, such as volume range, material, sterility, filter status, low-retention surface, plate footprint, tube geometry, membrane type, or instrument compatibility.",
-          "For broad searches, describe the workflow: PCR setup, sterile cell culture, HPLC sample prep, liquid handler automation, cryogenic storage, ELISA, Western blotting, or early bioprocess sampling. Workflow context helps BioAxis organize sourcing options around the product's use rather than matching vague keywords."
-        ]
-      },
-      {
-        heading: "Specify quantity and usage rhythm",
-        body: [
-          "Include immediate quantity, preferred pack size, case quantity, and estimated monthly or annual volume. A request for two packs of filtered tips is handled differently from a recurring supply need for 200 cases per quarter. If the lab expects scaling, include the pilot quantity and the recurring volume separately.",
-          "If there is a target delivery date, include it in the first RFQ. Sourcing teams can then separate urgent options from longer-lead equivalent options. For recurring supply, add shipping region, receiving constraints, and whether lot reservation or staggered delivery would help."
-        ]
-      },
-      {
-        heading: "List required documents",
-        body: [
-          "Documentation requirements should be explicit. Common requests include CoA, SDS, sterility statement, DNase/RNase-free statement, endotoxin information, material declaration, origin information, lot traceability, and storage condition. For filters and single-use process consumables, buyers may also ask for membrane or material information and extractables/leachables data where relevant.",
-          "Do not wait until after supplier matching to ask for documents. If procurement, QA, or a lab manager needs documentation before approval, include it in the RFQ so unsuitable options are filtered out early."
-        ]
-      },
-      {
-        heading: "Add packaging, sterility, and compatibility preferences",
-        body: [
-          "Packaging preferences can affect cost, storage, and workflow efficiency. For pipette tips, specify racked, reload, or bulk. For plates, note sterile status, color, bottom type, surface treatment, and sealing compatibility. For tubes, include cap style, centrifuge rating, volume, and temperature range. For automation consumables, include liquid handler platform, deck format, rack geometry, barcode needs, and conductive or non-conductive tip requirements.",
-          "Sterile and non-sterile should be written clearly. If sterile is optional, say so. If sterile is mandatory, ask for supporting documentation. The same applies to low-bind, low-retention, PCR-clean, DNase/RNase-free, endotoxin, and animal-origin-free requirements."
-        ]
-      },
-      {
-        heading: "State sample needs and evaluation plan",
-        body: [
-          "If switching suppliers could affect cells, assays, automation, sample recovery, or QC review, request samples as part of the RFQ. Include how many samples are needed, which users will evaluate them, and what criteria will be checked. This may include fit, leakage, retention, optical clarity, assay signal, cell attachment, filtration recovery, or compatibility with a liquid handler.",
-          "A quote-ready request gives BioAxis enough information to organize supplier conversations: catalog number, supplier, product description, quantity, documentation, packaging preference, timeline, sample needs, shipping region, institution or company, contact email, and notes about critical specifications."
-        ]
-      }
-    ]
+    slug: "how-to-choose-96-well-pcr-plates",
+    title: "How to choose 96-well PCR plates",
+    description: "A buyer guide for matching PCR plates by geometry, instrument fit, sealing, and documentation needs.",
+    productHref: "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=96-well%20PCR%20plates",
+    sampleHref: "/request-quote?requestType=sample&productName=96-well%20PCR%20plates",
+    rfqHref: "/request-quote?requestType=quote&productName=96-well%20PCR%20plates",
+    selectionFocus: ["skirt style", "plate profile", "thermal cycler compatibility", "seal compatibility", "well volume"],
+    documentationFocus: ["DNase/RNase-free statement", "PCR-clean information", "material declaration", "lot traceability"],
+    sampleFocus: ["instrument fit", "seal adhesion", "evaporation control", "workflow comparison against current plate"]
+  },
+  {
+    slug: "how-to-choose-qpcr-optical-seals",
+    title: "How to choose qPCR optical seals",
+    description: "How qPCR sealing choices affect optical readout, evaporation control, and instrument compatibility.",
+    productHref: "/products/molecular-biology-pcr/qpcr-consumables/optical-sealing-films",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=qPCR%20optical%20seals",
+    sampleHref: "/request-quote?requestType=sample&productName=qPCR%20optical%20seals",
+    rfqHref: "/request-quote?requestType=quote&productName=qPCR%20optical%20seals",
+    selectionFocus: ["optical clarity", "adhesive strength", "plate compatibility", "instrument cover fit", "low evaporation"],
+    documentationFocus: ["PCR-clean information", "DNase/RNase-free statement", "material declaration", "storage condition"],
+    sampleFocus: ["seal integrity", "readout consistency", "evaporation check", "plate and instrument fit"]
+  },
+  {
+    slug: "pes-vs-pvdf-vs-ptfe-syringe-filters",
+    title: "PES vs PVDF vs PTFE syringe filters",
+    description: "A membrane-focused comparison for aqueous, protein-containing, solvent, and analytical sample filtration.",
+    productHref: "/products/sample-prep-filtration/syringe-filters",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=PES%200.22%20syringe%20filter",
+    sampleHref: "/request-quote?requestType=sample&productName=syringe%20filters",
+    rfqHref: "/request-quote?requestType=quote&productName=syringe%20filters",
+    selectionFocus: ["membrane chemistry", "pore size", "filter diameter", "protein binding", "chemical compatibility"],
+    documentationFocus: ["membrane material information", "sterility statement", "CoA where available", "chemical compatibility guidance"],
+    sampleFocus: ["flow rate", "sample recovery", "binding profile", "extractables/leachables relevance"]
+  },
+  {
+    slug: "how-to-evaluate-sterile-syringe-filters",
+    title: "How to evaluate sterile syringe filters",
+    description: "A switching checklist for sterile syringe filters used in media prep, sample cleanup, and sterile handling.",
+    productHref: "/products/sample-prep-filtration/syringe-filters/sterile-syringe-filters",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=sterile%20syringe%20filter",
+    sampleHref: "/request-quote?requestType=sample&productName=sterile%20syringe%20filters",
+    rfqHref: "/request-quote?requestType=quote&productName=sterile%20syringe%20filters",
+    selectionFocus: ["sterile status", "membrane material", "pore size", "diameter", "hold-up volume"],
+    documentationFocus: ["sterility statement", "CoA where available", "material declaration", "lot traceability"],
+    sampleFocus: ["sterile workflow fit", "flow behavior", "sample matrix compatibility", "packaging review"]
+  },
+  {
+    slug: "how-to-prepare-a-product-list-rfq",
+    title: "How to prepare a product list RFQ",
+    description: "How to turn a spreadsheet or product-number list into a BioAxis sourcing request.",
+    productHref: "/products",
+    equivalentHref: "/equivalent-finder?requestType=equivalent",
+    sampleHref: "/request-quote?requestType=sample",
+    rfqHref: "/request-quote?requestType=product-list-review",
+    selectionFocus: ["supplier", "catalog number", "product description", "quantity", "timeline"],
+    documentationFocus: ["CoA", "SDS", "sterility information", "DNase/RNase-free information", "lot traceability"],
+    sampleFocus: ["switching-sensitive items", "critical workflow items", "automation or cell-contact consumables", "sample quantity needed"]
+  },
+  {
+    slug: "how-to-compare-equivalent-cryovials",
+    title: "How to compare equivalent cryovials",
+    description: "Compare cryovials by thread style, storage conditions, sterility, sample traceability, and sample-first evaluation.",
+    productHref: "/products/storage-cryopreservation/cryogenic-vials",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=cryogenic%20vials",
+    sampleHref: "/request-quote?requestType=sample&productName=cryogenic%20vials",
+    rfqHref: "/request-quote?requestType=quote&productName=cryogenic%20vials",
+    selectionFocus: ["volume", "internal or external thread", "sterile status", "temperature range", "barcode support"],
+    documentationFocus: ["sterility statement", "material declaration", "temperature range information", "lot traceability"],
+    sampleFocus: ["cap fit", "leak resistance", "freezer box compatibility", "sample traceability workflow"]
+  },
+  {
+    slug: "how-to-source-automation-compatible-tips",
+    title: "How to source automation-compatible tips",
+    description: "A liquid-handler-focused checklist for robotic tip matching and sourcing conversations.",
+    productHref: "/products/automation-consumables/robotic-pipette-tips",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=automation-compatible%20tips",
+    sampleHref: "/request-quote?requestType=sample&productName=automation-compatible%20tips",
+    rfqHref: "/request-quote?requestType=quote&productName=automation-compatible%20tips",
+    selectionFocus: ["liquid handler platform", "rack geometry", "conductive requirement", "filtered status", "nested packaging"],
+    documentationFocus: ["platform fit information", "sterility statement", "barcode specification", "lot traceability"],
+    sampleFocus: ["deck fit", "liquid-level sensing", "tip pickup and eject", "method comparison before switching"]
+  },
+  {
+    slug: "hamilton-vs-tecan-tip-compatibility-questions",
+    title: "Hamilton vs Tecan tip compatibility questions",
+    description: "Questions procurement and automation teams should ask before changing robotic tip sources.",
+    productHref: "/products/automation-consumables/robotic-pipette-tips",
+    equivalentHref: "/equivalent-finder?requestType=equivalent&q=Hamilton%20Tecan%20tips",
+    sampleHref: "/request-quote?requestType=sample&productName=robotic%20pipette%20tips",
+    rfqHref: "/request-quote?requestType=quote&productName=robotic%20pipette%20tips",
+    selectionFocus: ["platform model", "tip volume", "conductivity", "rack height", "deck method constraints"],
+    documentationFocus: ["platform fit information", "sterility statement where needed", "lot traceability", "barcode specification"],
+    sampleFocus: ["pickup performance", "liquid-level sensing", "gripper or deck clearance", "validated method impact"]
+  },
+  {
+    slug: "what-documents-to-request-for-sterile-consumables",
+    title: "What documents to request for sterile consumables",
+    description: "A documentation checklist for sterile lab consumables and switching-sensitive sourcing requests.",
+    productHref: "/quality",
+    equivalentHref: "/equivalent-finder?requestType=equivalent",
+    sampleHref: "/request-quote?requestType=sample",
+    rfqHref: "/request-quote?requestType=documentation",
+    selectionFocus: ["product family", "sterile status", "application", "supplier or catalog number", "lot needs"],
+    documentationFocus: ["CoA", "SDS", "sterility statement", "material declaration", "lot traceability"],
+    sampleFocus: ["cell-contact products", "sterile filtration", "critical assay consumables", "workflow-specific acceptance criteria"]
+  },
+  {
+    slug: "how-to-qualify-equivalent-lab-consumables-before-switching",
+    title: "How to qualify equivalent lab consumables before switching",
+    description: "A sample-first and documentation-aware path for reviewing equivalent lab consumables.",
+    productHref: "/products",
+    equivalentHref: "/equivalent-finder?requestType=equivalent",
+    sampleHref: "/request-quote?requestType=sample",
+    rfqHref: "/request-quote?requestType=product-list-review",
+    selectionFocus: ["must-match specifications", "current supplier", "catalog number", "material", "format"],
+    documentationFocus: ["CoA", "SDS", "sterility statement", "material declaration", "lot traceability"],
+    sampleFocus: ["fit", "workflow compatibility", "assay impact", "automation or instrument compatibility"]
   }
 ];
+
+function buildArticle(config: GuideConfig): ResourceArticle {
+  const equivalentHref = config.equivalentHref ?? "/equivalent-finder?requestType=equivalent";
+  const sampleHref = config.sampleHref ?? "/request-quote?requestType=sample";
+  const rfqHref = config.rfqHref ?? "/request-quote?requestType=quote";
+
+  return {
+    slug: config.slug,
+    title: config.title,
+    description: config.description,
+    productHref: config.productHref,
+    equivalentHref,
+    sampleHref,
+    rfqHref,
+    sections: [
+      {
+        heading: "Start with the intended workflow",
+        body: [
+          `Before comparing options, write down where the product will be used and which specifications cannot change. For ${config.title.toLowerCase()}, the request should include ${config.selectionFocus.join(", ")}.`,
+          "This keeps the search focused on fit, documentation, sample review, and quote-ready sourcing details instead of matching only a product name."
+        ]
+      },
+      {
+        heading: "Document the must-match specifications",
+        body: [
+          `Common selection inputs include ${config.selectionFocus.join(", ")}. If the request involves an equivalent, include the current supplier and catalog number so BioAxis can help organize a comparison path.`,
+          "Separate hard requirements from preferences. Hard requirements might include sterility, instrument compatibility, material, volume, or cleanliness statements. Preferences might include pack size, case quantity, or packaging format."
+        ]
+      },
+      {
+        heading: "Request supplier-provided documentation early",
+        body: [
+          `Useful documentation may include ${config.documentationFocus.join(", ")}. Availability depends on the supplier and product record, so documentation requests should be included before the quote path is finalized.`,
+          "Certification, sterility, and quality claims remain tied to supplier-provided product documentation. BioAxis can help request and organize the evidence for customer review."
+        ]
+      },
+      {
+        heading: "Use samples for switching-sensitive items",
+        body: [
+          `Sample-first review is useful when teams need to check ${config.sampleFocus.join(", ")}. The sample request should describe the current product, proposed use, quantity needed, and acceptance criteria.`,
+          "A candidate equivalent should be reviewed in the actual workflow before larger-volume purchasing when performance, fit, documentation, or downstream results could be affected."
+        ]
+      },
+      {
+        heading: "Turn the request into a sourcing list",
+        body: [
+          "A quote-ready request includes supplier, catalog number, product description, quantity, required documents, sample needs, shipping region, and target timeline.",
+          "BioAxis can help map that request to product families, equivalent review, documentation support, sample path, and recurring supply planning where appropriate."
+        ]
+      }
+    ]
+  };
+}
+
+export const resourceArticles: ResourceArticle[] = guideConfigs.map(buildArticle);
 
 export function getResourceArticleBySlug(slug: string) {
   return resourceArticles.find((article) => article.slug === slug);

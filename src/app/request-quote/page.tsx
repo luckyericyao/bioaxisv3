@@ -39,6 +39,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const product = first(params?.product);
   const requestType = first(params?.requestType) ?? first(params?.inquiryType);
   const query = first(params?.q);
+  const productList = first(params?.productList) ?? first(params?.list) ?? "";
   const labels = labelFromProductContext({ segment, subcategory, family });
   const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
   const contextLabels = [
@@ -68,7 +69,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           initialValues={{
             requestType: requestType ?? "quote",
             productCategory,
-            productName
+            productName,
+            productList
           }}
         />
       </section>

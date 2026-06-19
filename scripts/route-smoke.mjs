@@ -55,7 +55,12 @@ const productSearchExpectations = {
   "/products?q=pcr": ["PCR"],
   "/products?q=filter": ["Filter"],
   "/products?q=vial": ["Vial"],
-  "/products?q=hamilton": ["Hamilton"]
+  "/products?q=hamilton": ["Hamilton"],
+  "/products?q=filtered%20200%20ul%20tips": ["Filtered", "Pipette Tips"],
+  "/products?q=PES%200.22": ["PES", "0.22"],
+  "/products?q=qPCR%20plates": ["qPCR", "PCR"],
+  "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
+  "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"]
 };
 const requiredHomeWorkflowPreviews = [
   "Target Discovery",
@@ -118,11 +123,18 @@ const routes = [
   "/products?q=filter",
   "/products?q=vial",
   "/products?q=hamilton",
+  "/products?q=filtered%20200%20ul%20tips",
+  "/products?q=PES%200.22",
+  "/products?q=qPCR%20plates",
+  "/products?q=sterile%20syringe%20filter",
+  "/products?q=low%20retention%20tips",
   "/workflows",
   "/equivalent-finder",
   "/quality",
+  "/resources",
   "/samples",
   "/request-quote",
+  "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
   "/products/cell-culture/media-and-supplements/serum-free-media",
   "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates",
@@ -268,9 +280,31 @@ for (const route of routes) {
       failures.push(`${route}: missing homepage workflows CTA`);
     }
 
+    ["Paste a product list. We’ll organize the sourcing path.", "What BioAxis returns", "Matched Product Family", "Documentation Checklist"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing conversion homepage content ${label}`);
+      }
+    });
+
     if (!pageText.includes("View all product segments")) {
       failures.push(`${route}: missing all product segments CTA`);
     }
+  }
+
+  if (route === "/products") {
+    ["Browse by Product Type", "Browse by Workflow", "Browse by Buyer Need", "Current supplier out of stock", "Need quote from product list"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing buyer entry mode ${label}`);
+      }
+    });
+  }
+
+  if (route === "/resources") {
+    ["Filtered vs non-filtered pipette tips", "How to source automation-compatible tips", "How to qualify equivalent lab consumables before switching"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing resource guide ${label}`);
+      }
+    });
   }
 
   if (route === "/equivalent-finder") {
@@ -299,6 +333,14 @@ for (const route of routes) {
     if (!pageText.includes("Pasting a product list into Notes is fine")) {
       failures.push(`${route}: missing product list notes guidance`);
     }
+  }
+
+  if (route.startsWith("/request-quote?requestType=product-list-review")) {
+    ["Paste product list", "Supplier | Catalog No. | Product"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product-list RFQ field ${label}`);
+      }
+    });
   }
 
   if (route === "/quality" && !hasHrefWithParams(html, "/request-quote", { requestType: "documentation" })) {
@@ -386,6 +428,14 @@ for (const route of routes) {
 
   if (familyPageRoutes.includes(route) && !pageText.includes("Product configurations")) {
     failures.push(`${route}: missing Product configurations section`);
+  }
+
+  if (familyPageRoutes.includes(route)) {
+    ["Already using another supplier?", "Add to sourcing list", "Typical buyer cases"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing supplier comparison/sourcing list content ${label}`);
+      }
+    });
   }
 
   if (segmentProductItemRoutes.includes(route)) {

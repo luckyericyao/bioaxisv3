@@ -31,7 +31,7 @@ export const supportTypes: SupportType[] = [
   {
     id: "documentation-support",
     title: "Documentation support",
-    description: "Request COA, SDS, sterility, material, or lot-level documentation where available.",
+    description: "Request CoA, SDS, sterility, material, or lot-level documentation where available.",
     whatToSend: ["product name", "documentation type", "supplier or catalog number if known"],
     relatedRequestType: "Documentation request"
   },

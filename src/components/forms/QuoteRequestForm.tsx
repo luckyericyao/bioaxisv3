@@ -14,6 +14,7 @@ type QuoteFormState = {
   shippingRegion: string;
   productCategory: string;
   productName: string;
+  productList: string;
   currentSupplier: string;
   catalogNumber: string;
   requiredSpecification: string;
@@ -35,6 +36,7 @@ const initialState: QuoteFormState = {
   shippingRegion: "",
   productCategory: "",
   productName: "",
+  productList: "",
   currentSupplier: "",
   catalogNumber: "",
   requiredSpecification: "",
@@ -56,6 +58,7 @@ const fieldLabels: Record<keyof QuoteFormState, string> = {
   shippingRegion: "Shipping region",
   productCategory: "Product segment / category",
   productName: "Product or equivalent product",
+  productList: "Paste product list",
   currentSupplier: "Current brand / supplier",
   catalogNumber: "Current catalog number",
   requiredSpecification: "Required specification",
@@ -73,6 +76,7 @@ const alwaysVisible: Array<keyof QuoteFormState> = ["name", "organization", "ema
 const fieldOrder: Array<keyof QuoteFormState> = [
   "productCategory",
   "productName",
+  "productList",
   "currentSupplier",
   "catalogNumber",
   "requiredSpecification",
@@ -117,6 +121,7 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
     const requested = [...selectedRequestType.requiredFields, ...selectedRequestType.optionalFields, "notes"];
     return fieldOrder.filter((field) => requested.includes(field));
   }, [selectedRequestType]);
+  const showProductListField = formState.requestType === "product-list-review" || formState.requestType === "quote";
 
   function updateField<K extends keyof QuoteFormState>(field: K, value: QuoteFormState[K]) {
     setFormState((current) => ({ ...current, [field]: value }));
@@ -175,7 +180,14 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
           timeline: formState.targetTimeline,
           documentationNeeds: formState.needDocumentation === "yes" ? "Documentation requested" : "",
           sterileStatus: formState.sterility,
-          message: [formState.requiredSpecification, formState.monthlyUsage, formState.notes].filter(Boolean).join("\n\n")
+          message: [
+            formState.productList ? `Product list:\n${formState.productList}` : "",
+            formState.requiredSpecification,
+            formState.monthlyUsage,
+            formState.notes
+          ]
+            .filter(Boolean)
+            .join("\n\n")
         })
       });
       const payload = await response.json();
@@ -243,7 +255,7 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
           Choose the request that best matches the sourcing support you need. Fields update based on request type.
         </p>
         <p className="mt-3 border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
-          Pasting a product list into Notes is fine. Include supplier names, catalog numbers, quantities, target delivery dates, and documentation needs where available.
+          Pasting a product list into Notes is fine, and product-list review or quote requests can also use the dedicated product-list field below. Include supplier names, catalog numbers, quantities, target delivery dates, and documentation needs where available.
         </p>
         <div className="mt-6">
           <RequestTypeSelector
@@ -280,13 +292,32 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{selectedRequestType.description}</p>
         {selectedRequestType.id === "product-list-review" ? (
           <p className="mt-3 text-sm leading-6 text-bioaxis-accent">
-            Paste product names, current suppliers, catalog numbers, quantities, and documentation needs in the Notes field.
+            Paste product names, current suppliers, catalog numbers, quantities, timelines, and documentation needs in the product-list field.
           </p>
+        ) : null}
+
+        {showProductListField ? (
+          <div className="mt-6">
+            <TextArea
+              id="productList"
+              label={fieldLabels.productList}
+              value={formState.productList}
+              error={errors.productList}
+              required={selectedRequestType.requiredFields.includes("productList")}
+              rows={8}
+              placeholder={[
+                "Supplier | Catalog No. | Product | Qty | Required docs | Timeline",
+                "Corning | 352097 | 96-well plate | 20 cases | CoA/Sterility | July",
+                "Axygen | T-200-C | 200 µL filtered tips | 50 racks | DNase/RNase-free | ASAP"
+              ].join("\n")}
+              onChange={(value) => updateField("productList", value)}
+            />
+          </div>
         ) : null}
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           {visibleFields.map((field) =>
-            field === "notes" || field === "requiredSpecification" ? (
+            field === "productList" && showProductListField ? null : field === "notes" || field === "requiredSpecification" ? (
               <TextArea
                 key={field}
                 id={field}
@@ -373,7 +404,16 @@ function Field({ id, label, value, type = "text", error, required = false, onCha
 
 type TextAreaProps = Omit<FieldProps, "type">;
 
-function TextArea({ id, label, value, error, required = false, onChange }: TextAreaProps) {
+function TextArea({
+  id,
+  label,
+  value,
+  error,
+  required = false,
+  rows = 5,
+  placeholder,
+  onChange
+}: TextAreaProps & { rows?: number; placeholder?: string }) {
   return (
     <div className="md:col-span-2">
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
@@ -383,11 +423,12 @@ function TextArea({ id, label, value, error, required = false, onChange }: TextA
       <textarea
         id={id}
         value={value}
-        rows={5}
+        rows={rows}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
-        className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base text-bioaxis-text"
+        className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
       />
       {error ? (
         <p id={`${id}-error`} className="mt-2 text-sm text-bioaxis-accent">

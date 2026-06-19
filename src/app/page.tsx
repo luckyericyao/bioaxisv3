@@ -4,12 +4,9 @@ import { HeroSearchSection } from "@/components/home/HeroSearchSection";
 import { MissionSection } from "@/components/home/MissionSection";
 import { OnePlatformSection } from "@/components/home/OnePlatformSection";
 import {
-  DocumentationSupportHomeSection,
-  EquivalentSourcingHomeSection,
   HowBioAxisWorksSection,
-  HumanSupportHomeSection,
   PopularStartingPointsSection,
-  SampleRequestHomeSection,
+  ProductListIntakeHomeSection,
   SourceByWorkflowSection,
   SourcingProblemsSection
 } from "@/components/home/PlatformExpansionSections";
@@ -31,12 +28,9 @@ export default function Home() {
       <HeroSearchSection />
       <WhatBioAxisDoesSection />
       <HowBioAxisWorksSection />
+      <ProductListIntakeHomeSection />
       <SourcingProblemsSection />
       <SourceByWorkflowSection />
-      <EquivalentSourcingHomeSection />
-      <SampleRequestHomeSection />
-      <DocumentationSupportHomeSection />
-      <HumanSupportHomeSection />
       <PopularStartingPointsSection />
       <MissionSection />
       <ProductDirectorySection />

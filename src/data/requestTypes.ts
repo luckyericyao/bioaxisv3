@@ -13,7 +13,7 @@ export const requestTypes: RequestType[] = [
     description:
       "Let us know the products you need and the specifications required. BioAxis will help organize supplier quote options.",
     requiredFields: ["productCategory", "productName", "quantity", "targetTimeline"],
-    optionalFields: ["currentSupplier", "catalogNumber", "sterility", "requiredSpecification", "needDocumentation", "notes"]
+    optionalFields: ["productList", "currentSupplier", "catalogNumber", "sterility", "requiredSpecification", "needDocumentation", "notes"]
   },
   {
     id: "equivalent",
@@ -35,7 +35,7 @@ export const requestTypes: RequestType[] = [
     id: "documentation",
     label: "Documentation request",
     description:
-      "Select the documentation you need, such as COA, SDS, sterility information, material information, or lot-level documents where available.",
+      "Select the documentation you need, such as CoA, SDS, sterility information, material information, or lot-level documents where available.",
     requiredFields: ["productName", "needDocumentation", "requiredSpecification"],
     optionalFields: ["currentSupplier", "catalogNumber", "productCategory", "sterility", "notes"]
   },
@@ -51,9 +51,9 @@ export const requestTypes: RequestType[] = [
     id: "product-list-review",
     label: "Product list review",
     description:
-      "Paste a product list in the Notes field so BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation requirement.",
-    requiredFields: ["notes"],
-    optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline"]
+      "Paste a product list so BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation requirement.",
+    requiredFields: ["productList"],
+    optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline", "notes"]
   },
   {
     id: "contact",

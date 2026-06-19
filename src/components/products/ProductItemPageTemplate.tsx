@@ -5,6 +5,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
+import { SupplierComparisonModule } from "./SupplierComparisonModule";
 
 type ProductItemPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -67,6 +68,19 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           includeDocumentation
         />
       </PageHero>
+
+      <SupplierComparisonModule
+        title={productItem.name}
+        href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
+        segmentSlug={segment.slug}
+        categorySlug={category.slug}
+        familySlug={family.slug}
+        productSlug={productItem.slug}
+        segmentTitle={segment.title}
+        categoryTitle={category.title}
+        familyTitle={family.title}
+        productTitle={productItem.name}
+      />
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <InfoPanel title="Details" items={productItem.details} />

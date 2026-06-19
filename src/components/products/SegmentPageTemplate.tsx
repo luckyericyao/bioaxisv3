@@ -32,7 +32,7 @@ export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
             <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Browse {segment.shortTitle} categories.</h2>
           </div>
           <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-            Category rails link to real category pages with product families, sourcing skeletons, filters, and request CTAs.
+            Categories open into product families, specification filters, equivalent review paths, sample requests, documentation support, and quote-ready sourcing actions.
           </p>
         </div>
         <ExploreByCategoryRail segmentSlug={segment.slug} subcategories={segment.subcategories} />

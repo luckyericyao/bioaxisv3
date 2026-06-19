@@ -11,6 +11,7 @@ import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
 import { RelatedProducts } from "./RelatedProducts";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
+import { SupplierComparisonModule } from "./SupplierComparisonModule";
 
 type FamilyPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -42,6 +43,17 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
       <PageHero eyebrow={`${segment.title} / ${category.title}`} title={family.title} subtitle={family.longDescription}>
         <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" includeDocumentation />
       </PageHero>
+
+      <SupplierComparisonModule
+        title={family.title}
+        href={`/products/${segment.slug}/${category.slug}/${family.slug}`}
+        segmentSlug={segment.slug}
+        categorySlug={category.slug}
+        familySlug={family.slug}
+        segmentTitle={segment.title}
+        categoryTitle={category.title}
+        familyTitle={family.title}
+      />
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <InfoCard title="What this product family is used for" items={family.commonUseCases} />

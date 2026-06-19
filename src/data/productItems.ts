@@ -239,15 +239,15 @@ function productProfileFor(context: ProductItemContext): ProductProfile {
     return {
       details: [
         "Used for buffer preparation, molecular biology, protein work, cell culture support, analytical workflows, or assay setup.",
-        "Often specified by grade, purity, concentration, pH, sterility, storage condition, and COA or SDS needs.",
+        "Often specified by grade, purity, concentration, pH, sterility, storage condition, and CoA or SDS needs.",
         "Equivalent review should include application grade and documentation requirements before sourcing."
       ],
-      commonSpecifications: ["grade or purity", "concentration or pH", "sterile or non-sterile format", "molecular biology, cell culture, or analytical use", "storage condition", "COA and SDS availability"],
+      commonSpecifications: ["grade or purity", "concentration or pH", "sterile or non-sterile format", "molecular biology, cell culture, or analytical use", "storage condition", "CoA and SDS availability"],
       applications: ["buffer preparation", "cell culture support", "molecular biology", "protein analysis", "analytical chemistry"],
       compatibilityConsiderations: ["application grade", "concentration and pH", "container and pack size", "storage and stability", "documentation requirements"],
       documentationNeeds: ["CoA where available", "SDS", "grade and purity information", "storage condition", "lot traceability"],
-      equivalentMatchingInputs: ["current supplier and catalog number", "grade", "concentration or pH", "pack size", "application", "COA/SDS requirement"],
-      sampleEvaluationNotes: ["confirm formulation or grade", "check storage and handling fit", "review COA/SDS details", "test in the intended workflow if switching affects results"]
+      equivalentMatchingInputs: ["current supplier and catalog number", "grade", "concentration or pH", "pack size", "application", "CoA/SDS requirement"],
+      sampleEvaluationNotes: ["confirm formulation or grade", "check storage and handling fit", "review CoA/SDS details", "test in the intended workflow if switching affects results"]
     };
   }
 
@@ -317,40 +317,40 @@ const configuredProductItems: Record<string, ConfiguredProductItem[]> = {
   [routeKey("liquid-handling", "pipette-tips", "universal-pipette-tips")]: [
     {
       slug: "universal-200ul-pipette-tips",
-      name: "Universal 200 uL Pipette Tips",
-      shortDescription: "General-fit 200 uL pipette tips for routine manual and multichannel liquid handling.",
-      commonSpecifications: ["nominal volume: 200 uL", "fit: universal/manual pipette review", "sterility: sterile or non-sterile", "cleanliness: DNase/RNase-free where required", "packaging: racked, reload, or bulk", "surface: standard or low-retention option"]
+      name: "Universal 200 µL Pipette Tips",
+      shortDescription: "General-fit 200 µL pipette tips for routine manual and multichannel liquid handling.",
+      commonSpecifications: ["nominal volume: 200 µL", "fit: universal/manual pipette review", "sterility: sterile or non-sterile", "cleanliness: DNase/RNase-free where required", "packaging: racked, reload, or bulk", "surface: standard or low-retention option"]
     }
   ],
   [routeKey("liquid-handling", "pipette-tips", "filtered-pipette-tips")]: [
     {
       slug: "filtered-200ul-pipette-tips",
-      name: "Filtered 200 uL Pipette Tips",
-      shortDescription: "Aerosol-barrier 200 uL pipette tips for contamination-sensitive liquid handling workflows.",
+      name: "Filtered 200 µL Pipette Tips",
+      shortDescription: "Aerosol-barrier 200 µL pipette tips for contamination-sensitive liquid handling workflows.",
       details: [
         "Used for mid-volume transfers in manual and multichannel workflows.",
         "Often specified by volume range, filter barrier, sterile status, and rack format.",
         "Equivalent review should include current pipette fit, packaging format, cleanliness requirements, and documentation needs."
       ],
-      commonSpecifications: ["nominal volume: 200 uL", "filter barrier: filtered or aerosol barrier", "sterility: sterile or non-sterile", "cleanliness: DNase/RNase-free or PCR-clean where required", "packaging: racked, reload, or bulk", "surface: standard or low-retention"],
+      commonSpecifications: ["nominal volume: 200 µL", "filter barrier: filtered or aerosol barrier", "sterility: sterile or non-sterile", "cleanliness: DNase/RNase-free or PCR-clean where required", "packaging: racked, reload, or bulk", "surface: standard or low-retention"],
       applications: ["PCR and qPCR setup", "molecular biology sample prep", "contamination-sensitive liquid handling", "cell culture support", "assay setup"]
     }
   ],
   [routeKey("liquid-handling", "pipette-tips", "low-retention-pipette-tips")]: [
     {
       slug: "low-retention-200ul-pipette-tips",
-      name: "Low Retention 200 uL Pipette Tips",
-      shortDescription: "Low-retention 200 uL tips for viscous, protein-containing, or low-volume-sensitive transfers.",
-      commonSpecifications: ["nominal volume: 200 uL", "surface: low-retention", "filter option: filtered or non-filtered", "sterility: sterile or non-sterile", "packaging: racked or reload", "cleanliness: molecular biology grade where required"],
+      name: "Low Retention 200 µL Pipette Tips",
+      shortDescription: "Low-retention 200 µL tips for viscous, protein-containing, or low-volume-sensitive transfers.",
+      commonSpecifications: ["nominal volume: 200 µL", "surface: low-retention", "filter option: filtered or non-filtered", "sterility: sterile or non-sterile", "packaging: racked or reload", "cleanliness: molecular biology grade where required"],
       applications: ["protein sample handling", "PCR/qPCR setup", "assay reagent transfer", "low-volume liquid handling", "viscous sample transfer"]
     }
   ],
   [routeKey("liquid-handling", "pipette-tips", "sterile-pipette-tips")]: [
     {
       slug: "sterile-1000ul-pipette-tips",
-      name: "Sterile 1000 uL Pipette Tips",
+      name: "Sterile 1000 µL Pipette Tips",
       shortDescription: "Sterile high-volume pipette tips for cell culture, reagent transfer, and sample preparation workflows.",
-      commonSpecifications: ["nominal volume: 1000 uL", "sterility: sterile", "filter option: filtered or non-filtered", "packaging: racked or reload", "cleanliness: DNase/RNase-free where required", "fit: manual pipette compatibility review"],
+      commonSpecifications: ["nominal volume: 1000 µL", "sterility: sterile", "filter option: filtered or non-filtered", "packaging: racked or reload", "cleanliness: DNase/RNase-free where required", "fit: manual pipette compatibility review"],
       applications: ["cell culture support", "buffer and reagent transfer", "sample preparation", "sterile workflow support", "assay setup"]
     }
   ],
@@ -460,18 +460,18 @@ const configuredProductItems: Record<string, ConfiguredProductItem[]> = {
   [routeKey("sample-prep-filtration", "syringe-filters", "pes-syringe-filters")]: [
     {
       slug: "pes-022um-syringe-filters",
-      name: "PES 0.22 um Syringe Filters",
-      shortDescription: "PES 0.22 um syringe filters for aqueous sample prep and sterile filtration review.",
-      commonSpecifications: ["membrane: PES", "pore size: 0.22 um", "diameter: application-dependent", "sterility: sterile or non-sterile", "binding profile: low protein binding where required", "housing and syringe compatibility"],
+      name: "PES 0.22 µm Syringe Filters",
+      shortDescription: "PES 0.22 µm syringe filters for aqueous sample prep and sterile filtration review.",
+      commonSpecifications: ["membrane: PES", "pore size: 0.22 µm", "diameter: application-dependent", "sterility: sterile or non-sterile", "binding profile: low protein binding where required", "housing and syringe compatibility"],
       applications: ["sterile filtration", "cell culture media filtration", "aqueous sample clarification", "protein-containing sample prep", "assay reagent filtration"]
     }
   ],
   [routeKey("sample-prep-filtration", "syringe-filters", "pvdf-syringe-filters")]: [
     {
       slug: "pvdf-045um-syringe-filters",
-      name: "PVDF 0.45 um Syringe Filters",
-      shortDescription: "PVDF 0.45 um syringe filter configurations for clarification and compatibility-sensitive sample prep.",
-      commonSpecifications: ["membrane: PVDF", "pore size: 0.45 um", "diameter: application-dependent", "sterility: sterile or non-sterile", "aqueous or solvent compatibility review", "protein binding considerations"],
+      name: "PVDF 0.45 µm Syringe Filters",
+      shortDescription: "PVDF 0.45 µm syringe filter configurations for clarification and compatibility-sensitive sample prep.",
+      commonSpecifications: ["membrane: PVDF", "pore size: 0.45 µm", "diameter: application-dependent", "sterility: sterile or non-sterile", "aqueous or solvent compatibility review", "protein binding considerations"],
       applications: ["sample clarification", "analytical prep", "protein sample handling", "buffer filtration", "assay reagent prep"]
     }
   ],

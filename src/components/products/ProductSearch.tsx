@@ -19,20 +19,30 @@ const quickSearches = [
   { label: "cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials/sterile-cryogenic-vials" }
 ];
 
-const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product"];
+const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product", "workflow", "resource"];
 
 function resultTypeLabel(type: ProductSearchResult["type"]) {
   return type === "subcategory" ? "category" : type;
 }
 
 function resultPath(result: ProductSearchResult) {
+  if (result.type === "workflow") {
+    return "Workflows";
+  }
+
+  if (result.type === "resource") {
+    return "Resources";
+  }
+
   return [result.segmentTitle, result.categoryTitle, result.familyTitle, result.productTitle].filter(Boolean).join(" / ");
 }
 
 function requestHref(result: ProductSearchResult, requestType: "quote" | "equivalent", query: string) {
   const params = new URLSearchParams({ requestType, q: query });
 
-  params.set("segment", result.segmentSlug);
+  if (result.segmentSlug) {
+    params.set("segment", result.segmentSlug);
+  }
 
   if (result.categorySlug) {
     params.set("subcategory", result.categorySlug);
@@ -49,6 +59,14 @@ function requestHref(result: ProductSearchResult, requestType: "quote" | "equiva
   return `${requestType === "equivalent" ? "/equivalent-finder" : "/request-quote"}?${params.toString()}`;
 }
 
+function detailHref(result: ProductSearchResult, query: string) {
+  if (result.type === "workflow" || result.type === "resource") {
+    return result.href;
+  }
+
+  return `${result.href}?q=${encodeURIComponent(query)}`;
+}
+
 function relevanceLabel(result: ProductSearchResult) {
   const fields = result.matchedFields ?? [];
 
@@ -61,6 +79,34 @@ function relevanceLabel(result: ProductSearchResult) {
   }
 
   return "Ranked relevance";
+}
+
+function highlightText(value: string, query: string) {
+  const tokens = [
+    ...new Set(
+      query
+        .split(/\s+/)
+        .map((token) => token.trim())
+        .filter((token) => token.length > 1)
+    )
+  ];
+
+  if (tokens.length === 0) {
+    return value;
+  }
+
+  const pattern = new RegExp(`(${tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  const parts = value.split(pattern);
+
+  return parts.map((part, index) =>
+    tokens.some((token) => part.toLowerCase() === token.toLowerCase()) ? (
+      <mark key={`${part}-${index}`} className="bg-bioaxis-accent/20 px-1 text-bioaxis-accent">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
 }
 
 function topCounts(values: string[], limit: number) {
@@ -88,9 +134,9 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           {relevanceLabel(result)}
         </span>
       </div>
-      <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{resultPath(result)}</p>
-      <h3 className="mt-3 text-lg font-bold uppercase leading-snug text-bioaxis-text">{result.title}</h3>
-      <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{result.description}</p>
+      <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>
+      <h3 className="mt-3 text-lg font-bold uppercase leading-snug text-bioaxis-text">{highlightText(result.title, query)}</h3>
+      <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {result.matchedFields.slice(0, 5).map((field) => (
@@ -102,7 +148,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       ) : null}
       <div className="mt-auto flex flex-col gap-2 pt-5 sm:flex-row sm:flex-wrap">
         <Link
-          href={`${result.href}?q=${encodeURIComponent(query)}`}
+          href={detailHref(result, query)}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
           View details
@@ -129,10 +175,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const [query, setQuery] = useState(initialQuery);
   const trimmedQuery = query.trim();
   const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
-  const topMatches = results.slice(0, 8);
-  const relatedMatches = results.slice(8, 24);
+  const topMatches = results.slice(0, 6);
+  const relatedMatches = results.slice(6, 18);
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
-  const topSegments = topCounts(results.map((result) => result.segmentTitle), 5);
+  const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -199,10 +245,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               Results for &ldquo;{trimmedQuery}&rdquo;
             </h2>
             <p className="mt-4 text-base leading-7 text-bioaxis-muted">
-              {results.length} ranked segment, category, family, or product result{results.length === 1 ? "" : "s"}.
+              {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-dim">
-              Ranked across BioAxis product segments, categories, families, specifications, applications, and descriptions.
+              Ranked across BioAxis product segments, categories, families, product configurations, specifications, applications, workflows, resources, aliases, and descriptions.
             </p>
           </div>
           <div>

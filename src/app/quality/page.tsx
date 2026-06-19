@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 const documentationExamples = [
-  "COA",
+  "CoA",
   "SDS",
   "Sterility information",
   "DNase/RNase-free information",
@@ -31,7 +31,7 @@ const trustSections = [
     body: "BioAxis supports review of supplier options by product category, documentation path, responsiveness, and suitability for the requested workflow."
   },
   {
-    title: "COA/SDS availability",
+    title: "CoA/SDS availability",
     body: "Common documentation requests include CoA, SDS, sterility statements, DNase/RNase-free information, material declarations, and storage conditions."
   },
   {
@@ -56,9 +56,9 @@ export default function QualityPage() {
   return (
     <>
       <PageHero
-        eyebrow="Quality and documentation"
+        eyebrow="Trust Center"
         title="Quality, documentation, and supplier confidence."
-        subtitle="BioAxis supports sourcing decisions with supplier screening, documentation organization, and specification review. Where available, we help request COA, SDS, sterility information, material information, and lot-level documentation."
+        subtitle="BioAxis helps buyers review supplier-provided evidence through documentation organization, supplier screening context, specification review, and sample-first switching support. Where available, we help request CoA, SDS, sterility information, material information, and lot-level documentation."
       />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:px-10">
         <div>
@@ -95,6 +95,11 @@ export default function QualityPage() {
         </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="mb-8 border border-bioaxis-line bg-bioaxis-black p-5">
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            Certification, sterility, and quality claims remain tied to supplier-provided product documentation.
+          </p>
+        </div>
         <ProcessSteps
           steps={[
             { title: "Request documents", body: "Send product details, supplier or catalog number if known, and documentation needed." },
@@ -105,9 +110,11 @@ export default function QualityPage() {
       </section>
       <CTASection
         title="Need documentation before purchasing?"
-        body="Submit product details and the documentation you need. BioAxis helps request and organize COA, SDS, sterility, material, or lot-level documentation where available."
+        body="Submit product details and the documentation you need. BioAxis helps request and organize CoA, SDS, sterility, material, or lot-level documentation where available."
         primaryLabel="Request documentation support"
         primaryHref="/request-quote?requestType=documentation"
+        secondaryLabel="Submit current supplier/catalog number"
+        secondaryHref="/equivalent-finder?requestType=equivalent"
       />
     </>
   );

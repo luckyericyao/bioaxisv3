@@ -124,6 +124,53 @@ export function SourceByWorkflowSection() {
   );
 }
 
+export function ProductListIntakeHomeSection() {
+  const exampleRows = [
+    ["Supplier", "Catalog No.", "Product", "Qty", "Required docs", "Timeline"],
+    ["Corning", "352097", "96-well plate", "20 cases", "CoA / Sterility", "July"],
+    ["Axygen", "T-200-C", "200 µL filtered tips", "50 racks", "DNase/RNase-free", "ASAP"]
+  ];
+
+  return (
+    <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-20 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10">
+        <div>
+          <SectionHeader
+            title="Paste a product list. We’ll organize the sourcing path."
+            subtitle="Send supplier names, catalog numbers, product descriptions, quantities, required documents, and timing. BioAxis can help structure the request into product families, equivalent review paths, sample needs, documentation checklists, and quote-ready fields."
+          />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/request-quote?requestType=product-list-review" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+              Paste product list
+            </Link>
+            <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+              Request quote
+            </Link>
+          </div>
+        </div>
+        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-black">
+          <div className="grid min-w-[620px] grid-cols-[1fr_1fr_1.4fr_0.8fr_1.2fr_0.8fr] text-xs">
+            {exampleRows.flatMap((row, rowIndex) =>
+              row.map((cell, cellIndex) => (
+                <div
+                  key={`${rowIndex}-${cellIndex}-${cell}`}
+                  className={[
+                    "border-b border-r border-bioaxis-line px-3 py-3",
+                    rowIndex === 0 ? "font-bold uppercase text-bioaxis-accent" : "text-bioaxis-steel",
+                    cellIndex === row.length - 1 ? "border-r-0" : ""
+                  ].join(" ")}
+                >
+                  {cell}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function EquivalentSourcingHomeSection() {
   return (
     <CTASection
@@ -153,7 +200,7 @@ export function DocumentationSupportHomeSection() {
   return (
     <CTASection
       title="Quality, documentation, and supplier confidence"
-      body="BioAxis supports sourcing decisions with supplier screening, documentation organization, and specification review. Where available, we help request COA, SDS, sterility information, material information, and lot-level documentation."
+      body="BioAxis supports sourcing decisions with supplier screening, documentation organization, and specification review. Where available, we help request CoA, SDS, sterility information, material information, and lot-level documentation."
       primaryLabel="Learn about documentation support"
       primaryHref="/quality"
       secondaryLabel="Supplier qualification"

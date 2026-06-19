@@ -57,18 +57,30 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
             </section>
           ))}
         </div>
-        <div className="mt-12 flex flex-col gap-3 border-t border-bioaxis-line pt-8 sm:flex-row">
+        <div className="mt-12 grid gap-3 border-t border-bioaxis-line pt-8 sm:grid-cols-2 lg:grid-cols-4">
           <Link
-            href="/request-quote?requestType=quote"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            href={article.productHref}
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
-            Prepare RFQ
+            Related products
           </Link>
           <Link
-            href="/equivalent-finder"
+            href={article.equivalentHref}
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Find equivalent
+          </Link>
+          <Link
+            href={article.sampleHref}
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          >
+            Request sample
+          </Link>
+          <Link
+            href={article.rfqHref}
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          >
+            Prepare RFQ
           </Link>
         </div>
       </article>
