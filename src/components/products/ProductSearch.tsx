@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getProductSearchResults, type ProductSearchResult } from "@/data/productTaxonomy";
+import { getProductSearchResults } from "@/data/productSearch";
+import type { ProductSearchResult } from "@/data/productTaxonomy";
 
 type ProductSearchProps = {
   initialQuery?: string;
@@ -39,6 +40,10 @@ function requestHref(result: ProductSearchResult, requestType: "quote" | "equiva
     params.set("family", result.familySlug);
   }
 
+  if (result.productSlug) {
+    params.set("product", result.productSlug);
+  }
+
   return `${requestType === "equivalent" ? "/equivalent-finder" : "/request-quote"}?${params.toString()}`;
 }
 
@@ -53,6 +58,11 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       </div>
       <h3 className="mt-4 text-lg font-bold uppercase leading-snug text-bioaxis-text">{result.title}</h3>
       <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{result.description}</p>
+      {result.matchedFields && result.matchedFields.length > 0 ? (
+        <p className="mt-3 text-xs uppercase leading-5 text-bioaxis-dim">
+          Matched in {result.matchedFields.slice(0, 4).join(", ")}
+        </p>
+      ) : null}
       <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Link
           href={`${result.href}?q=${encodeURIComponent(query)}`}
@@ -82,8 +92,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const [query, setQuery] = useState(initialQuery);
   const trimmedQuery = query.trim();
   const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
-  const topMatches = results.slice(0, 6);
-  const relatedMatches = results.slice(6, 18);
+  const topMatches = results.slice(0, 8);
+  const relatedMatches = results.slice(8, 24);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -137,11 +147,14 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 Results for &ldquo;{trimmedQuery}&rdquo;
               </h2>
               <p className="mt-2 text-sm text-bioaxis-muted">
-                {results.length} matching segment, category, or family result{results.length === 1 ? "" : "s"}.
+                {results.length} ranked segment, category, family, or product result{results.length === 1 ? "" : "s"}.
               </p>
-              {results.length > 18 ? (
+              <p className="mt-2 text-xs leading-5 text-bioaxis-dim">
+                Ranked by keyword relevance across BioAxis product segments, categories, families, specifications, applications, and descriptions.
+              </p>
+              {results.length > 24 ? (
                 <p className="mt-2 text-xs leading-5 text-bioaxis-dim">
-                  Showing top matches. Refine your search or send us a product list for sourcing support.
+                  Showing top ranked matches. Refine your search or send us a product list for sourcing support.
                 </p>
               ) : null}
             </div>
@@ -182,7 +195,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               ) : null}
               <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-4">
                 <p className="text-sm leading-6 text-bioaxis-muted">
-                  Showing top matches. Refine your search or send us a product list for sourcing support.
+                  Showing top ranked matches. Refine your search or send us a product list for sourcing support.
                 </p>
                 <Link
                   href="/products#product-categories"
@@ -194,7 +207,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             </>
           ) : (
             <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-              No taxonomy result matched this query. Submit the product name, current supplier, catalog number, or workflow and BioAxis can organize sourcing support.
+              No product-universe result matched this query. Submit the product name, current supplier, catalog number, or workflow and BioAxis can organize sourcing support.
             </p>
           )}
         </section>

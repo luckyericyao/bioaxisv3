@@ -142,7 +142,7 @@ type RawSegment = {
   relatedSegments: string[];
 };
 
-type SearchResultType = "segment" | "subcategory" | "family";
+type SearchResultType = "segment" | "subcategory" | "family" | "product";
 
 export type ProductSearchResult = {
   type: SearchResultType;
@@ -156,6 +156,9 @@ export type ProductSearchResult = {
   subcategoryTitle?: string;
   familyTitle?: string;
   familySlug?: string;
+  productTitle?: string;
+  productSlug?: string;
+  matchedFields?: string[];
 };
 
 const buyerTypes = [

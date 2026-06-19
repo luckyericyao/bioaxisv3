@@ -49,6 +49,13 @@ const productItemDetailSections = [
 ];
 
 const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
+const productSearchExpectations = {
+  "/products?q=cell": ["Cell Culture"],
+  "/products?q=pcr": ["PCR"],
+  "/products?q=filter": ["Filter"],
+  "/products?q=vial": ["Vial"],
+  "/products?q=hamilton": ["Hamilton"]
+};
 const requiredHomeWorkflowPreviews = [
   "Target Discovery",
   "Assay Development",
@@ -105,6 +112,10 @@ const routes = [
   "/",
   "/products",
   "/products?q=cell",
+  "/products?q=pcr",
+  "/products?q=filter",
+  "/products?q=vial",
+  "/products?q=hamilton",
   "/workflows",
   "/equivalent-finder",
   "/quality",
@@ -205,15 +216,25 @@ for (const route of routes) {
     checkForbiddenVisibleStrings(route, pageText);
   }
 
-  if (route === "/products?q=cell") {
-    const cellCultureIndex = pageText.indexOf("Cell Culture");
-    const liquidHandlingIndex = pageText.indexOf("Liquid Handling");
+  if (route in productSearchExpectations) {
+    const expectedTerms = productSearchExpectations[route];
 
-    ["Results for “cell”", "Top matches", "Related matches", "Clear search", "Browse all product segments"].forEach((label) => {
+    ["Results for", "Ranked by keyword relevance", "Top matches", "Clear search", "Browse all product segments"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
     });
+
+    expectedTerms.forEach((term) => {
+      if (!new RegExp(term, "i").test(pageText)) {
+        failures.push(`${route}: missing expected search result term ${term}`);
+      }
+    });
+  }
+
+  if (route === "/products?q=cell") {
+    const cellCultureIndex = pageText.search(/Cell Culture/i);
+    const liquidHandlingIndex = pageText.indexOf("Liquid Handling");
 
     if (cellCultureIndex === -1) {
       failures.push(`${route}: missing Cell Culture result`);
