@@ -166,6 +166,19 @@ function textOnly(html) {
     .trim();
 }
 
+function textContentLike(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/g, "")
+    .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&ldquo;/g, "“")
+    .replace(/&rdquo;/g, "”")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function navBlocks(html) {
   return [...html.matchAll(/<nav\b[^>]*aria-label="(?:Primary|Footer) navigation"[^>]*>[\s\S]*?<\/nav>/g)].map((match) => match[0]);
 }
@@ -237,6 +250,7 @@ for (const route of routes) {
 
   const html = await response.text();
   const pageText = textOnly(html);
+  const rawPageText = textContentLike(html);
   if (route === "/products") {
     productsHtml = html;
   }
@@ -363,23 +377,38 @@ for (const route of routes) {
       }
     });
 
-    if (/Type 01 Selected Quote request/i.test(pageText)) {
-      failures.push(`${route}: request type cards are concatenated in visible text`);
+    if (/Request type 01\.?Selected request\.?Quote request/i.test(rawPageText)) {
+      failures.push(`${route}: request type cards are concatenated in raw text layer`);
     }
 
-    if (!pageText.includes("Request type 01. Selected request. Quote request.")) {
+    if (!pageText.includes("Request type 01 Selected request Quote request")) {
       failures.push(`${route}: missing separated selected request type card text`);
     }
 
-    ["Send product context with only your email.", "Only your email is required", "Email *", "Company / organization optional", "Optional details"].forEach((label) => {
+    [
+      "Send product context with only your email.",
+      "Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.",
+      "You can submit now and BioAxis can follow up for missing details.",
+      "Email *",
+      "Company / organization optional",
+      "Optional details"
+    ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction RFQ copy ${label}`);
       }
     });
 
-    if (/Organization\s+\*/i.test(pageText) || /Shipping region\s+\*/i.test(pageText) || /Required specification/i.test(pageText)) {
-      failures.push(`${route}: procurement fields still appear required`);
-    }
+    ["Name *", "Organization *", "Shipping region *", "Desired quantity *", "Target delivery date *"].forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: optional field still appears visually required: ${label}`);
+      }
+    });
+
+    [/Product segment\s*\/\s*category\s+\*/i, /Product or equivalent product\s+\*/i, /Required specification/i].forEach((pattern) => {
+      if (pattern.test(pageText)) {
+        failures.push(`${route}: procurement field still appears required or heavy: ${pattern}`);
+      }
+    });
   }
 
   if (route.startsWith("/request-quote?requestType=product-list-review")) {
@@ -397,7 +426,8 @@ for (const route of routes) {
       "Filtered Pipette Tips",
       "Pipette Tips",
       "Liquid Handling",
-      "BioAxis will include this product context with your request"
+      "Source page",
+      "BioAxis will include this product context with your request. You can add details below, but it is not required."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-context summary ${label}`);

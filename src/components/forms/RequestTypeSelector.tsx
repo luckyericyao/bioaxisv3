@@ -29,13 +29,13 @@ export function RequestTypeSelector({ requestTypes, selectedId, onSelect }: Requ
             >
               <span className="flex items-center justify-between gap-3">
                 <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
-                  Request type {typeNumber}.
+                  Request type {typeNumber}{" "}
                 </span>
                 <span className={selected ? "text-[11px] font-bold uppercase text-bioaxis-accent" : "text-[11px] font-bold uppercase text-bioaxis-dim"}>
-                  {selected ? "Selected request." : "Available request."}
+                  {selected ? "Selected request " : "Available request "}
                 </span>
               </span>
-              <span className="mt-4 block text-sm font-bold uppercase text-bioaxis-text">{requestType.label}.</span>
+              <span className="mt-4 block text-sm font-bold uppercase text-bioaxis-text">{requestType.label} </span>
               <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{requestType.description}</span>
             </button>
           </li>

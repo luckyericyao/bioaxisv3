@@ -246,17 +246,16 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         />
       </div>
 
-      {hasProductContext ? (
-        <RequestContextCard productContext={resolvedProductContext} />
-      ) : (
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">One-click intake</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-            Only your email is required. Add details if useful. BioAxis can follow up to clarify specs, equivalents, samples, or documentation.
-          </p>
-        </section>
-      )}
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+        <p className="text-sm font-semibold uppercase text-bioaxis-accent">One-click intake</p>
+        <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
+        <div className="mt-3 grid gap-2 text-sm leading-6 text-bioaxis-muted">
+          <p>Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.</p>
+          <p>You can submit now and BioAxis can follow up for missing details.</p>
+        </div>
+      </section>
+
+      {hasProductContext ? <RequestContextCard productContext={resolvedProductContext} /> : null}
 
       {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
@@ -300,9 +299,9 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <Field id="supplier" label="Supplier optional" value={formState.supplier} onChange={(value) => updateField("supplier", value)} />
           <Field id="catalogNumber" label="Catalog number optional" value={formState.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
-          <Field id="quantity" label="Quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
-          <Field id="timeline" label="Timeline optional" value={formState.timeline} onChange={(value) => updateField("timeline", value)} />
-          <Field id="requiredDocuments" label="Required documents optional" value={formState.requiredDocuments} onChange={(value) => updateField("requiredDocuments", value)} />
+          <Field id="quantity" label="Desired quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
+          <Field id="timeline" label="Target delivery date optional" value={formState.timeline} onChange={(value) => updateField("timeline", value)} />
+          <Field id="requiredDocuments" label="Documentation optional" value={formState.requiredDocuments} onChange={(value) => updateField("requiredDocuments", value)} />
           <div className="hidden md:block" aria-hidden="true" />
           <TextArea
             id="productList"
@@ -364,7 +363,7 @@ function RequestContextCard({ productContext }: { productContext: BioAxisProduct
     ["Family", productContext.productFamily],
     ["Category", productContext.productCategory],
     ["Segment", productContext.productSegment],
-    ["Source", productContext.productUrl || productContext.sourcePageUrl ? "Product page URL captured" : ""]
+    ["Source page", productContext.productUrl || productContext.sourcePageUrl ? "Product page URL captured" : ""]
   ].filter((row): row is [string, string] => Boolean(row[1]));
 
   return (
