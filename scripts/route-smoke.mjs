@@ -227,8 +227,16 @@ for (const route of routes) {
       }
     });
 
-    if (!pageText.includes("Replace current supplier products with equivalent options")) {
-      failures.push(`${route}: missing equivalent-options use case`);
+    if (!pageText.includes("Replace current supplier products with equivalents")) {
+      failures.push(`${route}: missing equivalents use case`);
+    }
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "product-list-review" })) {
+      failures.push(`${route}: missing workflow mapping/product list CTA to request quote`);
+    }
+
+    if (!hasHrefWithParams(html, "/equivalent-finder", { requestType: "equivalent" })) {
+      failures.push(`${route}: missing equivalent finder CTA`);
     }
   }
 

@@ -424,7 +424,7 @@ export const workflowProductFamilyMap: WorkflowProductMapItem[] = [
 
 export const workflowUseCases = [
   "Build a new assay consumables list",
-  "Replace current supplier products with equivalent options",
+  "Replace current supplier products with equivalents",
   "Source automation-compatible formats",
   "Prepare preclinical sample storage setup",
   "Support early CMC consumables sourcing",

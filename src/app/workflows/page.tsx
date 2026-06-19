@@ -51,12 +51,12 @@ export default function WorkflowsPage() {
               samples, documentation, and quote support that stage usually needs.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {workflows.map((workflow, index) => (
               <Link
                 key={workflow.id}
                 href={`#${workflow.slug}`}
-                className="group relative min-h-60 border border-bioaxis-line bg-bioaxis-black/70 p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
+                className="group relative flex min-h-[17rem] flex-col border border-bioaxis-line bg-bioaxis-black/70 p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
               >
                 <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
                   {workflow.stage}
@@ -64,11 +64,11 @@ export default function WorkflowsPage() {
                 <span className="absolute right-4 top-4 text-3xl font-bold text-bioaxis-line">
                   {(index + 1).toString().padStart(2, "0")}
                 </span>
-                <span className="mt-3 block pr-8 text-sm font-semibold uppercase leading-snug text-bioaxis-text">
+                <span className="mt-4 block pr-9 text-sm font-semibold uppercase leading-snug text-bioaxis-text">
                   {workflow.title}
                 </span>
                 <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{workflow.shortDescription}</span>
-                <span className="mt-5 flex flex-wrap gap-2">
+                <span className="mt-auto flex flex-wrap gap-2 pt-5">
                   {workflow.productFamilies.map((family) => (
                     <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
                       {family}
@@ -96,7 +96,7 @@ export default function WorkflowsPage() {
           </div>
         </div>
 
-        <div className="grid gap-5">
+        <div className="grid gap-7">
           {workflows.map((workflow) => (
             <WorkflowCard key={workflow.id} workflow={workflow} />
           ))}
@@ -109,10 +109,15 @@ export default function WorkflowsPage() {
             title="Workflow → Product Family Map"
             subtitle="Workflow context leads the page. Product families stay close enough for buyers to translate protocols into sourcing requests."
           />
-          <div className="mt-10 grid gap-3 lg:grid-cols-2">
+          <div className="mt-10 grid gap-4">
             {workflowProductFamilyMap.map((item) => (
-              <div key={item.workflow} className="grid gap-4 border border-bioaxis-line bg-bioaxis-black p-5 sm:grid-cols-[0.42fr_1fr] sm:items-start">
-                <h3 className="text-sm font-bold uppercase text-bioaxis-text">{item.workflow}</h3>
+              <div
+                key={item.workflow}
+                className="grid gap-4 border border-bioaxis-line bg-bioaxis-black p-5 sm:grid-cols-[0.34fr_1fr] sm:items-center"
+              >
+                <h3 className="border-l-2 border-bioaxis-accent pl-4 text-sm font-bold uppercase text-bioaxis-text">
+                  {item.workflow}
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {item.families.map((family) => (
                     <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
@@ -132,10 +137,15 @@ export default function WorkflowsPage() {
             title="Procurement and R&D operations use cases"
             subtitle="BioAxis can help turn protocol context, current supplier products, and purchasing constraints into organized sourcing paths."
           />
-          <div className="grid gap-3 sm:grid-cols-2">
-            {workflowUseCases.map((useCase) => (
-              <div key={useCase} className="border border-bioaxis-line bg-bioaxis-panel p-5 text-sm font-semibold uppercase leading-6 text-bioaxis-steel">
-                {useCase}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {workflowUseCases.map((useCase, index) => (
+              <div key={useCase} className="border border-bioaxis-line bg-bioaxis-panel p-5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
+                  Use case {(index + 1).toString().padStart(2, "0")}
+                </p>
+                <p className="mt-3 text-sm font-semibold uppercase leading-6 text-bioaxis-steel">
+                  {useCase}
+                </p>
               </div>
             ))}
           </div>
