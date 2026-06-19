@@ -75,8 +75,9 @@ function ListBlock({ title, items, tone = "muted" }: { title: string; items: Lis
             <Link
               key={item.href}
               href={item.href}
+              aria-label={`View ${item.label}`}
               className={[
-                "border border-white/[0.12] px-3 py-1 text-xs leading-5 transition hover:border-bioaxis-accent hover:text-bioaxis-accent",
+                "border border-white/[0.12] px-3 py-1 text-xs leading-5 underline decoration-bioaxis-accent/40 underline-offset-4 transition hover:border-bioaxis-accent hover:text-bioaxis-accent",
                 tone === "strong" ? "bg-white/[0.05] text-bioaxis-steel" : "bg-white/[0.03] text-bioaxis-muted"
               ].join(" ")}
             >

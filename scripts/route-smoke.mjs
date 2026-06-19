@@ -20,9 +20,11 @@ const segmentProductItemRoutes = [
 ];
 
 const representativeFamilyRoutes = [
+  "/products/liquid-handling/pipette-tips/universal-pipette-tips",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
+  "/products/liquid-handling/pipette-tips/low-retention-pipette-tips",
+  "/products/liquid-handling/pipette-tips/extended-length-pipette-tips",
   "/products/lab-plasticware/tubes/microcentrifuge-tubes",
-  "/products/cell-culture/media-and-supplements/serum-free-media",
   "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates",
   "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters",
   "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips"
@@ -37,6 +39,17 @@ const productItemDetailSections = [
   "Equivalent matching inputs",
   "Sample evaluation notes",
   "Related product configurations"
+];
+
+const forbiddenVisiblePatterns = [
+  { label: "Quote-ready sourcing support for", pattern: /Quote-ready sourcing support for/i },
+  { label: "Static taxonomy filters", pattern: /Static taxonomy filters/i },
+  { label: "backend catalog data", pattern: /backend catalog data/i },
+  { label: "Representative taxonomy rows only", pattern: /Representative taxonomy rows only/i },
+  { label: "cart behavior", pattern: /cart behavior/i },
+  { label: "fake inventory", pattern: /fake inventory/i },
+  { label: "fake SKU", pattern: /fake SKU/i },
+  { label: "* -", pattern: /\*\s*-/ }
 ];
 
 const routes = [
@@ -94,6 +107,14 @@ function pathDepth(pathname) {
   return pathname.split("/").filter(Boolean).length;
 }
 
+function checkForbiddenVisibleStrings(route, pageText) {
+  for (const forbidden of forbiddenVisiblePatterns) {
+    if (forbidden.pattern.test(pageText)) {
+      failures.push(`${route}: forbidden visible string "${forbidden.label}"`);
+    }
+  }
+}
+
 const failures = [];
 const discoveredNavLinks = new Set();
 let productsHtml = "";
@@ -113,6 +134,10 @@ for (const route of routes) {
 
   if (/Coming soon/i.test(pageText)) {
     failures.push(`${route}: visible Coming soon copy`);
+  }
+
+  if (route === "/products" || route.startsWith("/products/")) {
+    checkForbiddenVisibleStrings(route, pageText);
   }
 
   const navs = navBlocks(html);
@@ -178,6 +203,12 @@ for (const quickRoute of quickProductItemRoutes) {
   }
 }
 
+for (const familyRoute of representativeFamilyRoutes) {
+  if (!productsHtml.includes(`href="${familyRoute}"`)) {
+    failures.push(`/products: missing representative family link ${familyRoute}`);
+  }
+}
+
 const productFamilyLinks = [
   ...new Set(
     [...productsHtml.matchAll(/href="(\/products\/[^"#?]+)"/g)]
@@ -198,7 +229,9 @@ for (const href of productFamilyLinks) {
   }
 
   const html = await response.text();
-  if (!textOnly(html).includes("Product configurations")) {
+  const pageText = textOnly(html);
+  checkForbiddenVisibleStrings(href, pageText);
+  if (!pageText.includes("Product configurations")) {
     failures.push(`/products representative family link ${href}: missing Product configurations section`);
   }
 }
