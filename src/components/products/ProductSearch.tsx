@@ -25,6 +25,14 @@ function resultTypeLabel(type: ProductSearchResult["type"]) {
   return type === "subcategory" ? "category" : type;
 }
 
+function displayQueryLabel(value: string) {
+  return value
+    .replace(/\b([0-9]+)\s*u[lL]\b/g, "$1 µL")
+    .replace(/\bu[lL]\b/g, "µL")
+    .replace(/\b([0-9]+(?:\.[0-9]+)?)\s*u[mM]\b/g, "$1 µm")
+    .replace(/\bu[mM]\b/g, "µm");
+}
+
 function resultPath(result: ProductSearchResult) {
   if (result.type === "workflow") {
     return "Workflows";
@@ -87,7 +95,7 @@ function highlightText(value: string, query: string) {
       query
         .split(/\s+/)
         .map((token) => token.trim())
-        .filter((token) => token.length > 1)
+        .filter((token) => token.length > 2)
     )
   ];
 
@@ -174,6 +182,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const trimmedQuery = query.trim();
+  const displayedQuery = displayQueryLabel(trimmedQuery);
   const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, 18);
@@ -242,7 +251,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <div>
             <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search command center</p>
             <h2 className="mt-2 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
-              Results for &ldquo;{trimmedQuery}&rdquo;
+              Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
             <p className="mt-4 text-base leading-7 text-bioaxis-muted">
               {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.

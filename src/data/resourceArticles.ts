@@ -99,8 +99,8 @@ const guideConfigs: GuideConfig[] = [
     sampleFocus: ["sterile workflow fit", "flow behavior", "sample matrix compatibility", "packaging review"]
   },
   {
-    slug: "how-to-prepare-a-product-list-rfq",
-    title: "How to prepare a product list RFQ",
+    slug: "how-to-prepare-a-consumables-rfq",
+    title: "How to prepare a consumables RFQ",
     description: "How to turn a spreadsheet or product-number list into a BioAxis sourcing request.",
     productHref: "/products",
     equivalentHref: "/equivalent-finder?requestType=equivalent",

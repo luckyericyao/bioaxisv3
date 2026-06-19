@@ -99,6 +99,9 @@ const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", 
 const legacyNavLabels = ["Equivalents", "Support", "Applications", "Services", "Suppliers"];
 
 const forbiddenVisiblePatterns = [
+  { label: "Tpe Tubing", pattern: /Tpe Tubing/ },
+  { label: "visible uL unit", pattern: /(^|[^A-Za-z])uL([^A-Za-z]|$)/ },
+  { label: "visible ul unit", pattern: /(^|[^A-Za-z])ul([^A-Za-z]|$)/ },
   { label: "Static taxonomy filters", pattern: /Static taxonomy filters/i },
   { label: "backend catalog data", pattern: /backend catalog data/i },
   { label: "Representative taxonomy rows only", pattern: /Representative taxonomy rows only/i },
@@ -132,6 +135,7 @@ const routes = [
   "/equivalent-finder",
   "/quality",
   "/resources",
+  "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
   "/request-quote",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
@@ -208,6 +212,7 @@ function hasHrefWithParams(html, pathname, params) {
 const failures = [];
 const discoveredNavLinks = new Set();
 let productsHtml = "";
+let resourcesHtml = "";
 
 for (const route of routes) {
   const response = await fetch(new URL(route, baseUrl), { redirect: "manual" });
@@ -221,12 +226,15 @@ for (const route of routes) {
   if (route === "/products") {
     productsHtml = html;
   }
+  if (route === "/resources") {
+    resourcesHtml = html;
+  }
 
   if (/Coming soon/i.test(pageText)) {
     failures.push(`${route}: visible Coming soon copy`);
   }
 
-  if (route === "/products" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote")) {
+  if (route === "/" || route === "/products" || route.startsWith("/products?") || route === "/resources" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote") || route.startsWith("/resources/")) {
     checkForbiddenVisibleStrings(route, pageText);
   }
 
@@ -280,7 +288,7 @@ for (const route of routes) {
       failures.push(`${route}: missing homepage workflows CTA`);
     }
 
-    ["Paste a product list. We’ll organize the sourcing path.", "What BioAxis returns", "Matched Product Family", "Documentation Checklist"].forEach((label) => {
+    ["Paste a product list. BioAxis will organize the sourcing path.", "Supplier | Catalog No. | Product | Qty | Required docs | Timeline", "What BioAxis returns", "Matched product family", "Equivalent review path", "Quote-ready fields", "Sample request path", "Documentation checklist", "Recurring supply planning"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing conversion homepage content ${label}`);
       }
@@ -292,7 +300,18 @@ for (const route of routes) {
   }
 
   if (route === "/products") {
-    ["Browse by Product Type", "Browse by Workflow", "Browse by Buyer Need", "Current supplier out of stock", "Need quote from product list"].forEach((label) => {
+    [
+      "Browse by Product Type",
+      "Browse by Workflow",
+      "Browse by Buyer Need",
+      "Current supplier out of stock",
+      "Need lower-cost equivalent",
+      "Need sample before switching",
+      "Need sterile / DNase-free documentation",
+      "Need automation-compatible format",
+      "Need recurring monthly supply",
+      "Need quote from product list"
+    ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing buyer entry mode ${label}`);
       }
@@ -300,7 +319,7 @@ for (const route of routes) {
   }
 
   if (route === "/resources") {
-    ["Filtered vs non-filtered pipette tips", "How to source automation-compatible tips", "How to qualify equivalent lab consumables before switching"].forEach((label) => {
+    ["Filtered vs non-filtered pipette tips", "How to prepare a consumables RFQ", "How to source automation-compatible tips", "How to qualify equivalent lab consumables before switching"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing resource guide ${label}`);
       }
@@ -329,6 +348,14 @@ for (const route of routes) {
         failures.push(`${route}: missing request type ${label}`);
       }
     });
+
+    if (/Type 01 Selected Quote request/i.test(pageText)) {
+      failures.push(`${route}: request type cards are concatenated in visible text`);
+    }
+
+    if (!pageText.includes("Request type 01. Selected request. Quote request.")) {
+      failures.push(`${route}: missing separated selected request type card text`);
+    }
 
     if (!pageText.includes("Pasting a product list into Notes is fine")) {
       failures.push(`${route}: missing product list notes guidance`);
@@ -439,6 +466,12 @@ for (const route of routes) {
   }
 
   if (segmentProductItemRoutes.includes(route)) {
+    ["Already using another supplier?", "Add to sourcing list", "Buyer inputs", "Typical buyer cases"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product item sourcing module ${label}`);
+      }
+    });
+
     for (const section of productItemDetailSections) {
       if (!pageText.includes(section)) {
         failures.push(`${route}: missing product detail section "${section}"`);
@@ -509,8 +542,16 @@ const productFamilyLinks = [
   )
 ];
 
+const resourceGuideLinks = [
+  ...new Set([...resourcesHtml.matchAll(/href="(\/resources\/[^"#?]+)"/g)].map((match) => match[1]))
+];
+
 if (productFamilyLinks.length === 0) {
   failures.push("/products: no representative family links discovered");
+}
+
+if (resourceGuideLinks.length !== 12) {
+  failures.push(`/resources: expected 12 guide links, found ${resourceGuideLinks.length}`);
 }
 
 for (const href of productFamilyLinks) {
@@ -526,6 +567,23 @@ for (const href of productFamilyLinks) {
   if (!pageText.includes("Product configurations")) {
     failures.push(`/products representative family link ${href}: missing Product configurations section`);
   }
+}
+
+for (const href of resourceGuideLinks) {
+  const response = await fetch(new URL(href, baseUrl), { redirect: "manual" });
+  if (!response.ok) {
+    failures.push(`/resources guide link ${href}: HTTP ${response.status}`);
+    continue;
+  }
+
+  const html = await response.text();
+  const pageText = textOnly(html);
+  checkForbiddenVisibleStrings(href, pageText);
+  ["Related products", "Find equivalent", "Request sample", "Prepare RFQ"].forEach((label) => {
+    if (!pageText.includes(label)) {
+      failures.push(`/resources guide link ${href}: missing guide CTA ${label}`);
+    }
+  });
 }
 
 for (const href of discoveredNavLinks) {

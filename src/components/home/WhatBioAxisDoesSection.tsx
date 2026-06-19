@@ -3,27 +3,27 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const cards = [
   {
-    title: "Matched Product Family",
+    title: "Matched product family",
     body: "BioAxis helps map product names, supplier numbers, workflows, and specifications to the closest product family context."
   },
   {
-    title: "Equivalent Review Path",
+    title: "Equivalent review path",
     body: "Current supplier and catalog numbers can be organized into a comparison path for format, fit, documentation, sample, and quote review."
   },
   {
-    title: "Quote-Ready Sourcing Fields",
+    title: "Quote-ready fields",
     body: "Requests are structured around product, quantity, timeline, sterility, packaging, documentation, and usage rhythm."
   },
   {
-    title: "Sample Request Path",
+    title: "Sample request path",
     body: "For switching-sensitive consumables, BioAxis can help request samples so teams can evaluate fit before larger-volume sourcing."
   },
   {
-    title: "Documentation Checklist",
+    title: "Documentation checklist",
     body: "BioAxis can help collect required supplier-provided documents such as CoA, SDS, sterility, material, and lot information where available."
   },
   {
-    title: "Recurring Supply Planning",
+    title: "Recurring supply planning",
     body: "Usage rhythm, delivery timing, pack format, and documentation needs can be organized for repeat sourcing conversations."
   }
 ];

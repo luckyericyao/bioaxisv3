@@ -72,8 +72,8 @@ export const resourceGuides: ResourceGuide[] = [
   },
   {
     id: "prepare-product-list-rfq",
-    slug: "how-to-prepare-a-product-list-rfq",
-    title: "How to prepare a product list RFQ",
+    slug: "how-to-prepare-a-consumables-rfq",
+    title: "How to prepare a consumables RFQ",
     summary: "Turn supplier names, catalog numbers, product descriptions, quantities, documents, and timing into a quote-ready list.",
     relatedSegments: ["All Product Segments"],
     relatedWorkflows: ["Procurement", "Recurring Supply"],

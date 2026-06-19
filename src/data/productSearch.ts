@@ -24,6 +24,7 @@ const maxCountPerField = 5;
 function normalizeText(value: string) {
   return value
     .toLowerCase()
+    .replace(/[µμ]/g, "u")
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
@@ -170,7 +171,7 @@ function segmentAliases(segmentSlug: string) {
       "automation-compatible tips"
     ],
     "storage-cryopreservation": ["cell banking", "cryogenic vials", "cryovials", "freezing media", "sample banking"],
-    "sample-prep-filtration": ["PES 0.22", "PES 0.22 um", "sterile syringe filter", "syringe filters", "sample cleanup"]
+    "sample-prep-filtration": ["PES 0.22", "PES 0.22 µm", "sterile syringe filter", "syringe filters", "sample cleanup"]
   };
 
   return aliases[segmentSlug] ?? [];
@@ -183,12 +184,12 @@ function familyAliases(segmentSlug: string, familySlug: string) {
     "plasmid-prep-kits": ["cloning", "gene cloning", "plasmid"],
     "qpcr-plates": ["qPCR plates", "real time PCR plates", "optical qPCR"],
     "optical-sealing-films": ["qPCR optical seals", "optical seals", "PCR seals"],
-    "filtered-pipette-tips": ["filtered 200 ul tips", "filtered 200 µL tips", "aerosol barrier tips", "PCR clean tips"],
+    "filtered-pipette-tips": ["filtered 200 µL tips", "aerosol barrier tips", "PCR clean tips"],
     "low-retention-pipette-tips": ["low retention tips", "low bind tips", "protein recovery tips"],
     "hamilton-robotic-tips": ["Hamilton", "Hamilton-compatible", "conductive robotic tips", "liquid handler tips"],
     "tecan-robotic-tips": ["Tecan", "Tecan-compatible", "liquid handler tips"],
-    "pes-syringe-filters": ["PES 0.22", "PES 0.22 um", "PES 0.22 µm", "sterile syringe filter"],
-    "sterile-syringe-filters": ["sterile syringe filter", "sterile filtration", "0.22 um sterile filter"],
+    "pes-syringe-filters": ["PES 0.22", "PES 0.22 µm", "sterile syringe filter"],
+    "sterile-syringe-filters": ["sterile syringe filter", "sterile filtration", "0.22 µm sterile filter"],
     "sterile-cryovials": ["cryogenic vials", "cryovials", "cell banking", "cryopreservation"]
   };
 

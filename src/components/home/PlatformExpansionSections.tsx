@@ -136,7 +136,7 @@ export function ProductListIntakeHomeSection() {
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-20 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10">
         <div>
           <SectionHeader
-            title="Paste a product list. We’ll organize the sourcing path."
+            title="Paste a product list. BioAxis will organize the sourcing path."
             subtitle="Send supplier names, catalog numbers, product descriptions, quantities, required documents, and timing. BioAxis can help structure the request into product families, equivalent review paths, sample needs, documentation checklists, and quote-ready fields."
           />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -149,6 +149,9 @@ export function ProductListIntakeHomeSection() {
           </div>
         </div>
         <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-black">
+          <p className="border-b border-bioaxis-line px-3 py-3 font-mono text-xs text-bioaxis-accent">
+            Supplier | Catalog No. | Product | Qty | Required docs | Timeline
+          </p>
           <div className="grid min-w-[620px] grid-cols-[1fr_1fr_1.4fr_0.8fr_1.2fr_0.8fr] text-xs">
             {exampleRows.flatMap((row, rowIndex) =>
               row.map((cell, cellIndex) => (
