@@ -20,6 +20,10 @@ const comparisonInputs = [
   "sample testing criteria before switching"
 ];
 
+function cleanListItem(item: string) {
+  return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
+}
+
 export default function EquivalentFinderPage() {
   return (
     <>
@@ -41,7 +45,7 @@ export default function EquivalentFinderPage() {
           <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
             {comparisonInputs.map((input) => (
               <li key={input} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-bioaxis-steel">
-                {input}
+                {cleanListItem(input)}
               </li>
             ))}
           </ul>

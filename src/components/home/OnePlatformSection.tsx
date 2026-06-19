@@ -2,7 +2,7 @@ import { CapabilityChip } from "@/components/ui/CapabilityChip";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { brand } from "@/data/brand";
 
-const capabilities = ["Products", "Suppliers", "Equivalent Finder", "Samples", "Quotes", "Quality"];
+const capabilities = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
 
 export function OnePlatformSection() {
   return (

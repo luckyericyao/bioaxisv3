@@ -48,24 +48,26 @@ const productItemDetailSections = [
   "Related product configurations"
 ];
 
+const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
+const requestTypeLabels = ["Quote request", "Equivalent request", "Sample request", "Documentation request", "Recurring supply request", "Product list review", "Contact request"];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
 const legacyNavLabels = ["Equivalents", "Support", "Applications", "Services", "Suppliers"];
 
 const forbiddenVisiblePatterns = [
-  { label: "Quote-ready sourcing support for", pattern: /Quote-ready sourcing support for/i },
   { label: "Static taxonomy filters", pattern: /Static taxonomy filters/i },
   { label: "backend catalog data", pattern: /backend catalog data/i },
   { label: "Representative taxonomy rows only", pattern: /Representative taxonomy rows only/i },
   { label: "cart behavior", pattern: /cart behavior/i },
   { label: "fake inventory", pattern: /fake inventory/i },
   { label: "fake SKU", pattern: /fake SKU/i },
+  { label: "fake pricing", pattern: /fake pricing/i },
   { label: "* -", pattern: /\*\s*-/ },
   { label: "• -", pattern: /•\s*-/ },
   { label: "  * -", pattern: /\s{2,}\*\s*-/ },
-  { label: "- current supplier", pattern: /-\s*current supplier/i },
-  { label: "- aerosol barrier", pattern: /-\s*aerosol barrier/i },
-  { label: "Specification Buyer check", pattern: /Specification\s+Buyer check/i }
+  { label: "Specification Buyer check", pattern: /Specification\s+Buyer check/i },
+  { label: "Sourcing support for universal pipette tips within pipette tips", pattern: /Sourcing support for universal pipette tips within pipette tips/i },
+  { label: "Sourcing support for low retention pipette tips within pipette tips", pattern: /Sourcing support for low retention pipette tips within pipette tips/i }
 ];
 
 const routes = [
@@ -163,6 +165,26 @@ for (const route of routes) {
 
   if (route === "/products" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote")) {
     checkForbiddenVisibleStrings(route, pageText);
+  }
+
+  if (route === "/") {
+    requiredHomeChips.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing homepage chip ${label}`);
+      }
+    });
+
+    if (pageText.includes("Products Suppliers Equivalent Finder Samples Quotes Quality")) {
+      failures.push(`${route}: legacy homepage capability chip row`);
+    }
+  }
+
+  if (route === "/request-quote") {
+    requestTypeLabels.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing request type ${label}`);
+      }
+    });
   }
 
   const navs = navBlocks(html);
