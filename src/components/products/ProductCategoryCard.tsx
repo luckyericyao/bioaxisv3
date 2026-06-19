@@ -6,14 +6,26 @@ type ProductCategoryCardProps = {
   segment: ProductTaxonomySegment;
 };
 
+type ListItem = {
+  label: string;
+  href?: string;
+};
+
 function cleanListLabel(value: string) {
   return value.replace(/^\s*[-*•]\s+/, "").trim();
 }
 
 export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
-  const families = segment.productFamilies.slice(0, 6).map(cleanListLabel);
-  const buyerSpecs = segment.buyerSpecs.slice(0, 6).map(cleanListLabel);
-  const applications = segment.primaryApplications.slice(0, 4).map(cleanListLabel);
+  const families: ListItem[] = segment.subcategories
+    .flatMap((subcategory) =>
+      subcategory.productFamilies.map((family) => ({
+        label: cleanListLabel(family.title),
+        href: `/products/${segment.slug}/${subcategory.slug}/${family.slug}`
+      }))
+    )
+    .slice(0, 6);
+  const buyerSpecs = segment.buyerSpecs.slice(0, 6).map((item) => ({ label: cleanListLabel(item) }));
+  const applications = segment.primaryApplications.slice(0, 4).map((item) => ({ label: cleanListLabel(item) }));
 
   return (
     <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-6 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft">
@@ -53,21 +65,34 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
   );
 }
 
-function ListBlock({ title, items, tone = "muted" }: { title: string; items: string[]; tone?: "strong" | "muted" }) {
+function ListBlock({ title, items, tone = "muted" }: { title: string; items: ListItem[]; tone?: "strong" | "muted" }) {
   return (
     <div>
       <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">{title}</p>
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-          <span
-            key={item}
-            className={[
-              "border border-white/[0.12] px-3 py-1 text-xs leading-5",
-              tone === "strong" ? "bg-white/[0.05] text-bioaxis-steel" : "bg-white/[0.03] text-bioaxis-muted"
-            ].join(" ")}
-          >
-            {item}
-          </span>
+          item.href ? (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={[
+                "border border-white/[0.12] px-3 py-1 text-xs leading-5 transition hover:border-bioaxis-accent hover:text-bioaxis-accent",
+                tone === "strong" ? "bg-white/[0.05] text-bioaxis-steel" : "bg-white/[0.03] text-bioaxis-muted"
+              ].join(" ")}
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <span
+              key={item.label}
+              className={[
+                "border border-white/[0.12] px-3 py-1 text-xs leading-5",
+                tone === "strong" ? "bg-white/[0.05] text-bioaxis-steel" : "bg-white/[0.03] text-bioaxis-muted"
+              ].join(" ")}
+            >
+              {item.label}
+            </span>
+          )
         ))}
       </div>
     </div>

@@ -13,7 +13,7 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
       <div className="border-b border-bioaxis-line p-5">
         <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Sourcing options preview</h2>
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-          Representative taxonomy rows only. BioAxis does not present pricing, availability labels, or cart behavior.
+          Representative sourcing rows only. Availability, documentation, and pricing are confirmed through sourcing review.
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -35,7 +35,11 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
                   <td className="px-4 py-4 align-top">
                     <input type="checkbox" className="accent-bioaxis-accent" aria-label={`Compare ${family.title}`} />
                   </td>
-                  <td className="px-4 py-4 align-top text-sm font-semibold text-bioaxis-text">{family.title}</td>
+                  <td className="px-4 py-4 align-top text-sm font-semibold text-bioaxis-text">
+                    <Link href={`/products/${segmentSlug}/${subcategory.slug}/${family.slug}`} className="transition hover:text-bioaxis-accent">
+                      {family.title}
+                    </Link>
+                  </td>
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.representativeFormats.slice(0, 3).join(", ")}</td>
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.keySpecifications.slice(0, 3).join(", ")}</td>
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.documentationNeeds.slice(0, 2).join(", ")}</td>

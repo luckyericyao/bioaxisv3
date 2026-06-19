@@ -20,7 +20,7 @@ export function FilterSidebar({ subcategory }: FilterSidebarProps) {
     <aside className="border border-bioaxis-line bg-bioaxis-panel p-5">
       <h2 className="text-lg font-bold uppercase text-bioaxis-text">Filter sourcing options</h2>
       <p className="mt-3 text-xs leading-5 text-bioaxis-muted">
-        Static taxonomy filters. BioAxis can connect these controls to live search when backend catalog data is added.
+        Use these sourcing filters to frame the request. BioAxis confirms exact options through sourcing review.
       </p>
       <div className="mt-6 grid gap-6">
         {filterGroups.map((group) => (

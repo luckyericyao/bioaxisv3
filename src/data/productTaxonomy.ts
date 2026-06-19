@@ -1,6 +1,22 @@
 export type ProductSpecification = string;
 export type DocumentationRequirement = string;
 export type ApplicationArea = string;
+export type ProductRequestType = "quote" | "equivalent" | "sample" | "documentation";
+
+export type ProductItem = {
+  slug: string;
+  name: string;
+  shortDescription: string;
+  introduction: string;
+  details: string[];
+  commonSpecifications: string[];
+  applications: string[];
+  compatibilityConsiderations: string[];
+  documentationNeeds: string[];
+  equivalentMatchingInputs: string[];
+  sampleEvaluationNotes: string[];
+  relatedRequestTypes: ProductRequestType[];
+};
 
 export type RelatedCategory = {
   label: string;
@@ -32,6 +48,7 @@ export type ProductFamily = {
   documentationChecklist: DocumentationRequirement[];
   recommendedRFQFields: string[];
   relatedFamilies: string[];
+  productItems?: ProductItem[];
   requestCta: string;
   seoTitle: string;
   metaDescription: string;
@@ -208,9 +225,9 @@ function buildFamily(segment: RawSegment, subcategory: RawSubcategory, familySlu
     id: familySlug,
     name,
     title: name,
-    shortDescription: `Quote-ready sourcing support for ${name.toLowerCase()} within ${subcategory.name.toLowerCase()}.`,
-    longDescription: `Source ${name.toLowerCase()} for ${segment.name.toLowerCase()} workflows with BioAxis support for product specification, supplier equivalent review, sample-first evaluation, and documentation coordination. BioAxis does not present fake SKU availability or unsupported manufacturer claims.`,
-    description: `Quote-ready sourcing support for ${name.toLowerCase()} within ${subcategory.name.toLowerCase()}.`,
+    shortDescription: `Sourcing support for ${name.toLowerCase()} within ${subcategory.name.toLowerCase()}, organized around specifications, documentation, equivalent review, and sample evaluation.`,
+    longDescription: `Source ${name.toLowerCase()} for ${segment.name.toLowerCase()} workflows with BioAxis support for product specification, supplier equivalent review, sample-first evaluation, and documentation coordination.`,
+    description: `Sourcing support for ${name.toLowerCase()} within ${subcategory.name.toLowerCase()}, organized around specifications, documentation, equivalent review, and sample evaluation.`,
     buyerSpecs: segment.buyerSpecs,
     commonFormats: segment.commonFormats,
     applications: segment.applications,
@@ -691,6 +708,7 @@ export function buildRequestHref({
   category,
   subcategory,
   family,
+  product,
   inquiryType,
   requestType = inquiryType ?? "quote"
 }: {
@@ -698,6 +716,7 @@ export function buildRequestHref({
   category?: string;
   subcategory?: string;
   family?: string;
+  product?: string;
   inquiryType?: string;
   requestType?: string;
 }) {
@@ -718,6 +737,10 @@ export function buildRequestHref({
     params.set("family", family);
   }
 
+  if (product) {
+    params.set("product", product);
+  }
+
   return `/request-quote?${params.toString()}`;
 }
 
@@ -725,12 +748,14 @@ export function buildEquivalentFinderHref({
   segment,
   category,
   subcategory,
-  family
+  family,
+  product
 }: {
   segment?: string;
   category?: string;
   subcategory?: string;
   family?: string;
+  product?: string;
 }) {
   const params = new URLSearchParams();
   const resolvedSubcategory = subcategory ?? category;
@@ -747,6 +772,10 @@ export function buildEquivalentFinderHref({
 
   if (family) {
     params.set("family", family);
+  }
+
+  if (product) {
+    params.set("product", product);
   }
 
   return `/equivalent-finder?${params.toString()}`;

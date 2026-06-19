@@ -6,6 +6,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { DocumentationChecklist } from "./DocumentationChecklist";
+import { ProductConfigurationSection } from "./ProductConfigurationSection";
 import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
 import { RelatedProducts } from "./RelatedProducts";
@@ -63,6 +64,8 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
           ]}
         />
       </section>
+
+      <ProductConfigurationSection segment={segment} category={category} family={family} />
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <SpecificationTable title="Specification checklist" specifications={family.keySpecifications} criteria={family.selectionCriteria} />

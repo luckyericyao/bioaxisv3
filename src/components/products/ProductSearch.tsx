@@ -10,12 +10,12 @@ type ProductSearchProps = {
 };
 
 const quickSearches = [
-  { label: "filtered 200 µL tips", href: "/products/liquid-handling/pipette-tips?q=filtered%20200%20%C2%B5L%20tips" },
-  { label: "serum-free media", href: "/products/cell-culture/media-and-supplements/serum-free-media" },
-  { label: "96-well PCR plates", href: "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates" },
-  { label: "PES 0.22 µm syringe filters", href: "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters" },
-  { label: "Hamilton-compatible tips", href: "/products/automation-consumables/robotic-pipette-tips?q=Hamilton-compatible%20tips" },
-  { label: "cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials" }
+  { label: "filtered 200 µL tips", href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips" },
+  { label: "serum-free media", href: "/products/cell-culture/media-and-supplements/serum-free-media/serum-free-cell-culture-media" },
+  { label: "96-well PCR plates", href: "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates/96-well-pcr-plates" },
+  { label: "PES 0.22 µm syringe filters", href: "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters/pes-022um-syringe-filters" },
+  { label: "Hamilton-compatible tips", href: "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips/hamilton-compatible-robotic-tips" },
+  { label: "cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials/sterile-cryogenic-vials" }
 ];
 
 export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {

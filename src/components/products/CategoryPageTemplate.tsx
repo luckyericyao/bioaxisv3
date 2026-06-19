@@ -85,7 +85,7 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
 
       <RFQCTA
         title="Prepare a category sourcing request."
-        body="Send BioAxis the product family, current supplier or catalog number, quantity, sterile status, documentation need, and target date. BioAxis will organize quote, equivalent, and sample support without presenting fake inventory or pricing."
+        body="Send BioAxis the product family, current supplier or catalog number, quantity, sterile status, documentation need, and target date. BioAxis will organize quote, equivalent, and sample support with availability, documentation, and pricing confirmed through sourcing review."
         segment={segment.slug}
         category={category.slug}
       />

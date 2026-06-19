@@ -6,6 +6,7 @@ type SourcingRequestButtonGroupProps = {
   category?: string;
   subcategory?: string;
   family?: string;
+  product?: string;
   size?: "sm" | "md";
   layout?: "grid" | "inline";
   includeSupport?: boolean;
@@ -25,6 +26,7 @@ export function SourcingRequestButtonGroup({
   category,
   subcategory,
   family,
+  product,
   size = "sm",
   layout = "grid",
   includeSupport = false,
@@ -45,8 +47,8 @@ export function SourcingRequestButtonGroup({
           key={request.requestType}
           href={
             request.requestType === "equivalent"
-              ? buildEquivalentFinderHref({ segment, category, subcategory, family })
-              : buildRequestHref({ segment, category, subcategory, family, requestType: request.requestType })
+              ? buildEquivalentFinderHref({ segment, category, subcategory, family, product })
+              : buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType })
           }
           className={[
             baseClass,

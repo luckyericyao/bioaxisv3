@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { labelFromProductContext } from "@/data/productTaxonomy";
+import { getProductItemBySlug } from "@/data/productItems";
 
 export const metadata: Metadata = {
   title: "Request Quote | BioAxis Consumables Sourcing",
@@ -35,10 +36,19 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const segment = first(params?.segment);
   const subcategory = first(params?.subcategory) ?? first(params?.category);
   const family = first(params?.family);
+  const product = first(params?.product);
   const requestType = first(params?.requestType) ?? first(params?.inquiryType);
   const query = first(params?.q);
   const labels = labelFromProductContext({ segment, subcategory, family });
-  const productCategory = [labels.segmentName || labelize(segment), labels.subcategoryName || labelize(subcategory)].filter(Boolean).join(" / ");
+  const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
+  const contextLabels = [
+    labels.segmentName || labelize(segment),
+    labels.subcategoryName || labelize(subcategory),
+    labels.familyName || labelize(family),
+    productMatch?.productItem.name || labelize(product)
+  ].filter(Boolean);
+  const productCategory = contextLabels.slice(0, 3).join(" / ");
+  const productName = productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
 
   return (
     <>
@@ -48,11 +58,17 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
         subtitle="Use BioAxis for quote requests, equivalent review, sample evaluation, documentation requests, recurring supply planning, contact messages, and product-list review. Include the current supplier, catalog number, quantity, sterile status, documentation needs, and target timeline where available."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+        {contextLabels.length > 0 ? (
+          <div className="mb-6 border border-bioaxis-line bg-bioaxis-panel p-5">
+            <p className="text-xs font-semibold uppercase text-bioaxis-accent">Product context</p>
+            <p className="mt-3 text-sm font-semibold text-bioaxis-text">{contextLabels.join(" > ")}</p>
+          </div>
+        ) : null}
         <QuoteRequestForm
           initialValues={{
             requestType: requestType ?? "quote",
             productCategory,
-            productName: labels.familyName || labelize(family) || query || ""
+            productName
           }}
         />
       </section>
