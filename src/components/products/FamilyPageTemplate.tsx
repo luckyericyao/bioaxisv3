@@ -67,10 +67,16 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <ProductConfigurationSection segment={segment} category={category} family={family} />
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <SpecificationTable title="Specification checklist" specifications={family.keySpecifications} criteria={family.selectionCriteria} />
-        <DocumentationChecklist items={family.documentationChecklist} />
-      </section>
+      {priorityContent ? (
+        <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+          <DocumentationChecklist items={family.documentationChecklist} />
+        </section>
+      ) : (
+        <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
+          <SpecificationTable title="Specification checklist" specifications={family.keySpecifications} criteria={family.selectionCriteria} />
+          <DocumentationChecklist items={family.documentationChecklist} />
+        </section>
+      )}
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">

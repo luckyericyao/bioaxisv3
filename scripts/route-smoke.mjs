@@ -19,7 +19,7 @@ const segmentProductItemRoutes = [
   "/products/early-bioprocess-single-use/single-use-bags/media-bags/media-bags-general"
 ];
 
-const representativeFamilyRoutes = [
+const visibleRepresentativeFamilyRoutes = [
   "/products/liquid-handling/pipette-tips/universal-pipette-tips",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
   "/products/liquid-handling/pipette-tips/low-retention-pipette-tips",
@@ -30,6 +30,12 @@ const representativeFamilyRoutes = [
   "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips"
 ];
 
+const familyPageRoutes = [
+  ...visibleRepresentativeFamilyRoutes,
+  "/products/cell-culture/media-and-supplements/serum-free-media",
+  "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials"
+];
+
 const productItemDetailSections = [
   "Details",
   "Common specifications",
@@ -38,8 +44,13 @@ const productItemDetailSections = [
   "Documentation often requested",
   "Equivalent matching inputs",
   "Sample evaluation notes",
+  "Quote-ready details",
   "Related product configurations"
 ];
+
+const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
+const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
+const legacyNavLabels = ["Equivalents", "Support", "Applications", "Services", "Suppliers"];
 
 const forbiddenVisiblePatterns = [
   { label: "Quote-ready sourcing support for", pattern: /Quote-ready sourcing support for/i },
@@ -49,7 +60,8 @@ const forbiddenVisiblePatterns = [
   { label: "cart behavior", pattern: /cart behavior/i },
   { label: "fake inventory", pattern: /fake inventory/i },
   { label: "fake SKU", pattern: /fake SKU/i },
-  { label: "* -", pattern: /\*\s*-/ }
+  { label: "* -", pattern: /\*\s*-/ },
+  { label: "• -", pattern: /•\s*-/ }
 ];
 
 const routes = [
@@ -73,7 +85,7 @@ const routes = [
   "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters",
   "/products/automation-consumables/robotic-pipette-tips",
   "/products/storage-cryopreservation/cryogenic-vials",
-  ...representativeFamilyRoutes,
+  ...familyPageRoutes,
   ...segmentProductItemRoutes
 ].filter((route, index, allRoutes) => allRoutes.indexOf(route) === index);
 
@@ -91,12 +103,20 @@ function navBlocks(html) {
   return [...html.matchAll(/<nav\b[^>]*aria-label="(?:Primary|Footer) navigation"[^>]*>[\s\S]*?<\/nav>/g)].map((match) => match[0]);
 }
 
+function navBlock(html, label) {
+  return html.match(new RegExp(`<nav\\b[^>]*aria-label="${label}"[^>]*>[\\s\\S]*?<\\/nav>`))?.[0] ?? "";
+}
+
 function navLabels(block) {
   return [...block.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((match) => textOnly(match[1]));
 }
 
 function navHrefs(block) {
   return [...block.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map((match) => match[1]);
+}
+
+function hrefsFromHtml(html) {
+  return [...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map((match) => match[1].replace(/&amp;/g, "&"));
 }
 
 function hrefPath(href) {
@@ -113,6 +133,18 @@ function checkForbiddenVisibleStrings(route, pageText) {
       failures.push(`${route}: forbidden visible string "${forbidden.label}"`);
     }
   }
+}
+
+function hasHrefWithParams(html, pathname, params) {
+  return hrefsFromHtml(html).some((href) => {
+    const url = new URL(href, baseUrl);
+
+    if (url.pathname !== pathname) {
+      return false;
+    }
+
+    return Object.entries(params).every(([key, value]) => url.searchParams.get(key) === value);
+  });
 }
 
 const failures = [];
@@ -149,9 +181,12 @@ for (const route of routes) {
     const labels = navLabels(nav);
     const hrefs = navHrefs(nav);
 
-    if (labels.includes("Equivalents")) {
-      failures.push(`${route}: legacy Equivalents nav label`);
-    }
+    legacyNavLabels.forEach((legacyLabel) => {
+      if (labels.includes(legacyLabel)) {
+        failures.push(`${route}: legacy ${legacyLabel} nav/footer label`);
+      }
+    });
+
     if (hrefs.includes("/equivalents")) {
       failures.push(`${route}: legacy /equivalents nav link`);
     }
@@ -162,7 +197,20 @@ for (const route of routes) {
     hrefs.filter((href) => href.startsWith("/")).forEach((href) => discoveredNavLinks.add(href));
   }
 
-  if (representativeFamilyRoutes.includes(route) && !pageText.includes("Product configurations")) {
+  const primaryLabels = navLabels(navBlock(html, "Primary navigation"));
+  const footerLabels = navLabels(navBlock(html, "Footer navigation"));
+  requiredPrimaryNavigation.forEach((label) => {
+    if (!primaryLabels.includes(label)) {
+      failures.push(`${route}: missing primary nav label ${label}`);
+    }
+  });
+  requiredFooterNavigation.forEach((label) => {
+    if (!footerLabels.includes(label)) {
+      failures.push(`${route}: missing footer nav label ${label}`);
+    }
+  });
+
+  if (familyPageRoutes.includes(route) && !pageText.includes("Product configurations")) {
     failures.push(`${route}: missing Product configurations section`);
   }
 
@@ -174,9 +222,29 @@ for (const route of routes) {
     }
 
     const productSlug = route.split("/").at(-1);
+    const routeParts = route.split("/").filter(Boolean);
+    const [segmentSlug, subcategorySlug, familySlug] = routeParts.slice(1, 4);
     if (!html.includes(`product=${productSlug}`)) {
       failures.push(`${route}: missing RFQ/equivalent links with product query param`);
     }
+    [
+      { label: "Request quote", pathname: "/request-quote", params: { requestType: "quote" } },
+      { label: "Find equivalent", pathname: "/equivalent-finder", params: { requestType: "equivalent" } },
+      { label: "Request sample", pathname: "/request-quote", params: { requestType: "sample" } },
+      { label: "Ask for documentation", pathname: "/request-quote", params: { requestType: "documentation" } }
+    ].forEach((cta) => {
+      if (
+        !hasHrefWithParams(html, cta.pathname, {
+          ...cta.params,
+          segment: segmentSlug,
+          subcategory: subcategorySlug,
+          family: familySlug,
+          product: productSlug
+        })
+      ) {
+        failures.push(`${route}: missing ${cta.label} CTA with full product context`);
+      }
+    });
   }
 
   if (route === "/products/liquid-handling/pipette-tips") {
@@ -203,7 +271,7 @@ for (const quickRoute of quickProductItemRoutes) {
   }
 }
 
-for (const familyRoute of representativeFamilyRoutes) {
+for (const familyRoute of visibleRepresentativeFamilyRoutes) {
   if (!productsHtml.includes(`href="${familyRoute}"`)) {
     failures.push(`/products: missing representative family link ${familyRoute}`);
   }

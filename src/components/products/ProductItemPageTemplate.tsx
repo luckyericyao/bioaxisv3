@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
+import { buildEquivalentFinderHref, buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 import { PageHero } from "@/components/ui/PageHero";
-import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
@@ -25,6 +24,24 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
     "quantity and target timeline",
     "documentation requirements",
     "sample needs and evaluation criteria"
+  ];
+  const requestLinks = [
+    {
+      label: "Request quote",
+      href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "quote" })
+    },
+    {
+      label: "Find equivalent",
+      href: buildEquivalentFinderHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug })
+    },
+    {
+      label: "Request sample",
+      href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "sample" })
+    },
+    {
+      label: "Ask for documentation",
+      href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "documentation" })
+    }
   ];
 
   return (
@@ -64,25 +81,21 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             Prepare these inputs before requesting quote, equivalent review, sample evaluation, or documentation support.
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <ul className="mt-5 grid gap-2">
             {quoteReadyDetails.map((item) => (
-              <SpecTag key={item}>{item}</SpecTag>
+              <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
+                {item}
+              </li>
             ))}
-          </div>
+          </ul>
           <div className="mt-6 grid gap-2 sm:grid-cols-2">
-            {productItem.relatedRequestTypes.map((requestType) => (
+            {requestLinks.map((request) => (
               <Link
-                key={requestType}
-                href={buildRequestHref({
-                  segment: segment.slug,
-                  category: category.slug,
-                  family: family.slug,
-                  product: productItem.slug,
-                  requestType
-                })}
+                key={request.label}
+                href={request.href}
                 className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
-                {requestType === "documentation" ? "Ask for documentation" : requestType === "equivalent" ? "Equivalent request" : `Request ${requestType}`}
+                {request.label}
               </Link>
             ))}
           </div>
@@ -144,11 +157,13 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
       <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
-      <div className="mt-5 flex flex-wrap gap-2">
+      <ul className="mt-5 grid gap-3">
         {items.map((item) => (
-          <SpecTag key={item}>{item}</SpecTag>
+          <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
+            {item}
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

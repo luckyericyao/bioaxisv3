@@ -38,7 +38,9 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
       <h3 className="text-xl font-bold uppercase text-bioaxis-text">{title}</h3>
       <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
         {items.map((item) => (
-          <li key={item}>- {item}</li>
+          <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-bioaxis-steel">
+            {item}
+          </li>
         ))}
       </ul>
     </article>
