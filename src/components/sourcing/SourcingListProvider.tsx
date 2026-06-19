@@ -40,6 +40,7 @@ type SourcingListContextValue = {
 
 const storageKey = "bioaxis:sourcing-list";
 const submissionStorageKey = "bioaxis:sourcing-list-submission";
+const submissionItemsStorageKey = "bioaxis:sourcing-list-items";
 const SourcingListContext = createContext<SourcingListContextValue | null>(null);
 
 function itemKey(item: SourcingListInput) {
@@ -139,6 +140,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   function submitSourcingList() {
     const productList = formatSubmission(items);
     window.sessionStorage.setItem(submissionStorageKey, productList);
+    window.sessionStorage.setItem(submissionItemsStorageKey, JSON.stringify(items));
     const params = new URLSearchParams({
       requestType: "product-list-review",
       productList

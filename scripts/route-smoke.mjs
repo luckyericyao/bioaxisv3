@@ -1,4 +1,9 @@
+import { readFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const quickProductItemRoutes = [
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
@@ -213,6 +218,15 @@ const failures = [];
 const discoveredNavLinks = new Set();
 let productsHtml = "";
 let resourcesHtml = "";
+
+async function readRequiredProjectFile(pathname) {
+  try {
+    return await readFile(resolve(repoRoot, pathname), "utf8");
+  } catch {
+    failures.push(`${pathname}: missing required project file`);
+    return "";
+  }
+}
 
 for (const route of routes) {
   const response = await fetch(new URL(route, baseUrl), { redirect: "manual" });
@@ -601,8 +615,83 @@ if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.inc
   console.log(`/equivalents: ${equivalentsResponse.status} -> ${equivalentsLocation}`);
 }
 
+const rfqRouteSource = await readRequiredProjectFile("src/app/api/rfq/route.ts");
+const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
+const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisRequest.ts");
+const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
+const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
+const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
+const envExampleSource = await readRequiredProjectFile(".env.example");
+
+if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("https://api.resend.com/emails")) {
+  failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or Resend delivery call");
+}
+
+if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
+  failures.push("src/app/api/request-quote/route.ts: legacy route is not aliased to /api/rfq");
+}
+
+if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.includes("RESEND_API_KEY")) {
+  failures.push("RFQ implementation: Resend API key appears in browser-facing code or NEXT_PUBLIC key is referenced");
+}
+
+if (!submitHelperSource.includes('fetch("/api/rfq"')) {
+  failures.push("src/lib/submitBioAxisRequest.ts: expected centralized submit helper to post to /api/rfq");
+}
+
+for (const [label, source] of [
+  ["QuoteRequestForm", quoteFormSource],
+  ["ContactForm", contactFormSource],
+  ["SimpleRequestForm", simpleFormSource]
+]) {
+  if (!source.includes("submitBioAxisRequest") || !source.includes('data-api-endpoint="/api/rfq"')) {
+    failures.push(`${label}: expected form to submit through submitBioAxisRequest and declare /api/rfq endpoint`);
+  }
+
+  if (!source.includes("submitting") || !source.includes("submitError") || !source.includes("submitted")) {
+    failures.push(`${label}: missing idle/submitting/success/error state wiring`);
+  }
+}
+
+[
+  "Request received. BioAxis will review the details and follow up by email.",
+  "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly."
+].forEach((message) => {
+  if (!submitHelperSource.includes(message)) {
+    failures.push(`src/lib/submitBioAxisRequest.ts: missing UI state message "${message}"`);
+  }
+});
+
+const envLines = envExampleSource
+  .split("\n")
+  .map((line) => line.trim())
+  .filter((line) => line && !line.startsWith("#"));
+const envMap = new Map(envLines.map((line) => {
+  const equalsIndex = line.indexOf("=");
+  return equalsIndex === -1 ? [line, ""] : [line.slice(0, equalsIndex), line.slice(equalsIndex + 1)];
+}));
+
+[
+  "RESEND_API_KEY",
+  "BIOAXIS_RFQ_TO_EMAIL",
+  "BIOAXIS_RFQ_FROM_EMAIL",
+  "BIOAXIS_RFQ_REPLY_TO_EMAIL"
+].forEach((name) => {
+  if (!envMap.has(name)) {
+    failures.push(`.env.example: missing ${name}`);
+  }
+});
+
+if (envMap.get("RESEND_API_KEY")) {
+  failures.push(".env.example: RESEND_API_KEY should be blank");
+}
+
+if ([...envMap.keys()].some((name) => name.startsWith("NEXT_PUBLIC_RESEND"))) {
+  failures.push(".env.example: must not expose a NEXT_PUBLIC_RESEND key");
+}
+
 if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
-  const rfqResponse = await fetch(new URL("/api/request-quote", baseUrl), {
+  const rfqResponse = await fetch(new URL("/api/rfq", baseUrl), {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -618,9 +707,30 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
   const payload = await rfqResponse.json();
 
   if (!rfqResponse.ok || payload?.ok !== true) {
-    failures.push(`/api/request-quote: expected success, got ${rfqResponse.status}`);
+    failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
   } else {
-    console.log(`/api/request-quote: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+    console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+  }
+
+  const legacyResponse = await fetch(new URL("/api/request-quote", baseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: "Smoke Test",
+      email: "smoke@example.com",
+      company: "BioAxis QA",
+      requestType: "contact",
+      message: "Local smoke test for legacy RFQ compatibility."
+    })
+  });
+  const legacyPayload = await legacyResponse.json();
+
+  if (!legacyResponse.ok || legacyPayload?.ok !== true) {
+    failures.push(`/api/request-quote: expected compatibility success, got ${legacyResponse.status}`);
+  } else {
+    console.log(`/api/request-quote: ${legacyPayload.mode ?? "ok"} ${legacyPayload.referenceId ?? ""}`.trim());
   }
 }
 

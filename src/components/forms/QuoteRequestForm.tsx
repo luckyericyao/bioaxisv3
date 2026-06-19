@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { getRequestTypeById, normalizeRequestType, requestTypes } from "@/data/requestTypes";
+import { requestErrorMessage, requestSuccessMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";
 import { RequestTypeSelector } from "./RequestTypeSelector";
 
 type QuoteFormState = {
@@ -25,6 +26,7 @@ type QuoteFormState = {
   needDocumentation: "yes" | "no";
   targetTimeline: string;
   notes: string;
+  website: string;
 };
 
 const initialState: QuoteFormState = {
@@ -46,7 +48,8 @@ const initialState: QuoteFormState = {
   needSample: "no",
   needDocumentation: "no",
   targetTimeline: "",
-  notes: ""
+  notes: "",
+  website: ""
 };
 
 const fieldLabels: Record<keyof QuoteFormState, string> = {
@@ -54,7 +57,7 @@ const fieldLabels: Record<keyof QuoteFormState, string> = {
   name: "Name",
   organization: "Organization",
   email: "Email",
-  phone: "Role / title optional",
+  phone: "Phone / role optional",
   shippingRegion: "Shipping region",
   productCategory: "Product segment / category",
   productName: "Product or equivalent product",
@@ -68,7 +71,8 @@ const fieldLabels: Record<keyof QuoteFormState, string> = {
   needSample: "Need sample?",
   needDocumentation: "Documentation required?",
   targetTimeline: "Target delivery date",
-  notes: "Notes"
+  notes: "Notes",
+  website: "Website"
 };
 
 const universalRequired: Array<keyof QuoteFormState> = ["name", "organization", "email", "shippingRegion"];
@@ -88,11 +92,12 @@ const fieldOrder: Array<keyof QuoteFormState> = [
   "targetTimeline",
   "notes"
 ];
+const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
 type SubmitState = {
-  mode: "email" | "captured";
+  mode?: string;
   message: string;
   referenceId?: string;
 };
@@ -161,50 +166,67 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
     setSubmitError("");
 
     try {
-      const response = await fetch("/api/request-quote", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name: formState.name,
-          email: formState.email,
-          company: formState.organization,
-          roleTitle: formState.phone,
-          requestType: formState.requestType,
-          productCategory: formState.productCategory,
-          productName: formState.productName,
-          catalogNumber: formState.catalogNumber,
-          currentSupplier: formState.currentSupplier,
-          quantity: formState.quantity,
-          timeline: formState.targetTimeline,
-          documentationNeeds: formState.needDocumentation === "yes" ? "Documentation requested" : "",
-          sterileStatus: formState.sterility,
-          message: [
-            formState.productList ? `Product list:\n${formState.productList}` : "",
-            formState.requiredSpecification,
-            formState.monthlyUsage,
-            formState.notes
-          ]
-            .filter(Boolean)
-            .join("\n\n")
-        })
-      });
-      const payload = await response.json();
+      const sourcingListItems = (() => {
+        if (typeof window === "undefined") {
+          return [];
+        }
 
-      if (!response.ok) {
-        setSubmitError(payload?.error ?? "Unable to submit the request. Please review the required fields.");
+        try {
+          return JSON.parse(window.sessionStorage.getItem(sourcingListItemsStorageKey) ?? "[]");
+        } catch {
+          return [];
+        }
+      })();
+      const payload = await submitBioAxisRequest({
+        name: formState.name,
+        email: formState.email,
+        company: formState.organization,
+        phone: formState.phone,
+        roleTitle: formState.phone,
+        requestType: formState.requestType,
+        productCategory: formState.productCategory,
+        productSegment: formState.productCategory,
+        productName: formState.productName,
+        productList: formState.productList,
+        catalogNumber: formState.catalogNumber,
+        currentSupplier: formState.currentSupplier,
+        quantity: formState.quantity || formState.monthlyUsage,
+        timeline: formState.targetTimeline,
+        shippingRegion: formState.shippingRegion,
+        documentationNeeds: [
+          formState.needDocumentation === "yes" ? "Documentation requested" : "",
+          formState.requiredSpecification
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
+        sterileStatus: formState.sterility,
+        sampleNeeded: formState.needSample === "yes",
+        recurringSupplyNeeded: formState.requestType === "recurring-supply" || Boolean(formState.monthlyUsage),
+        sourcingListItems,
+        website: formState.website,
+        message: [
+          formState.productList ? `Product list:\n${formState.productList}` : "",
+          formState.requiredSpecification ? `Required specification:\n${formState.requiredSpecification}` : "",
+          formState.monthlyUsage ? `Monthly or annual usage:\n${formState.monthlyUsage}` : "",
+          formState.notes
+        ]
+          .filter(Boolean)
+          .join("\n\n")
+      });
+
+      if (!payload.ok) {
+        setSubmitError(requestErrorMessage);
         setSubmitted(null);
         return;
       }
 
       setSubmitted({
         mode: payload.mode ?? "captured",
-        message: payload.message ?? "Your BioAxis sourcing request has been received.",
+        message: payload.message ?? requestSuccessMessage,
         referenceId: payload.referenceId
       });
     } catch {
-      setSubmitError("Unable to reach the request endpoint. Please try again.");
+      setSubmitError(requestErrorMessage);
       setSubmitted(null);
     } finally {
       setSubmitting(false);
@@ -248,7 +270,17 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="grid gap-8">
+    <form onSubmit={handleSubmit} noValidate data-api-endpoint="/api/rfq" className="grid gap-8">
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="quote-website">Website</label>
+        <input
+          id="quote-website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={formState.website}
+          onChange={(event) => updateField("website", event.target.value)}
+        />
+      </div>
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
         <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Select request type</h2>
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">

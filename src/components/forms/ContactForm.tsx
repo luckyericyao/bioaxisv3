@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { requestErrorMessage, requestSuccessMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";
 
 type ContactFormState = {
   name: string;
@@ -9,6 +10,7 @@ type ContactFormState = {
   company: string;
   requestType: string;
   message: string;
+  website: string;
 };
 
 const initialState: ContactFormState = {
@@ -16,7 +18,8 @@ const initialState: ContactFormState = {
   email: "",
   company: "",
   requestType: "contact",
-  message: ""
+  message: "",
+  website: ""
 };
 
 const requestTypeOptions = [
@@ -86,34 +89,28 @@ export function ContactForm() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/request-quote", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          company: values.company,
-          requestType: values.requestType,
-          productName: "Contact request",
-          message: values.message
-        })
+      const payload = await submitBioAxisRequest({
+        name: values.name,
+        email: values.email,
+        company: values.company,
+        requestType: values.requestType,
+        productName: "Contact request",
+        message: values.message,
+        website: values.website
       });
-      const payload = await response.json();
 
-      if (!response.ok) {
-        setSubmitError(payload?.error ?? "Unable to submit the contact request.");
+      if (!payload.ok) {
+        setSubmitError(requestErrorMessage);
         setSubmitted(null);
         return;
       }
 
       setSubmitted({
-        message: payload.message ?? "Your BioAxis request has been received.",
+        message: payload.message ?? requestSuccessMessage,
         referenceId: payload.referenceId
       });
     } catch {
-      setSubmitError("Unable to reach the request endpoint. Please try again.");
+      setSubmitError(requestErrorMessage);
       setSubmitted(null);
     } finally {
       setSubmitting(false);
@@ -153,7 +150,17 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+    <form onSubmit={handleSubmit} noValidate data-api-endpoint="/api/rfq" className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="contact-website">Website</label>
+        <input
+          id="contact-website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={values.website}
+          onChange={(event) => updateField("website", event.target.value)}
+        />
+      </div>
       <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact BioAxis</h2>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
         Send a sourcing question, equivalent request, sample need, documentation request, or recurring supply note.

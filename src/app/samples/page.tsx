@@ -48,6 +48,7 @@ export default function SamplesPage() {
         </div>
         <SimpleRequestForm
           title="Sample request form"
+          requestType="sample"
           submitLabel="Request sample"
           confirmation="Your sample request has been prepared. BioAxis can use this information to review product fit, sample options, documentation needs, and quote paths where available."
           fields={[
