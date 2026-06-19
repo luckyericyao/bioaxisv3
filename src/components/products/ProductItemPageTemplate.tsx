@@ -84,7 +84,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <ul className="mt-5 grid gap-2">
             {quoteReadyDetails.map((item) => (
               <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
-                {item}
+                {cleanListItem(item)}
               </li>
             ))}
           </ul>
@@ -160,10 +160,14 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
       <ul className="mt-5 grid gap-3">
         {items.map((item) => (
           <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
-            {item}
+            {cleanListItem(item)}
           </li>
         ))}
       </ul>
     </section>
   );
+}
+
+function cleanListItem(item: string) {
+  return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
 }

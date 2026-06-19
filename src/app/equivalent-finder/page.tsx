@@ -40,7 +40,9 @@ export default function EquivalentFinderPage() {
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">What to send</h2>
           <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
             {comparisonInputs.map((input) => (
-              <li key={input}>- {input}</li>
+              <li key={input} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-bioaxis-steel">
+                {input}
+              </li>
             ))}
           </ul>
         </div>

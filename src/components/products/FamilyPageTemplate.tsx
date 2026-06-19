@@ -11,7 +11,6 @@ import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
 import { RelatedProducts } from "./RelatedProducts";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
-import { SpecificationTable } from "./SpecificationTable";
 
 type FamilyPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -26,7 +25,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
     .map((item) => ({
       label: item.title,
       href: `/products/${segment.slug}/${category.slug}/${item.slug}`,
-      description: item.shortDescription
+      description: relatedFamilyDescription(item.slug, item.title, category.title)
     }));
 
   return (
@@ -67,16 +66,9 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <ProductConfigurationSection segment={segment} category={category} family={family} />
 
-      {priorityContent ? (
-        <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-          <DocumentationChecklist items={family.documentationChecklist} />
-        </section>
-      ) : (
-        <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-          <SpecificationTable title="Specification checklist" specifications={family.keySpecifications} criteria={family.selectionCriteria} />
-          <DocumentationChecklist items={family.documentationChecklist} />
-        </section>
-      )}
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <DocumentationChecklist items={family.documentationChecklist} />
+      </section>
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
@@ -123,6 +115,23 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
       />
     </>
   );
+}
+
+function relatedFamilyDescription(slug: string, title: string, categoryTitle: string) {
+  const descriptions: Record<string, string> = {
+    "filtered-pipette-tips": "Aerosol-barrier tips for PCR, qPCR, cell culture, assay setup, and other contamination-sensitive workflows.",
+    "universal-pipette-tips": "General-purpose tips for routine manual and multichannel liquid handling, selected by fit, volume range, packaging format, and documentation needs.",
+    "low-retention-pipette-tips": "Tips for viscous, low-volume, or recovery-sensitive transfers where surface behavior and liquid retention matter.",
+    "extended-length-pipette-tips": "Longer-reach tips for tubes, reservoirs, deep wells, and workflows where standard tips do not reach cleanly.",
+    "sterile-pipette-tips": "Sterile tips for cell culture, assay setup, reagent handling, and contamination-sensitive bench workflows.",
+    "reload-and-bulk-pipette-tips": "Reload and bulk formats for high-use labs comparing packaging efficiency, rack fit, and recurring supply needs.",
+    "microcentrifuge-tubes": "Small-volume tubes for sample prep, spin-downs, storage, and molecular biology workflows.",
+    "96-well-pcr-plates": "PCR plates selected by skirt style, profile, seal compatibility, instrument fit, and PCR-clean documentation.",
+    "pes-syringe-filters": "PES membrane filters for aqueous samples, media, protein-containing solutions, and sterile filtration review.",
+    "hamilton-robotic-tips": "Robotic tips for Hamilton-style methods where deck fit, rack format, conductivity, and validation samples matter."
+  };
+
+  return descriptions[slug] ?? `${title} for ${categoryTitle.toLowerCase()} workflows, selected by format, compatibility, documentation needs, and sample evaluation criteria.`;
 }
 
 function InfoCard({ title, items }: { title: string; items: string[] }) {

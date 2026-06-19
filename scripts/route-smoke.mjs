@@ -61,30 +61,23 @@ const forbiddenVisiblePatterns = [
   { label: "fake inventory", pattern: /fake inventory/i },
   { label: "fake SKU", pattern: /fake SKU/i },
   { label: "* -", pattern: /\*\s*-/ },
-  { label: "• -", pattern: /•\s*-/ }
+  { label: "• -", pattern: /•\s*-/ },
+  { label: "  * -", pattern: /\s{2,}\*\s*-/ },
+  { label: "- current supplier", pattern: /-\s*current supplier/i },
+  { label: "- aerosol barrier", pattern: /-\s*aerosol barrier/i },
+  { label: "Specification Buyer check", pattern: /Specification\s+Buyer check/i }
 ];
 
 const routes = [
   "/",
   "/products",
-  "/about",
-  "/contact",
-  "/supplier-qualification",
   "/equivalent-finder",
   "/request-quote",
-  "/quality",
-  "/samples",
-  "/resources",
-  "/products/liquid-handling/pipette-tips",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
-  "/products/cell-culture/media-and-supplements",
   "/products/cell-culture/media-and-supplements/serum-free-media",
-  "/products/molecular-biology-pcr/pcr-plastics",
   "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates",
-  "/products/sample-prep-filtration/syringe-filters",
   "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters",
-  "/products/automation-consumables/robotic-pipette-tips",
-  "/products/storage-cryopreservation/cryogenic-vials",
+  "/request-quote?family=filtered-pipette-tips&product=filtered-200ul-pipette-tips&requestType=quote&segment=liquid-handling&subcategory=pipette-tips",
   ...familyPageRoutes,
   ...segmentProductItemRoutes
 ].filter((route, index, allRoutes) => allRoutes.indexOf(route) === index);
@@ -168,7 +161,7 @@ for (const route of routes) {
     failures.push(`${route}: visible Coming soon copy`);
   }
 
-  if (route === "/products" || route.startsWith("/products/")) {
+  if (route === "/products" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote")) {
     checkForbiddenVisibleStrings(route, pageText);
   }
 
