@@ -49,6 +49,16 @@ const productItemDetailSections = [
 ];
 
 const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
+const requiredHomeWorkflowPreviews = [
+  "Target Discovery",
+  "Assay Development",
+  "Screening",
+  "Lead Optimization",
+  "ADME / DMPK",
+  "Preclinical Storage",
+  "Early CMC",
+  "QC / Analytical"
+];
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
   "Cell Model & Assay Development",
@@ -70,6 +80,7 @@ const requiredWorkflowCtaLabels = [
   "Build QC supply list"
 ];
 const requestTypeLabels = ["Quote request", "Equivalent request", "Sample request", "Documentation request", "Recurring supply request", "Product list review", "Contact request"];
+const equivalentFinderContent = ["Common equivalent requests", "How BioAxis compares fit", "Safer switching path", "BioAxis helps compare compatible options. Final suitability depends on customer validation."];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
 const legacyNavLabels = ["Equivalents", "Support", "Applications", "Services", "Suppliers"];
@@ -95,6 +106,8 @@ const routes = [
   "/products",
   "/workflows",
   "/equivalent-finder",
+  "/quality",
+  "/samples",
   "/request-quote",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
   "/products/cell-culture/media-and-supplements/serum-free-media",
@@ -198,6 +211,36 @@ for (const route of routes) {
     if (pageText.includes("Products Suppliers Equivalent Finder Samples Quotes Quality")) {
       failures.push(`${route}: legacy homepage capability chip row`);
     }
+
+    requiredHomeWorkflowPreviews.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing homepage workflow preview ${label}`);
+      }
+    });
+
+    if (!html.includes('href="/workflows"') || !pageText.includes("Explore Drug R&D Workflows")) {
+      failures.push(`${route}: missing homepage workflows CTA`);
+    }
+
+    if (!pageText.includes("View all product segments")) {
+      failures.push(`${route}: missing all product segments CTA`);
+    }
+  }
+
+  if (route === "/equivalent-finder") {
+    equivalentFinderContent.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing equivalent finder content ${label}`);
+      }
+    });
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "equivalent" })) {
+      failures.push(`${route}: missing equivalent request CTA`);
+    }
+
+    if (!hrefsFromHtml(html).some((href) => hrefPath(href) === "/samples")) {
+      failures.push(`${route}: missing sample-first CTA`);
+    }
   }
 
   if (route === "/request-quote") {
@@ -206,6 +249,23 @@ for (const route of routes) {
         failures.push(`${route}: missing request type ${label}`);
       }
     });
+
+    if (!pageText.includes("Pasting a product list into Notes is fine")) {
+      failures.push(`${route}: missing product list notes guidance`);
+    }
+  }
+
+  if (route === "/quality" && !hasHrefWithParams(html, "/request-quote", { requestType: "documentation" })) {
+    failures.push(`${route}: missing documentation support CTA`);
+  }
+
+  if (route === "/samples") {
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "sample" })) {
+      failures.push(`${route}: missing sample request CTA`);
+    }
+    if (!hasHrefWithParams(html, "/equivalent-finder", { requestType: "equivalent" })) {
+      failures.push(`${route}: missing equivalent finder CTA`);
+    }
   }
 
   if (route === "/workflows") {

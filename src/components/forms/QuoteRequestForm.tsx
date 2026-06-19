@@ -242,6 +242,9 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
           Choose the request that best matches the sourcing support you need. Fields update based on request type.
         </p>
+        <p className="mt-3 border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
+          Pasting a product list into Notes is fine. Include supplier names, catalog numbers, quantities, target delivery dates, and documentation needs where available.
+        </p>
         <div className="mt-6">
           <RequestTypeSelector
             requestTypes={requestTypes}

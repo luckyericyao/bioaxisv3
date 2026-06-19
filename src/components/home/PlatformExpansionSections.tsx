@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { workflows } from "@/data/workflows";
 import { CTASection } from "@/components/ui/CTASection";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -22,6 +21,17 @@ const popularStartingPoints = [
   { label: "Compare centrifugal filter membranes", href: "/products/sample-prep-filtration" },
   { label: "Find automation-compatible tips", href: "/products/automation-consumables" },
   { label: "Prepare a consumables RFQ", href: "/request-quote" }
+];
+
+const workflowPreviewCards = [
+  { title: "Target Discovery", href: "/workflows#target-discovery-biology-validation", tags: ["Biology", "Biomarkers"] },
+  { title: "Assay Development", href: "/workflows#cell-model-assay-development", tags: ["Plates", "Readouts"] },
+  { title: "Screening", href: "/workflows#screening-hit-identification", tags: ["Automation", "HTS"] },
+  { title: "Lead Optimization", href: "/workflows#lead-optimization-in-vitro-profiling", tags: ["Profiling", "Repeat use"] },
+  { title: "ADME / DMPK", href: "/workflows#adme-dmpk-bioanalysis", tags: ["Bioanalysis", "Sample prep"] },
+  { title: "Preclinical Storage", href: "/workflows#preclinical-sample-collection-storage", tags: ["Cold chain", "Traceability"] },
+  { title: "Early CMC", href: "/workflows#process-development-early-cmc", tags: ["Sterile", "Single-use"] },
+  { title: "QC / Analytical", href: "/workflows#qc-analytical-testing-release-support", tags: ["Documents", "Testing"] }
 ];
 
 export function HowBioAxisWorksSection() {
@@ -90,17 +100,23 @@ export function SourceByWorkflowSection() {
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <SectionHeader
           title="Source by workflow"
-          subtitle="Labs often buy by experiment, not by catalog structure. BioAxis organizes consumables around the workflows your team actually runs."
+          subtitle="Labs buy by experiment and development stage, not only by catalog structure. BioAxis maps drug discovery and development workflows to consumables, equivalents, samples, documentation, and quote support required to keep studies moving."
         />
         <Link href="/workflows" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
-          Explore workflows
+          Explore Drug R&D Workflows
         </Link>
       </div>
-      <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {workflows.map((workflow) => (
-          <Link key={workflow.id} href={`/workflows#${workflow.slug}`} className="border border-bioaxis-line bg-bioaxis-panel p-6 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
-            <h3 className="text-xl font-bold uppercase text-bioaxis-text">{workflow.title}</h3>
-            <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{workflow.description}</p>
+      <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {workflowPreviewCards.map((workflow) => (
+          <Link key={workflow.title} href={workflow.href} className="border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
+            <h3 className="text-base font-bold uppercase text-bioaxis-text">{workflow.title}</h3>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {workflow.tags.map((tag) => (
+                <span key={tag} className="border border-bioaxis-line bg-bioaxis-black px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
+                  {tag}
+                </span>
+              ))}
+            </div>
           </Link>
         ))}
       </div>

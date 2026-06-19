@@ -107,7 +107,7 @@ export default function QualityPage() {
         title="Need documentation before purchasing?"
         body="Submit product details and the documentation you need. BioAxis helps request and organize COA, SDS, sterility, material, or lot-level documentation where available."
         primaryLabel="Request documentation support"
-        primaryHref="/request-quote"
+        primaryHref="/request-quote?requestType=documentation"
       />
     </>
   );

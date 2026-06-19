@@ -26,7 +26,7 @@ export const resourceGuides: ResourceGuide[] = [
     title: "How to evaluate equivalent consumables",
     summary: "Compare dimensions, material, sterility, fit, documentation, sample testing, packaging, and lot consistency before switching.",
     relatedSegments: ["Liquid Handling", "Lab Plasticware", "Sample Prep & Filtration"],
-    relatedWorkflows: ["Automation & HTS", "Quality Review"],
+    relatedWorkflows: ["Automation-compatible sourcing", "Quality Review"],
     status: "available",
     ctaCopy: "Read guide"
   },

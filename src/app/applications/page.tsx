@@ -44,7 +44,7 @@ const applications = [
   },
   {
     id: "automation-hts",
-    title: "Automation & HTS",
+    title: "Automation-Compatible Formats",
     description: "Automation-compatible plates, tips, reservoirs, seals, barcoded formats, and equipment-fit consumables.",
     href: "/products/liquid-handling"
   },
