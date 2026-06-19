@@ -39,16 +39,41 @@ export default function WorkflowsPage() {
 
       <section className="border-b border-bioaxis-line bg-bioaxis-panel/45">
         <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+          <div className="mb-8 grid gap-4 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Workflow navigator</p>
+              <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">
+                Follow the sourcing path from discovery to QC.
+              </h2>
+            </div>
+            <p className="max-w-3xl text-sm leading-6 text-bioaxis-muted">
+              Use the roadmap to jump from an R&D stage to the consumables, formats, equivalent options,
+              samples, documentation, and quote support that stage usually needs.
+            </p>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {workflows.map((workflow) => (
+            {workflows.map((workflow, index) => (
               <Link
                 key={workflow.id}
                 href={`#${workflow.slug}`}
-                className="group border border-bioaxis-line bg-bioaxis-black/70 p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
+                className="group relative min-h-60 border border-bioaxis-line bg-bioaxis-black/70 p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
               >
-                <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">{workflow.stage}</span>
-                <span className="mt-2 block text-sm font-semibold uppercase leading-snug text-bioaxis-steel group-hover:text-bioaxis-text">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
+                  {workflow.stage}
+                </span>
+                <span className="absolute right-4 top-4 text-3xl font-bold text-bioaxis-line">
+                  {(index + 1).toString().padStart(2, "0")}
+                </span>
+                <span className="mt-3 block pr-8 text-sm font-semibold uppercase leading-snug text-bioaxis-text">
                   {workflow.title}
+                </span>
+                <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{workflow.shortDescription}</span>
+                <span className="mt-5 flex flex-wrap gap-2">
+                  {workflow.productFamilies.map((family) => (
+                    <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
+                      {family}
+                    </span>
+                  ))}
                 </span>
               </Link>
             ))}

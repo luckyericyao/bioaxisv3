@@ -59,6 +59,16 @@ const requiredWorkflowStageLabels = [
   "Process Development & Early CMC",
   "QC, Analytical Testing & Release Support"
 ];
+const requiredWorkflowCtaLabels = [
+  "Map this workflow",
+  "Build assay consumables list",
+  "Source screening formats",
+  "Map optimization consumables",
+  "Source ADME/DMPK consumables",
+  "Plan sample storage",
+  "Source early CMC consumables",
+  "Build QC supply list"
+];
 const requestTypeLabels = ["Quote request", "Equivalent request", "Sample request", "Documentation request", "Recurring supply request", "Product list review", "Contact request"];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
@@ -210,6 +220,16 @@ for (const route of routes) {
         failures.push(`${route}: missing workflow content ${label}`);
       }
     });
+
+    requiredWorkflowCtaLabels.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing workflow CTA ${label}`);
+      }
+    });
+
+    if (!pageText.includes("Replace current supplier products with equivalent options")) {
+      failures.push(`${route}: missing equivalent-options use case`);
+    }
   }
 
   const navs = navBlocks(html);

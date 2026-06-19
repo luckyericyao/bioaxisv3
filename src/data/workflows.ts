@@ -9,6 +9,8 @@ export type Workflow = {
   stage: string;
   title: string;
   description: string;
+  shortDescription: string;
+  productFamilies: string[];
   whatYouAreDoing: string[];
   consumablesNeeded: string[];
   commonQuestions: string[];
@@ -29,6 +31,8 @@ export const workflows: Workflow[] = [
     title: "Target Discovery & Biology Validation",
     description:
       "Teams are validating disease biology, target relevance, pathway modulation, and biomarker readouts.",
+    shortDescription: "Validate disease biology and biomarker readouts before assay scale-up.",
+    productFamilies: ["Cell Culture", "PCR/qPCR", "ELISA", "Antibodies"],
     whatYouAreDoing: [
       "Build disease-relevant cell models",
       "Run gene knockdown or overexpression experiments",
@@ -72,6 +76,8 @@ export const workflows: Workflow[] = [
     title: "Cell Model & Assay Development",
     description:
       "Teams are building reproducible cell-based, biochemical, reporter, binding, or phenotypic assays.",
+    shortDescription: "Build reproducible assay formats and lock critical consumable choices.",
+    productFamilies: ["Assay Plates", "Plate Seals", "Filtered Tips", "Detection Reagents"],
     whatYouAreDoing: [
       "Select plate format and surface treatment",
       "Optimize cell seeding and reagent compatibility",
@@ -104,7 +110,7 @@ export const workflows: Workflow[] = [
       "Quote support"
     ],
     cta: {
-      label: "Build assay list",
+      label: "Build assay consumables list",
       href: "/request-quote?requestType=product-list-review&workflow=cell-model-assay-development"
     }
   },
@@ -115,6 +121,8 @@ export const workflows: Workflow[] = [
     title: "Screening & Hit Identification",
     description:
       "Teams are running medium-throughput or high-throughput screens across compounds, peptides, siRNA, biologics, or functional assays.",
+    shortDescription: "Support screening runs with automation-ready plates, tips, seals, and storage.",
+    productFamilies: ["Automation Consumables", "Robotic Tips", "384/1536 Plates", "Storage"],
     whatYouAreDoing: [
       "Prepare assay-ready plates",
       "Support automated liquid handling",
@@ -158,6 +166,8 @@ export const workflows: Workflow[] = [
     title: "Lead Optimization & In Vitro Profiling",
     description:
       "Teams are testing potency, selectivity, stability, cellular activity, developability, and repeat assay performance.",
+    shortDescription: "Map recurring profiling assays to repeat-use consumables and equivalent options.",
+    productFamilies: ["Assays", "Filtration", "Low-bind Tubes", "Analytical Vials"],
     whatYouAreDoing: [
       "Run dose-response studies",
       "Compare potency and selectivity",
@@ -190,8 +200,8 @@ export const workflows: Workflow[] = [
       "Quote-ready recurring supply lists"
     ],
     cta: {
-      label: "Compare equivalents",
-      href: "/equivalent-finder?workflow=lead-optimization-in-vitro-profiling"
+      label: "Map optimization consumables",
+      href: "/request-quote?requestType=product-list-review&workflow=lead-optimization-in-vitro-profiling"
     }
   },
   {
@@ -201,6 +211,8 @@ export const workflows: Workflow[] = [
     title: "ADME / DMPK / Bioanalysis",
     description:
       "Teams are preparing and analyzing plasma, serum, tissue, microsomal, stability, binding, and PK samples.",
+    shortDescription: "Coordinate sample prep, vials, filters, tubes, and storage for bioanalysis.",
+    productFamilies: ["SPE Plates", "LC-MS Vials", "Filters", "Sample Tubes"],
     whatYouAreDoing: [
       "Prepare biological samples",
       "Run plasma or microsomal stability studies",
@@ -233,7 +245,7 @@ export const workflows: Workflow[] = [
       "Quote support for recurring bioanalysis use"
     ],
     cta: {
-      label: "Request bioanalysis support",
+      label: "Source ADME/DMPK consumables",
       href: "/request-quote?requestType=quote&workflow=adme-dmpk-bioanalysis"
     }
   },
@@ -244,6 +256,8 @@ export const workflows: Workflow[] = [
     title: "Preclinical Sample Collection & Storage",
     description:
       "Teams are collecting, aliquoting, transporting, freezing, and tracking samples from animal studies and preclinical experiments.",
+    shortDescription: "Plan collection, aliquoting, cold-chain handling, storage, and traceability.",
+    productFamilies: ["Cryovials", "Barcoded Tubes", "Freezer Boxes", "Cold Chain"],
     whatYouAreDoing: [
       "Collect blood, serum, plasma, tissue, or cell samples",
       "Aliquot and label samples",
@@ -276,8 +290,8 @@ export const workflows: Workflow[] = [
       "Preclinical storage consumables lists"
     ],
     cta: {
-      label: "Request storage samples",
-      href: "/request-quote?requestType=sample&workflow=preclinical-sample-collection-storage"
+      label: "Plan sample storage",
+      href: "/request-quote?requestType=product-list-review&workflow=preclinical-sample-collection-storage"
     }
   },
   {
@@ -287,6 +301,8 @@ export const workflows: Workflow[] = [
     title: "Process Development & Early CMC",
     description:
       "Teams are moving from research-scale work toward process development, sterile handling, media and buffer preparation, and early CMC support.",
+    shortDescription: "Source sterile handling, filtration, transfer, and single-use formats for early process work.",
+    productFamilies: ["Single-use Bags", "Tubing", "Sterile Connectors", "Filters"],
     whatYouAreDoing: [
       "Prepare media and buffers",
       "Run sterile filtration",
@@ -320,7 +336,7 @@ export const workflows: Workflow[] = [
       "Quote support"
     ],
     cta: {
-      label: "Source early CMC needs",
+      label: "Source early CMC consumables",
       href: "/request-quote?requestType=quote&workflow=process-development-early-cmc"
     }
   },
@@ -331,6 +347,8 @@ export const workflows: Workflow[] = [
     title: "QC, Analytical Testing & Release Support",
     description:
       "Teams are supporting quality testing, contamination control, analytical sample handling, microbiology workflows, and release-adjacent testing.",
+    shortDescription: "Organize quality-adjacent testing consumables and documentation requests.",
+    productFamilies: ["Membranes", "HPLC Vials", "Sterility Testing", "Endotoxin"],
     whatYouAreDoing: [
       "Run sterility or contamination testing",
       "Prepare analytical samples",
@@ -363,7 +381,7 @@ export const workflows: Workflow[] = [
       "Analytical testing support"
     ],
     cta: {
-      label: "Organize QC list",
+      label: "Build QC supply list",
       href: "/request-quote?requestType=documentation&workflow=qc-analytical-testing-release-support"
     }
   }
@@ -406,7 +424,7 @@ export const workflowProductFamilyMap: WorkflowProductMapItem[] = [
 
 export const workflowUseCases = [
   "Build a new assay consumables list",
-  "Replace current supplier products with equivalents",
+  "Replace current supplier products with equivalent options",
   "Source automation-compatible formats",
   "Prepare preclinical sample storage setup",
   "Support early CMC consumables sourcing",
