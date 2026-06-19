@@ -371,17 +371,42 @@ for (const route of routes) {
       failures.push(`${route}: missing separated selected request type card text`);
     }
 
-    if (!pageText.includes("Pasting a product list into Notes is fine")) {
-      failures.push(`${route}: missing product list notes guidance`);
+    ["Send product context with only your email.", "Only your email is required", "Email *", "Company / organization optional", "Optional details"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing low-friction RFQ copy ${label}`);
+      }
+    });
+
+    if (/Organization\s+\*/i.test(pageText) || /Shipping region\s+\*/i.test(pageText) || /Required specification/i.test(pageText)) {
+      failures.push(`${route}: procurement fields still appear required`);
     }
   }
 
   if (route.startsWith("/request-quote?requestType=product-list-review")) {
-    ["Paste product list", "Supplier | Catalog No. | Product"].forEach((label) => {
+    ["Pasted product list optional", "Supplier | Catalog No. | Product"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-list RFQ field ${label}`);
       }
     });
+  }
+
+  if (route.startsWith("/request-quote?") && route.includes("product=filtered-200ul-pipette-tips")) {
+    [
+      "Request context",
+      "Filtered 200 µL Pipette Tips",
+      "Filtered Pipette Tips",
+      "Pipette Tips",
+      "Liquid Handling",
+      "BioAxis will include this product context with your request"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product-context summary ${label}`);
+      }
+    });
+
+    if (!html.includes('data-product-context-summary="true"')) {
+      failures.push(`${route}: missing product context summary marker`);
+    }
   }
 
   if (route === "/quality" && !hasHrefWithParams(html, "/request-quote", { requestType: "documentation" })) {
@@ -486,6 +511,10 @@ for (const route of routes) {
       }
     });
 
+    if (!pageText.includes("Request quote for this product")) {
+      failures.push(`${route}: missing low-friction product quote CTA label`);
+    }
+
     for (const section of productItemDetailSections) {
       if (!pageText.includes(section)) {
         failures.push(`${route}: missing product detail section "${section}"`);
@@ -497,6 +526,9 @@ for (const route of routes) {
     const [segmentSlug, subcategorySlug, familySlug] = routeParts.slice(1, 4);
     if (!html.includes(`product=${productSlug}`)) {
       failures.push(`${route}: missing RFQ/equivalent links with product query param`);
+    }
+    if (!html.includes("source=product-page")) {
+      failures.push(`${route}: product request CTAs do not mark product-page source`);
     }
     [
       { label: "Request quote", pathname: "/request-quote", params: { requestType: "quote" } },
@@ -639,6 +671,38 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   failures.push("src/lib/submitBioAxisRequest.ts: expected centralized submit helper to post to /api/rfq");
 }
 
+if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes("data-rfq-mode=\"email-only\"")) {
+  failures.push("QuoteRequestForm: expected email-only validation mode");
+}
+
+["selectedRequestType.requiredFields", "universalRequired", "productCategory: \"Product segment / category\""].forEach((legacyPattern) => {
+  if (quoteFormSource.includes(legacyPattern)) {
+    failures.push(`QuoteRequestForm: still contains legacy required-field logic ${legacyPattern}`);
+  }
+});
+
+["data-product-context-summary=\"true\"", "data-sourcing-list-summary=\"true\"", "sourcingListItems", "productContext"].forEach((label) => {
+  if (!quoteFormSource.includes(label)) {
+    failures.push(`QuoteRequestForm: missing low-friction context/source wiring ${label}`);
+  }
+});
+
+if (rfqRouteSource.includes("request.name") && rfqRouteSource.includes("Name is required")) {
+  failures.push("src/app/api/rfq/route.ts: still requires name");
+}
+
+["hasRequestDetail", "Supported request type is required", "Provide a message, product detail"].forEach((legacyPattern) => {
+  if (rfqRouteSource.includes(legacyPattern)) {
+    failures.push(`src/app/api/rfq/route.ts: still contains legacy blocking validation ${legacyPattern}`);
+  }
+});
+
+["Auto-captured product context", "Optional customer notes", "Optional supplier/catalog/quantity/docs/timeline fields", "Sourcing list items"].forEach((label) => {
+  if (!rfqRouteSource.includes(label)) {
+    failures.push(`src/app/api/rfq/route.ts: missing email section ${label}`);
+  }
+});
+
 for (const [label, source] of [
   ["QuoteRequestForm", quoteFormSource],
   ["ContactForm", contactFormSource],
@@ -654,7 +718,7 @@ for (const [label, source] of [
 }
 
 [
-  "Request received. BioAxis will review the details and follow up by email.",
+  "Request received. BioAxis will review the product context and follow up by email.",
   "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly."
 ].forEach((message) => {
   if (!submitHelperSource.includes(message)) {
@@ -697,11 +761,38 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      name: "Smoke Test",
       email: "smoke@example.com",
-      company: "BioAxis QA",
-      requestType: "contact",
-      message: "Local smoke test for RFQ fallback capture."
+      requestType: "quote",
+      productContext: {
+        requestType: "quote",
+        productName: "Filtered 200 µL Pipette Tips",
+        productFamily: "Filtered Pipette Tips",
+        productCategory: "Pipette Tips",
+        productSegment: "Liquid Handling",
+        productUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+        sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+        relevantSpecs: ["nominal volume: 200 µL"],
+        documentationNotes: ["DNase/RNase-free statement"],
+        timestamp: "smoke-test"
+      },
+      sourcingListItems: [
+        {
+          title: "Filtered 200 µL Pipette Tips",
+          href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+          segmentTitle: "Liquid Handling",
+          categoryTitle: "Pipette Tips",
+          familyTitle: "Filtered Pipette Tips",
+          productTitle: "Filtered 200 µL Pipette Tips",
+          quantity: "1 case",
+          currentSupplier: "Current supplier",
+          catalogNumber: "ABC-200",
+          equivalentNeeded: true,
+          sampleNeeded: false,
+          documentationNeeded: true,
+          sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+          addedAt: "smoke-test"
+        }
+      ]
     })
   });
   const payload = await rfqResponse.json();
@@ -710,6 +801,52 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
     failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
   } else {
     console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+  }
+
+  const missingEmailResponse = await fetch(new URL("/api/rfq", baseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      requestType: "quote",
+      productContext: {
+        productName: "Filtered 200 µL Pipette Tips"
+      }
+    })
+  });
+  if (missingEmailResponse.status !== 400) {
+    failures.push(`/api/rfq missing email: expected HTTP 400, got ${missingEmailResponse.status}`);
+  }
+
+  const invalidEmailResponse = await fetch(new URL("/api/rfq", baseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: "not-an-email",
+      requestType: "quote"
+    })
+  });
+  if (invalidEmailResponse.status !== 400) {
+    failures.push(`/api/rfq invalid email: expected HTTP 400, got ${invalidEmailResponse.status}`);
+  }
+
+  const honeypotResponse = await fetch(new URL("/api/rfq", baseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: "smoke@example.com",
+      requestType: "quote",
+      website: "filled"
+    })
+  });
+  const honeypotPayload = await honeypotResponse.json();
+  if (!honeypotResponse.ok || honeypotPayload?.mode !== "honeypot") {
+    failures.push(`/api/rfq honeypot: expected silent honeypot success, got ${honeypotResponse.status}`);
   }
 
   const legacyResponse = await fetch(new URL("/api/request-quote", baseUrl), {

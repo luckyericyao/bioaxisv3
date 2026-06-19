@@ -1,3 +1,16 @@
+export type BioAxisProductContext = {
+  requestType?: string;
+  productName?: string;
+  productFamily?: string;
+  productCategory?: string;
+  productSegment?: string;
+  productUrl?: string;
+  sourcePageUrl?: string;
+  relevantSpecs?: string[];
+  documentationNotes?: string[];
+  timestamp?: string;
+};
+
 export type BioAxisRequestPayload = {
   name?: string;
   email?: string;
@@ -27,6 +40,7 @@ export type BioAxisRequestPayload = {
   sourcePageUrl?: string;
   referrer?: string;
   utm?: Record<string, string>;
+  productContext?: BioAxisProductContext;
   website?: string;
 };
 
@@ -38,7 +52,7 @@ export type BioAxisRequestResponse = {
   error?: string;
 };
 
-export const requestSuccessMessage = "Request received. BioAxis will review the details and follow up by email.";
+export const requestSuccessMessage = "Request received. BioAxis will review the product context and follow up by email.";
 export const requestErrorMessage = "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.";
 
 function utmFromLocation() {

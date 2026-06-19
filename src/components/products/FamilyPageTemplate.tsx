@@ -84,10 +84,10 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">RFQ form context</p>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Prefill your sourcing request.</h2>
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">One-click request context</p>
+          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Send this family to BioAxis.</h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-            The request link carries segment, category, family, and inquiry type parameters into the quote form. Include these buyer fields so BioAxis can organize quote, equivalent, sample, and documentation support.
+            The request link carries segment, category, family, source page, and inquiry type into the quote form. Only an email is required; add supplier, catalog, quantity, or documentation details if useful.
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {family.recommendedRFQFields.map((field) => (
@@ -100,7 +100,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
             href={buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, requestType: "quote" })}
             className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
-            Open prefilled RFQ
+            Send family context
           </Link>
         </section>
       </section>
@@ -120,7 +120,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <RFQCTA
         title="Ready to review this family?"
-        body="Submit product, current brand, catalog number, quantity, sterile status, documentation need, target delivery date, institution, email, and notes so BioAxis can organize sourcing support."
+        body="Send this product family with one click. Only your email is required, and BioAxis can follow up for supplier, catalog number, quantity, documentation, sample, or timeline details."
         segment={segment.slug}
         category={category.slug}
         family={family.slug}

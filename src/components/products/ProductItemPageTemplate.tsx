@@ -157,7 +157,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 
       <RFQCTA
         title="Ready to review this product item?"
-        body="Send BioAxis the product, current supplier or catalog number, required specifications, quantity, sample needs, documentation needs, and target timeline so the request can be routed with full product context."
+        body="Send BioAxis this product context with one click. Only your email is required, and BioAxis can follow up for supplier, catalog number, quantity, sample, documentation, or timeline details."
         segment={segment.slug}
         category={category.slug}
         family={family.slug}

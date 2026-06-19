@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";
+import { buildRequestHref } from "@/data/productTaxonomy";
 
 export const metadata: Metadata = {
   title: "Equivalent Finder | BioAxis",
@@ -60,7 +61,24 @@ function cleanListItem(item: string) {
   return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
 }
 
-export default function EquivalentFinderPage() {
+type EquivalentFinderPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function EquivalentFinderPage({ searchParams }: EquivalentFinderPageProps) {
+  const params = await searchParams;
+  const equivalentRequestHref = buildRequestHref({
+    requestType: "equivalent",
+    segment: first(params?.segment),
+    subcategory: first(params?.subcategory) ?? first(params?.category),
+    family: first(params?.family),
+    product: first(params?.product)
+  });
+
   return (
     <>
       <PageHero
@@ -70,7 +88,7 @@ export default function EquivalentFinderPage() {
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/request-quote?requestType=equivalent"
+            href={equivalentRequestHref}
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Start equivalent request
@@ -100,7 +118,7 @@ export default function EquivalentFinderPage() {
             BioAxis helps compare compatible options across practical sourcing dimensions. Final suitability depends on customer validation in the intended workflow.
           </p>
           <Link
-            href="/request-quote?requestType=equivalent"
+            href={equivalentRequestHref}
             className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Submit current product

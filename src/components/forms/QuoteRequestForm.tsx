@@ -1,98 +1,74 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getRequestTypeById, normalizeRequestType, requestTypes } from "@/data/requestTypes";
-import { requestErrorMessage, requestSuccessMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";
+import {
+  type BioAxisProductContext,
+  requestErrorMessage,
+  requestSuccessMessage,
+  submitBioAxisRequest
+} from "@/lib/submitBioAxisRequest";
 import { RequestTypeSelector } from "./RequestTypeSelector";
 
 type QuoteFormState = {
   requestType: string;
+  email: string;
   name: string;
   organization: string;
-  email: string;
   phone: string;
+  roleTitle: string;
   shippingRegion: string;
-  productCategory: string;
-  productName: string;
-  productList: string;
-  currentSupplier: string;
+  supplier: string;
   catalogNumber: string;
-  requiredSpecification: string;
   quantity: string;
-  sterility: string;
-  monthlyUsage: string;
-  needSample: "yes" | "no";
-  needDocumentation: "yes" | "no";
-  targetTimeline: string;
+  requiredDocuments: string;
+  timeline: string;
+  productList: string;
   notes: string;
   website: string;
 };
 
+type SourcingListSummaryItem = {
+  id?: string;
+  title?: string;
+  href?: string;
+  segmentTitle?: string;
+  categoryTitle?: string;
+  familyTitle?: string;
+  productTitle?: string;
+  quantity?: string;
+  currentSupplier?: string;
+  catalogNumber?: string;
+  equivalentNeeded?: boolean;
+  sampleNeeded?: boolean;
+  documentationNeeded?: boolean;
+  notes?: string;
+  sourcePageUrl?: string;
+  addedAt?: string;
+};
+
 const initialState: QuoteFormState = {
   requestType: requestTypes[0].id,
+  email: "",
   name: "",
   organization: "",
-  email: "",
   phone: "",
+  roleTitle: "",
   shippingRegion: "",
-  productCategory: "",
-  productName: "",
-  productList: "",
-  currentSupplier: "",
+  supplier: "",
   catalogNumber: "",
-  requiredSpecification: "",
   quantity: "",
-  sterility: "",
-  monthlyUsage: "",
-  needSample: "no",
-  needDocumentation: "no",
-  targetTimeline: "",
+  requiredDocuments: "",
+  timeline: "",
+  productList: "",
   notes: "",
   website: ""
 };
 
-const fieldLabels: Record<keyof QuoteFormState, string> = {
-  requestType: "Request type",
-  name: "Name",
-  organization: "Organization",
-  email: "Email",
-  phone: "Phone / role optional",
-  shippingRegion: "Shipping region",
-  productCategory: "Product segment / category",
-  productName: "Product or equivalent product",
-  productList: "Paste product list",
-  currentSupplier: "Current brand / supplier",
-  catalogNumber: "Current catalog number",
-  requiredSpecification: "Required specification",
-  quantity: "Desired quantity",
-  sterility: "Sterile / non-sterile",
-  monthlyUsage: "Monthly or annual usage",
-  needSample: "Need sample?",
-  needDocumentation: "Documentation required?",
-  targetTimeline: "Target delivery date",
-  notes: "Notes",
-  website: "Website"
-};
-
-const universalRequired: Array<keyof QuoteFormState> = ["name", "organization", "email", "shippingRegion"];
-const alwaysVisible: Array<keyof QuoteFormState> = ["name", "organization", "email", "phone", "shippingRegion"];
-const fieldOrder: Array<keyof QuoteFormState> = [
-  "productCategory",
-  "productName",
-  "productList",
-  "currentSupplier",
-  "catalogNumber",
-  "requiredSpecification",
-  "quantity",
-  "sterility",
-  "monthlyUsage",
-  "needSample",
-  "needDocumentation",
-  "targetTimeline",
-  "notes"
-];
+const sourcingListStorageKey = "bioaxis:sourcing-list";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
+const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
@@ -104,29 +80,54 @@ type SubmitState = {
 
 type QuoteRequestFormProps = {
   initialValues?: Partial<QuoteFormState>;
+  productContext?: BioAxisProductContext;
 };
 
-export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) {
+export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRequestFormProps) {
   const startingState = useMemo(
     () => ({
       ...initialState,
       ...initialValues,
-      requestType: normalizeRequestType(initialValues.requestType ?? initialState.requestType)
+      requestType: normalizeRequestType(initialValues.requestType ?? productContext?.requestType ?? initialState.requestType)
     }),
-    [initialValues]
+    [initialValues, productContext?.requestType]
   );
   const [formState, setFormState] = useState<QuoteFormState>(startingState);
+  const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const selectedRequestType = getRequestTypeById(formState.requestType);
-  const visibleFields = useMemo(() => {
-    const requested = [...selectedRequestType.requiredFields, ...selectedRequestType.optionalFields, "notes"];
-    return fieldOrder.filter((field) => requested.includes(field));
-  }, [selectedRequestType]);
-  const showProductListField = formState.requestType === "product-list-review" || formState.requestType === "quote";
+  const resolvedProductContext = useMemo(
+    () => ({
+      ...productContext,
+      requestType: formState.requestType,
+      productName: productContext?.productName ?? "",
+      productFamily: productContext?.productFamily ?? "",
+      productCategory: productContext?.productCategory ?? "",
+      productSegment: productContext?.productSegment ?? ""
+    }),
+    [formState.requestType, productContext]
+  );
+  const hasProductContext = Boolean(
+    resolvedProductContext.productName ||
+      resolvedProductContext.productFamily ||
+      resolvedProductContext.productCategory ||
+      resolvedProductContext.productSegment ||
+      resolvedProductContext.productUrl
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const sessionItems = readStoredSourcingItems(window.sessionStorage.getItem(sourcingListItemsStorageKey));
+    const localItems = readStoredSourcingItems(window.localStorage.getItem(sourcingListStorageKey));
+    setSourcingListItems(sessionItems.length > 0 ? sessionItems : localItems);
+  }, []);
 
   function updateField<K extends keyof QuoteFormState>(field: K, value: QuoteFormState[K]) {
     setFormState((current) => ({ ...current, [field]: value }));
@@ -135,20 +136,11 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   }
 
   function validate() {
-    const nextErrors: FieldErrors = {};
-    const requiredFields = [...universalRequired, ...selectedRequestType.requiredFields] as Array<keyof QuoteFormState>;
-
-    requiredFields.forEach((field) => {
-      if (!String(formState[field]).trim()) {
-        nextErrors[field] = `${fieldLabels[field]} is required.`;
-      }
-    });
-
-    if (formState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-      nextErrors.email = "Enter a valid email address.";
+    if (!formState.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+      return { email: emailErrorMessage };
     }
 
-    return nextErrors;
+    return {};
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -166,52 +158,31 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
     setSubmitError("");
 
     try {
-      const sourcingListItems = (() => {
-        if (typeof window === "undefined") {
-          return [];
-        }
-
-        try {
-          return JSON.parse(window.sessionStorage.getItem(sourcingListItemsStorageKey) ?? "[]");
-        } catch {
-          return [];
-        }
-      })();
       const payload = await submitBioAxisRequest({
-        name: formState.name,
         email: formState.email,
+        name: formState.name,
         company: formState.organization,
+        organization: formState.organization,
         phone: formState.phone,
-        roleTitle: formState.phone,
+        roleTitle: formState.roleTitle,
         requestType: formState.requestType,
-        productCategory: formState.productCategory,
-        productSegment: formState.productCategory,
-        productName: formState.productName,
+        productSegment: resolvedProductContext.productSegment,
+        productCategory: resolvedProductContext.productCategory,
+        productFamily: resolvedProductContext.productFamily,
+        productName: resolvedProductContext.productName,
         productList: formState.productList,
         catalogNumber: formState.catalogNumber,
-        currentSupplier: formState.currentSupplier,
-        quantity: formState.quantity || formState.monthlyUsage,
-        timeline: formState.targetTimeline,
+        currentSupplier: formState.supplier,
+        supplier: formState.supplier,
+        quantity: formState.quantity,
+        timeline: formState.timeline,
         shippingRegion: formState.shippingRegion,
-        documentationNeeds: [
-          formState.needDocumentation === "yes" ? "Documentation requested" : "",
-          formState.requiredSpecification
-        ]
-          .filter(Boolean)
-          .join("\n\n"),
-        sterileStatus: formState.sterility,
-        sampleNeeded: formState.needSample === "yes",
-        recurringSupplyNeeded: formState.requestType === "recurring-supply" || Boolean(formState.monthlyUsage),
+        documentationNeeds: formState.requiredDocuments,
         sourcingListItems,
+        sourcePageUrl: resolvedProductContext.sourcePageUrl ?? resolvedProductContext.productUrl,
+        productContext: resolvedProductContext,
         website: formState.website,
-        message: [
-          formState.productList ? `Product list:\n${formState.productList}` : "",
-          formState.requiredSpecification ? `Required specification:\n${formState.requiredSpecification}` : "",
-          formState.monthlyUsage ? `Monthly or annual usage:\n${formState.monthlyUsage}` : "",
-          formState.notes
-        ]
-          .filter(Boolean)
-          .join("\n\n")
+        message: formState.notes
       });
 
       if (!payload.ok) {
@@ -237,16 +208,9 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
     return (
       <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-8">
         <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request received</p>
-        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">Your sourcing request is ready for BioAxis review.</h2>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          {submitted.message}
-        </p>
+        <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">BioAxis has the product context.</h2>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">{submitted.message}</p>
         {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
-        <div className="mt-6 grid gap-3 text-sm leading-6 text-bioaxis-muted">
-          <p>- BioAxis can review the product details, current supplier context, specifications, and documentation needs you sent.</p>
-          <p>- If your request involves switching, sample-first evaluation or additional documentation may be useful before a larger purchase.</p>
-          <p>- For recurring supply, usage rhythm, shipping region, and packaging requirements help shape the next sourcing step.</p>
-        </div>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
@@ -270,7 +234,7 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate data-api-endpoint="/api/rfq" className="grid gap-8">
+    <form onSubmit={handleSubmit} noValidate data-api-endpoint="/api/rfq" data-rfq-mode="email-only" className="grid gap-6">
       <div className="hidden" aria-hidden="true">
         <label htmlFor="quote-website">Website</label>
         <input
@@ -281,13 +245,25 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
           onChange={(event) => updateField("website", event.target.value)}
         />
       </div>
+
+      {hasProductContext ? (
+        <RequestContextCard productContext={resolvedProductContext} />
+      ) : (
+        <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">One-click intake</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
+            Only your email is required. Add details if useful. BioAxis can follow up to clarify specs, equivalents, samples, or documentation.
+          </p>
+        </section>
+      )}
+
+      {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
+
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Select request type</h2>
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Request type</h2>
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-          Choose the request that best matches the sourcing support you need. Fields update based on request type.
-        </p>
-        <p className="mt-3 border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
-          Pasting a product list into Notes is fine, and product-list review or quote requests can also use the dedicated product-list field below. Include supplier names, catalog numbers, quantities, target delivery dates, and documentation needs where available.
+          The request type can be preselected from a product page. You can change it, but you do not need to re-enter product details.
         </p>
         <div className="mt-6">
           <RequestTypeSelector
@@ -302,95 +278,64 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
       </section>
 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact and shipping</h2>
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact</h2>
+        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+          Email is the only required field. BioAxis will use it to follow up about the product context and any notes below.
+        </p>
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          {alwaysVisible.map((field) => (
-            <Field
-              key={field}
-              id={field}
-              label={fieldLabels[field]}
-              value={String(formState[field])}
-              type={field === "email" ? "email" : "text"}
-              error={errors[field]}
-              required={universalRequired.includes(field)}
-              onChange={(value) => updateField(field, value)}
-            />
-          ))}
+          <Field id="email" label="Email" type="email" value={formState.email} error={errors.email} required onChange={(value) => updateField("email", value)} />
+          <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
+          <Field id="organization" label="Company / organization optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
+          <Field id="phone" label="Phone optional" value={formState.phone} onChange={(value) => updateField("phone", value)} />
+          <Field id="roleTitle" label="Role / title optional" value={formState.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
+          <Field id="shippingRegion" label="Shipping region optional" value={formState.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
         </div>
       </section>
 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{selectedRequestType.label}</h2>
-        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{selectedRequestType.description}</p>
-        {selectedRequestType.id === "product-list-review" ? (
-          <p className="mt-3 text-sm leading-6 text-bioaxis-accent">
-            Paste product names, current suppliers, catalog numbers, quantities, timelines, and documentation needs in the product-list field.
-          </p>
-        ) : null}
-
-        {showProductListField ? (
-          <div className="mt-6">
-            <TextArea
-              id="productList"
-              label={fieldLabels.productList}
-              value={formState.productList}
-              error={errors.productList}
-              required={selectedRequestType.requiredFields.includes("productList")}
-              rows={8}
-              placeholder={[
-                "Supplier | Catalog No. | Product | Qty | Required docs | Timeline",
-                "Corning | 352097 | 96-well plate | 20 cases | CoA/Sterility | July",
-                "Axygen | T-200-C | 200 µL filtered tips | 50 racks | DNase/RNase-free | ASAP"
-              ].join("\n")}
-              onChange={(value) => updateField("productList", value)}
-            />
-          </div>
-        ) : null}
-
+        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Optional details</h2>
+        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+          Add supplier, catalog number, quantity, documents, timeline, or a pasted list if you already have them.
+        </p>
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          {visibleFields.map((field) =>
-            field === "productList" && showProductListField ? null : field === "notes" || field === "requiredSpecification" ? (
-              <TextArea
-                key={field}
-                id={field}
-                label={fieldLabels[field]}
-                value={String(formState[field])}
-                error={errors[field]}
-                required={selectedRequestType.requiredFields.includes(field)}
-                onChange={(value) => updateField(field, value)}
-              />
-            ) : field === "needSample" || field === "needDocumentation" ? (
-              <Select
-                key={field}
-                id={field}
-                label={fieldLabels[field]}
-                value={formState[field]}
-                onChange={(value) => updateField(field, value as QuoteFormState[typeof field])}
-              />
-            ) : (
-              <Field
-                key={field}
-                id={field}
-                label={fieldLabels[field]}
-                value={String(formState[field])}
-                error={errors[field]}
-                required={selectedRequestType.requiredFields.includes(field)}
-                onChange={(value) => updateField(field, value)}
-              />
-            )
-          )}
+          <Field id="supplier" label="Supplier optional" value={formState.supplier} onChange={(value) => updateField("supplier", value)} />
+          <Field id="catalogNumber" label="Catalog number optional" value={formState.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
+          <Field id="quantity" label="Quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
+          <Field id="timeline" label="Timeline optional" value={formState.timeline} onChange={(value) => updateField("timeline", value)} />
+          <Field id="requiredDocuments" label="Required documents optional" value={formState.requiredDocuments} onChange={(value) => updateField("requiredDocuments", value)} />
+          <div className="hidden md:block" aria-hidden="true" />
+          <TextArea
+            id="productList"
+            label="Pasted product list optional"
+            value={formState.productList}
+            rows={7}
+            placeholder={[
+              "Supplier | Catalog No. | Product | Qty | Required docs | Timeline",
+              "Corning | 352097 | 96-well plate | 20 cases | CoA/Sterility | July",
+              "Axygen | T-200-C | 200 µL filtered tips | 50 racks | DNase/RNase-free | ASAP"
+            ].join("\n")}
+            onChange={(value) => updateField("productList", value)}
+          />
+          <TextArea
+            id="notes"
+            label="Message / notes optional"
+            value={formState.notes}
+            rows={5}
+            placeholder={`Add anything useful for this ${selectedRequestType.label.toLowerCase()}.`}
+            onChange={(value) => updateField("notes", value)}
+          />
         </div>
 
         <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
-            BioAxis reviews quote-ready product details including current supplier, catalog number, quantity, timeline, sterility, documentation, and sample needs.
+            Submit with only an email. BioAxis can ask follow-up questions if specs, equivalents, samples, or documentation need clarification.
           </p>
           <button
             type="submit"
             disabled={submitting}
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
-            {submitting ? "Submitting..." : "Submit request"}
+            {submitting ? "Submitting..." : "Send request"}
           </button>
         </div>
         {submitError ? <p className="mt-4 text-sm text-bioaxis-accent">{submitError}</p> : null}
@@ -399,7 +344,99 @@ export function QuoteRequestForm({ initialValues = {} }: QuoteRequestFormProps) 
   );
 }
 
-type FieldProps = {
+function readStoredSourcingItems(raw: string | null) {
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as SourcingListSummaryItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function RequestContextCard({ productContext }: { productContext: BioAxisProductContext }) {
+  const contextRows = [
+    ["Request type", getRequestTypeById(productContext.requestType ?? "quote").label],
+    ["Product", productContext.productName],
+    ["Family", productContext.productFamily],
+    ["Category", productContext.productCategory],
+    ["Segment", productContext.productSegment],
+    ["Source", productContext.productUrl || productContext.sourcePageUrl ? "Product page URL captured" : ""]
+  ].filter((row): row is [string, string] => Boolean(row[1]));
+
+  return (
+    <section data-product-context-summary="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-5 sm:p-8">
+      <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request context</p>
+      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
+        BioAxis will include this product context with your request. You can add details below, but it is not required.
+      </p>
+      <dl className="mt-6 grid gap-3 md:grid-cols-2">
+        {contextRows.map(([label, value]) => (
+          <div key={label} className="border border-bioaxis-line bg-bioaxis-black p-4">
+            <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
+            <dd className="mt-2 text-sm font-semibold text-bioaxis-text">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {productContext.relevantSpecs?.length ? (
+        <div className="mt-5">
+          <p className="text-xs font-bold uppercase text-bioaxis-dim">Auto-captured specs</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {productContext.relevantSpecs.slice(0, 6).map((spec) => (
+              <span key={spec} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs text-bioaxis-steel">
+                {spec}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function SourcingListSummary({ items }: { items: SourcingListSummaryItem[] }) {
+  return (
+    <section data-sourcing-list-summary="true" className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+      <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing list detected</p>
+      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">BioAxis will include these items.</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
+        You can submit with only an email. The sourcing list items are included in the email payload automatically.
+      </p>
+      <div className="mt-6 grid gap-3">
+        {items.slice(0, 6).map((item, index) => (
+          <article key={item.id ?? `${item.title}-${index}`} className="border border-bioaxis-line bg-bioaxis-black p-4">
+            <h3 className="text-sm font-bold uppercase text-bioaxis-text">{item.title ?? item.productTitle ?? `Sourcing item ${index + 1}`}</h3>
+            <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{sourcingItemPath(item) || item.href || "Product context captured"}</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase text-bioaxis-steel">
+              {item.quantity ? <span className="border border-bioaxis-line px-2 py-1">Qty: {item.quantity}</span> : null}
+              {item.currentSupplier ? <span className="border border-bioaxis-line px-2 py-1">Supplier: {item.currentSupplier}</span> : null}
+              {item.catalogNumber ? <span className="border border-bioaxis-line px-2 py-1">Catalog: {item.catalogNumber}</span> : null}
+            </div>
+          </article>
+        ))}
+      </div>
+      {items.length > 6 ? <p className="mt-4 text-sm text-bioaxis-muted">Plus {items.length - 6} more sourcing list items.</p> : null}
+    </section>
+  );
+}
+
+function sourcingItemPath(item: SourcingListSummaryItem) {
+  return [item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ");
+}
+
+function Field({
+  id,
+  label,
+  value,
+  type = "text",
+  error,
+  required = false,
+  onChange
+}: {
   id: keyof QuoteFormState;
   label: string;
   value: string;
@@ -407,9 +444,7 @@ type FieldProps = {
   error?: string;
   required?: boolean;
   onChange: (value: string) => void;
-};
-
-function Field({ id, label, value, type = "text", error, required = false, onChange }: FieldProps) {
+}) {
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
@@ -434,23 +469,25 @@ function Field({ id, label, value, type = "text", error, required = false, onCha
   );
 }
 
-type TextAreaProps = Omit<FieldProps, "type">;
-
 function TextArea({
   id,
   label,
   value,
-  error,
-  required = false,
   rows = 5,
   placeholder,
   onChange
-}: TextAreaProps & { rows?: number; placeholder?: string }) {
+}: {
+  id: keyof QuoteFormState;
+  label: string;
+  value: string;
+  rows?: number;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="md:col-span-2">
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
         {label}
-        {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
       <textarea
         id={id}
@@ -458,44 +495,8 @@ function TextArea({
         rows={rows}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-error` : undefined}
         className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
       />
-      {error ? (
-        <p id={`${id}-error`} className="mt-2 text-sm text-bioaxis-accent">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function Select({
-  id,
-  label,
-  value,
-  onChange
-}: {
-  id: "needSample" | "needDocumentation";
-  label: string;
-  value: "yes" | "no";
-  onChange: (value: "yes" | "no") => void;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value as "yes" | "no")}
-        className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
-      >
-        <option value="no">no</option>
-        <option value="yes">yes</option>
-      </select>
     </div>
   );
 }

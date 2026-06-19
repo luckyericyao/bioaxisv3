@@ -11,7 +11,7 @@ export const requestTypes: RequestType[] = [
     id: "quote",
     label: "Quote request",
     description:
-      "Let us know the products you need and the specifications required. BioAxis will help organize supplier quote options.",
+      "Send product context, a pasted list, or a short note. BioAxis can follow up for any missing specs before organizing quote options.",
     requiredFields: ["productCategory", "productName", "quantity", "targetTimeline"],
     optionalFields: ["productList", "currentSupplier", "catalogNumber", "sterility", "requiredSpecification", "needDocumentation", "notes"]
   },
@@ -19,7 +19,7 @@ export const requestTypes: RequestType[] = [
     id: "equivalent",
     label: "Equivalent request",
     description:
-      "Tell us your current supplier or catalog number along with critical specifications. BioAxis will help identify compatible alternatives and support sample or quote requests.",
+      "Send the current product context if you have it. BioAxis can help compare compatible options and ask for specs only when needed.",
     requiredFields: ["productName", "currentSupplier", "catalogNumber", "requiredSpecification"],
     optionalFields: ["productCategory", "quantity", "sterility", "needSample", "needDocumentation", "notes"]
   },
@@ -27,7 +27,7 @@ export const requestTypes: RequestType[] = [
     id: "sample",
     label: "Sample request",
     description:
-      "Provide details on the consumables you want to test before switching suppliers or scaling volume.",
+      "Send the product or family you want to evaluate. BioAxis can follow up for sample criteria before switching or scale-up.",
     requiredFields: ["productCategory", "productName", "requiredSpecification", "targetTimeline"],
     optionalFields: ["currentSupplier", "catalogNumber", "quantity", "sterility", "monthlyUsage", "notes"]
   },
@@ -35,7 +35,7 @@ export const requestTypes: RequestType[] = [
     id: "documentation",
     label: "Documentation request",
     description:
-      "Select the documentation you need, such as CoA, SDS, sterility information, material information, or lot-level documents where available.",
+      "Ask for CoA, SDS, sterility, material, or lot-level documents when available. Add details only if you already know them.",
     requiredFields: ["productName", "needDocumentation", "requiredSpecification"],
     optionalFields: ["currentSupplier", "catalogNumber", "productCategory", "sterility", "notes"]
   },
@@ -43,7 +43,7 @@ export const requestTypes: RequestType[] = [
     id: "recurring-supply",
     label: "Recurring supply request",
     description:
-      "Share expected usage, timing, and shipping region so BioAxis can help plan recurring sourcing support.",
+      "Start recurring supply support with an email and any usage rhythm you already know. BioAxis can clarify timing and region later.",
     requiredFields: ["productCategory", "productName", "monthlyUsage", "targetTimeline"],
     optionalFields: ["quantity", "sterility", "currentSupplier", "requiredSpecification", "notes"]
   },
@@ -51,7 +51,7 @@ export const requestTypes: RequestType[] = [
     id: "product-list-review",
     label: "Product list review",
     description:
-      "Paste a product list so BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation requirement.",
+      "Paste a product list if you have one. BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation.",
     requiredFields: ["productList"],
     optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline", "notes"]
   },
@@ -59,7 +59,7 @@ export const requestTypes: RequestType[] = [
     id: "contact",
     label: "Contact request",
     description:
-      "Send a general sourcing question, documentation note, equivalent matching request, or procurement-support message to BioAxis.",
+      "Send a general sourcing question, documentation note, equivalent matching request, or product-support message to BioAxis.",
     requiredFields: ["notes"],
     optionalFields: ["productCategory", "productName", "currentSupplier", "catalogNumber", "quantity", "sterility", "needSample", "needDocumentation", "targetTimeline"]
   }

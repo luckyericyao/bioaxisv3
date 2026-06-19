@@ -49,26 +49,10 @@ export function ContactForm() {
   function validate() {
     const nextErrors: ContactFormErrors = {};
 
-    if (!values.name.trim()) {
-      nextErrors.name = "Name is required.";
-    }
-
     if (!values.email.trim()) {
-      nextErrors.email = "Email is required.";
+      nextErrors.email = "Please enter an email so BioAxis can follow up.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-      nextErrors.email = "Enter a valid email address.";
-    }
-
-    if (!values.company.trim()) {
-      nextErrors.company = "Company is required.";
-    }
-
-    if (!values.requestType.trim()) {
-      nextErrors.requestType = "Request type is required.";
-    }
-
-    if (!values.message.trim()) {
-      nextErrors.message = "Message is required.";
+      nextErrors.email = "Please enter an email so BioAxis can follow up.";
     }
 
     return nextErrors;
@@ -163,15 +147,15 @@ export function ContactForm() {
       </div>
       <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact BioAxis</h2>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-        Send a sourcing question, equivalent request, sample need, documentation request, or recurring supply note.
+        Only your email is required. Add a sourcing question, equivalent request, sample need, documentation note, or recurring supply context if useful.
       </p>
       <div className="mt-6 grid gap-5 md:grid-cols-2">
-        <Field id="name" label="Name" value={values.name} error={errors.name} required onChange={(value) => updateField("name", value)} />
+        <Field id="name" label="Name optional" value={values.name} error={errors.name} onChange={(value) => updateField("name", value)} />
         <Field id="email" label="Email" type="email" value={values.email} error={errors.email} required onChange={(value) => updateField("email", value)} />
-        <Field id="company" label="Company" value={values.company} error={errors.company} required onChange={(value) => updateField("company", value)} />
+        <Field id="company" label="Company optional" value={values.company} error={errors.company} onChange={(value) => updateField("company", value)} />
         <div>
           <label htmlFor="requestType" className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
-            Request type <span className="text-bioaxis-accent">*</span>
+            Request type
           </label>
           <select
             id="requestType"
@@ -187,7 +171,7 @@ export function ContactForm() {
           </select>
           {errors.requestType ? <p className="mt-2 text-sm text-bioaxis-accent">{errors.requestType}</p> : null}
         </div>
-        <TextArea id="message" label="Message" value={values.message} error={errors.message} required onChange={(value) => updateField("message", value)} />
+        <TextArea id="message" label="Message optional" value={values.message} error={errors.message} onChange={(value) => updateField("message", value)} />
       </div>
       <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">

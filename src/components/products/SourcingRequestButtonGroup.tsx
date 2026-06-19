@@ -33,7 +33,7 @@ export function SourcingRequestButtonGroup({
   includeDocumentation = false
 }: SourcingRequestButtonGroupProps) {
   const requests = [
-    { label: "Request quote", requestType: "quote", primary: true },
+    { label: product ? "Request quote for this product" : "Request quote", requestType: "quote", primary: true },
     { label: "Find equivalent", requestType: "equivalent", primary: false },
     { label: "Request sample", requestType: "sample", primary: false },
     ...(includeDocumentation ? [{ label: "Ask for documentation", requestType: "documentation", primary: false }] : []),

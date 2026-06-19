@@ -23,11 +23,22 @@ export type SourcingListItem = {
   sampleNeeded: boolean;
   documentationNeeded: boolean;
   notes: string;
+  sourcePageUrl: string;
+  addedAt: string;
 };
 
 type SourcingListInput = Omit<
   SourcingListItem,
-  "id" | "quantity" | "currentSupplier" | "catalogNumber" | "equivalentNeeded" | "sampleNeeded" | "documentationNeeded" | "notes"
+  | "id"
+  | "quantity"
+  | "currentSupplier"
+  | "catalogNumber"
+  | "equivalentNeeded"
+  | "sampleNeeded"
+  | "documentationNeeded"
+  | "notes"
+  | "sourcePageUrl"
+  | "addedAt"
 >;
 
 type SourcingListContextValue = {
@@ -57,7 +68,9 @@ function emptyFields(item: SourcingListInput): SourcingListItem {
     equivalentNeeded: false,
     sampleNeeded: false,
     documentationNeeded: false,
-    notes: ""
+    notes: "",
+    sourcePageUrl: typeof window !== "undefined" ? window.location.href : item.href,
+    addedAt: new Date().toISOString()
   };
 }
 
@@ -75,7 +88,7 @@ function readStoredItems() {
 }
 
 function formatSubmission(items: SourcingListItem[]) {
-  const header = "Product / family | Path | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes";
+  const header = "Product / family | Path | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
   const rows = items.map((item) => {
     const path = [item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ");
 
@@ -88,7 +101,9 @@ function formatSubmission(items: SourcingListItem[]) {
       item.equivalentNeeded ? "yes" : "no",
       item.sampleNeeded ? "yes" : "no",
       item.documentationNeeded ? "yes" : "no",
-      item.notes || "-"
+      item.notes || "-",
+      item.sourcePageUrl || item.href,
+      item.addedAt || "-"
     ].join(" | ");
   });
 

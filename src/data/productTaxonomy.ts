@@ -729,8 +729,12 @@ export function buildRequestHref({
 }) {
   const params = new URLSearchParams();
   const resolvedSubcategory = subcategory ?? category;
+  const hasProductContext = Boolean(segment || resolvedSubcategory || family || product);
 
   params.set("requestType", requestType);
+  if (hasProductContext) {
+    params.set("source", "product-page");
+  }
 
   if (segment) {
     params.set("segment", segment);
@@ -766,8 +770,12 @@ export function buildEquivalentFinderHref({
 }) {
   const params = new URLSearchParams();
   const resolvedSubcategory = subcategory ?? category;
+  const hasProductContext = Boolean(segment || resolvedSubcategory || family || product);
 
   params.set("requestType", "equivalent");
+  if (hasProductContext) {
+    params.set("source", "product-page");
+  }
 
   if (segment) {
     params.set("segment", segment);

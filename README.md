@@ -55,7 +55,7 @@ Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. 
 To test email delivery:
 
 1. Deploy with all RFQ email environment variables configured.
-2. Submit `/request-quote` with a valid name, email, request type, and product detail or message.
+2. Submit `/request-quote` with a valid email. Product context, sourcing list items, and optional notes are included when available.
 3. Confirm the destination inbox receives the BioAxis request email and the UI shows a request received state.
 
 When `RESEND_API_KEY` or `BIOAXIS_RFQ_TO_EMAIL` is not configured, the API still validates the request and returns a captured success response so local builds, smoke tests, and demos remain functional without crashing. The API never exposes `RESEND_API_KEY` to browser code.
@@ -81,7 +81,7 @@ SMOKE_BASE_URL=https://bioaxisv3.vercel.app npm run smoke
 - `/about` - BioAxis positioning and sourcing-platform boundaries
 - `/contact` - backend-backed contact and sourcing request form
 - `/supplier-qualification` - supplier qualification, documentation, lot traceability, sample-first evaluation, and equivalent review approach
-- `/request-quote` - request quote form backed by `POST /api/rfq`
+- `/request-quote` - email-first RFQ form backed by `POST /api/rfq`
 - `/equivalent-finder` - equivalent consumables request entry point
 - `/samples` - sample evaluation request flow
 - `/quality` - documentation, qualification, and switching support

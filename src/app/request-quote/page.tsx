@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
 import { PageHero } from "@/components/ui/PageHero";
-import { labelFromProductContext } from "@/data/productTaxonomy";
+import { getFamilyBySlug, labelFromProductContext } from "@/data/productTaxonomy";
 import { getProductItemBySlug } from "@/data/productItems";
+import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 
 export const metadata: Metadata = {
   title: "Request Quote | BioAxis Consumables Sourcing",
@@ -40,40 +41,75 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const requestType = first(params?.requestType) ?? first(params?.inquiryType);
   const query = first(params?.q);
   const productList = first(params?.productList) ?? first(params?.list) ?? "";
+  const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
+  const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
+  const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
+  const timeline = first(params?.timeline) ?? "";
+  const requiredDocuments = first(params?.requiredDocuments) ?? first(params?.docs) ?? "";
   const labels = labelFromProductContext({ segment, subcategory, family });
   const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
-  const contextLabels = [
-    labels.segmentName || labelize(segment),
-    labels.subcategoryName || labelize(subcategory),
-    labels.familyName || labelize(family),
-    productMatch?.productItem.name || labelize(product)
-  ].filter(Boolean);
-  const productCategory = contextLabels.slice(0, 3).join(" / ");
+  const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
+  const sourceProductUrl = buildSourceProductUrl({ segment, subcategory, family, product });
+  const productCategory = labels.subcategoryName || labelize(subcategory) || "";
   const productName = productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
+  const productContext: BioAxisProductContext | undefined =
+    segment || subcategory || family || product
+      ? {
+          requestType: requestType ?? "quote",
+          productName,
+          productFamily: labels.familyName || labelize(family),
+          productCategory,
+          productSegment: labels.segmentName || labelize(segment),
+          productUrl: sourceProductUrl,
+          sourcePageUrl: sourceProductUrl,
+          relevantSpecs:
+            productMatch?.productItem.commonSpecifications.slice(0, 8) ??
+            familyMatch?.family.keySpecifications.slice(0, 8) ??
+            [],
+          documentationNotes:
+            productMatch?.productItem.documentationNeeds.slice(0, 8) ??
+            familyMatch?.family.documentationChecklist.slice(0, 8) ??
+            [],
+          timestamp: new Date().toISOString()
+        }
+      : undefined;
 
   return (
     <>
       <PageHero
         eyebrow="Request quote"
-        title="Turn product details into a quote-ready sourcing request."
-        subtitle="Use BioAxis for quote requests, equivalent review, sample evaluation, documentation requests, recurring supply planning, contact messages, and product-list review. Include the current supplier, catalog number, quantity, sterile status, documentation needs, and target timeline where available."
+        title="Send product context with only your email."
+        subtitle="BioAxis can follow up to clarify specs, equivalents, samples, documentation, or quote details. Product page context and sourcing list items are carried into the request automatically."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        {contextLabels.length > 0 ? (
-          <div className="mb-6 border border-bioaxis-line bg-bioaxis-panel p-5">
-            <p className="text-xs font-semibold uppercase text-bioaxis-accent">Product context</p>
-            <p className="mt-3 text-sm font-semibold text-bioaxis-text">{contextLabels.join(" > ")}</p>
-          </div>
-        ) : null}
         <QuoteRequestForm
           initialValues={{
             requestType: requestType ?? "quote",
-            productCategory,
-            productName,
-            productList
+            productList,
+            supplier,
+            catalogNumber,
+            quantity,
+            timeline,
+            requiredDocuments
           }}
+          productContext={productContext}
         />
       </section>
     </>
   );
+}
+
+function buildSourceProductUrl({
+  segment,
+  subcategory,
+  family,
+  product
+}: {
+  segment?: string;
+  subcategory?: string;
+  family?: string;
+  product?: string;
+}) {
+  const parts = ["products", segment, subcategory, family, product].filter(Boolean);
+  return parts.length > 1 ? `/${parts.join("/")}` : "";
 }

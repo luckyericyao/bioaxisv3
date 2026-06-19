@@ -37,15 +37,9 @@ export function SimpleRequestForm({ title, fields, submitLabel, confirmation, re
   function validate() {
     const nextErrors: Record<string, string> = {};
 
-    fields.forEach((field) => {
-      if (field.required && !values[field.id]?.trim()) {
-        nextErrors[field.id] = `${field.label} is required.`;
-      }
-    });
-
     const emailField = fields.find((field) => field.kind === "email");
-    if (emailField && values[emailField.id] && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values[emailField.id])) {
-      nextErrors[emailField.id] = "Enter a valid email address.";
+    if (emailField && (!values[emailField.id]?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values[emailField.id]))) {
+      nextErrors[emailField.id] = "Please enter an email so BioAxis can follow up.";
     }
 
     return nextErrors;
@@ -83,7 +77,7 @@ export function SimpleRequestForm({ title, fields, submitLabel, confirmation, re
         sampleNeeded: requestType === "sample",
         website,
         message: [
-          values.requiredSpecifications ? `Required specifications:\n${values.requiredSpecifications}` : "",
+          values.requiredSpecifications ? `Specifications or notes:\n${values.requiredSpecifications}` : "",
           values.application ? `Application / workflow:\n${values.application}` : "",
           values.notes
         ]
@@ -148,7 +142,7 @@ export function SimpleRequestForm({ title, fields, submitLabel, confirmation, re
         {fields.map((field) => (
           <FormField
             key={field.id}
-            field={field}
+            field={{ ...field, required: field.kind === "email" }}
             value={values[field.id] ?? ""}
             error={errors[field.id]}
             onChange={(value) => {

@@ -5,7 +5,16 @@ import { type SourcingListItem, useSourcingList } from "./SourcingListProvider";
 
 type AddToSourcingListButtonProps = Omit<
   SourcingListItem,
-  "id" | "quantity" | "currentSupplier" | "catalogNumber" | "equivalentNeeded" | "sampleNeeded" | "documentationNeeded" | "notes"
+  | "id"
+  | "quantity"
+  | "currentSupplier"
+  | "catalogNumber"
+  | "equivalentNeeded"
+  | "sampleNeeded"
+  | "documentationNeeded"
+  | "notes"
+  | "sourcePageUrl"
+  | "addedAt"
 > & {
   className?: string;
 };

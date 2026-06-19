@@ -52,15 +52,15 @@ export default function SamplesPage() {
           submitLabel="Request sample"
           confirmation="Your sample request has been prepared. BioAxis can use this information to review product fit, sample options, documentation needs, and quote paths where available."
           fields={[
-            { id: "name", label: "Name", required: true },
-            { id: "organization", label: "Organization", required: true },
+            { id: "name", label: "Name" },
+            { id: "organization", label: "Organization" },
             { id: "email", label: "Email", required: true, kind: "email" },
-            { id: "productCategory", label: "Product category", required: true },
+            { id: "productCategory", label: "Product category" },
             { id: "currentSupplier", label: "Current supplier / catalog number" },
-            { id: "requiredSpecifications", label: "Required specifications", required: true, kind: "textarea" },
+            { id: "requiredSpecifications", label: "Specifications or notes", kind: "textarea" },
             { id: "application", label: "Application / workflow" },
             { id: "estimatedUsage", label: "Estimated monthly usage" },
-            { id: "shippingRegion", label: "Shipping region", required: true },
+            { id: "shippingRegion", label: "Shipping region" },
             { id: "evaluationTimeline", label: "Evaluation timeline" },
             { id: "notes", label: "Notes", kind: "textarea" }
           ]}
@@ -69,7 +69,7 @@ export default function SamplesPage() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <ProcessSteps
           steps={[
-            { title: "Define fit", body: "Send product category, current product, required specifications, workflow, and shipping region." },
+            { title: "Define fit", body: "Send product category, current product, specs, workflow, or shipping region if already known." },
             { title: "Review sample path", body: "BioAxis helps organize sample request details and documentation needs where available." },
             { title: "Evaluate before scale", body: "Use pilot evaluation to support product matching, equivalent review, and recurring supply planning." }
           ]}

@@ -29,6 +29,7 @@ type RfqPayload = {
   sourcePageUrl?: unknown;
   referrer?: unknown;
   utm?: unknown;
+  productContext?: unknown;
   website?: unknown;
 };
 
@@ -59,6 +60,7 @@ type NormalizedRfq = {
   sourcePageUrl: string;
   referrer: string;
   utm: Record<string, string>;
+  productContext: ProductContextEmail;
 };
 
 type SourcingListEmailItem = {
@@ -71,6 +73,21 @@ type SourcingListEmailItem = {
   sampleNeeded: string;
   documentationNeeded: string;
   notes: string;
+  sourcePageUrl: string;
+  addedAt: string;
+};
+
+type ProductContextEmail = {
+  requestType: string;
+  productName: string;
+  productFamily: string;
+  productCategory: string;
+  productSegment: string;
+  productUrl: string;
+  sourcePageUrl: string;
+  relevantSpecs: string[];
+  documentationNotes: string[];
+  timestamp: string;
 };
 
 const maxPayloadBytes = 160_000;
@@ -136,6 +153,11 @@ function normalizeRequestType(value: unknown) {
   return requestTypeAliases[raw] ?? raw;
 }
 
+function normalizeSupportedRequestType(value: unknown) {
+  const normalized = normalizeRequestType(value);
+  return supportedRequestTypes.has(normalized) ? normalized : "quote";
+}
+
 function normalizeUtm(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
@@ -174,16 +196,46 @@ function normalizeSourcingListItems(value: unknown): SourcingListEmailItem[] {
       equivalentNeeded: cleanBoolean(record.equivalentNeeded),
       sampleNeeded: cleanBoolean(record.sampleNeeded),
       documentationNeeded: cleanBoolean(record.documentationNeeded),
-      notes: clean(record.notes, 1200)
+      notes: clean(record.notes, 1200),
+      sourcePageUrl: clean(record.sourcePageUrl || record.href, 1000),
+      addedAt: clean(record.addedAt, 80)
     };
   });
 }
 
+function normalizeStringArray(value: unknown, limit = 8) {
+  return Array.isArray(value)
+    ? value
+        .map((item) => clean(item, 500))
+        .filter(Boolean)
+        .slice(0, limit)
+    : [];
+}
+
+function normalizeProductContext(value: unknown, requestType: string): ProductContextEmail {
+  const record = value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+
+  return {
+    requestType: normalizeSupportedRequestType(record.requestType || requestType),
+    productName: clean(record.productName, 260),
+    productFamily: clean(record.productFamily, 220),
+    productCategory: clean(record.productCategory, 220),
+    productSegment: clean(record.productSegment, 220),
+    productUrl: clean(record.productUrl, 1000),
+    sourcePageUrl: clean(record.sourcePageUrl, 1000),
+    relevantSpecs: normalizeStringArray(record.relevantSpecs),
+    documentationNotes: normalizeStringArray(record.documentationNotes),
+    timestamp: clean(record.timestamp, 80)
+  };
+}
+
 function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq {
-  const requestType = normalizeRequestType(payload.requestType);
+  const requestType = normalizeSupportedRequestType(payload.requestType);
   const organization = clean(payload.organization || payload.company, 240);
   const sourcePageUrl = clean(payload.sourcePageUrl, 1000);
   const referrer = clean(payload.referrer, 1000) || clean(request.headers.get("referer"), 1000);
+  const productContext = normalizeProductContext(payload.productContext, requestType);
+  const resolvedSourcePageUrl = sourcePageUrl || productContext.sourcePageUrl || productContext.productUrl;
 
   return {
     name: clean(payload.name, 180),
@@ -192,10 +244,10 @@ function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq 
     phone: clean(payload.phone, 80),
     roleTitle: clean(payload.roleTitle, 160),
     requestType,
-    productCategory: clean(payload.productCategory || payload.productSegment, 240),
-    productSegment: clean(payload.productSegment, 180),
-    productFamily: clean(payload.productFamily, 220),
-    productName: clean(payload.productName, 260),
+    productCategory: clean(payload.productCategory || payload.productSegment || productContext.productCategory, 240),
+    productSegment: clean(payload.productSegment || productContext.productSegment, 180),
+    productFamily: clean(payload.productFamily || productContext.productFamily, 220),
+    productName: clean(payload.productName || productContext.productName, 260),
     catalogNumber: clean(payload.catalogNumber, 180),
     currentSupplier: clean(payload.currentSupplier || payload.supplier, 220),
     quantity: clean(payload.quantity, 120),
@@ -209,53 +261,27 @@ function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq 
     productList: clean(payload.productList, maxProductListLength),
     sourcingListItems: normalizeSourcingListItems(payload.sourcingListItems),
     message: clean(payload.message, maxMessageLength),
-    sourcePageUrl,
+    sourcePageUrl: resolvedSourcePageUrl,
     referrer,
-    utm: normalizeUtm(payload.utm)
+    utm: normalizeUtm(payload.utm),
+    productContext
   };
 }
 
-function hasRequestDetail(request: NormalizedRfq) {
-  return Boolean(
-    request.message ||
-      request.productList ||
-      request.productName ||
-      request.productCategory ||
-      request.productFamily ||
-      request.catalogNumber ||
-      request.currentSupplier ||
-      request.quantity ||
-      request.documentationNeeds ||
-      request.sourcingListItems.length > 0
-  );
-}
-
 function validateRequest(request: NormalizedRfq) {
-  if (!request.name) {
-    return "Name is required.";
-  }
-
   if (!request.email || !isValidEmail(request.email)) {
-    return "A valid email is required.";
-  }
-
-  if (!request.requestType || !supportedRequestTypes.has(request.requestType)) {
-    return "Supported request type is required.";
-  }
-
-  if (!hasRequestDetail(request)) {
-    return "Provide a message, product detail, catalog number, supplier, quantity, product list, or documentation need.";
+    return "Please enter an email so BioAxis can follow up.";
   }
 
   return "";
 }
 
 function fieldLine(label: string, value: string) {
-  return `${label}: ${value || "-"}`;
+  return `${label}: ${value || "Not provided"}`;
 }
 
 function htmlRow(label: string, value: string) {
-  return `<tr><th style="width:210px;text-align:left;padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#0f172a;background:#f8fafc;">${escapeHtml(label)}</th><td style="padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#1f2937;">${escapeHtml(value || "-")}</td></tr>`;
+  return `<tr><th style="width:210px;text-align:left;padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#0f172a;background:#f8fafc;">${escapeHtml(label)}</th><td style="padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#1f2937;">${escapeHtml(value || "Not provided")}</td></tr>`;
 }
 
 function htmlSection(title: string, rows: Array<[string, string]>) {
@@ -275,13 +301,13 @@ function plainSection(title: string, lines: string[]) {
 
 function formatSourcingListText(items: SourcingListEmailItem[]) {
   if (items.length === 0) {
-    return "-";
+    return "Not provided";
   }
 
   return items
     .map((item, index) =>
       [
-        `Item ${index + 1}: ${item.title || "-"}`,
+        `Item ${index + 1}: ${item.title || "Not provided"}`,
         fieldLine("Path", item.path),
         fieldLine("Quantity", item.quantity),
         fieldLine("Current supplier", item.currentSupplier),
@@ -289,7 +315,9 @@ function formatSourcingListText(items: SourcingListEmailItem[]) {
         fieldLine("Equivalent needed", item.equivalentNeeded),
         fieldLine("Sample needed", item.sampleNeeded),
         fieldLine("Documentation needed", item.documentationNeeded),
-        fieldLine("Notes", item.notes)
+        fieldLine("Notes", item.notes),
+        fieldLine("Source page", item.sourcePageUrl),
+        fieldLine("Added", item.addedAt)
       ].join("\n")
     )
     .join("\n\n");
@@ -297,14 +325,14 @@ function formatSourcingListText(items: SourcingListEmailItem[]) {
 
 function formatSourcingListHtml(items: SourcingListEmailItem[]) {
   if (items.length === 0) {
-    return "<p style=\"margin:0;color:#475569;\">-</p>";
+    return "<p style=\"margin:0;color:#475569;\">Not provided</p>";
   }
 
   return items
     .map(
       (item, index) => `
         <div style="margin:0 0 14px;border:1px solid #dbe3ea;padding:12px;background:#ffffff;">
-          <p style="margin:0 0 8px;font-weight:700;color:#0f172a;">Item ${index + 1}: ${escapeHtml(item.title || "-")}</p>
+          <p style="margin:0 0 8px;font-weight:700;color:#0f172a;">Item ${index + 1}: ${escapeHtml(item.title || "Not provided")}</p>
           <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
             ${[
               ["Path", item.path],
@@ -314,7 +342,9 @@ function formatSourcingListHtml(items: SourcingListEmailItem[]) {
               ["Equivalent needed", item.equivalentNeeded],
               ["Sample needed", item.sampleNeeded],
               ["Documentation needed", item.documentationNeeded],
-              ["Notes", item.notes]
+              ["Notes", item.notes],
+              ["Source page", item.sourcePageUrl],
+              ["Added", item.addedAt]
             ]
               .map(([label, value]) => htmlRow(label, value))
               .join("")}
@@ -352,8 +382,19 @@ function buildEmail(referenceId: string, request: NormalizedRfq) {
     ["Sterile / non-sterile preference", request.sterileStatus],
     ["Equivalent needed", request.equivalentNeeded],
     ["Sample needed", request.sampleNeeded],
-    ["Recurring supply needed", request.recurringSupplyNeeded],
-    ["Message", request.message]
+    ["Recurring supply needed", request.recurringSupplyNeeded]
+  ];
+  const productContextRows: Array<[string, string]> = [
+    ["Request type", requestTypeLabels[request.productContext.requestType] ?? request.productContext.requestType],
+    ["Product", request.productContext.productName],
+    ["Family", request.productContext.productFamily],
+    ["Category", request.productContext.productCategory],
+    ["Segment", request.productContext.productSegment],
+    ["Product URL", request.productContext.productUrl],
+    ["Source page", request.productContext.sourcePageUrl],
+    ["Auto-captured specs", request.productContext.relevantSpecs.join("; ")],
+    ["Documentation notes", request.productContext.documentationNotes.join("; ")],
+    ["Captured at", request.productContext.timestamp]
   ];
   const sourceRows: Array<[string, string]> = [
     ["Source page URL", request.sourcePageUrl],
@@ -366,8 +407,10 @@ function buildEmail(referenceId: string, request: NormalizedRfq) {
     "",
     plainSection("Request summary", summaryRows.map(([label, value]) => fieldLine(label, value))),
     plainSection("Contact information", contactRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Product / sourcing details", detailRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Pasted product list", [request.productList || "-"]),
+    plainSection("Auto-captured product context", productContextRows.map(([label, value]) => fieldLine(label, value))),
+    plainSection("Optional customer notes", [request.message || "Not provided"]),
+    plainSection("Optional supplier/catalog/quantity/docs/timeline fields", detailRows.map(([label, value]) => fieldLine(label, value))),
+    plainSection("Pasted product list", [request.productList || "Not provided"]),
     plainSection("Sourcing list items", [formatSourcingListText(request.sourcingListItems)]),
     plainSection("Source page / timestamp", sourceRows.map(([label, value]) => fieldLine(label, value))),
     "Reply instruction: Reply directly to the submitter if reply-to is valid."
@@ -380,10 +423,15 @@ function buildEmail(referenceId: string, request: NormalizedRfq) {
         <h1 style="margin:0;font-size:24px;line-height:1.25;color:#0f172a;">New BioAxis request</h1>
         ${htmlSection("Request summary", summaryRows)}
         ${htmlSection("Contact information", contactRows)}
-        ${htmlSection("Product / sourcing details", detailRows)}
+        ${htmlSection("Auto-captured product context", productContextRows)}
+        ${htmlSection("Optional supplier/catalog/quantity/docs/timeline fields", detailRows)}
         <section style="margin-top:22px;">
           <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Pasted product list</h2>
-          <pre style="white-space:pre-wrap;margin:0;border:1px solid #dbe3ea;background:#f8fafc;padding:12px;color:#1f2937;font-family:Menlo,Consolas,monospace;font-size:13px;">${escapeHtml(request.productList || "-")}</pre>
+          <pre style="white-space:pre-wrap;margin:0;border:1px solid #dbe3ea;background:#f8fafc;padding:12px;color:#1f2937;font-family:Menlo,Consolas,monospace;font-size:13px;">${escapeHtml(request.productList || "Not provided")}</pre>
+        </section>
+        <section style="margin-top:22px;">
+          <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Optional customer notes</h2>
+          <pre style="white-space:pre-wrap;margin:0;border:1px solid #dbe3ea;background:#f8fafc;padding:12px;color:#1f2937;font-family:Menlo,Consolas,monospace;font-size:13px;">${escapeHtml(request.message || "Not provided")}</pre>
         </section>
         <section style="margin-top:22px;">
           <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Sourcing list items</h2>
@@ -409,7 +457,7 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   }
 
   const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
-  const senderName = request.organization || request.name;
+  const senderName = request.productName || request.organization || request.name || request.email;
   const subject = `[BioAxis RFQ] ${requestLabel} — ${senderName}`;
   const { text, html } = buildEmail(referenceId, request);
   const replyTo = isValidEmail(request.email) ? request.email : fallbackReplyTo;
@@ -460,7 +508,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       mode: "honeypot",
-      message: "Request received. BioAxis will review the details and follow up by email."
+      message: "Request received. BioAxis will review the product context and follow up by email."
     });
   }
 
@@ -490,7 +538,7 @@ export async function POST(request: Request) {
       ok: true,
       mode: delivery.mode,
       referenceId,
-      message: "Request received. BioAxis will review the details and follow up by email."
+      message: "Request received. BioAxis will review the product context and follow up by email."
     });
   } catch {
     return NextResponse.json(
