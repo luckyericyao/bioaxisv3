@@ -104,6 +104,7 @@ const forbiddenVisiblePatterns = [
 const routes = [
   "/",
   "/products",
+  "/products?q=cell",
   "/workflows",
   "/equivalent-finder",
   "/quality",
@@ -122,7 +123,10 @@ function textOnly(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>/g, " ")
     .replace(/<style[\s\S]*?<\/style>/g, " ")
+    .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<[^>]+>/g, " ")
+    .replace(/&ldquo;/g, "“")
+    .replace(/&rdquo;/g, "”")
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
@@ -199,6 +203,25 @@ for (const route of routes) {
 
   if (route === "/products" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote")) {
     checkForbiddenVisibleStrings(route, pageText);
+  }
+
+  if (route === "/products?q=cell") {
+    const cellCultureIndex = pageText.indexOf("Cell Culture");
+    const liquidHandlingIndex = pageText.indexOf("Liquid Handling");
+
+    ["Results for “cell”", "Top matches", "Related matches", "Clear search", "Browse all product segments"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing search UX label ${label}`);
+      }
+    });
+
+    if (cellCultureIndex === -1) {
+      failures.push(`${route}: missing Cell Culture result`);
+    }
+
+    if (liquidHandlingIndex !== -1 && cellCultureIndex !== -1 && liquidHandlingIndex < cellCultureIndex) {
+      failures.push(`${route}: Liquid Handling appears before Cell Culture for cell query`);
+    }
   }
 
   if (route === "/") {

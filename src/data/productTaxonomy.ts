@@ -150,9 +150,12 @@ export type ProductSearchResult = {
   description: string;
   href: string;
   segmentTitle: string;
+  segmentSlug: string;
   categoryTitle?: string;
+  categorySlug?: string;
   subcategoryTitle?: string;
   familyTitle?: string;
+  familySlug?: string;
 };
 
 const buyerTypes = [
@@ -781,6 +784,54 @@ export function buildEquivalentFinderHref({
   return `/equivalent-finder?${params.toString()}`;
 }
 
+type ScoredProductSearchResult = ProductSearchResult & {
+  score: number;
+  order: number;
+};
+
+function scoreSearchText(text: string | string[] | undefined, normalizedQuery: string, weight: number) {
+  const source = Array.isArray(text) ? text.join(" ") : text ?? "";
+  const normalizedText = source.toLowerCase();
+
+  if (!normalizedText.includes(normalizedQuery)) {
+    return 0;
+  }
+
+  if (normalizedText === normalizedQuery) {
+    return weight * 5;
+  }
+
+  if (normalizedText.startsWith(normalizedQuery)) {
+    return weight * 4;
+  }
+
+  if (new RegExp(`(^|[^a-z0-9])${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(normalizedText)) {
+    return weight * 3;
+  }
+
+  return weight;
+}
+
+function typeSortWeight(type: SearchResultType) {
+  return type === "segment" ? 3 : type === "subcategory" ? 2 : 1;
+}
+
+function toProductSearchResult(result: ScoredProductSearchResult): ProductSearchResult {
+  return {
+    type: result.type,
+    title: result.title,
+    description: result.description,
+    href: result.href,
+    segmentTitle: result.segmentTitle,
+    segmentSlug: result.segmentSlug,
+    categoryTitle: result.categoryTitle,
+    categorySlug: result.categorySlug,
+    subcategoryTitle: result.subcategoryTitle,
+    familyTitle: result.familyTitle,
+    familySlug: result.familySlug
+  };
+}
+
 export function getProductSearchResults(query: string): ProductSearchResult[] {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -788,89 +839,94 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     return [];
   }
 
-  const results: ProductSearchResult[] = [];
+  const results: ScoredProductSearchResult[] = [];
+  let order = 0;
 
   productTaxonomy.forEach((segment) => {
-    const segmentSearch = [
-      segment.name,
-      segment.headline,
-      segment.shortDescription,
-      ...segment.buyerUseCases,
-      ...segment.buyerSpecs,
-      ...segment.productFamilies,
-      ...segment.applications,
-      ...segment.formats
-    ]
-      .join(" ")
-      .toLowerCase();
+    const segmentScore =
+      scoreSearchText(segment.name, normalizedQuery, 120) +
+      scoreSearchText(segment.slug, normalizedQuery, 100) +
+      scoreSearchText(segment.productFamilies, normalizedQuery, 72) +
+      scoreSearchText([segment.headline, segment.shortDescription], normalizedQuery, 45) +
+      scoreSearchText([...segment.buyerUseCases, ...segment.buyerSpecs, ...segment.applications, ...segment.formats], normalizedQuery, 12) +
+      typeSortWeight("segment");
 
-    if (segmentSearch.includes(normalizedQuery)) {
+    if (segmentScore > typeSortWeight("segment")) {
       results.push({
         type: "segment",
         title: segment.name,
         description: segment.shortDescription,
         href: `/products/${segment.slug}`,
-        segmentTitle: segment.name
+        segmentTitle: segment.name,
+        segmentSlug: segment.slug,
+        score: segmentScore,
+        order: order++
       });
     }
 
     segment.subcategories.forEach((subcategory) => {
-      const subcategorySearch = [
-        subcategory.name,
-        subcategory.shortDescription,
-        subcategory.longDescription,
-        ...subcategory.buyerSpecs,
-        ...subcategory.commonFormats,
-        ...subcategory.applications,
-        ...subcategory.documentationNeeds,
-        ...subcategory.families.map((family) => family.name)
-      ]
-        .join(" ")
-        .toLowerCase();
+      const subcategoryPath = [segment.name, segment.slug, subcategory.name, subcategory.slug];
+      const subcategoryScore =
+        scoreSearchText(subcategory.name, normalizedQuery, 110) +
+        scoreSearchText(subcategory.slug, normalizedQuery, 96) +
+        scoreSearchText(subcategoryPath, normalizedQuery, 74) +
+        scoreSearchText(subcategory.families.map((family) => family.name), normalizedQuery, 56) +
+        scoreSearchText([subcategory.shortDescription, subcategory.longDescription], normalizedQuery, 34) +
+        scoreSearchText([...subcategory.buyerSpecs, ...subcategory.commonFormats, ...subcategory.applications, ...subcategory.documentationNeeds], normalizedQuery, 10) +
+        typeSortWeight("subcategory");
 
-      if (subcategorySearch.includes(normalizedQuery)) {
+      if (subcategoryScore > typeSortWeight("subcategory")) {
         results.push({
           type: "subcategory",
           title: subcategory.name,
           description: subcategory.shortDescription,
           href: `/products/${segment.slug}/${subcategory.slug}`,
           segmentTitle: segment.name,
+          segmentSlug: segment.slug,
           categoryTitle: subcategory.name,
-          subcategoryTitle: subcategory.name
+          categorySlug: subcategory.slug,
+          subcategoryTitle: subcategory.name,
+          score: subcategoryScore,
+          order: order++
         });
       }
 
       subcategory.families.forEach((family) => {
-        const familySearch = [
-          family.name,
-          family.shortDescription,
-          family.longDescription,
-          ...family.buyerSpecs,
-          ...family.commonFormats,
-          ...family.applications,
-          ...family.documentationNeeds,
-          ...family.equivalentMatchingInputs
-        ]
-          .join(" ")
-          .toLowerCase();
+        const familyPath = [segment.name, segment.slug, subcategory.name, subcategory.slug, family.name, family.slug];
+        const familyScore =
+          scoreSearchText(family.name, normalizedQuery, 116) +
+          scoreSearchText(family.slug, normalizedQuery, 102) +
+          scoreSearchText(familyPath, normalizedQuery, 70) +
+          scoreSearchText([family.shortDescription, family.longDescription], normalizedQuery, 32) +
+          scoreSearchText([...family.buyerSpecs, ...family.commonFormats], normalizedQuery, 14) +
+          scoreSearchText([...family.applications, ...family.documentationNeeds, ...family.equivalentMatchingInputs], normalizedQuery, 8) +
+          typeSortWeight("family");
 
-        if (familySearch.includes(normalizedQuery)) {
+        if (familyScore > typeSortWeight("family")) {
           results.push({
             type: "family",
             title: family.name,
             description: family.shortDescription,
             href: `/products/${segment.slug}/${subcategory.slug}/${family.slug}`,
             segmentTitle: segment.name,
+            segmentSlug: segment.slug,
             categoryTitle: subcategory.name,
+            categorySlug: subcategory.slug,
             subcategoryTitle: subcategory.name,
-            familyTitle: family.name
+            familyTitle: family.name,
+            familySlug: family.slug,
+            score: familyScore,
+            order: order++
           });
         }
       });
     });
   });
 
-  return results.slice(0, 42);
+  return results
+    .sort((a, b) => b.score - a.score || typeSortWeight(b.type) - typeSortWeight(a.type) || a.order - b.order)
+    .slice(0, 42)
+    .map(toProductSearchResult);
 }
 
 export function getAllProductHrefs() {
