@@ -101,6 +101,20 @@ const requestTypeLabels = ["Quote request", "Equivalent request", "Sample reques
 const equivalentFinderContent = ["Common equivalent requests", "How BioAxis compares fit", "Safer switching path", "BioAxis helps compare compatible options. Final suitability depends on customer validation."];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
+const requiredProductSegments = [
+  "Liquid Handling",
+  "Lab Plasticware",
+  "Cell Culture",
+  "Molecular Biology & PCR",
+  "Sample Prep & Filtration",
+  "Storage & Cryopreservation",
+  "Automation Consumables",
+  "Assays & Detection",
+  "Proteins, Antibodies & Immunology",
+  "Buffers, Chemicals & Reagents",
+  "Small Lab Equipment",
+  "Early Bioprocess & Single-Use"
+];
 const legacyNavLabels = ["Equivalents", "Support", "Applications", "Services", "Suppliers"];
 
 const forbiddenVisiblePatterns = [
@@ -283,8 +297,13 @@ for (const route of routes) {
   }
 
   if (route === "/products?q=cell") {
-    const cellCultureIndex = pageText.search(/Cell Culture/i);
-    const liquidHandlingIndex = pageText.indexOf("Liquid Handling");
+    const rankedResultsStart = pageText.indexOf("Top matches");
+    const rankedResultsEnd = pageText.indexOf("Browse all product segments");
+    const rankedResultsText = rankedResultsStart !== -1 && rankedResultsEnd !== -1
+      ? pageText.slice(rankedResultsStart, rankedResultsEnd)
+      : pageText;
+    const cellCultureIndex = rankedResultsText.search(/Cell Culture/i);
+    const liquidHandlingIndex = rankedResultsText.indexOf("Liquid Handling");
 
     if (cellCultureIndex === -1) {
       failures.push(`${route}: missing Cell Culture result`);
@@ -344,6 +363,23 @@ for (const route of routes) {
         failures.push(`${route}: missing buyer entry mode ${label}`);
       }
     });
+
+    requiredProductSegments.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product navigation segment ${label}`);
+      }
+    });
+
+    ["Product navigation", "Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "Request sample"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product navigation/hover content ${label}`);
+      }
+    });
+
+    if (!html.includes('id="products-mega-menu"') || !html.includes('aria-expanded="false"')) {
+      failures.push(`${route}: missing desktop Products mega menu shell`);
+    }
+
   }
 
   if (route === "/resources") {
@@ -683,6 +719,9 @@ const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisR
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
+const headerSource = await readRequiredProjectFile("src/components/layout/Header.tsx");
+const productNavigationSource = await readRequiredProjectFile("src/data/productNavigation.ts");
+const productCategoryCardSource = await readRequiredProjectFile("src/components/products/ProductCategoryCard.tsx");
 const envExampleSource = await readRequiredProjectFile(".env.example");
 
 if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("https://api.resend.com/emails")) {
@@ -700,6 +739,32 @@ if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.
 if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   failures.push("src/lib/submitBioAxisRequest.ts: expected centralized submit helper to post to /api/rfq");
 }
+
+[
+  "products-mega-menu",
+  "mobile-products-navigation",
+  "ProductMegaMenu",
+  "MobileProductsAccordion",
+  "aria-expanded",
+  "Escape",
+  "productNavigationSegments"
+].forEach((label) => {
+  if (!headerSource.includes(label)) {
+    failures.push(`Header: missing product navigation capability ${label}`);
+  }
+});
+
+["productTaxonomy.map", "familyLinks", "categories.flatMap"].forEach((label) => {
+  if (!productNavigationSource.includes(label)) {
+    failures.push(`productNavigation data: missing shared taxonomy-derived field ${label}`);
+  }
+});
+
+["getProductNavigationSegment", "SegmentFamilyReveal", "group-hover:max-h-80", "group-focus-within:max-h-80"].forEach((label) => {
+  if (!productCategoryCardSource.includes(label)) {
+    failures.push(`ProductCategoryCard: missing hover/focus family reveal ${label}`);
+  }
+});
 
 if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes("data-rfq-mode=\"email-only\"")) {
   failures.push("QuoteRequestForm: expected email-only validation mode");
