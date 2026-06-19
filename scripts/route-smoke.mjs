@@ -388,7 +388,7 @@ for (const route of routes) {
     [
       "Send product context with only your email.",
       "Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.",
-      "You can submit now and BioAxis can follow up for missing details.",
+      "Submit now, and BioAxis can follow up by email to clarify specs, equivalents, samples, documentation, or quantities.",
       "Email *",
       "Company / organization optional",
       "Optional details"
@@ -427,7 +427,7 @@ for (const route of routes) {
       "Pipette Tips",
       "Liquid Handling",
       "Source page",
-      "BioAxis will include this product context with your request. You can add details below, but it is not required."
+      "BioAxis will include this product context with your request. You can add more details below, but it is not required."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-context summary ${label}`);
@@ -831,6 +831,21 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
     failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
   } else {
     console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+  }
+
+  const emailOnlyResponse = await fetch(new URL("/api/rfq", baseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: "email-only@example.com"
+    })
+  });
+  const emailOnlyPayload = await emailOnlyResponse.json();
+
+  if (!emailOnlyResponse.ok || emailOnlyPayload?.ok !== true) {
+    failures.push(`/api/rfq email-only: expected success, got ${emailOnlyResponse.status}`);
   }
 
   const missingEmailResponse = await fetch(new URL("/api/rfq", baseUrl), {

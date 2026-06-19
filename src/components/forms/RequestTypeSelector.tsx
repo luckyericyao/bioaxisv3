@@ -36,7 +36,8 @@ export function RequestTypeSelector({ requestTypes, selectedId, onSelect }: Requ
                 </span>
               </span>
               <span className="mt-4 block text-sm font-bold uppercase text-bioaxis-text">{requestType.label} </span>
-              <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{requestType.description}</span>
+              <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{requestType.description} </span>
+              <span className="sr-only">End of {requestType.label} card. </span>
             </button>
           </li>
         );

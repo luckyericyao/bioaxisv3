@@ -251,7 +251,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
         <div className="mt-3 grid gap-2 text-sm leading-6 text-bioaxis-muted">
           <p>Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.</p>
-          <p>You can submit now and BioAxis can follow up for missing details.</p>
+          <p>Submit now, and BioAxis can follow up by email to clarify specs, equivalents, samples, documentation, or quantities.</p>
         </div>
       </section>
 
@@ -371,7 +371,7 @@ function RequestContextCard({ productContext }: { productContext: BioAxisProduct
       <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request context</p>
       <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-        BioAxis will include this product context with your request. You can add details below, but it is not required.
+        BioAxis will include this product context with your request. You can add more details below, but it is not required.
       </p>
       <dl className="mt-6 grid gap-3 md:grid-cols-2">
         {contextRows.map(([label, value]) => (
