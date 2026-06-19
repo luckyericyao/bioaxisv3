@@ -49,6 +49,16 @@ const productItemDetailSections = [
 ];
 
 const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
+const requiredWorkflowStageLabels = [
+  "Target Discovery & Biology Validation",
+  "Cell Model & Assay Development",
+  "Screening & Hit Identification",
+  "Lead Optimization & In Vitro Profiling",
+  "ADME / DMPK / Bioanalysis",
+  "Preclinical Sample Collection & Storage",
+  "Process Development & Early CMC",
+  "QC, Analytical Testing & Release Support"
+];
 const requestTypeLabels = ["Quote request", "Equivalent request", "Sample request", "Documentation request", "Recurring supply request", "Product list review", "Contact request"];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
@@ -73,6 +83,7 @@ const forbiddenVisiblePatterns = [
 const routes = [
   "/",
   "/products",
+  "/workflows",
   "/equivalent-finder",
   "/request-quote",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -183,6 +194,20 @@ for (const route of routes) {
     requestTypeLabels.forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing request type ${label}`);
+      }
+    });
+  }
+
+  if (route === "/workflows") {
+    requiredWorkflowStageLabels.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing workflow stage ${label}`);
+      }
+    });
+
+    ["Workflow → Product Family Map", "Send us your workflow. We will map the consumables.", "Map my workflow"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing workflow content ${label}`);
       }
     });
   }
