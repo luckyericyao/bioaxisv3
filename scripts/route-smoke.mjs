@@ -50,6 +50,7 @@ const productItemDetailSections = [
 
 const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
 const productSearchExpectations = {
+  "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
   "/products?q=pcr": ["PCR"],
   "/products?q=filter": ["Filter"],
@@ -111,6 +112,7 @@ const forbiddenVisiblePatterns = [
 const routes = [
   "/",
   "/products",
+  "/products?q=gene",
   "/products?q=cell",
   "/products?q=pcr",
   "/products?q=filter",
@@ -219,7 +221,7 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    ["Results for", "Ranked by keyword relevance", "Top matches", "Clear search", "Browse all product segments"].forEach((label) => {
+    ["Results for", "Ranked across BioAxis", "Search coverage", "Top matches", "Sourcing next steps", "Clear search", "Browse all product segments"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }

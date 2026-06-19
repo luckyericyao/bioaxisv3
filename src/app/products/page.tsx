@@ -34,39 +34,52 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <>
       <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-16 sm:px-8 lg:px-10">
-        <div className="grid gap-8 border-b border-bioaxis-line pb-12 pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-end">
-          <div>
-            <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">One stop for life science consumables</p>
+        {query ? (
+          <div className="border-b border-bioaxis-line pb-12 pt-10">
+            <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">BioAxis product universe search</p>
             <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
-            <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-              Browse BioAxis product segments, drill into category and family pages, prepare equivalent reviews, request samples, and submit quote-ready sourcing requests. Availability, documentation, and pricing are confirmed through sourcing review.
+            <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+              Search across BioAxis segments, categories, families, product configurations, specifications, applications, and descriptions. Results are ranked for sourcing relevance before the full directory appears below.
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {[
-                { title: "Browse by category", body: "Start from 12 product segments and move into category and family pages." },
-                { title: "Find an equivalent", body: "Submit a current supplier, catalog number, product description, or critical specification." },
-                { title: "Request quote or sample", body: "Share quantity, timeline, documentation needs, and evaluation requirements." }
-              ].map((mode) => (
-                <article key={mode.title} className="border border-bioaxis-line bg-bioaxis-panel/70 p-4">
-                  <h2 className="text-sm font-bold uppercase text-bioaxis-text">{mode.title}</h2>
-                  <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{mode.body}</p>
-                </article>
-              ))}
-            </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
-                Browse categories
-              </Link>
-              <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                Find equivalent
-              </Link>
-              <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                Request quote
-              </Link>
+            <div className="mt-8">
+              <ProductSearch initialQuery={query} />
             </div>
           </div>
-          <ProductSearch initialQuery={query} />
-        </div>
+        ) : (
+          <div className="grid gap-8 border-b border-bioaxis-line pb-12 pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-end">
+            <div>
+              <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">One stop for life science consumables</p>
+              <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
+              <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+                Browse BioAxis product segments, drill into category and family pages, prepare equivalent reviews, request samples, and submit quote-ready sourcing requests. Availability, documentation, and pricing are confirmed through sourcing review.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {[
+                  { title: "Browse by category", body: "Start from 12 product segments and move into category and family pages." },
+                  { title: "Find an equivalent", body: "Submit a current supplier, catalog number, product description, or critical specification." },
+                  { title: "Request quote or sample", body: "Share quantity, timeline, documentation needs, and evaluation requirements." }
+                ].map((mode) => (
+                  <article key={mode.title} className="border border-bioaxis-line bg-bioaxis-panel/70 p-4">
+                    <h2 className="text-sm font-bold uppercase text-bioaxis-text">{mode.title}</h2>
+                    <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{mode.body}</p>
+                  </article>
+                ))}
+              </div>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+                  Browse categories
+                </Link>
+                <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                  Find equivalent
+                </Link>
+                <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                  Request quote
+                </Link>
+              </div>
+            </div>
+            <ProductSearch initialQuery={query} />
+          </div>
+        )}
       </section>
 
       <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
