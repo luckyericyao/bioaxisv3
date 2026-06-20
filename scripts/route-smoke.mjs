@@ -376,7 +376,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
+    ["Explore family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -790,6 +790,9 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "aria-expanded",
   "Escape",
   "max-h-[70vh]",
+  "familyPreviewLimit",
+  "slice(0, familyPreviewLimit)",
+  "View all",
   "productsOpen ? <ProductMegaMenu",
   "productNavigationSegments"
 ].forEach((label) => {
@@ -804,7 +807,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-family-discovery=\"true\"", "FamilyLinkGroups", "group-hover:max-h-80", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-family-discovery=\"true\"", "FamilyLinkGroups", "group-hover:max-h-96", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }

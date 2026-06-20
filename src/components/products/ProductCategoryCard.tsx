@@ -59,7 +59,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
 function SegmentFamilyDiscovery({ categories }: { categories: ProductNavigationCategory[] }) {
   return (
     <div data-product-family-discovery="true" className="mt-5">
-      <div className="hidden max-h-0 overflow-hidden border-t border-bioaxis-line pt-0 opacity-0 transition-all duration-300 md:block md:group-hover:max-h-80 md:group-hover:overflow-y-auto md:group-hover:pt-5 md:group-hover:opacity-100 md:group-focus-within:max-h-80 md:group-focus-within:overflow-y-auto md:group-focus-within:pt-5 md:group-focus-within:opacity-100">
+      <div className="hidden max-h-0 overflow-hidden border-t border-bioaxis-line pt-0 opacity-0 transition-all duration-300 ease-out md:block md:group-hover:max-h-96 md:group-hover:overflow-y-auto md:group-hover:pt-5 md:group-hover:opacity-100 md:group-focus-within:max-h-96 md:group-focus-within:overflow-y-auto md:group-focus-within:pt-5 md:group-focus-within:opacity-100">
         <FamilyLinkGroups categories={categories} />
       </div>
       <details className="border-t border-bioaxis-line pt-4 md:hidden">
@@ -74,8 +74,8 @@ function SegmentFamilyDiscovery({ categories }: { categories: ProductNavigationC
 
 function FamilyLinkGroups({ categories }: { categories: ProductNavigationCategory[] }) {
   return (
-    <div>
-      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-accent">Family links</p>
+    <div className="rounded-none border border-white/[0.08] bg-bioaxis-black/55 p-3">
+      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-accent">Explore family links</p>
       <div className="grid gap-3">
         {categories.map((category) => (
           <div key={category.slug}>
@@ -85,12 +85,12 @@ function FamilyLinkGroups({ categories }: { categories: ProductNavigationCategor
             >
               {category.label}
             </Link>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {category.families.map((family) => (
                 <Link
                   key={family.href}
                   href={family.href}
-                  className="border border-white/[0.1] bg-bioaxis-black px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                  className="border border-white/[0.1] bg-bioaxis-panel px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:bg-bioaxis-accent/10 hover:text-bioaxis-accent focus:border-bioaxis-accent focus:text-bioaxis-accent"
                 >
                   {family.label}
                 </Link>

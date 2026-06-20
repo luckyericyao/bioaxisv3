@@ -12,6 +12,8 @@ const productMenuActions = [
   { label: "Request sample", href: "/request-quote?requestType=sample" }
 ];
 
+const familyPreviewLimit = 4;
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
@@ -191,15 +193,26 @@ function ProductMegaMenu({ onNavigate }: { onNavigate: () => void }) {
               <div className="mt-3 grid gap-3">
                 {segment.categories.map((category) => (
                   <div key={category.slug}>
-                    <Link
-                      href={category.href}
-                      onClick={onNavigate}
-                      className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent transition hover:text-bioaxis-text"
-                    >
-                      {category.label}
-                    </Link>
+                    <div className="flex items-center justify-between gap-3">
+                      <Link
+                        href={category.href}
+                        onClick={onNavigate}
+                        className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent transition hover:text-bioaxis-text"
+                      >
+                        {category.label}
+                      </Link>
+                      {category.families.length > familyPreviewLimit ? (
+                        <Link
+                          href={category.href}
+                          onClick={onNavigate}
+                          className="text-[10px] font-bold uppercase text-bioaxis-dim transition hover:text-bioaxis-accent"
+                        >
+                          View all
+                        </Link>
+                      ) : null}
+                    </div>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {category.families.map((family) => (
+                      {category.families.slice(0, familyPreviewLimit).map((family) => (
                         <Link
                           key={family.href}
                           href={family.href}
@@ -246,15 +259,18 @@ function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
                 View {segment.label}
               </Link>
               {segment.categories.map((category) => (
-                <div key={category.slug}>
-                  <Link
-                    href={category.href}
-                    onClick={onNavigate}
-                    className="text-[11px] font-bold uppercase text-bioaxis-dim"
-                  >
+                <details key={category.slug} className="border border-white/[0.1] bg-bioaxis-panel/60">
+                  <summary className="cursor-pointer px-3 py-2 text-[11px] font-bold uppercase text-bioaxis-dim">
                     {category.label}
-                  </Link>
-                  <div className="mt-2 grid gap-1">
+                  </summary>
+                  <div className="grid gap-1 border-t border-white/[0.1] p-2">
+                    <Link
+                      href={category.href}
+                      onClick={onNavigate}
+                      className="border border-bioaxis-line px-2 py-2 text-xs font-bold uppercase text-bioaxis-accent"
+                    >
+                      View all {category.label}
+                    </Link>
                     {category.families.map((family) => (
                       <Link
                         key={family.href}
@@ -266,7 +282,7 @@ function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
                       </Link>
                     ))}
                   </div>
-                </div>
+                </details>
               ))}
             </div>
           </details>
