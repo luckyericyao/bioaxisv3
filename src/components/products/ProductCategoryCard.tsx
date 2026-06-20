@@ -30,7 +30,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
         ))}
       </div>
 
-      {navigationSegment ? <SegmentFamilyDiscovery categories={navigationSegment.categories} /> : null}
+      {navigationSegment ? <SegmentCategoryPreview categories={navigationSegment.categories} segmentHref={`/products/${segment.slug}`} /> : null}
 
       <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
         <Link
@@ -56,48 +56,45 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
   );
 }
 
-function SegmentFamilyDiscovery({ categories }: { categories: ProductNavigationCategory[] }) {
+function SegmentCategoryPreview({ categories, segmentHref }: { categories: ProductNavigationCategory[]; segmentHref: string }) {
+  const visibleCategories = categories.slice(0, 5);
+
   return (
-    <div data-product-family-discovery="true" className="mt-5">
+    <div data-product-category-preview="true" className="mt-5">
       <div className="hidden max-h-0 overflow-hidden border-t border-bioaxis-line pt-0 opacity-0 transition-all duration-300 ease-out md:block md:group-hover:max-h-96 md:group-hover:overflow-y-auto md:group-hover:pt-5 md:group-hover:opacity-100 md:group-focus-within:max-h-96 md:group-focus-within:overflow-y-auto md:group-focus-within:pt-5 md:group-focus-within:opacity-100">
-        <FamilyLinkGroups categories={categories} />
+        <CategoryLinkPreview categories={visibleCategories} segmentHref={segmentHref} />
       </div>
       <details className="border-t border-bioaxis-line pt-4 md:hidden">
-        <summary className="cursor-pointer text-xs font-bold uppercase text-bioaxis-accent">Show family links</summary>
+        <summary className="cursor-pointer text-xs font-bold uppercase text-bioaxis-accent">Show category links</summary>
         <div className="mt-4 max-h-80 overflow-y-auto">
-          <FamilyLinkGroups categories={categories} />
+          <CategoryLinkPreview categories={visibleCategories} segmentHref={segmentHref} />
         </div>
       </details>
     </div>
   );
 }
 
-function FamilyLinkGroups({ categories }: { categories: ProductNavigationCategory[] }) {
+function CategoryLinkPreview({ categories, segmentHref }: { categories: ProductNavigationCategory[]; segmentHref: string }) {
   return (
     <div className="rounded-none border border-white/[0.08] bg-bioaxis-black/55 p-3">
-      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-accent">Explore family links</p>
-      <div className="grid gap-3">
+      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-accent">Explore categories</p>
+      <div className="grid gap-2">
         {categories.map((category) => (
-          <div key={category.slug}>
-            <Link
-              href={category.href}
-              className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-dim transition hover:text-bioaxis-accent"
-            >
-              {category.label}
-            </Link>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {category.families.map((family) => (
-                <Link
-                  key={family.href}
-                  href={family.href}
-                  className="border border-white/[0.1] bg-bioaxis-panel px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:bg-bioaxis-accent/10 hover:text-bioaxis-accent focus:border-bioaxis-accent focus:text-bioaxis-accent"
-                >
-                  {family.label}
-                </Link>
-              ))}
-            </div>
-          </div>
+          <Link
+            key={category.slug}
+            href={category.href}
+            className="flex items-center justify-between border border-white/[0.1] bg-bioaxis-panel px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-bioaxis-steel transition hover:border-bioaxis-accent hover:bg-bioaxis-accent/10 hover:text-bioaxis-accent focus:border-bioaxis-accent focus:text-bioaxis-accent"
+          >
+            <span>{category.label}</span>
+            <span aria-hidden="true">→</span>
+          </Link>
         ))}
+        <Link
+          href={segmentHref}
+          className="mt-1 text-[11px] font-bold uppercase text-bioaxis-accent transition hover:text-bioaxis-text"
+        >
+          View segment
+        </Link>
       </div>
     </div>
   );

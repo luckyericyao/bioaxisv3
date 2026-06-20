@@ -35,6 +35,15 @@ const visibleRepresentativeFamilyRoutes = [
   "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips"
 ];
 
+const visibleRepresentativeCategoryRoutes = [
+  "/products/liquid-handling/pipette-tips",
+  "/products/lab-plasticware/tubes",
+  "/products/cell-culture/media-and-supplements",
+  "/products/molecular-biology-pcr/pcr-plastics",
+  "/products/sample-prep-filtration/syringe-filters",
+  "/products/automation-consumables/robotic-pipette-tips"
+];
+
 const familyPageRoutes = [
   ...visibleRepresentativeFamilyRoutes,
   "/products/cell-culture/media-and-supplements/serum-free-media",
@@ -382,7 +391,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Explore family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
+    ["Explore categories", "Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -393,9 +402,9 @@ for (const route of routes) {
       failures.push(`${route}: expected 12 compact segment cards, found ${compactSegmentCards}`);
     }
 
-    const familyDiscoveryPanels = [...html.matchAll(/data-product-family-discovery="true"/g)].length;
-    if (familyDiscoveryPanels !== 12) {
-      failures.push(`${route}: expected 12 product family discovery panels, found ${familyDiscoveryPanels}`);
+    const categoryPreviewPanels = [...html.matchAll(/data-product-category-preview="true"/g)].length;
+    if (categoryPreviewPanels !== 12) {
+      failures.push(`${route}: expected 12 product category preview panels, found ${categoryPreviewPanels}`);
     }
 
     ["Common buyer specs", "Primary applications"].forEach((label) => {
@@ -681,17 +690,17 @@ for (const route of routes) {
   console.log(`${route}: ok`);
 }
 
-for (const familyRoute of visibleRepresentativeFamilyRoutes) {
-  if (!productsHtml.includes(`href="${familyRoute}"`)) {
-    failures.push(`/products: missing header/mega-menu family link ${familyRoute}`);
+for (const categoryRoute of visibleRepresentativeCategoryRoutes) {
+  if (!productsHtml.includes(`href="${categoryRoute}"`)) {
+    failures.push(`/products: missing segment-card category preview link ${categoryRoute}`);
   }
 }
 
-const productFamilyLinks = [
+const productCategoryLinks = [
   ...new Set(
     [...productsHtml.matchAll(/href="(\/products\/[^"#?]+)"/g)]
       .map((match) => match[1])
-      .filter((href) => pathDepth(hrefPath(href)) === 4)
+      .filter((href) => pathDepth(hrefPath(href)) === 3)
   )
 ];
 
@@ -699,26 +708,26 @@ const resourceGuideLinks = [
   ...new Set([...resourcesHtml.matchAll(/href="(\/resources\/[^"#?]+)"/g)].map((match) => match[1]))
 ];
 
-if (productFamilyLinks.length === 0) {
-  failures.push("/products: no representative family links discovered");
+if (productCategoryLinks.length === 0) {
+  failures.push("/products: no representative category links discovered");
 }
 
 if (resourceGuideLinks.length !== 12) {
   failures.push(`/resources: expected 12 guide links, found ${resourceGuideLinks.length}`);
 }
 
-for (const href of productFamilyLinks) {
+for (const href of productCategoryLinks) {
   const response = await fetch(new URL(href, baseUrl), { redirect: "manual" });
   if (!response.ok) {
-    failures.push(`/products representative family link ${href}: HTTP ${response.status}`);
+    failures.push(`/products representative category link ${href}: HTTP ${response.status}`);
     continue;
   }
 
   const html = await response.text();
   const pageText = textOnly(html);
   checkForbiddenVisibleStrings(href, pageText);
-  if (!pageText.includes("Product configurations")) {
-    failures.push(`/products representative family link ${href}: missing Product configurations section`);
+  if (!pageText.includes("Choose a product family")) {
+    failures.push(`/products representative category link ${href}: missing category page family selection section`);
   }
 }
 
@@ -789,25 +798,36 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
 }
 
 [
-  "products-mega-menu",
+  "products-segment-dropdown",
   "mobile-products-navigation",
-  "ProductMegaMenu",
+  "ProductSegmentDropdown",
   "MobileProductsAccordion",
   "aria-expanded",
   "Escape",
   "handlePointerDown",
   "max-h-[calc(100vh-110px)]",
-  "w-[min(1280px,calc(100vw-48px))]",
-  "z-[80]",
+  "w-[min(360px,calc(100vw-32px))]",
+  "z-[90]",
   "bg-[#050a09]",
-  "familyPreviewLimit",
-  "slice(0, familyPreviewLimit)",
-  "View all",
-  "productsOpen ? <ProductMegaMenu",
+  "productsOpen ? <ProductSegmentDropdown",
   "productNavigationSegments"
 ].forEach((label) => {
   if (!headerSource.includes(label)) {
     failures.push(`Header: missing product navigation capability ${label}`);
+  }
+});
+
+[
+  "products-mega-menu",
+  "ProductMegaMenu",
+  "Product navigation",
+  "BioAxis product catalog",
+  "familyPreviewLimit",
+  "segment.categories.map",
+  "category.families.map"
+].forEach((label) => {
+  if (headerSource.includes(label)) {
+    failures.push(`Header: product dropdown still exposes dense catalog content ${label}`);
   }
 });
 
@@ -817,11 +837,15 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-family-discovery=\"true\"", "FamilyLinkGroups", "group-hover:max-h-96", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-category-preview=\"true\"", "CategoryLinkPreview", "group-hover:max-h-96", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
 });
+
+if (productCategoryCardSource.includes("category.families.map")) {
+  failures.push("ProductCategoryCard: product directory still exposes family links from top-level cards");
+}
 
 ["Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
   if (productCategoryCardSource.includes(legacyPattern)) {
