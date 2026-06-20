@@ -372,12 +372,23 @@ for (const route of routes) {
       failures.push(`${route}: missing desktop Products mega menu shell`);
     }
 
+    ["Product navigation", "Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "Request sample"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product navigation/discovery content ${label}`);
+      }
+    });
+
     const compactSegmentCards = [...html.matchAll(/data-product-segment-card="compact"/g)].length;
     if (compactSegmentCards !== 12) {
       failures.push(`${route}: expected 12 compact segment cards, found ${compactSegmentCards}`);
     }
 
-    ["Representative families", "Common buyer specs", "Primary applications", "Family links"].forEach((label) => {
+    const familyDiscoveryPanels = [...html.matchAll(/data-product-family-discovery="true"/g)].length;
+    if (familyDiscoveryPanels !== 12) {
+      failures.push(`${route}: expected 12 product family discovery panels, found ${familyDiscoveryPanels}`);
+    }
+
+    ["Common buyer specs", "Primary applications"].forEach((label) => {
       if (mainText.includes(label)) {
         failures.push(`${route}: product directory exposes old dense card content ${label}`);
       }
@@ -787,13 +798,13 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "segment.shortDescription", "View segment"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-family-discovery=\"true\"", "FamilyLinkGroups", "group-hover:max-h-80", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
-    failures.push(`ProductCategoryCard: missing compact segment card behavior ${label}`);
+    failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
 });
 
-["SegmentFamilyReveal", "Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
+["Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
   if (productCategoryCardSource.includes(legacyPattern)) {
     failures.push(`ProductCategoryCard: still contains dense product directory content ${legacyPattern}`);
   }
