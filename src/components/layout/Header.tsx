@@ -83,7 +83,7 @@ export function Header() {
                 >
                   {item.label}
                 </Link>
-                <ProductMegaMenu open={productsOpen} onNavigate={() => setProductsOpen(false)} />
+                {productsOpen ? <ProductMegaMenu onNavigate={() => setProductsOpen(false)} /> : null}
               </div>
             ) : (
               <Link
@@ -144,23 +144,19 @@ export function Header() {
   );
 }
 
-function ProductMegaMenu({ open, onNavigate }: { open: boolean; onNavigate: () => void }) {
+function ProductMegaMenu({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div
       id="products-mega-menu"
-      aria-hidden={!open}
-      className={[
-        "fixed left-0 right-0 top-16 hidden border-b border-bioaxis-line bg-bioaxis-black/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition duration-200 md:block",
-        open ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0"
-      ].join(" ")}
+      className="fixed left-0 right-0 top-16 hidden border-b border-white/[0.14] bg-bioaxis-black/80 shadow-2xl shadow-black/50 backdrop-blur-xl md:block"
     >
-      <div className="mx-auto max-h-[calc(100vh-5rem)] w-full max-w-7xl overflow-y-auto px-5 py-6 sm:px-8 lg:px-10">
-        <div className="mb-5 grid gap-4 border-b border-bioaxis-line pb-5 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div className="mx-auto max-h-[70vh] w-full max-w-7xl overflow-y-auto px-5 py-5 sm:px-8 lg:px-10">
+        <div className="mb-4 grid gap-4 border border-bioaxis-line bg-bioaxis-panel/85 p-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="text-xs font-bold uppercase text-bioaxis-accent">Product navigation</p>
-            <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Browse BioAxis product segments</h2>
+            <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">BioAxis product catalog</h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-              Move from top-level consumables segments into category and product-family pages without leaving the header.
+              Browse segments, then category headings, then compact product-family links. The panel scrolls internally so the page stays in place.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -169,30 +165,30 @@ function ProductMegaMenu({ open, onNavigate }: { open: boolean; onNavigate: () =
                 key={action.label}
                 href={action.href}
                 onClick={onNavigate}
-                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line bg-bioaxis-black px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 {action.label}
               </Link>
             ))}
           </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 lg:grid-cols-3 xl:grid-cols-4">
           {productNavigationSegments.map((segment) => (
-            <article key={segment.slug} className="border border-bioaxis-line bg-bioaxis-panel/90 p-4">
+            <article key={segment.slug} className="border border-bioaxis-line bg-bioaxis-panel/95 p-4 transition hover:border-bioaxis-accent/60">
               <Link
                 href={segment.href}
                 onClick={onNavigate}
-                className="group flex items-start justify-between gap-3"
+                className="group flex items-start justify-between gap-3 border-b border-bioaxis-line pb-3"
               >
                 <span>
                   <span className="text-[11px] font-bold uppercase text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
-                  <span className="mt-2 block text-sm font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
+                  <span className="mt-2 block text-sm font-bold uppercase leading-tight tracking-wide text-bioaxis-text transition group-hover:text-bioaxis-accent">
                     {segment.label}
                   </span>
                 </span>
                 <span className="text-bioaxis-accent transition group-hover:translate-x-1">→</span>
               </Link>
-              <div className="mt-4 grid gap-3">
+              <div className="mt-3 grid gap-3">
                 {segment.categories.map((category) => (
                   <div key={category.slug}>
                     <Link
@@ -202,13 +198,13 @@ function ProductMegaMenu({ open, onNavigate }: { open: boolean; onNavigate: () =
                     >
                       {category.label}
                     </Link>
-                    <div className="mt-2 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-1.5">
                       {category.families.map((family) => (
                         <Link
                           key={family.href}
                           href={family.href}
                           onClick={onNavigate}
-                          className="border border-white/[0.1] bg-bioaxis-black px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                          className="border border-white/[0.1] bg-bioaxis-black px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:bg-bioaxis-accent/10 hover:text-bioaxis-accent focus:border-bioaxis-accent focus:text-bioaxis-accent"
                         >
                           {family.label}
                         </Link>

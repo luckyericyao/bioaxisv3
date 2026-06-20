@@ -368,11 +368,15 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes('id="products-mega-menu"') || !html.includes('aria-expanded="false"')) {
-      failures.push(`${route}: missing desktop Products mega menu shell`);
+    if (html.includes('id="products-mega-menu"')) {
+      failures.push(`${route}: closed page should not render desktop Products mega menu content`);
     }
 
-    ["Product navigation", "Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "Request sample"].forEach((label) => {
+    if (!html.includes('aria-expanded="false"')) {
+      failures.push(`${route}: missing closed Products aria-expanded state`);
+    }
+
+    ["Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -785,6 +789,8 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "MobileProductsAccordion",
   "aria-expanded",
   "Escape",
+  "max-h-[70vh]",
+  "productsOpen ? <ProductMegaMenu",
   "productNavigationSegments"
 ].forEach((label) => {
   if (!headerSource.includes(label)) {
