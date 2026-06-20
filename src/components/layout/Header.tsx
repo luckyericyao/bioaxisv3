@@ -32,6 +32,24 @@ export function Header() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!productsOpen) {
+        return;
+      }
+
+      const target = event.target;
+      if (target instanceof Node && productsMenuRef.current?.contains(target)) {
+        return;
+      }
+
+      setProductsOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [productsOpen]);
+
   function closeMobileMenu() {
     setMenuOpen(false);
     setMobileProductsOpen(false);
@@ -150,10 +168,10 @@ function ProductMegaMenu({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div
       id="products-mega-menu"
-      className="fixed left-0 right-0 top-16 hidden border-b border-white/[0.14] bg-bioaxis-black/80 shadow-2xl shadow-black/50 backdrop-blur-xl md:block"
+      className="fixed left-1/2 top-16 z-[80] hidden w-[min(1280px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden border border-white/[0.16] bg-[#050a09] shadow-2xl shadow-black/70 md:block"
     >
-      <div className="mx-auto max-h-[70vh] w-full max-w-7xl overflow-y-auto px-5 py-5 sm:px-8 lg:px-10">
-        <div className="mb-4 grid gap-4 border border-bioaxis-line bg-bioaxis-panel/85 p-5 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div className="max-h-[calc(100vh-110px)] overflow-y-auto p-5 sm:p-6">
+        <div className="mb-4 grid gap-4 border border-bioaxis-line bg-bioaxis-panel p-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="text-xs font-bold uppercase text-bioaxis-accent">Product navigation</p>
             <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">BioAxis product catalog</h2>
@@ -176,7 +194,7 @@ function ProductMegaMenu({ onNavigate }: { onNavigate: () => void }) {
         </div>
         <div className="grid gap-3 lg:grid-cols-3 xl:grid-cols-4">
           {productNavigationSegments.map((segment) => (
-            <article key={segment.slug} className="border border-bioaxis-line bg-bioaxis-panel/95 p-4 transition hover:border-bioaxis-accent/60">
+            <article key={segment.slug} className="border border-bioaxis-line bg-bioaxis-panel p-4 transition hover:border-bioaxis-accent/60">
               <Link
                 href={segment.href}
                 onClick={onNavigate}

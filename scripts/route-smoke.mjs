@@ -372,6 +372,12 @@ for (const route of routes) {
       failures.push(`${route}: closed page should not render desktop Products mega menu content`);
     }
 
+    ["Product navigation", "BioAxis product catalog"].forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: closed page renders always-visible catalog panel text ${label}`);
+      }
+    });
+
     if (!html.includes('aria-expanded="false"')) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
@@ -789,7 +795,11 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "MobileProductsAccordion",
   "aria-expanded",
   "Escape",
-  "max-h-[70vh]",
+  "handlePointerDown",
+  "max-h-[calc(100vh-110px)]",
+  "w-[min(1280px,calc(100vw-48px))]",
+  "z-[80]",
+  "bg-[#050a09]",
   "familyPreviewLimit",
   "slice(0, familyPreviewLimit)",
   "View all",
