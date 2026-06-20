@@ -139,6 +139,8 @@ const routes = [
   "/products",
   "/products?q=gene",
   "/products?q=cell",
+  "/products?q=serum-free%20media",
+  "/products?q=cryovial",
   "/products?q=pcr",
   "/products?q=filter",
   "/products?q=vial",
@@ -150,6 +152,8 @@ const routes = [
   "/products?q=low%20retention%20tips",
   "/products/liquid-handling",
   "/products/liquid-handling/pipette-tips",
+  "/products/cell-culture",
+  "/products/cell-culture/media-and-supplements",
   "/workflows",
   "/equivalent-finder",
   "/quality",
@@ -157,6 +161,7 @@ const routes = [
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
   "/request-quote",
+  "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
   "/products/cell-culture/media-and-supplements/serum-free-media",
@@ -391,7 +396,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Explore categories", "Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
+    ["Show family links", "Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -402,9 +407,9 @@ for (const route of routes) {
       failures.push(`${route}: expected 12 compact segment cards, found ${compactSegmentCards}`);
     }
 
-    const categoryPreviewPanels = [...html.matchAll(/data-product-category-preview="true"/g)].length;
-    if (categoryPreviewPanels !== 12) {
-      failures.push(`${route}: expected 12 product category preview panels, found ${categoryPreviewPanels}`);
+    const familyDisclosurePanels = [...html.matchAll(/data-product-family-disclosure="true"/g)].length;
+    if (familyDisclosurePanels !== 12) {
+      failures.push(`${route}: expected 12 collapsed product family disclosure panels, found ${familyDisclosurePanels}`);
     }
 
     ["Common buyer specs", "Primary applications"].forEach((label) => {
@@ -504,6 +509,18 @@ for (const route of routes) {
 
     if (!html.includes('data-product-context-summary="true"')) {
       failures.push(`${route}: missing product context summary marker`);
+    }
+  }
+
+  if (route.startsWith("/request-quote?") && route.includes("family=Serum%20Free%20Media")) {
+    ["Request context", "Serum Free Media", "Media and Supplements", "Cell Culture"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing label-based RFQ context ${label}`);
+      }
+    });
+
+    if (!html.includes('data-product-context-summary="true"')) {
+      failures.push(`${route}: missing label-based product context summary marker`);
     }
   }
 
@@ -619,7 +636,7 @@ for (const route of routes) {
   }
 
   if (familyPageRoutes.includes(route)) {
-    ["Product configurations", "Buyer checklist", "Selection guidance", "Documentation", "Already using another supplier?", "Add to sourcing list"].forEach((label) => {
+    ["Product configurations", "Buyer checklist", "Specification checklist", "How to select", "Documentation checklist", "Compliance disclaimer", "Already using another supplier?", "Add to sourcing list"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing family progressive disclosure content ${label}`);
       }
@@ -837,15 +854,11 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-category-preview=\"true\"", "CategoryLinkPreview", "group-hover:max-h-96", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
 });
-
-if (productCategoryCardSource.includes("category.families.map")) {
-  failures.push("ProductCategoryCard: product directory still exposes family links from top-level cards");
-}
 
 ["Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
   if (productCategoryCardSource.includes(legacyPattern)) {
@@ -863,7 +876,7 @@ if (productCategoryCardSource.includes("category.families.map")) {
   ["Products page", productsPageSource, ["CompactEntryPanel", "Choose one starting point"]],
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
-  ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "ProductConfigurationSection"]],
+  ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
   ["Product item template", productItemTemplateSource, ["Product item details", "Specifications", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "min-h-20", "sr-only"]]
 ].forEach(([label, source, required]) => {

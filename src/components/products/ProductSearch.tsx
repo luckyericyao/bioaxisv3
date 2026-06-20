@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProductSearchResults } from "@/data/productSearch";
-import type { ProductSearchResult } from "@/data/productTaxonomy";
+import { buildEquivalentFinderHref, buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
 
 type ProductSearchProps = {
   initialQuery?: string;
@@ -45,26 +45,23 @@ function resultPath(result: ProductSearchResult) {
   return [result.segmentTitle, result.categoryTitle, result.familyTitle, result.productTitle].filter(Boolean).join(" / ");
 }
 
+function sourcePageFromResult(result: ProductSearchResult) {
+  return result.type === "workflow" || result.type === "resource" ? result.href : result.href.split("?")[0];
+}
+
 function requestHref(result: ProductSearchResult, requestType: "quote" | "equivalent", query: string) {
-  const params = new URLSearchParams({ requestType, q: query });
+  const context = {
+    segment: result.segmentSlug,
+    category: result.categorySlug,
+    family: result.familySlug,
+    product: result.productSlug,
+    sourcePage: sourcePageFromResult(result),
+    query
+  };
 
-  if (result.segmentSlug) {
-    params.set("segment", result.segmentSlug);
-  }
-
-  if (result.categorySlug) {
-    params.set("subcategory", result.categorySlug);
-  }
-
-  if (result.familySlug) {
-    params.set("family", result.familySlug);
-  }
-
-  if (result.productSlug) {
-    params.set("product", result.productSlug);
-  }
-
-  return `${requestType === "equivalent" ? "/equivalent-finder" : "/request-quote"}?${params.toString()}`;
+  return requestType === "equivalent"
+    ? buildEquivalentFinderHref(context)
+    : buildRequestHref({ ...context, requestType });
 }
 
 function detailHref(result: ProductSearchResult, query: string) {
@@ -87,6 +84,33 @@ function relevanceLabel(result: ProductSearchResult) {
   }
 
   return "Ranked relevance";
+}
+
+function matchedReason(result: ProductSearchResult) {
+  const fields = result.matchedFields ?? [];
+  const path = resultPath(result);
+
+  if (fields.includes("title")) {
+    return `Matched directly in the title${path ? ` within ${path}` : ""}.`;
+  }
+
+  if (fields.includes("path")) {
+    return `Matched the product path${path ? `: ${path}` : ""}.`;
+  }
+
+  if (fields.includes("aliases") || fields.includes("representative families")) {
+    return `Matched a related product-family term${path ? ` in ${path}` : ""}.`;
+  }
+
+  if (fields.includes("specifications")) {
+    return "Matched specification or buyer requirement text.";
+  }
+
+  if (fields.includes("applications")) {
+    return "Matched application or workflow context.";
+  }
+
+  return "Ranked by keyword relevance across BioAxis sourcing content.";
 }
 
 function highlightText(value: string, query: string) {
@@ -145,6 +169,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>
       <h3 className="mt-3 text-lg font-bold uppercase leading-snug text-bioaxis-text">{highlightText(result.title, query)}</h3>
       <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
+      <p className="mt-3 border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim">{matchedReason(result)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {result.matchedFields.slice(0, 5).map((field) => (
@@ -189,6 +214,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
+  const quoteSearchHref = `/request-quote?requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
+  const productListSearchHref = `/request-quote?requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -270,7 +297,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 Clear search
               </Link>
               <Link
-                href={`/request-quote?q=${encodeURIComponent(trimmedQuery)}&requestType=quote`}
+                href={quoteSearchHref}
                 className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
               >
                 Prepare request
@@ -282,11 +309,11 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       </section>
 
       {results.length > 0 ? (
-        <section className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_260px]">
-          <aside className="grid gap-4 lg:sticky lg:top-24 lg:self-start">
-            <div className="border border-bioaxis-line bg-bioaxis-panel p-5">
+        <section className="mt-6">
+          <div className="grid gap-4 border border-bioaxis-line bg-bioaxis-panel p-5 lg:grid-cols-3">
+            <div>
               <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Search coverage</p>
-              <div className="mt-5 grid gap-3">
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {typeCounts.map(([label, count]) => (
                   <div key={label} className="flex items-center justify-between border border-bioaxis-line bg-bioaxis-black px-3 py-2">
                     <span className="text-xs font-semibold uppercase text-bioaxis-steel">{label}</span>
@@ -295,9 +322,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 ))}
               </div>
             </div>
-            <div className="border border-bioaxis-line bg-bioaxis-panel p-5">
+            <div>
               <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top product areas</p>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {topSegments.map(([segment, count]) => (
                   <span key={segment} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
                     {segment} <span className="text-bioaxis-accent">{count}</span>
@@ -305,9 +332,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 ))}
               </div>
             </div>
-            <div className="border border-bioaxis-line bg-bioaxis-panel p-5">
+            <div>
               <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Matched across</p>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {matchedFields.map(([field, count]) => (
                   <span key={field} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
                     {field} <span className="text-bioaxis-accent">{count}</span>
@@ -315,9 +342,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 ))}
               </div>
             </div>
-          </aside>
+          </div>
 
-          <div className="min-w-0">
+          <div className="mt-8 min-w-0">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top matches</p>
@@ -353,9 +380,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             ) : null}
           </div>
 
-          <aside className="border border-bioaxis-line bg-bioaxis-panel p-5 xl:sticky xl:top-24 xl:self-start">
+          <aside className="mt-8 border border-bioaxis-line bg-bioaxis-panel p-5">
             <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Sourcing next steps</p>
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-4">
               {["View product details", "Request quote", "Find equivalent", "Send product list"].map((action) => (
                 <div key={action} className="border border-bioaxis-line bg-bioaxis-black px-3 py-3 text-xs font-semibold uppercase text-bioaxis-steel">
                   {action}
@@ -366,8 +393,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               BioAxis can help compare equivalent options, samples, documentation, and quote-ready sourcing lists.
             </p>
             <Link
-              href={`/request-quote?q=${encodeURIComponent(trimmedQuery)}&requestType=product-list-review`}
-              className="mt-5 inline-flex min-h-10 w-full items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+              href={productListSearchHref}
+              className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
               Send product list
             </Link>
@@ -378,6 +405,12 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <p className="text-sm leading-6 text-bioaxis-muted">
             No product-universe result matched this query. Submit the product name, current supplier, catalog number, or workflow and BioAxis can organize sourcing support.
           </p>
+          <Link
+            href={productListSearchHref}
+            className="mt-4 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+          >
+            Submit product list or RFQ
+          </Link>
         </section>
       )}
 

@@ -39,7 +39,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const family = first(params?.family);
   const product = first(params?.product);
   const requestType = first(params?.requestType) ?? first(params?.inquiryType);
-  const query = first(params?.q);
+  const query = first(params?.query) ?? first(params?.q);
+  const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const productList = first(params?.productList) ?? first(params?.list) ?? "";
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
@@ -49,11 +50,11 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const labels = labelFromProductContext({ segment, subcategory, family });
   const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
-  const sourceProductUrl = buildSourceProductUrl({ segment, subcategory, family, product });
+  const sourceProductUrl = sourcePage || buildSourceProductUrl({ segment, subcategory, family, product });
   const productCategory = labels.subcategoryName || labelize(subcategory) || "";
   const productName = productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
-    segment || subcategory || family || product
+    segment || subcategory || family || product || query || sourcePage
       ? {
           requestType: requestType ?? "quote",
           productName,

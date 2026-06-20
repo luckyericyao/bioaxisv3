@@ -717,7 +717,9 @@ export function buildRequestHref({
   family,
   product,
   inquiryType,
-  requestType = inquiryType ?? "quote"
+  requestType = inquiryType ?? "quote",
+  sourcePage,
+  query
 }: {
   segment?: string;
   category?: string;
@@ -726,10 +728,13 @@ export function buildRequestHref({
   product?: string;
   inquiryType?: string;
   requestType?: string;
+  sourcePage?: string;
+  query?: string;
 }) {
   const params = new URLSearchParams();
   const resolvedSubcategory = subcategory ?? category;
   const hasProductContext = Boolean(segment || resolvedSubcategory || family || product);
+  const resolvedSourcePage = sourcePage ?? buildProductContextPath({ segment, subcategory: resolvedSubcategory, family, product });
 
   params.set("requestType", requestType);
   if (hasProductContext) {
@@ -741,6 +746,7 @@ export function buildRequestHref({
   }
 
   if (resolvedSubcategory) {
+    params.set("category", resolvedSubcategory);
     params.set("subcategory", resolvedSubcategory);
   }
 
@@ -752,6 +758,14 @@ export function buildRequestHref({
     params.set("product", product);
   }
 
+  if (resolvedSourcePage) {
+    params.set("sourcePage", resolvedSourcePage);
+  }
+
+  if (query) {
+    params.set("query", query);
+  }
+
   return `/request-quote?${params.toString()}`;
 }
 
@@ -760,17 +774,22 @@ export function buildEquivalentFinderHref({
   category,
   subcategory,
   family,
-  product
+  product,
+  sourcePage,
+  query
 }: {
   segment?: string;
   category?: string;
   subcategory?: string;
   family?: string;
   product?: string;
+  sourcePage?: string;
+  query?: string;
 }) {
   const params = new URLSearchParams();
   const resolvedSubcategory = subcategory ?? category;
   const hasProductContext = Boolean(segment || resolvedSubcategory || family || product);
+  const resolvedSourcePage = sourcePage ?? buildProductContextPath({ segment, subcategory: resolvedSubcategory, family, product });
 
   params.set("requestType", "equivalent");
   if (hasProductContext) {
@@ -782,6 +801,7 @@ export function buildEquivalentFinderHref({
   }
 
   if (resolvedSubcategory) {
+    params.set("category", resolvedSubcategory);
     params.set("subcategory", resolvedSubcategory);
   }
 
@@ -793,7 +813,30 @@ export function buildEquivalentFinderHref({
     params.set("product", product);
   }
 
+  if (resolvedSourcePage) {
+    params.set("sourcePage", resolvedSourcePage);
+  }
+
+  if (query) {
+    params.set("query", query);
+  }
+
   return `/equivalent-finder?${params.toString()}`;
+}
+
+function buildProductContextPath({
+  segment,
+  subcategory,
+  family,
+  product
+}: {
+  segment?: string;
+  subcategory?: string;
+  family?: string;
+  product?: string;
+}) {
+  const parts = ["products", segment, subcategory, family, product].filter(Boolean);
+  return parts.length > 1 ? `/${parts.join("/")}` : "";
 }
 
 type ScoredProductSearchResult = ProductSearchResult & {

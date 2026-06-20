@@ -169,15 +169,21 @@ function ProductSegmentDropdown({ onNavigate }: { onNavigate: () => void }) {
               key={segment.slug}
               href={segment.href}
               onClick={onNavigate}
-              className="group flex min-h-11 items-center justify-between gap-3 border border-transparent px-3 py-2 text-sm font-semibold uppercase leading-tight text-bioaxis-steel transition hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-bioaxis-text focus:border-bioaxis-accent focus:bg-white/[0.06] focus:text-bioaxis-text focus:outline-none"
+              className="group grid gap-2 border border-transparent px-3 py-3 transition hover:border-white/[0.12] hover:bg-white/[0.06] focus:border-bioaxis-accent focus:bg-white/[0.06] focus:outline-none"
             >
-              <span className="flex items-center gap-3">
-                <span className="w-5 text-[11px] font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
-                <span>{segment.label}</span>
+              <span className="flex items-start justify-between gap-3">
+                <span className="flex min-w-0 items-start gap-3">
+                  <span className="mt-0.5 w-5 text-[11px] font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
+                  <span className="min-w-0 text-sm font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
+                    {segment.label}
+                  </span>
+                </span>
+                <span className="shrink-0 text-bioaxis-accent transition group-hover:translate-x-1" aria-hidden="true">
+                  →
+                </span>
               </span>
-              <span className="text-bioaxis-accent transition group-hover:translate-x-1" aria-hidden="true">
-                →
-              </span>
+              <span className="line-clamp-2 pl-8 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</span>
+              <span className="pl-8 text-[11px] font-bold uppercase text-bioaxis-accent">View segment</span>
             </Link>
           ))}
         </div>
@@ -195,12 +201,16 @@ function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
             key={segment.slug}
             href={segment.href}
             onClick={onNavigate}
-            className="flex min-h-11 items-center justify-between border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-sm font-bold uppercase text-bioaxis-text"
+            className="grid gap-1 border border-bioaxis-line bg-bioaxis-black px-3 py-3"
           >
-            <span>{segment.label}</span>
-            <span className="text-bioaxis-accent" aria-hidden="true">
-              →
+            <span className="flex items-start justify-between gap-3">
+              <span className="text-sm font-bold uppercase text-bioaxis-text">{segment.label}</span>
+              <span className="text-bioaxis-accent" aria-hidden="true">
+                →
+              </span>
             </span>
+            <span className="line-clamp-2 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</span>
+            <span className="text-[11px] font-bold uppercase text-bioaxis-accent">View segment</span>
           </Link>
         ))}
       </div>

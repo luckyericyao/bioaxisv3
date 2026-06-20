@@ -11,6 +11,8 @@ type SourcingRequestButtonGroupProps = {
   layout?: "grid" | "inline";
   includeSupport?: boolean;
   includeDocumentation?: boolean;
+  sourcePage?: string;
+  query?: string;
 };
 
 const baseClass =
@@ -30,7 +32,9 @@ export function SourcingRequestButtonGroup({
   size = "sm",
   layout = "grid",
   includeSupport = false,
-  includeDocumentation = false
+  includeDocumentation = false,
+  sourcePage,
+  query
 }: SourcingRequestButtonGroupProps) {
   const requests = [
     { label: product ? "Request quote for this product" : "Request quote", requestType: "quote", primary: true },
@@ -47,8 +51,8 @@ export function SourcingRequestButtonGroup({
           key={request.requestType}
           href={
             request.requestType === "equivalent"
-              ? buildEquivalentFinderHref({ segment, category, subcategory, family, product })
-              : buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType })
+              ? buildEquivalentFinderHref({ segment, category, subcategory, family, product, sourcePage, query })
+              : buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType, sourcePage, query })
           }
           className={[
             baseClass,

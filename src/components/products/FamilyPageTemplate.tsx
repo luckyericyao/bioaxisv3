@@ -38,14 +38,15 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Family overview</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Where this family fits</h2>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">What this family is used for</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{family.longDescription}</p>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Buyer checklist</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Specification checklist</h2>
           <div className="mt-5 flex flex-wrap gap-2">
             {family.recommendedRFQFields.slice(0, 8).map((field) => (
-              <SpecTag key={field}>{field}</SpecTag>
+              <SpecTag key={field}>{cleanListItem(field)}</SpecTag>
             ))}
           </div>
         </section>
@@ -55,11 +56,10 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-3">
-          <Disclosure title="Selection guidance" items={family.selectionCriteria} />
-          <Disclosure title="Applications" items={family.applications} />
-          <Disclosure title="Compatibility and equivalent notes" items={family.equivalentSwitchingConsiderations} />
-          <Disclosure title="Documentation" items={family.documentationChecklist} />
-          <Disclosure title="Sample and quote inputs" items={family.equivalentMatchingInputs} />
+          <Disclosure title="How to select" items={family.selectionCriteria} />
+          <Disclosure title="Equivalent switching considerations" items={family.equivalentSwitchingConsiderations} />
+          <Disclosure title="Documentation checklist" items={family.documentationChecklist} />
+          <Disclosure title="Sample / RFQ context" items={family.equivalentMatchingInputs} />
         </div>
       </section>
 
@@ -81,6 +81,15 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         category={category.slug}
         family={family.slug}
       />
+
+      <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+        <div className="border border-bioaxis-line bg-bioaxis-black p-5">
+          <p className="text-xs font-bold uppercase text-bioaxis-accent">Compliance disclaimer</p>
+          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+            Product fit, equivalent suitability, documentation, and sample acceptance should be reviewed and validated by the buyer for the intended protocol, instrument, quality system, and application.
+          </p>
+        </div>
+      </section>
     </>
   );
 }
@@ -95,10 +104,14 @@ function Disclosure({ title, items }: { title: string; items: string[] }) {
       <div className="border-t border-bioaxis-line p-5">
         <div className="flex flex-wrap gap-2">
           {items.map((item) => (
-            <SpecTag key={item}>{item}</SpecTag>
+            <SpecTag key={item}>{cleanListItem(item)}</SpecTag>
           ))}
         </div>
       </div>
     </details>
   );
+}
+
+function cleanListItem(item: string) {
+  return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
 }

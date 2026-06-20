@@ -24,6 +24,15 @@ const sourcingPaths = [
   }
 ];
 
+const buyerProblems = [
+  "Out-of-stock items",
+  "Price increases",
+  "Equivalent needs",
+  "Documentation needs",
+  "Sample-before-switching",
+  "Automation-compatible formats"
+];
+
 export function ProductDirectorySection() {
   return (
     <section id="sourcing-paths" className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
@@ -47,6 +56,16 @@ export function ProductDirectorySection() {
             </span>
           </Link>
         ))}
+      </div>
+      <div className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4">
+        <p className="text-xs font-bold uppercase text-bioaxis-accent">Common buyer triggers</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {buyerProblems.map((problem) => (
+            <span key={problem} className="border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+              {problem}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );

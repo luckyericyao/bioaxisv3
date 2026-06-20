@@ -139,6 +139,10 @@ function typeRank(type: ProductSearchResult["type"]) {
   return 1;
 }
 
+function productUniverseRank(type: ProductSearchResult["type"]) {
+  return type === "workflow" || type === "resource" ? 0 : 1;
+}
+
 function segmentAliases(segmentSlug: string) {
   const aliases: Record<string, string[]> = {
     "molecular-biology-pcr": [
@@ -388,9 +392,10 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
   return results
     .sort(
       (a, b) =>
-        b.score - a.score ||
+        productUniverseRank(b.type) - productUniverseRank(a.type) ||
         Number(b.exactPhraseMatch) - Number(a.exactPhraseMatch) ||
         Number(b.directMatch) - Number(a.directMatch) ||
+        b.score - a.score ||
         typeRank(b.type) - typeRank(a.type) ||
         a.order - b.order
     )
