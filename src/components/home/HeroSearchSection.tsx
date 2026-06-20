@@ -5,11 +5,10 @@ import { CTAButton } from "@/components/ui/CTAButton";
 import { SearchBox } from "@/components/ui/SearchBox";
 
 const heroTasks = [
-  { label: "Find equivalent", href: "/equivalent-finder?requestType=equivalent" },
-  { label: "Request quote", href: "/request-quote?requestType=quote" },
-  { label: "Request sample", href: "/request-quote?requestType=sample" },
+  { label: "Browse products", href: "/products" },
   { label: "Paste product list", href: "/request-quote?requestType=product-list-review" },
-  { label: "Request documentation", href: "/request-quote?requestType=documentation" }
+  { label: "Find equivalent", href: "/equivalent-finder?requestType=equivalent" },
+  { label: "Request quote", href: "/request-quote?requestType=quote" }
 ];
 
 export function HeroSearchSection() {
@@ -35,7 +34,7 @@ export function HeroSearchSection() {
           </h1>
           <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">{brand.tagline}</p>
           <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            BioAxis helps biotech, pharma, academic, and research labs source consumables, compare compatible options, request samples before switching, and organize supplier documentation.
+            Search, browse, paste a product list, or send one request. BioAxis turns product context into a sourcing path without asking for every detail up front.
           </p>
         </div>
 
@@ -56,7 +55,10 @@ export function HeroSearchSection() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <CTAButton href="/products">Start with Products</CTAButton>
+          <CTAButton href="/products">Browse Products</CTAButton>
+          <CTAButton href="/request-quote?requestType=product-list-review" variant="secondary">
+            Paste Product List
+          </CTAButton>
           <CTAButton href="/request-quote" variant="secondary">
             Request Quote
           </CTAButton>

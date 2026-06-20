@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { buildEquivalentFinderHref, buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
+import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
 import { PageHero } from "@/components/ui/PageHero";
+import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
@@ -58,15 +60,39 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         ]}
       />
       <PageHero eyebrow={`${segment.title} / ${category.title} / ${family.title}`} title={productItem.name} subtitle={productItem.introduction}>
-        <SourcingRequestButtonGroup
-          segment={segment.slug}
-          category={category.slug}
-          family={family.slug}
-          product={productItem.slug}
-          size="md"
-          layout="inline"
-          includeDocumentation
-        />
+        <div className="grid gap-5">
+          <div className="flex flex-wrap gap-2">
+            {productItem.commonSpecifications.slice(0, 5).map((specification) => (
+              <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
+            ))}
+          </div>
+          <SourcingRequestButtonGroup
+            segment={segment.slug}
+            category={category.slug}
+            family={family.slug}
+            product={productItem.slug}
+            size="md"
+            layout="inline"
+            includeDocumentation
+          />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <AddToSourcingListButton
+              title={productItem.name}
+              href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
+              segmentSlug={segment.slug}
+              categorySlug={category.slug}
+              familySlug={family.slug}
+              productSlug={productItem.slug}
+              segmentTitle={segment.title}
+              categoryTitle={category.title}
+              familyTitle={family.title}
+              productTitle={productItem.name}
+            />
+            <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+              Back to family
+            </Link>
+          </div>
+        </div>
       </PageHero>
 
       <SupplierComparisonModule
@@ -82,38 +108,20 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         productTitle={productItem.name}
       />
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <InfoPanel title="Details" items={productItem.details} />
-        <InfoPanel title="Common specifications" items={productItem.commonSpecifications} />
-        <InfoPanel title="Applications" items={productItem.applications} />
-        <InfoPanel title="Compatibility considerations" items={productItem.compatibilityConsiderations} />
-        <InfoPanel title="Documentation often requested" items={productItem.documentationNeeds} />
-        <InfoPanel title="Equivalent matching inputs" items={productItem.equivalentMatchingInputs} />
-        <InfoPanel title="Sample evaluation notes" items={productItem.sampleEvaluationNotes} />
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Quote-ready details</h2>
-          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            Prepare these inputs before requesting quote, equivalent review, sample evaluation, or documentation support.
-          </p>
-          <ul className="mt-5 grid gap-2">
-            {quoteReadyDetails.map((item) => (
-              <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
-                {cleanListItem(item)}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6 grid gap-2 sm:grid-cols-2">
-            {requestLinks.map((request) => (
-              <Link
-                key={request.label}
-                href={request.href}
-                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-              >
-                {request.label}
-              </Link>
-            ))}
-          </div>
-        </section>
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+        <div className="mb-8">
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Product item details</p>
+          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
+        </div>
+        <div className="grid gap-3">
+          <InfoPanel title="Specifications" items={[...productItem.details, ...productItem.commonSpecifications]} />
+          <InfoPanel title="Applications" items={productItem.applications} />
+          <InfoPanel title="Compatibility" items={productItem.compatibilityConsiderations} />
+          <InfoPanel title="Documentation" items={productItem.documentationNeeds} />
+          <InfoPanel title="Equivalent matching" items={productItem.equivalentMatchingInputs} />
+          <InfoPanel title="Sample request notes" items={productItem.sampleEvaluationNotes} />
+          <InfoPanel title="Quote-ready details" items={quoteReadyDetails} links={requestLinks} />
+        </div>
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:px-10">
@@ -167,18 +175,34 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
   );
 }
 
-function InfoPanel({ title, items }: { title: string; items: string[] }) {
+function InfoPanel({ title, items, links = [] }: { title: string; items: string[]; links?: { label: string; href: string }[] }) {
   return (
-    <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
-      <ul className="mt-5 grid gap-3">
+    <details className="group border border-bioaxis-line bg-bioaxis-panel">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+        <span>{title}</span>
+        <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+      </summary>
+      <ul className="grid gap-3 border-t border-bioaxis-line p-5">
         {items.map((item) => (
           <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
             {cleanListItem(item)}
           </li>
         ))}
       </ul>
-    </section>
+      {links.length > 0 ? (
+        <div className="grid gap-2 border-t border-bioaxis-line p-5 sm:grid-cols-2 lg:grid-cols-4">
+          {links.map((request) => (
+            <Link
+              key={request.label}
+              href={request.href}
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              {request.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </details>
   );
 }
 

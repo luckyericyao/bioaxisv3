@@ -42,18 +42,17 @@ const familyPageRoutes = [
 ];
 
 const productItemDetailSections = [
-  "Details",
-  "Common specifications",
+  "Specifications",
   "Applications",
-  "Compatibility considerations",
-  "Documentation often requested",
-  "Equivalent matching inputs",
-  "Sample evaluation notes",
+  "Compatibility",
+  "Documentation",
+  "Equivalent matching",
+  "Sample request notes",
   "Quote-ready details",
   "Related product configurations"
 ];
 
-const requiredHomeChips = ["Products", "Equivalent Finder", "Samples", "Quotes", "Quality", "Documentation"];
+const requiredHomeCtas = ["Browse products", "Paste product list", "Find equivalent", "Request quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -67,16 +66,6 @@ const productSearchExpectations = {
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"]
 };
-const requiredHomeWorkflowPreviews = [
-  "Target Discovery",
-  "Assay Development",
-  "Screening",
-  "Lead Optimization",
-  "ADME / DMPK",
-  "Preclinical Storage",
-  "Early CMC",
-  "QC / Analytical"
-];
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
   "Cell Model & Assay Development",
@@ -97,7 +86,7 @@ const requiredWorkflowCtaLabels = [
   "Source early CMC consumables",
   "Build QC supply list"
 ];
-const requestTypeLabels = ["Quote request", "Equivalent request", "Sample request", "Documentation request", "Recurring supply request", "Product list review", "Contact request"];
+const requestTypeLabels = ["Quote", "Equivalent", "Sample", "Documentation", "Recurring supply", "Product list", "Contact"];
 const equivalentFinderContent = ["Common equivalent requests", "How BioAxis compares fit", "Safer switching path", "BioAxis helps compare compatible options. Final suitability depends on customer validation."];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
@@ -150,6 +139,8 @@ const routes = [
   "/products?q=qPCR%20plates",
   "/products?q=sterile%20syringe%20filter",
   "/products?q=low%20retention%20tips",
+  "/products/liquid-handling",
+  "/products/liquid-handling/pipette-tips",
   "/workflows",
   "/equivalent-finder",
   "/quality",
@@ -191,6 +182,10 @@ function textContentLike(html) {
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function mainBlock(html) {
+  return html.match(/<main\b[^>]*>[\s\S]*<\/main>/)?.[0] ?? html;
 }
 
 function navBlocks(html) {
@@ -264,6 +259,7 @@ for (const route of routes) {
 
   const html = await response.text();
   const pageText = textOnly(html);
+  const mainText = textOnly(mainBlock(html));
   const rawPageText = textContentLike(html);
   if (route === "/products") {
     productsHtml = html;
@@ -315,9 +311,9 @@ for (const route of routes) {
   }
 
   if (route === "/") {
-    requiredHomeChips.forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing homepage chip ${label}`);
+    requiredHomeCtas.forEach((label) => {
+      if (!mainText.includes(label)) {
+        failures.push(`${route}: missing homepage command CTA ${label}`);
       }
     });
 
@@ -325,24 +321,26 @@ for (const route of routes) {
       failures.push(`${route}: legacy homepage capability chip row`);
     }
 
-    requiredHomeWorkflowPreviews.forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing homepage workflow preview ${label}`);
+    ["Start from a sourcing path", "Browse product universe", "Request sample/documentation", "How BioAxis works", "What BioAxis returns"].forEach((label) => {
+      if (!mainText.includes(label)) {
+        failures.push(`${route}: missing progressive homepage content ${label}`);
       }
     });
 
-    if (!html.includes('href="/workflows"') || !pageText.includes("Explore Drug R&D Workflows")) {
-      failures.push(`${route}: missing homepage workflows CTA`);
-    }
-
-    ["Paste a product list. BioAxis will organize the sourcing path.", "Supplier | Catalog No. | Product | Qty | Required docs | Timeline", "What BioAxis returns", "Matched product family", "Equivalent review path", "Quote-ready fields", "Sample request path", "Documentation checklist", "Recurring supply planning"].forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing conversion homepage content ${label}`);
+    ["Matched product family", "Equivalent review path", "Quote-ready fields", "Sample and documentation path"].forEach((label) => {
+      if (!mainText.includes(label)) {
+        failures.push(`${route}: missing concise return card ${label}`);
       }
     });
 
-    if (!pageText.includes("View all product segments")) {
-      failures.push(`${route}: missing all product segments CTA`);
+    ["Universal Pipette Tips", "Filtered Pipette Tips", "Microcentrifuge Tubes"].forEach((label) => {
+      if (mainText.includes(label)) {
+        failures.push(`${route}: homepage main content exposes product family list ${label}`);
+      }
+    });
+
+    if (mainText.includes("Featured product segments")) {
+      failures.push(`${route}: homepage still uses catalog-style featured product segments`);
     }
   }
 
@@ -370,16 +368,20 @@ for (const route of routes) {
       }
     });
 
-    ["Product navigation", "Family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Find equivalent", "Request quote", "Request sample"].forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing product navigation/hover content ${label}`);
-      }
-    });
-
     if (!html.includes('id="products-mega-menu"') || !html.includes('aria-expanded="false"')) {
       failures.push(`${route}: missing desktop Products mega menu shell`);
     }
 
+    const compactSegmentCards = [...html.matchAll(/data-product-segment-card="compact"/g)].length;
+    if (compactSegmentCards !== 12) {
+      failures.push(`${route}: expected 12 compact segment cards, found ${compactSegmentCards}`);
+    }
+
+    ["Representative families", "Common buyer specs", "Primary applications", "Family links"].forEach((label) => {
+      if (mainText.includes(label)) {
+        failures.push(`${route}: product directory exposes old dense card content ${label}`);
+      }
+    });
   }
 
   if (route === "/resources") {
@@ -413,12 +415,12 @@ for (const route of routes) {
       }
     });
 
-    if (/Request type 01\.?Selected request\.?Quote request/i.test(rawPageText)) {
+    if (/Request type 01\.?Selected request\.?Quote request/i.test(rawPageText) || /Quote requestEquivalent requestSample request/i.test(rawPageText)) {
       failures.push(`${route}: request type cards are concatenated in raw text layer`);
     }
 
-    if (!pageText.includes("Request type 01 Selected request Quote request")) {
-      failures.push(`${route}: missing separated selected request type card text`);
+    if (!pageText.includes("Type 01 Selected Quote")) {
+      failures.push(`${route}: missing compact selected request type card text`);
     }
 
     [
@@ -427,7 +429,7 @@ for (const route of routes) {
       "Submit now, and BioAxis can follow up by email to clarify specs, equivalents, samples, documentation, or quantities.",
       "Email *",
       "Company / organization optional",
-      "Optional details"
+      "Add more details"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction RFQ copy ${label}`);
@@ -562,10 +564,34 @@ for (const route of routes) {
     failures.push(`${route}: missing Product configurations section`);
   }
 
+  if (route === "/products/liquid-handling") {
+    ["Choose a Liquid Handling category", "Pipette Tips", "Serological Pipettes", "Common sourcing questions"].forEach((label) => {
+      if (!mainText.includes(label)) {
+        failures.push(`${route}: missing segment-level category flow content ${label}`);
+      }
+    });
+
+    if (mainText.includes("Universal Pipette Tips") || mainText.includes("Sourcing options preview")) {
+      failures.push(`${route}: segment page exposes family/item-level content too early`);
+    }
+  }
+
+  if (route === "/products/liquid-handling/pipette-tips") {
+    ["Choose a product family", "Buyer decision filters", "Common specs as chips"].forEach((label) => {
+      if (!mainText.includes(label)) {
+        failures.push(`${route}: missing category-level family flow content ${label}`);
+      }
+    });
+
+    if (mainText.includes("Sourcing options preview")) {
+      failures.push(`${route}: category page still exposes item-level sourcing table`);
+    }
+  }
+
   if (familyPageRoutes.includes(route)) {
-    ["Already using another supplier?", "Add to sourcing list", "Typical buyer cases"].forEach((label) => {
+    ["Product configurations", "Buyer checklist", "Selection guidance", "Documentation", "Already using another supplier?", "Add to sourcing list"].forEach((label) => {
       if (!pageText.includes(label)) {
-        failures.push(`${route}: missing supplier comparison/sourcing list content ${label}`);
+        failures.push(`${route}: missing family progressive disclosure content ${label}`);
       }
     });
   }
@@ -634,15 +660,9 @@ for (const route of routes) {
   console.log(`${route}: ok`);
 }
 
-for (const quickRoute of quickProductItemRoutes) {
-  if (!productsHtml.includes(`href="${quickRoute}"`)) {
-    failures.push(`/products: missing quick-search link ${quickRoute}`);
-  }
-}
-
 for (const familyRoute of visibleRepresentativeFamilyRoutes) {
   if (!productsHtml.includes(`href="${familyRoute}"`)) {
-    failures.push(`/products: missing representative family link ${familyRoute}`);
+    failures.push(`/products: missing header/mega-menu family link ${familyRoute}`);
   }
 }
 
@@ -719,9 +739,16 @@ const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisR
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
+const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
+const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
+const productsPageSource = await readRequiredProjectFile("src/app/products/page.tsx");
 const headerSource = await readRequiredProjectFile("src/components/layout/Header.tsx");
 const productNavigationSource = await readRequiredProjectFile("src/data/productNavigation.ts");
 const productCategoryCardSource = await readRequiredProjectFile("src/components/products/ProductCategoryCard.tsx");
+const segmentTemplateSource = await readRequiredProjectFile("src/components/products/SegmentPageTemplate.tsx");
+const categoryTemplateSource = await readRequiredProjectFile("src/components/products/CategoryPageTemplate.tsx");
+const familyTemplateSource = await readRequiredProjectFile("src/components/products/FamilyPageTemplate.tsx");
+const productItemTemplateSource = await readRequiredProjectFile("src/components/products/ProductItemPageTemplate.tsx");
 const envExampleSource = await readRequiredProjectFile(".env.example");
 
 if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("https://api.resend.com/emails")) {
@@ -760,15 +787,48 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["getProductNavigationSegment", "SegmentFamilyReveal", "group-hover:max-h-80", "group-focus-within:max-h-80"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "segment.shortDescription", "View segment"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
-    failures.push(`ProductCategoryCard: missing hover/focus family reveal ${label}`);
+    failures.push(`ProductCategoryCard: missing compact segment card behavior ${label}`);
+  }
+});
+
+["SegmentFamilyReveal", "Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
+  if (productCategoryCardSource.includes(legacyPattern)) {
+    failures.push(`ProductCategoryCard: still contains dense product directory content ${legacyPattern}`);
+  }
+});
+
+["ProductListIntakeHomeSection", "SourcingProblemsSection", "SourceByWorkflowSection", "PopularStartingPointsSection", "MissionSection", "OnePlatformSection"].forEach((legacySection) => {
+  if (homePageSource.includes(legacySection)) {
+    failures.push(`Home page: still imports dense homepage section ${legacySection}`);
+  }
+});
+
+[
+  ["Products page", productsPageSource, ["CompactEntryPanel", "Choose one starting point"]],
+  ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
+  ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
+  ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "ProductConfigurationSection"]],
+  ["Product item template", productItemTemplateSource, ["Product item details", "Specifications", "AddToSourcingListButton"]],
+  ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "min-h-20", "sr-only"]]
+].forEach(([label, source, required]) => {
+  for (const needle of required) {
+    if (!source.includes(needle)) {
+      failures.push(`${label}: missing progressive disclosure source marker ${needle}`);
+    }
   }
 });
 
 if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes("data-rfq-mode=\"email-only\"")) {
   failures.push("QuoteRequestForm: expected email-only validation mode");
 }
+
+["Add more details", "shouldOpenOptionalDetails", "<details"].forEach((label) => {
+  if (!quoteFormSource.includes(label)) {
+    failures.push(`QuoteRequestForm: missing collapsed optional detail behavior ${label}`);
+  }
+});
 
 ["selectedRequestType.requiredFields", "universalRequired", "productCategory: \"Product segment / category\""].forEach((legacyPattern) => {
   if (quoteFormSource.includes(legacyPattern)) {

@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import { FinalCTASection } from "@/components/home/FinalCTASection";
 import { HeroSearchSection } from "@/components/home/HeroSearchSection";
-import { MissionSection } from "@/components/home/MissionSection";
-import { OnePlatformSection } from "@/components/home/OnePlatformSection";
-import {
-  HowBioAxisWorksSection,
-  PopularStartingPointsSection,
-  ProductListIntakeHomeSection,
-  SourceByWorkflowSection,
-  SourcingProblemsSection
-} from "@/components/home/PlatformExpansionSections";
+import { HowBioAxisWorksSection } from "@/components/home/PlatformExpansionSections";
 import { ProductDirectorySection } from "@/components/home/ProductDirectorySection";
 import { WhatBioAxisDoesSection } from "@/components/home/WhatBioAxisDoesSection";
 
@@ -26,15 +18,9 @@ export default function Home() {
   return (
     <>
       <HeroSearchSection />
+      <ProductDirectorySection />
       <WhatBioAxisDoesSection />
       <HowBioAxisWorksSection />
-      <ProductListIntakeHomeSection />
-      <SourcingProblemsSection />
-      <SourceByWorkflowSection />
-      <PopularStartingPointsSection />
-      <MissionSection />
-      <ProductDirectorySection />
-      <OnePlatformSection />
       <FinalCTASection />
     </>
   );

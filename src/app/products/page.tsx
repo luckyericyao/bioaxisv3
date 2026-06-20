@@ -68,52 +68,68 @@ const buyerNeedCards = [
 
 function BuyerEntryModes() {
   return (
-    <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-      <div className="grid gap-5 lg:grid-cols-3">
-        <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Browse by Product Type</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Start from the 12 BioAxis segments.</h2>
-          <div className="mt-6 grid gap-2">
-            {productTaxonomy.slice(0, 6).map((segment) => (
-              <Link key={segment.slug} href={`/products/${segment.slug}`} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                {segment.name}
-              </Link>
-            ))}
+    <section className="mx-auto w-full max-w-7xl px-5 pb-12 sm:px-8 lg:px-10">
+      <div className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
+        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase text-bioaxis-accent">Entry modes</p>
+            <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Choose one starting point.</h2>
           </div>
-          <Link href="#product-categories" className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
-            View all product types
-          </Link>
-        </article>
-
-        <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Browse by Workflow</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Map what R&D teams are doing.</h2>
-          <div className="mt-6 grid gap-2">
-            {workflows.slice(0, 6).map((workflow) => (
-              <Link key={workflow.slug} href={`/workflows#${workflow.slug}`} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                {workflow.title}
-              </Link>
-            ))}
-          </div>
-          <Link href="/workflows" className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-            Explore workflows
-          </Link>
-        </article>
-
-        <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Browse by Buyer Need</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Start from the sourcing problem.</h2>
-          <div className="mt-6 grid gap-2">
-            {buyerNeedCards.map((need) => (
-              <Link key={need.title} href={need.href} className="border border-bioaxis-line bg-bioaxis-black p-3 transition hover:border-bioaxis-accent">
-                <span className="text-xs font-bold uppercase text-bioaxis-text">{need.title}</span>
-                <span className="mt-2 block text-xs leading-5 text-bioaxis-muted">{need.body}</span>
-              </Link>
-            ))}
-          </div>
-        </article>
+          <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
+            Browse by product type, workflow, or buyer need. Each path leads to the next layer instead of exposing every detail at once.
+          </p>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-3">
+          <CompactEntryPanel
+            title="Browse by Product Type"
+            href="#product-categories"
+            cta="View segments"
+            items={productTaxonomy.slice(0, 4).map((segment) => segment.name)}
+          />
+          <CompactEntryPanel
+            title="Browse by Workflow"
+            href="/workflows"
+            cta="Explore workflows"
+            items={workflows.slice(0, 4).map((workflow) => workflow.title)}
+          />
+          <article className="border border-bioaxis-line bg-bioaxis-black p-4">
+            <p className="text-xs font-bold uppercase text-bioaxis-accent">Browse by Buyer Need</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {buyerNeedCards.map((need) => (
+                <Link
+                  key={need.title}
+                  href={need.href}
+                  className="border border-white/[0.12] px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                >
+                  {need.title}
+                </Link>
+              ))}
+            </div>
+          </article>
+        </div>
       </div>
     </section>
+  );
+}
+
+function CompactEntryPanel({ title, href, cta, items }: { title: string; href: string; cta: string; items: string[] }) {
+  return (
+    <article className="border border-bioaxis-line bg-bioaxis-black p-4">
+      <p className="text-xs font-bold uppercase text-bioaxis-accent">{title}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <span key={item} className="border border-white/[0.12] px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
+            {item}
+          </span>
+        ))}
+      </div>
+      <Link
+        href={href}
+        className="mt-4 inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+      >
+        {cta}
+      </Link>
+    </article>
   );
 }
 

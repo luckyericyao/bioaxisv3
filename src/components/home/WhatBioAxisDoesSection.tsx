@@ -4,27 +4,19 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const cards = [
   {
     title: "Matched product family",
-    body: "BioAxis helps map product names, supplier numbers, workflows, and specifications to the closest product family context."
+    body: "Product names, supplier numbers, and workflow notes are mapped into the right segment, category, and family context."
   },
   {
     title: "Equivalent review path",
-    body: "Current supplier and catalog numbers can be organized into a comparison path for format, fit, documentation, sample, and quote review."
+    body: "Current products can be organized for format, fit, documentation, sample, and quote review."
   },
   {
     title: "Quote-ready fields",
-    body: "Requests are structured around product, quantity, timeline, sterility, packaging, documentation, and usage rhythm."
+    body: "BioAxis structures the useful fields: product, quantity, timeline, documents, and usage rhythm."
   },
   {
-    title: "Sample request path",
-    body: "For switching-sensitive consumables, BioAxis can help request samples so teams can evaluate fit before larger-volume sourcing."
-  },
-  {
-    title: "Documentation checklist",
-    body: "BioAxis can help collect required supplier-provided documents such as CoA, SDS, sterility, material, and lot information where available."
-  },
-  {
-    title: "Recurring supply planning",
-    body: "Usage rhythm, delivery timing, pack format, and documentation needs can be organized for repeat sourcing conversations."
+    title: "Sample and documentation path",
+    body: "Sample needs and supplier-provided documents can be attached to the request when they matter."
   }
 ];
 
@@ -33,9 +25,9 @@ export function WhatBioAxisDoesSection() {
     <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
       <SectionHeader
         title="What BioAxis returns"
-        subtitle="A search or product list becomes a structured sourcing path instead of a blank procurement email."
+        subtitle="A search, product page, or pasted list becomes the next useful sourcing step."
       />
-      <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <MissionCard key={card.title} title={card.title} body={card.body} />
         ))}

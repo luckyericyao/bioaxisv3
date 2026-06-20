@@ -1,19 +1,11 @@
 import Link from "next/link";
 import type { ProductCategory, ProductTaxonomySegment } from "@/data/productTaxonomy";
-import { productTaxonomy } from "@/data/productTaxonomy";
-import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { DocumentationChecklist } from "./DocumentationChecklist";
-import { FilterSidebar } from "./FilterSidebar";
 import { ProductFamilyCard } from "./ProductFamilyCard";
-import { ProductListingSkeleton } from "./ProductListingSkeleton";
-import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
-import { RelatedCategoryLinks } from "./RelatedCategoryLinks";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
-import { SpecificationTable } from "./SpecificationTable";
 
 type CategoryPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -21,9 +13,6 @@ type CategoryPageTemplateProps = {
 };
 
 export function CategoryPageTemplate({ segment, category }: CategoryPageTemplateProps) {
-  const relatedSegments = productTaxonomy.filter((item) => category.relatedSegments.includes(item.slug)).slice(0, 4);
-  const priorityContent = getPriorityProductContent(segment.slug, category.slug);
-
   return (
     <>
       <Breadcrumbs
@@ -35,17 +24,22 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
         ]}
       />
       <PageHero eyebrow={segment.title} title={category.title} subtitle={category.longDescription}>
-        <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} size="md" layout="inline" />
+        <div className="grid gap-3">
+          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} size="md" layout="inline" />
+          <Link href={`/products/${segment.slug}`} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+            Back to {segment.title}
+          </Link>
+        </div>
       </PageHero>
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Product families</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Browse family-level sourcing paths.</h2>
+            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Next step</p>
+            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a product family.</h2>
           </div>
-          <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-            Each family opens a dedicated page with use cases, formats, selection guidance, specifications, documentation needs, and RFQ context.
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            Family pages show product item cards, buyer checklists, and request context. Detailed specifications live on product item pages.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -55,37 +49,14 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
         </div>
       </section>
 
-      {priorityContent ? <PriorityProductContentSection content={priorityContent} /> : null}
-
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[280px_1fr] lg:px-10">
-        <FilterSidebar subcategory={category} />
-        <ProductListingSkeleton segmentSlug={segment.slug} subcategory={category} />
-      </section>
-
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <SpecificationTable specifications={category.specifications} criteria={category.selectionCriteria} />
-        <InfoCard title="Common formats" items={category.commonFormats} />
-        <InfoCard title="Typical applications" items={category.commonApplications} />
-        <InfoCard title="Equivalent-switching guidance" items={segment.equivalentPrompts} />
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <DocumentationChecklist items={category.documentation} />
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <RelatedCategoryLinks
-          links={category.relatedCategories.map((related) => ({
-            label: related.label,
-            href: related.href
-          }))}
-          relatedSegments={relatedSegments}
-        />
+        <DecisionPanel title="Buyer decision filters" items={category.selectionCriteria.slice(0, 8)} />
+        <DecisionPanel title="Common specs as chips" items={category.specifications.slice(0, 10)} />
       </section>
 
       <RFQCTA
-        title="Prepare a category sourcing request."
-        body="Send BioAxis the product family, current supplier or catalog number, quantity, sterile status, documentation need, and target date. BioAxis will organize quote, equivalent, and sample support with availability, documentation, and pricing confirmed through sourcing review."
+        title="Send this category context."
+        body="Choose a family first when you know it, or send this category with your email. BioAxis can follow up for supplier, catalog number, quantity, sample, equivalent, or documentation details."
         segment={segment.slug}
         category={category.slug}
       />
@@ -93,7 +64,7 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
   );
 }
 
-function InfoCard({ title, items }: { title: string; items: string[] }) {
+function DecisionPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
       <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
@@ -102,14 +73,6 @@ function InfoCard({ title, items }: { title: string; items: string[] }) {
           <SpecTag key={item}>{item}</SpecTag>
         ))}
       </div>
-      {title === "Equivalent-switching guidance" ? (
-        <Link
-          href="/equivalent-finder?requestType=equivalent"
-          className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-        >
-          Start equivalent request
-        </Link>
-      ) : null}
     </section>
   );
 }

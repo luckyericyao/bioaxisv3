@@ -1,15 +1,10 @@
 import Link from "next/link";
 import type { ProductCategory, ProductFamily, ProductTaxonomySegment } from "@/data/productTaxonomy";
-import { buildRequestHref } from "@/data/productTaxonomy";
-import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { DocumentationChecklist } from "./DocumentationChecklist";
 import { ProductConfigurationSection } from "./ProductConfigurationSection";
-import { PriorityProductContentSection } from "./PriorityProductContentSection";
 import { RFQCTA } from "./RFQCTA";
-import { RelatedProducts } from "./RelatedProducts";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 import { SupplierComparisonModule } from "./SupplierComparisonModule";
 
@@ -20,15 +15,6 @@ type FamilyPageTemplateProps = {
 };
 
 export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemplateProps) {
-  const priorityContent = getPriorityProductContent(segment.slug, category.slug, family.slug);
-  const relatedFamilies = category.productFamilies
-    .filter((item) => family.relatedFamilies.includes(item.slug))
-    .map((item) => ({
-      label: item.title,
-      href: `/products/${segment.slug}/${category.slug}/${item.slug}`,
-      description: relatedFamilyDescription(item.slug, item.title, category.title)
-    }));
-
   return (
     <>
       <Breadcrumbs
@@ -40,9 +26,42 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
           { label: family.title }
         ]}
       />
-      <PageHero eyebrow={`${segment.title} / ${category.title}`} title={family.title} subtitle={family.longDescription}>
-        <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" includeDocumentation />
+      <PageHero eyebrow={`${segment.title} / ${category.title}`} title={family.title} subtitle={family.shortDescription}>
+        <div className="grid gap-3">
+          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" includeDocumentation />
+          <Link href={`/products/${segment.slug}/${category.slug}`} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+            Back to {category.title}
+          </Link>
+        </div>
       </PageHero>
+
+      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
+        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Family overview</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Where this family fits</h2>
+          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{family.longDescription}</p>
+        </section>
+        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Buyer checklist</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {family.recommendedRFQFields.slice(0, 8).map((field) => (
+              <SpecTag key={field}>{field}</SpecTag>
+            ))}
+          </div>
+        </section>
+      </section>
+
+      <ProductConfigurationSection segment={segment} category={category} family={family} />
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="grid gap-3">
+          <Disclosure title="Selection guidance" items={family.selectionCriteria} />
+          <Disclosure title="Applications" items={family.applications} />
+          <Disclosure title="Compatibility and equivalent notes" items={family.equivalentSwitchingConsiderations} />
+          <Disclosure title="Documentation" items={family.documentationChecklist} />
+          <Disclosure title="Sample and quote inputs" items={family.equivalentMatchingInputs} />
+        </div>
+      </section>
 
       <SupplierComparisonModule
         title={family.title}
@@ -55,72 +74,9 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         familyTitle={family.title}
       />
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <InfoCard title="What this product family is used for" items={family.commonUseCases} />
-        <InfoCard title="Common formats" items={family.commonFormats} />
-        <InfoCard title="How to select" items={family.selectionCriteria} />
-        <InfoCard title="Equivalent switching considerations" items={family.equivalentSwitchingConsiderations} />
-      </section>
-
-      {priorityContent ? <PriorityProductContentSection content={priorityContent} /> : null}
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <InfoCard
-          title="How BioAxis helps source this"
-          items={[
-            "Convert product descriptions, current supplier details, and catalog numbers into quote-ready product specifications.",
-            "Compare equivalent options by format, material, sterility, packaging, documentation, and application fit.",
-            "Coordinate sample-first evaluation when switching could affect cells, assays, automation decks, or QC workflows.",
-            "Organize documentation requests including CoA, SDS, sterility statements, material declarations, and lot traceability where available."
-          ]}
-        />
-      </section>
-
-      <ProductConfigurationSection segment={segment} category={category} family={family} />
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <DocumentationChecklist items={family.documentationChecklist} />
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">One-click request context</p>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Send this family to BioAxis.</h2>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-            The request link carries segment, category, family, source page, and inquiry type into the quote form. Only an email is required; add supplier, catalog, quantity, or documentation details if useful.
-          </p>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {family.recommendedRFQFields.map((field) => (
-              <div key={field} className="border border-bioaxis-line bg-bioaxis-black p-4 text-sm text-bioaxis-steel">
-                {field}
-              </div>
-            ))}
-          </div>
-          <Link
-            href={buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, requestType: "quote" })}
-            className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-          >
-            Send family context
-          </Link>
-        </section>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <RelatedProducts links={relatedFamilies} />
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <div className="border border-bioaxis-line bg-bioaxis-black p-5">
-          <h2 className="text-xl font-bold uppercase text-bioaxis-text">Compliance disclaimer</h2>
-          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            BioAxis helps source appropriate products and documentation; final suitability depends on customer application and validation.
-          </p>
-        </div>
-      </section>
-
       <RFQCTA
-        title="Ready to review this family?"
-        body="Send this product family with one click. Only your email is required, and BioAxis can follow up for supplier, catalog number, quantity, documentation, sample, or timeline details."
+        title="Send this family to BioAxis."
+        body="BioAxis will include the segment, category, and family context automatically. Only your email is required; add supplier, catalog number, quantity, sample, or documentation details only if useful."
         segment={segment.slug}
         category={category.slug}
         family={family.slug}
@@ -129,32 +85,20 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
   );
 }
 
-function relatedFamilyDescription(slug: string, title: string, categoryTitle: string) {
-  const descriptions: Record<string, string> = {
-    "filtered-pipette-tips": "Aerosol-barrier tips for PCR, qPCR, cell culture, assay setup, and other contamination-sensitive workflows.",
-    "universal-pipette-tips": "General-purpose tips for routine manual and multichannel liquid handling, selected by fit, volume range, packaging format, and documentation needs.",
-    "low-retention-pipette-tips": "Tips for viscous, low-volume, or recovery-sensitive transfers where surface behavior and liquid retention matter.",
-    "extended-length-pipette-tips": "Longer-reach tips for tubes, reservoirs, deep wells, and workflows where standard tips do not reach cleanly.",
-    "sterile-pipette-tips": "Sterile tips for cell culture, assay setup, reagent handling, and contamination-sensitive bench workflows.",
-    "reload-and-bulk-pipette-tips": "Reload and bulk formats for high-use labs comparing packaging efficiency, rack fit, and recurring supply needs.",
-    "microcentrifuge-tubes": "Small-volume tubes for sample prep, spin-downs, storage, and molecular biology workflows.",
-    "96-well-pcr-plates": "PCR plates selected by skirt style, profile, seal compatibility, instrument fit, and PCR-clean documentation.",
-    "pes-syringe-filters": "PES membrane filters for aqueous samples, media, protein-containing solutions, and sterile filtration review.",
-    "hamilton-robotic-tips": "Robotic tips for Hamilton-style methods where deck fit, rack format, conductivity, and validation samples matter."
-  };
-
-  return descriptions[slug] ?? `${title} for ${categoryTitle.toLowerCase()} workflows, selected by format, compatibility, documentation needs, and sample evaluation criteria.`;
-}
-
-function InfoCard({ title, items }: { title: string; items: string[] }) {
+function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <SpecTag key={item}>{item}</SpecTag>
-        ))}
+    <details className="group border border-bioaxis-line bg-bioaxis-panel">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+        <span>{title}</span>
+        <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+      </summary>
+      <div className="border-t border-bioaxis-line p-5">
+        <div className="flex flex-wrap gap-2">
+          {items.map((item) => (
+            <SpecTag key={item}>{item}</SpecTag>
+          ))}
+        </div>
       </div>
-    </section>
+    </details>
   );
 }

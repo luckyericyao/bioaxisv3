@@ -100,6 +100,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
   const [submitting, setSubmitting] = useState(false);
 
   const selectedRequestType = getRequestTypeById(formState.requestType);
+  const shouldOpenOptionalDetails = formState.requestType === "product-list-review";
   const resolvedProductContext = useMemo(
     () => ({
       ...productContext,
@@ -261,9 +262,6 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
         <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Request type</h2>
-        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-          The request type can be preselected from a product page. You can change it, but you do not need to re-enter product details.
-        </p>
         <div className="mt-6">
           <RequestTypeSelector
             requestTypes={requestTypes}
@@ -274,6 +272,9 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
             }}
           />
         </div>
+        <p className="mt-4 border border-bioaxis-line bg-bioaxis-black p-4 text-sm leading-6 text-bioaxis-muted">
+          {selectedRequestType.description}
+        </p>
       </section>
 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
@@ -291,12 +292,17 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         </div>
       </section>
 
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Optional details</h2>
-        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-          Add supplier, catalog number, quantity, documents, timeline, or a pasted list if you already have them.
-        </p>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+      <details className="group border border-bioaxis-line bg-bioaxis-panel" open={shouldOpenOptionalDetails ? true : undefined}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left sm:p-8">
+          <span>
+            <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add more details</span>
+            <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">
+              Optional supplier, catalog number, quantity, documents, timeline, notes, or pasted product list.
+            </span>
+          </span>
+          <span className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
+        </summary>
+        <div className="grid gap-5 border-t border-bioaxis-line p-5 md:grid-cols-2 sm:p-8">
           <Field id="supplier" label="Supplier optional" value={formState.supplier} onChange={(value) => updateField("supplier", value)} />
           <Field id="catalogNumber" label="Catalog number optional" value={formState.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
           <Field id="quantity" label="Desired quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
@@ -324,10 +330,12 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
             onChange={(value) => updateField("notes", value)}
           />
         </div>
+      </details>
 
-        <div className="mt-8 flex flex-col gap-4 border-t border-bioaxis-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
-            Submit with only an email. BioAxis can ask follow-up questions if specs, equivalents, samples, or documentation need clarification.
+            Submit with only an email. BioAxis can ask follow-up questions if specs, equivalents, samples, documentation, or quantities need clarification.
           </p>
           <button
             type="submit"

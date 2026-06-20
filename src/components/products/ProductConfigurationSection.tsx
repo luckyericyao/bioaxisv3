@@ -20,10 +20,10 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Product configurations</p>
-          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Select a quote-ready product item.</h2>
+          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a product item.</h2>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-          Each configuration opens a detail page with sourcing criteria, documentation needs, equivalent inputs, sample notes, and request links.
+          Product item pages contain the full item-level specifications, applications, documentation, equivalent inputs, and sample notes.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -48,7 +48,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
               <h3 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{productItem.name}</h3>
               <p className="mt-3 flex-1 text-sm leading-6 text-bioaxis-muted">{productItem.shortDescription}</p>
               <div className="mt-5 grid gap-2">
-                {productItem.commonSpecifications.slice(0, 5).map((specification) => (
+                {productItem.commonSpecifications.slice(0, 3).map((specification) => (
                   <div key={specification} className="border border-white/[0.1] bg-bioaxis-black px-3 py-2 text-xs leading-5 text-bioaxis-steel">
                     {specification}
                   </div>
