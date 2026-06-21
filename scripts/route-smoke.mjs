@@ -335,7 +335,21 @@ for (const route of routes) {
       failures.push(`${route}: legacy homepage capability chip row`);
     }
 
-    ["Start from a sourcing path", "Browse product universe", "Request sample/documentation", "How BioAxis works", "What BioAxis returns"].forEach((label) => {
+    [
+      "Priority Sourcing Lines",
+      "Cell Culture Media & Supplements",
+      "Liquid Handling Consumables",
+      "Filtration Consumables",
+      "Tubes, Plates & Storage",
+      "PCR / qPCR Consumables",
+      "Sample Preparation Consumables",
+      "Request quote with a product list",
+      "Start from a sourcing path",
+      "Browse product universe",
+      "Request sample/documentation",
+      "How BioAxis works",
+      "What BioAxis returns"
+    ].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing progressive homepage content ${label}`);
       }
