@@ -156,6 +156,7 @@ const routes = [
   "/products/cell-culture/media-and-supplements",
   "/workflows",
   "/equivalent-finder",
+  "/private-label",
   "/quality",
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
@@ -343,6 +344,8 @@ for (const route of routes) {
       "Tubes, Plates & Storage",
       "PCR / qPCR Consumables",
       "Sample Preparation Consumables",
+      "Private Label / OEM Consumables",
+      "Explore private label options",
       "Request quote with a product list",
       "Start from a sourcing path",
       "Browse product universe",
@@ -536,6 +539,49 @@ for (const route of routes) {
     if (!html.includes('data-product-context-summary="true"')) {
       failures.push(`${route}: missing label-based product context summary marker`);
     }
+  }
+
+  if (route === "/private-label") {
+    [
+      "Private Label / OEM Consumables",
+      "Explore private-label, neutral-label, and OEM-style sourcing options",
+      "What this is for",
+      "Suitable product areas",
+      "What BioAxis can help coordinate",
+      "What buyers should prepare",
+      "Compliance / limitation note",
+      "Private-label feasibility depends on product type",
+      "Discuss private-label sourcing",
+      "Submit a product list",
+      "Back to Products",
+      "Equivalent Finder"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing private-label page content ${label}`);
+      }
+    });
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "quote", sourcePage: "private-label" })) {
+      failures.push(`${route}: missing private-label RFQ CTA`);
+    }
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "quote", sourcePage: "private-label-product-list" })) {
+      failures.push(`${route}: missing private-label product-list CTA`);
+    }
+
+    if (!hrefsFromHtml(html).some((href) => hrefPath(href) === "/products")) {
+      failures.push(`${route}: missing back to products link`);
+    }
+
+    if (!hrefsFromHtml(html).some((href) => hrefPath(href) === "/equivalent-finder")) {
+      failures.push(`${route}: missing equivalent finder link`);
+    }
+
+    [/guaranteed inventory/i, /guaranteed pricing/i, /exclusive factory control/i, /BioAxis directly manufactures/i].forEach((pattern) => {
+      if (pattern.test(pageText)) {
+        failures.push(`${route}: private-label page overclaims ${pattern}`);
+      }
+    });
   }
 
   if (route === "/quality" && !hasHrefWithParams(html, "/request-quote", { requestType: "documentation" })) {

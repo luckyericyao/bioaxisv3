@@ -37,6 +37,13 @@ const priorityLines = [
     description: "Spin columns, extraction plates, cleanup formats, and workflow-specific sample prep supplies.",
     cta: "Explore sample prep",
     href: "/products/sample-prep-filtration/sample-cleanup"
+  },
+  {
+    title: "Private Label / OEM Consumables",
+    description:
+      "Selected consumables where BioAxis can help evaluate private-label, neutral-label, or OEM-style sourcing options, including documentation, samples, packaging requirements, and RFQ preparation.",
+    cta: "Explore private label options",
+    href: "/private-label"
   }
 ];
 
