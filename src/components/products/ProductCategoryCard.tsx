@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
-import { buildEquivalentFinderHref, buildRequestHref } from "@/data/productTaxonomy";
+import { buildRequestHref } from "@/data/productTaxonomy";
 import { getProductNavigationSegment, type ProductNavigationCategory } from "@/data/productNavigation";
 
 type ProductCategoryCardProps = {
@@ -46,7 +46,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           Request quote
         </Link>
         <Link
-          href={buildEquivalentFinderHref({ segment: segment.slug })}
+          href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Find equivalent

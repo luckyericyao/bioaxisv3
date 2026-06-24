@@ -98,15 +98,26 @@ const maxSourcingListItems = 30;
 
 const fallbackToEmail = "crazyowenyao@gmail.com";
 const requestTypeAliases: Record<string, string> = {
+  rfq: "quote",
+  "quote-request": "quote",
   "quote request": "quote",
   "equivalent request": "equivalent",
+  "equivalent finding": "equivalent",
+  "equivalent-finding": "equivalent",
+  "equivalent-review": "equivalent",
   "sample request": "sample",
+  sample: "sample",
   "documentation request": "documentation",
+  documentation: "documentation",
+  docs: "documentation",
+  documents: "documentation",
   "recurring supply request": "recurring-supply",
   "contact request": "contact",
+  contact: "contact",
   "product list review": "product-list-review",
   recurring: "recurring-supply",
   "product-list": "product-list-review",
+  "product list": "product-list-review",
   support: "contact",
   general: "contact"
 };

@@ -736,6 +736,7 @@ export function buildRequestHref({
   const hasProductContext = Boolean(segment || resolvedSubcategory || family || product);
   const resolvedSourcePage = sourcePage ?? buildProductContextPath({ segment, subcategory: resolvedSubcategory, family, product });
 
+  params.set("type", requestTypeToQueryType(requestType));
   params.set("requestType", requestType);
   if (hasProductContext) {
     params.set("source", "product-page");
@@ -767,6 +768,20 @@ export function buildRequestHref({
   }
 
   return `/request-quote?${params.toString()}`;
+}
+
+function requestTypeToQueryType(requestType: string) {
+  const queryTypes: Record<string, string> = {
+    quote: "rfq",
+    equivalent: "equivalent",
+    sample: "sample",
+    documentation: "documentation",
+    "recurring-supply": "recurring-supply",
+    "product-list-review": "product-list",
+    contact: "contact"
+  };
+
+  return queryTypes[requestType] ?? requestType;
 }
 
 export function buildEquivalentFinderHref({

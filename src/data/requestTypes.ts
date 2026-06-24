@@ -9,15 +9,23 @@ export type RequestType = {
 export const requestTypes: RequestType[] = [
   {
     id: "quote",
-    label: "Quote request",
+    label: "Quote / RFQ",
     description:
       "Send product context, a pasted list, or a short note. BioAxis can follow up for any missing specs before organizing quote options.",
     requiredFields: [],
     optionalFields: ["productList", "currentSupplier", "catalogNumber", "sterility", "requiredSpecification", "needDocumentation", "notes"]
   },
   {
+    id: "product-list-review",
+    label: "Product list review",
+    description:
+      "Paste a product list if you have one. BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation.",
+    requiredFields: [],
+    optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline", "notes"]
+  },
+  {
     id: "equivalent",
-    label: "Equivalent request",
+    label: "Equivalent finding",
     description:
       "Send the current product context if you have it. BioAxis can help compare compatible options and ask for specs only when needed.",
     requiredFields: [],
@@ -41,23 +49,15 @@ export const requestTypes: RequestType[] = [
   },
   {
     id: "recurring-supply",
-    label: "Recurring supply request",
+    label: "Recurring supply",
     description:
       "Start recurring supply support with an email and any usage rhythm you already know. BioAxis can clarify timing and region later.",
     requiredFields: [],
     optionalFields: ["quantity", "sterility", "currentSupplier", "requiredSpecification", "notes"]
   },
   {
-    id: "product-list-review",
-    label: "Product list review",
-    description:
-      "Paste a product list if you have one. BioAxis can organize products by segment, family, quote path, equivalent review, sample need, and documentation.",
-    requiredFields: [],
-    optionalFields: ["productCategory", "currentSupplier", "needDocumentation", "targetTimeline", "notes"]
-  },
-  {
     id: "contact",
-    label: "Contact request",
+    label: "General sourcing question",
     description:
       "Send a general sourcing question, documentation note, equivalent matching request, or product-support message to BioAxis.",
     requiredFields: [],
@@ -66,8 +66,18 @@ export const requestTypes: RequestType[] = [
 ];
 
 const requestTypeAliases: Record<string, string> = {
+  rfq: "quote",
+  "quote-request": "quote",
   recurring: "recurring-supply",
   "product-list": "product-list-review",
+  "product-list-review": "product-list-review",
+  "product list": "product-list-review",
+  "equivalent-finding": "equivalent",
+  "equivalent-review": "equivalent",
+  docs: "documentation",
+  documents: "documentation",
+  sample: "sample",
+  documentation: "documentation",
   support: "contact"
 };
 

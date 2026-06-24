@@ -22,9 +22,11 @@ type QuoteFormState = {
   supplier: string;
   catalogNumber: string;
   quantity: string;
+  productCategory: string;
   requiredDocuments: string;
   timeline: string;
   productList: string;
+  needs: string[];
   notes: string;
   website: string;
 };
@@ -59,9 +61,11 @@ const initialState: QuoteFormState = {
   supplier: "",
   catalogNumber: "",
   quantity: "",
+  productCategory: "",
   requiredDocuments: "",
   timeline: "",
   productList: "",
+  needs: [],
   notes: "",
   website: ""
 };
@@ -69,6 +73,45 @@ const initialState: QuoteFormState = {
 const sourcingListStorageKey = "bioaxis:sourcing-list";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
+
+const productCategoryOptions = [
+  "Liquid handling",
+  "Lab plasticware",
+  "Cell culture",
+  "Filtration",
+  "PCR / qPCR",
+  "Sample storage",
+  "Automation consumables",
+  "Assay consumables",
+  "Antibodies / reagents",
+  "Single-use bioprocess",
+  "Other / not sure"
+];
+
+const needOptions = [
+  "Quote",
+  "Equivalent option",
+  "Sample",
+  "CoA",
+  "SDS",
+  "Sterility documentation",
+  "Material / resin information",
+  "Lot-level documentation",
+  "Lead time discussion",
+  "Recurring supply support"
+];
+
+const timelineOptions = ["Urgent", "This week", "This month", "Planning ahead", "Not sure"];
+
+const reviewBullets = [
+  "Product name or catalog number",
+  "Supplier / brand currently used",
+  "Compatible equivalent options",
+  "Sterility, material, packaging, and format fit",
+  "CoA, SDS, and lot-level documentation needs",
+  "Sample request path",
+  "Quote and recurring supply next steps"
+];
 
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
@@ -101,6 +144,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
 
   const selectedRequestType = getRequestTypeById(formState.requestType);
   const shouldOpenOptionalDetails = formState.requestType === "product-list-review";
+  const selectedNeedsText = formState.needs.join(", ");
   const resolvedProductContext = useMemo(
     () => ({
       ...productContext,
@@ -136,6 +180,14 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
     setSubmitError("");
   }
 
+  function toggleNeed(value: string) {
+    setFormState((current) => ({
+      ...current,
+      needs: current.needs.includes(value) ? current.needs.filter((need) => need !== value) : [...current.needs, value]
+    }));
+    setSubmitError("");
+  }
+
   function validate() {
     if (!formState.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
       return { email: emailErrorMessage };
@@ -168,7 +220,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         roleTitle: formState.roleTitle,
         requestType: formState.requestType,
         productSegment: resolvedProductContext.productSegment,
-        productCategory: resolvedProductContext.productCategory,
+        productCategory: formState.productCategory || resolvedProductContext.productCategory,
         productFamily: resolvedProductContext.productFamily,
         productName: resolvedProductContext.productName,
         productList: formState.productList,
@@ -178,12 +230,15 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         quantity: formState.quantity,
         timeline: formState.timeline,
         shippingRegion: formState.shippingRegion,
-        documentationNeeds: formState.requiredDocuments,
+        documentationNeeds: [formState.requiredDocuments, selectedNeedsText ? `Selected needs: ${selectedNeedsText}` : ""].filter(Boolean).join("\n"),
+        equivalentNeeded: formState.needs.includes("Equivalent option"),
+        sampleNeeded: formState.needs.includes("Sample"),
+        recurringSupplyNeeded: formState.needs.includes("Recurring supply support"),
         sourcingListItems,
         sourcePageUrl: resolvedProductContext.sourcePageUrl ?? resolvedProductContext.productUrl,
         productContext: resolvedProductContext,
         website: formState.website,
-        message: formState.notes
+        message: [formState.notes, selectedNeedsText ? `What buyer needs: ${selectedNeedsText}` : ""].filter(Boolean).join("\n")
       });
 
       if (!payload.ok) {
@@ -277,19 +332,92 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         </p>
       </section>
 
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Contact</h2>
-        <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-          Email is the only required field. BioAxis will use it to follow up about the product context and any notes below.
-        </p>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <Field id="email" label="Email" type="email" value={formState.email} error={errors.email} required onChange={(value) => updateField("email", value)} />
-          <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
-          <Field id="organization" label="Company / organization optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
-          <Field id="phone" label="Phone optional" value={formState.phone} onChange={(value) => updateField("phone", value)} />
-          <Field id="roleTitle" label="Role / title optional" value={formState.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
-          <Field id="shippingRegion" label="Shipping region optional" value={formState.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
+        <div className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Inquiry engine</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send a product, catalog number, or list.</h2>
+          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+            Use as much or as little detail as you have. Email is the only required field.
+          </p>
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <Field
+              id="email"
+              label="Email"
+              type="email"
+              value={formState.email}
+              error={errors.email}
+              required
+              placeholder="you@organization.com"
+              onChange={(value) => updateField("email", value)}
+            />
+            <SelectField
+              id="productCategory"
+              label="Product category optional"
+              value={formState.productCategory}
+              options={productCategoryOptions}
+              placeholder="Other / not sure"
+              onChange={(value) => updateField("productCategory", value)}
+            />
+            <TextArea
+              id="productList"
+              label="Product context / list optional"
+              value={formState.productList}
+              rows={7}
+              placeholder="Paste product names, catalog numbers, supplier names, pack sizes, current brand, target equivalent, workflow notes, or documentation needs."
+              onChange={(value) => updateField("productList", value)}
+            />
+            <Field
+              id="supplier"
+              label="Current supplier / brand optional"
+              value={formState.supplier}
+              placeholder="e.g. Corning, Thermo Fisher, Eppendorf, Greiner, Sartorius, Cytiva, Hamilton, Tecan"
+              onChange={(value) => updateField("supplier", value)}
+            />
+            <Field
+              id="catalogNumber"
+              label="Catalog number / SKU optional"
+              value={formState.catalogNumber}
+              placeholder="Paste one or multiple catalog numbers"
+              onChange={(value) => updateField("catalogNumber", value)}
+            />
+            <CheckboxGroup label="What do you need? optional" values={needOptions} selected={formState.needs} onToggle={toggleNeed} />
+            <SelectField
+              id="timeline"
+              label="Timeline optional"
+              value={formState.timeline}
+              options={timelineOptions}
+              placeholder="Not sure"
+              onChange={(value) => updateField("timeline", value)}
+            />
+            <TextArea
+              id="notes"
+              label="Notes optional"
+              value={formState.notes}
+              rows={5}
+              placeholder={`Add anything useful for this ${selectedRequestType.label.toLowerCase()}.`}
+              onChange={(value) => updateField("notes", value)}
+            />
+          </div>
         </div>
+
+        <aside className="grid gap-5">
+          <section className="border border-bioaxis-line bg-bioaxis-panel p-5">
+            <h2 className="text-xl font-bold uppercase text-bioaxis-text">What BioAxis can review</h2>
+            <ul className="mt-5 grid gap-2 text-sm leading-6 text-bioaxis-muted">
+              {reviewBullets.map((item) => (
+                <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-3 py-2">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="border border-bioaxis-line bg-bioaxis-black p-5">
+            <h2 className="text-xl font-bold uppercase text-bioaxis-text">What BioAxis does not claim</h2>
+            <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
+              BioAxis does not display unsupported real-time inventory, guaranteed equivalence, regulatory approval, or validated compatibility unless confirmed through supplier documentation, sample testing, or customer review.
+            </p>
+          </section>
+        </aside>
       </section>
 
       <details className="group border border-bioaxis-line bg-bioaxis-panel" open={shouldOpenOptionalDetails ? true : undefined}>
@@ -297,37 +425,25 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
           <span>
             <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add more details</span>
             <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">
-              Optional supplier, catalog number, quantity, documents, timeline, notes, or pasted product list.
+              Optional contact, company, quantity, shipping, and documentation notes. You can submit without these fields.
             </span>
           </span>
           <span className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
         </summary>
         <div className="grid gap-5 border-t border-bioaxis-line p-5 md:grid-cols-2 sm:p-8">
-          <Field id="supplier" label="Supplier optional" value={formState.supplier} onChange={(value) => updateField("supplier", value)} />
-          <Field id="catalogNumber" label="Catalog number optional" value={formState.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
+          <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
+          <Field id="organization" label="Company / organization optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
+          <Field id="phone" label="Phone optional" value={formState.phone} onChange={(value) => updateField("phone", value)} />
+          <Field id="roleTitle" label="Role / title optional" value={formState.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
+          <Field id="shippingRegion" label="Shipping region optional" value={formState.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
           <Field id="quantity" label="Desired quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
-          <Field id="timeline" label="Target delivery date optional" value={formState.timeline} onChange={(value) => updateField("timeline", value)} />
-          <Field id="requiredDocuments" label="Documentation optional" value={formState.requiredDocuments} onChange={(value) => updateField("requiredDocuments", value)} />
-          <div className="hidden md:block" aria-hidden="true" />
           <TextArea
-            id="productList"
-            label="Pasted product list optional"
-            value={formState.productList}
-            rows={7}
-            placeholder={[
-              "Supplier | Catalog No. | Product | Qty | Required docs | Timeline",
-              "Corning | 352097 | 96-well plate | 20 cases | CoA/Sterility | July",
-              "Axygen | T-200-C | 200 µL filtered tips | 50 racks | DNase/RNase-free | ASAP"
-            ].join("\n")}
-            onChange={(value) => updateField("productList", value)}
-          />
-          <TextArea
-            id="notes"
-            label="Message / notes optional"
-            value={formState.notes}
-            rows={5}
-            placeholder={`Add anything useful for this ${selectedRequestType.label.toLowerCase()}.`}
-            onChange={(value) => updateField("notes", value)}
+            id="requiredDocuments"
+            label="Documentation optional"
+            value={formState.requiredDocuments}
+            rows={4}
+            placeholder="CoA, SDS, sterility, material, lot-level documentation, or other supplier documents."
+            onChange={(value) => updateField("requiredDocuments", value)}
           />
         </div>
       </details>
@@ -442,6 +558,7 @@ function Field({
   type = "text",
   error,
   required = false,
+  placeholder,
   onChange
 }: {
   id: keyof QuoteFormState;
@@ -450,6 +567,7 @@ function Field({
   type?: "email" | "text";
   error?: string;
   required?: boolean;
+  placeholder?: string;
   onChange: (value: string) => void;
 }) {
   return (
@@ -462,10 +580,11 @@ function Field({
         id={id}
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
-        className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
+        className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
       />
       {error ? (
         <p id={`${id}-error`} className="mt-2 text-sm text-bioaxis-accent">
@@ -473,6 +592,86 @@ function Field({
         </p>
       ) : null}
     </div>
+  );
+}
+
+function SelectField({
+  id,
+  label,
+  value,
+  options,
+  placeholder,
+  onChange
+}: {
+  id: "productCategory" | "timeline";
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function CheckboxGroup({
+  label,
+  values,
+  selected,
+  onToggle
+}: {
+  label: string;
+  values: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <fieldset className="md:col-span-2">
+      <legend className="mb-3 block text-sm font-semibold uppercase text-bioaxis-steel">{label}</legend>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {values.map((value) => {
+          const checked = selected.includes(value);
+
+          return (
+            <label
+              key={value}
+              className={[
+                "flex min-h-11 cursor-pointer items-center gap-3 border px-3 py-2 text-sm font-semibold uppercase transition",
+                checked
+                  ? "border-bioaxis-accent bg-bioaxis-accent/10 text-bioaxis-accent"
+                  : "border-bioaxis-line bg-bioaxis-black text-bioaxis-steel hover:border-bioaxis-accent/70"
+              ].join(" ")}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => onToggle(value)}
+                className="h-4 w-4 accent-bioaxis-accent"
+              />
+              <span>{value}</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getProductSearchResults } from "@/data/productSearch";
-import { buildEquivalentFinderHref, buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
+import { buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
 
 type ProductSearchProps = {
   initialQuery?: string;
@@ -59,9 +59,7 @@ function requestHref(result: ProductSearchResult, requestType: "quote" | "equiva
     query
   };
 
-  return requestType === "equivalent"
-    ? buildEquivalentFinderHref(context)
-    : buildRequestHref({ ...context, requestType });
+  return buildRequestHref({ ...context, requestType });
 }
 
 function detailHref(result: ProductSearchResult, query: string) {
@@ -214,8 +212,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
-  const quoteSearchHref = `/request-quote?requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
-  const productListSearchHref = `/request-quote?requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
+  const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
+  const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
 import { PageHero } from "@/components/ui/PageHero";
+import { normalizeRequestType } from "@/data/requestTypes";
 import { getFamilyBySlug, labelFromProductContext } from "@/data/productTaxonomy";
 import { getProductItemBySlug } from "@/data/productItems";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
@@ -38,7 +39,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const subcategory = first(params?.subcategory) ?? first(params?.category);
   const family = first(params?.family);
   const product = first(params?.product);
-  const requestType = first(params?.requestType) ?? first(params?.inquiryType);
+  const requestType = normalizeRequestType(first(params?.type) ?? first(params?.requestType) ?? first(params?.inquiryType) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const productList = first(params?.productList) ?? first(params?.list) ?? "";
@@ -47,11 +48,12 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
   const timeline = first(params?.timeline) ?? "";
   const requiredDocuments = first(params?.requiredDocuments) ?? first(params?.docs) ?? "";
+  const productCategoryParam = first(params?.productCategory) ?? "";
   const labels = labelFromProductContext({ segment, subcategory, family });
   const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
   const sourceProductUrl = sourcePage || buildSourceProductUrl({ segment, subcategory, family, product });
-  const productCategory = labels.subcategoryName || labelize(subcategory) || "";
+  const productCategory = productCategoryParam || labels.subcategoryName || labelize(subcategory) || "";
   const productName = productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
     segment || subcategory || family || product || query || sourcePage
@@ -79,8 +81,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     <>
       <PageHero
         eyebrow="Request quote"
-        title="Send product context with only your email."
-        subtitle="BioAxis can follow up to clarify specs, equivalents, samples, documentation, or quote details. Product page context and sourcing list items are carried into the request automatically."
+        title="Send a product, catalog number, or list"
+        subtitle="Use this page for RFQs, equivalent review, sample requests, documentation requests, recurring supply needs, or general sourcing questions. Only your email is required to start."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <QuoteRequestForm
@@ -91,6 +93,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
             catalogNumber,
             quantity,
             timeline,
+            productCategory,
             requiredDocuments
           }}
           productContext={productContext}

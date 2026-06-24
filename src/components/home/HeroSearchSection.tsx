@@ -5,10 +5,10 @@ import { CTAButton } from "@/components/ui/CTAButton";
 import { SearchBox } from "@/components/ui/SearchBox";
 
 const heroTasks = [
-  { label: "Browse products", href: "/products" },
-  { label: "Paste product list", href: "/request-quote?requestType=product-list-review" },
-  { label: "Find equivalent", href: "/equivalent-finder?requestType=equivalent" },
-  { label: "Request quote", href: "/request-quote?requestType=quote" }
+  { label: "Paste product list", href: "/request-quote?type=product-list&requestType=product-list-review" },
+  { label: "Find equivalent", href: "/equivalent-finder" },
+  { label: "Request quote", href: "/request-quote?type=rfq&requestType=quote" },
+  { label: "Browse products", href: "/products" }
 ];
 
 export function HeroSearchSection() {
@@ -34,7 +34,7 @@ export function HeroSearchSection() {
           </h1>
           <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">{brand.tagline}</p>
           <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            Search, browse, paste a product list, or send one request. BioAxis turns product context into a sourcing path without asking for every detail up front.
+            Send us a product name, catalog number, supplier list, or current consumables workflow. BioAxis helps structure sourcing options, equivalent review, documentation needs, sample requests, and quote next steps.
           </p>
         </div>
 
@@ -55,15 +55,14 @@ export function HeroSearchSection() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <CTAButton href="/products">Browse Products</CTAButton>
-          <CTAButton href="/request-quote?requestType=product-list-review" variant="secondary">
+          <CTAButton href="/request-quote?type=product-list&requestType=product-list-review">
             Paste Product List
-          </CTAButton>
-          <CTAButton href="/request-quote" variant="secondary">
-            Request Quote
           </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
             Find Equivalent
+          </CTAButton>
+          <CTAButton href="/products" variant="secondary">
+            Browse Products
           </CTAButton>
         </div>
       </div>

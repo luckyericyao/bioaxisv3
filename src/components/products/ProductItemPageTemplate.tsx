@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buildEquivalentFinderHref, buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
+import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
 import { PageHero } from "@/components/ui/PageHero";
@@ -35,7 +35,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
     },
     {
       label: "Find equivalent",
-      href: buildEquivalentFinderHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug })
+      href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "equivalent" })
     },
     {
       label: "Request sample",

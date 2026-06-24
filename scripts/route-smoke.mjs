@@ -96,7 +96,16 @@ const requiredWorkflowCtaLabels = [
   "Build QC supply list"
 ];
 const requestTypeLabels = ["Quote", "Equivalent", "Sample", "Documentation", "Recurring supply", "Product list", "Contact"];
-const equivalentFinderContent = ["Common equivalent requests", "How BioAxis compares fit", "Safer switching path", "BioAxis helps compare compatible options. Final suitability depends on customer validation."];
+const equivalentFinderContent = [
+  "Find compatible consumables alternatives",
+  "Equivalent intake",
+  "Start equivalent review",
+  "How BioAxis reviews equivalent requests",
+  "Common equivalent requests",
+  "compatible option",
+  "potential equivalent",
+  "Final suitability depends on supplier documentation, sample testing, and customer review"
+];
 const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
 const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
 const requiredProductSegments = [
@@ -162,6 +171,11 @@ const routes = [
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
   "/request-quote",
+  "/request-quote?type=product-list",
+  "/request-quote?type=equivalent",
+  "/request-quote?type=sample",
+  "/request-quote?type=documentation",
+  "/request-quote?type=rfq",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -347,9 +361,17 @@ for (const route of routes) {
       "Private Label / OEM Consumables",
       "Explore private label options",
       "Request quote with a product list",
-      "Start from a sourcing path",
-      "Browse product universe",
-      "Request sample/documentation",
+      "Start with what you have",
+      "Catalog number",
+      "Product list",
+      "Current supplier",
+      "Workflow need",
+      "Common buyer triggers",
+      "Out-of-stock or long lead time",
+      "Need compatible equivalent",
+      "Have a product list?",
+      "Built for real purchasing situations",
+      "You need documents before purchasing",
       "How BioAxis works",
       "What BioAxis returns"
     ].forEach((label) => {
@@ -451,12 +473,12 @@ for (const route of routes) {
       }
     });
 
-    if (!hasHrefWithParams(html, "/request-quote", { requestType: "equivalent" })) {
+    if (!hasHrefWithParams(html, "/request-quote", { type: "equivalent", requestType: "equivalent" })) {
       failures.push(`${route}: missing equivalent request CTA`);
     }
 
-    if (!hrefsFromHtml(html).some((href) => hrefPath(href) === "/samples")) {
-      failures.push(`${route}: missing sample-first CTA`);
+    if (!hasHrefWithParams(html, "/request-quote", { type: "sample", requestType: "sample" })) {
+      failures.push(`${route}: missing sample-first request CTA`);
     }
   }
 
@@ -476,9 +498,16 @@ for (const route of routes) {
     }
 
     [
-      "Send product context with only your email.",
+      "Send a product, catalog number, or list",
       "Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.",
-      "Submit now, and BioAxis can follow up by email to clarify specs, equivalents, samples, documentation, or quantities.",
+      "Use this page for RFQs, equivalent review, sample requests, documentation requests, recurring supply needs, or general sourcing questions. Only your email is required to start.",
+      "Product context / list optional",
+      "Current supplier / brand optional",
+      "Catalog number / SKU optional",
+      "Product category optional",
+      "What do you need? optional",
+      "What BioAxis can review",
+      "What BioAxis does not claim",
       "Email *",
       "Company / organization optional",
       "Add more details"
@@ -501,12 +530,28 @@ for (const route of routes) {
     });
   }
 
-  if (route.startsWith("/request-quote?requestType=product-list-review")) {
-    ["Pasted product list optional", "Supplier | Catalog No. | Product"].forEach((label) => {
+  if (route.startsWith("/request-quote?type=product-list") || route.startsWith("/request-quote?requestType=product-list-review")) {
+    ["Product list", "Product context / list optional"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-list RFQ field ${label}`);
       }
     });
+
+    if (!html.includes("Paste product names, catalog numbers")) {
+      failures.push(`${route}: missing product-list textarea placeholder`);
+    }
+  }
+
+  if (route.startsWith("/request-quote?type=equivalent") && !pageText.includes("Type 03 Selected Equivalent")) {
+    failures.push(`${route}: equivalent type query did not preselect equivalent request`);
+  }
+
+  if (route.startsWith("/request-quote?type=sample") && !pageText.includes("Type 04 Selected Sample")) {
+    failures.push(`${route}: sample type query did not preselect sample request`);
+  }
+
+  if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Type 05 Selected Documentation")) {
+    failures.push(`${route}: documentation type query did not preselect documentation request`);
   }
 
   if (route.startsWith("/request-quote?") && route.includes("product=filtered-200ul-pipette-tips")) {
@@ -731,7 +776,7 @@ for (const route of routes) {
     }
     [
       { label: "Request quote", pathname: "/request-quote", params: { requestType: "quote" } },
-      { label: "Find equivalent", pathname: "/equivalent-finder", params: { requestType: "equivalent" } },
+      { label: "Find equivalent", pathname: "/request-quote", params: { requestType: "equivalent" } },
       { label: "Request sample", pathname: "/request-quote", params: { requestType: "sample" } },
       { label: "Ask for documentation", pathname: "/request-quote", params: { requestType: "documentation" } }
     ].forEach((cta) => {
@@ -821,6 +866,22 @@ for (const href of resourceGuideLinks) {
   ["Related products", "Find equivalent", "Request sample", "Prepare RFQ"].forEach((label) => {
     if (!pageText.includes(label)) {
       failures.push(`/resources guide link ${href}: missing guide CTA ${label}`);
+    }
+  });
+
+  ["Need help sourcing this product type?", "Paste product list", "Request documents"].forEach((label) => {
+    if (!pageText.includes(label)) {
+      failures.push(`/resources guide link ${href}: missing conversion CTA ${label}`);
+    }
+  });
+
+  [
+    { pathname: "/request-quote", params: { type: "product-list", requestType: "product-list-review" } },
+    { pathname: "/request-quote", params: { type: "equivalent", requestType: "equivalent" } },
+    { pathname: "/request-quote", params: { type: "documentation", requestType: "documentation" } }
+  ].forEach((cta) => {
+    if (!hasHrefWithParams(html, cta.pathname, cta.params)) {
+      failures.push(`/resources guide link ${href}: missing conversion CTA href ${cta.params.type}`);
     }
   });
 }
@@ -914,7 +975,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "buildEquivalentFinderHref", "View category"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "View category"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }

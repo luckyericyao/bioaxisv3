@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getResourceArticleBySlug, resourceArticles } from "@/data/resourceArticles";
 import { PageHero } from "@/components/ui/PageHero";
+import { ResourceConversionCTA } from "@/components/resources/ResourceConversionCTA";
 
 type ResourceArticlePageProps = {
   params: Promise<{
@@ -83,6 +84,7 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
             Prepare RFQ
           </Link>
         </div>
+        <ResourceConversionCTA />
       </article>
     </>
   );

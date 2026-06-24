@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buildEquivalentFinderHref, buildRequestHref } from "@/data/productTaxonomy";
+import { buildRequestHref } from "@/data/productTaxonomy";
 
 type SourcingRequestButtonGroupProps = {
   segment?: string;
@@ -32,7 +32,6 @@ export function SourcingRequestButtonGroup({
   size = "sm",
   layout = "grid",
   includeSupport = false,
-  includeDocumentation = false,
   sourcePage,
   query
 }: SourcingRequestButtonGroupProps) {
@@ -40,20 +39,16 @@ export function SourcingRequestButtonGroup({
     { label: product ? "Request quote for this product" : "Request quote", requestType: "quote", primary: true },
     { label: "Find equivalent", requestType: "equivalent", primary: false },
     { label: "Request sample", requestType: "sample", primary: false },
-    ...(includeDocumentation ? [{ label: "Ask for documentation", requestType: "documentation", primary: false }] : []),
+    { label: "Ask for documents", requestType: "documentation", primary: false },
     ...(includeSupport ? [{ label: "Recurring supply", requestType: "recurring-supply", primary: false }] : [])
   ];
 
   return (
-    <div className={layout === "grid" ? "grid gap-2 sm:grid-cols-3" : "flex flex-col gap-2 sm:flex-row"}>
+    <div className={layout === "grid" ? "grid gap-2 sm:grid-cols-2 xl:grid-cols-4" : "flex flex-col gap-2 sm:flex-row sm:flex-wrap"}>
       {requests.map((request) => (
         <Link
           key={request.requestType}
-          href={
-            request.requestType === "equivalent"
-              ? buildEquivalentFinderHref({ segment, category, subcategory, family, product, sourcePage, query })
-              : buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType, sourcePage, query })
-          }
+          href={buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType, sourcePage, query })}
           className={[
             baseClass,
             sizeClass[size],
