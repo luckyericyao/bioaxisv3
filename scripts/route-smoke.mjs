@@ -176,6 +176,8 @@ const routes = [
   "/request-quote?type=sample",
   "/request-quote?type=documentation",
   "/request-quote?type=rfq",
+  "/request-quote?type=recurring",
+  "/request-quote?type=unknown",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -501,7 +503,9 @@ for (const route of routes) {
       "Send a product, catalog number, or list",
       "Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.",
       "Use this page for RFQs, equivalent review, sample requests, documentation requests, recurring supply needs, or general sourcing questions. Only your email is required to start.",
-      "Product context / list optional",
+      "Contact",
+      "Only email is required.",
+      "Product context / list",
       "Current supplier / brand optional",
       "Catalog number / SKU optional",
       "Product category optional",
@@ -531,7 +535,7 @@ for (const route of routes) {
   }
 
   if (route.startsWith("/request-quote?type=product-list") || route.startsWith("/request-quote?requestType=product-list-review")) {
-    ["Product list", "Product context / list optional"].forEach((label) => {
+    ["Product list", "Product context / list"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-list RFQ field ${label}`);
       }
@@ -552,6 +556,14 @@ for (const route of routes) {
 
   if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Type 05 Selected Documentation")) {
     failures.push(`${route}: documentation type query did not preselect documentation request`);
+  }
+
+  if (route.startsWith("/request-quote?type=recurring") && !pageText.includes("Type 06 Selected Recurring supply")) {
+    failures.push(`${route}: recurring type query did not preselect recurring supply request`);
+  }
+
+  if (route.startsWith("/request-quote?type=unknown") && !pageText.includes("Type 01 Selected Quote")) {
+    failures.push(`${route}: unknown type query did not default to quote request`);
   }
 
   if (route.startsWith("/request-quote?") && route.includes("product=filtered-200ul-pipette-tips")) {

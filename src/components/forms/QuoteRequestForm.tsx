@@ -333,71 +333,96 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
-        <div className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Inquiry engine</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send a product, catalog number, or list.</h2>
-          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            Use as much or as little detail as you have. Email is the only required field.
-          </p>
-          <div className="mt-6 grid gap-5 md:grid-cols-2">
-            <Field
-              id="email"
-              label="Email"
-              type="email"
-              value={formState.email}
-              error={errors.email}
-              required
-              placeholder="you@organization.com"
-              onChange={(value) => updateField("email", value)}
-            />
-            <SelectField
-              id="productCategory"
-              label="Product category optional"
-              value={formState.productCategory}
-              options={productCategoryOptions}
-              placeholder="Other / not sure"
-              onChange={(value) => updateField("productCategory", value)}
-            />
-            <TextArea
-              id="productList"
-              label="Product context / list optional"
-              value={formState.productList}
-              rows={7}
-              placeholder="Paste product names, catalog numbers, supplier names, pack sizes, current brand, target equivalent, workflow notes, or documentation needs."
-              onChange={(value) => updateField("productList", value)}
-            />
-            <Field
-              id="supplier"
-              label="Current supplier / brand optional"
-              value={formState.supplier}
-              placeholder="e.g. Corning, Thermo Fisher, Eppendorf, Greiner, Sartorius, Cytiva, Hamilton, Tecan"
-              onChange={(value) => updateField("supplier", value)}
-            />
-            <Field
-              id="catalogNumber"
-              label="Catalog number / SKU optional"
-              value={formState.catalogNumber}
-              placeholder="Paste one or multiple catalog numbers"
-              onChange={(value) => updateField("catalogNumber", value)}
-            />
-            <CheckboxGroup label="What do you need? optional" values={needOptions} selected={formState.needs} onToggle={toggleNeed} />
-            <SelectField
-              id="timeline"
-              label="Timeline optional"
-              value={formState.timeline}
-              options={timelineOptions}
-              placeholder="Not sure"
-              onChange={(value) => updateField("timeline", value)}
-            />
-            <TextArea
-              id="notes"
-              label="Notes optional"
-              value={formState.notes}
-              rows={5}
-              placeholder={`Add anything useful for this ${selectedRequestType.label.toLowerCase()}.`}
-              onChange={(value) => updateField("notes", value)}
-            />
-          </div>
+        <div className="grid gap-5">
+          <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Contact</p>
+            <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Only email is required.</h2>
+            <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+              Add name, company, role, phone, or shipping region only when useful for follow-up.
+            </p>
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <Field
+                id="email"
+                label="Email"
+                type="email"
+                value={formState.email}
+                error={errors.email}
+                required
+                placeholder="you@organization.com"
+                onChange={(value) => updateField("email", value)}
+              />
+              <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
+              <Field id="organization" label="Company / organization optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
+              <Field id="roleTitle" label="Role / title optional" value={formState.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
+              <Field id="phone" label="Phone optional" value={formState.phone} onChange={(value) => updateField("phone", value)} />
+              <Field id="shippingRegion" label="Shipping region optional" value={formState.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
+            </div>
+          </section>
+
+          <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-8">
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Product context</p>
+            <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Paste the product, catalog number, or list.</h2>
+            <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+              This is the main action. Product details can be rough, copied from a spreadsheet, or written as short notes.
+            </p>
+            <div className="mt-6">
+              <TextArea
+                id="productList"
+                label="Product context / list"
+                value={formState.productList}
+                rows={9}
+                prominent
+                placeholder="Paste product names, catalog numbers, supplier names, pack sizes, current brand, target equivalent, workflow notes, required documents, sample needs, or expected usage."
+                onChange={(value) => updateField("productList", value)}
+              />
+            </div>
+          </section>
+
+          <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Product details</p>
+            <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Structure the request if you can.</h2>
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <Field
+                id="supplier"
+                label="Current supplier / brand optional"
+                value={formState.supplier}
+                placeholder="e.g. Corning, Thermo Fisher, Eppendorf, Greiner, Sartorius, Cytiva, Hamilton, Tecan"
+                onChange={(value) => updateField("supplier", value)}
+              />
+              <Field
+                id="catalogNumber"
+                label="Catalog number / SKU optional"
+                value={formState.catalogNumber}
+                placeholder="Paste one or multiple catalog numbers"
+                onChange={(value) => updateField("catalogNumber", value)}
+              />
+              <SelectField
+                id="productCategory"
+                label="Product category optional"
+                value={formState.productCategory}
+                options={productCategoryOptions}
+                placeholder="Other / not sure"
+                onChange={(value) => updateField("productCategory", value)}
+              />
+              <SelectField
+                id="timeline"
+                label="Timeline optional"
+                value={formState.timeline}
+                options={timelineOptions}
+                placeholder="Not sure"
+                onChange={(value) => updateField("timeline", value)}
+              />
+              <CheckboxGroup label="What do you need? optional" values={needOptions} selected={formState.needs} onToggle={toggleNeed} />
+              <TextArea
+                id="notes"
+                label="Notes optional"
+                value={formState.notes}
+                rows={5}
+                placeholder={`Add anything useful for this ${selectedRequestType.label.toLowerCase()}.`}
+                onChange={(value) => updateField("notes", value)}
+              />
+            </div>
+          </section>
         </div>
 
         <aside className="grid gap-5">
@@ -425,17 +450,12 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
           <span>
             <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add more details</span>
             <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">
-              Optional contact, company, quantity, shipping, and documentation notes. You can submit without these fields.
+              Optional quantity and documentation notes. You can submit without these fields.
             </span>
           </span>
           <span className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
         </summary>
         <div className="grid gap-5 border-t border-bioaxis-line p-5 md:grid-cols-2 sm:p-8">
-          <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
-          <Field id="organization" label="Company / organization optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
-          <Field id="phone" label="Phone optional" value={formState.phone} onChange={(value) => updateField("phone", value)} />
-          <Field id="roleTitle" label="Role / title optional" value={formState.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
-          <Field id="shippingRegion" label="Shipping region optional" value={formState.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
           <Field id="quantity" label="Desired quantity optional" value={formState.quantity} onChange={(value) => updateField("quantity", value)} />
           <TextArea
             id="requiredDocuments"
@@ -681,6 +701,7 @@ function TextArea({
   value,
   rows = 5,
   placeholder,
+  prominent = false,
   onChange
 }: {
   id: keyof QuoteFormState;
@@ -688,6 +709,7 @@ function TextArea({
   value: string;
   rows?: number;
   placeholder?: string;
+  prominent?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
@@ -701,7 +723,10 @@ function TextArea({
         rows={rows}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
+        className={[
+          "field-focus w-full resize-y border bg-bioaxis-black px-4 py-3 text-base text-bioaxis-text placeholder:text-bioaxis-dim",
+          prominent ? "min-h-64 border-bioaxis-accent/55 text-lg leading-7" : "border-bioaxis-line"
+        ].join(" ")}
       />
     </div>
   );

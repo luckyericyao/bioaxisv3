@@ -78,11 +78,14 @@ const requestTypeAliases: Record<string, string> = {
   documents: "documentation",
   sample: "sample",
   documentation: "documentation",
+  general: "contact",
+  contact: "contact",
   support: "contact"
 };
 
 export function normalizeRequestType(id: string) {
-  return requestTypeAliases[id] ?? id;
+  const normalizedId = requestTypeAliases[id] ?? id;
+  return requestTypes.some((requestType) => requestType.id === normalizedId) ? normalizedId : "quote";
 }
 
 export function getRequestTypeById(id: string) {

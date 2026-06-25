@@ -464,6 +464,7 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   const fallbackReplyTo = process.env.BIOAXIS_RFQ_REPLY_TO_EMAIL || toEmail || fallbackToEmail;
 
   if (!apiKey || !toEmail) {
+    // TODO: Configure Resend env vars in production so captured requests are delivered by email.
     return { mode: "captured" as const };
   }
 
