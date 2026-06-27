@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductItemPageTemplate } from "@/components/products/ProductItemPageTemplate";
 import { getAllProductItemPaths, getProductItemBySlug } from "@/data/productItems";
+import { CatalogProductPage } from "@/components/products/catalog/CatalogPageTemplates";
+import { getAllCatalogProductPaths, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
 
 type ProductItemPageProps = {
   params: Promise<{
@@ -13,7 +15,23 @@ type ProductItemPageProps = {
 };
 
 export function generateStaticParams() {
-  return getAllProductItemPaths().map((path) => ({
+  const paths = [
+    ...getAllProductItemPaths().map((path) => ({
+      segment: path.segment,
+      subcategory: path.subcategory,
+      family: path.family,
+      product: path.product
+    })),
+    ...getAllCatalogProductPaths()
+  ];
+  const seen = new Set<string>();
+
+  return paths.filter((path) => {
+    const key = `${path.segment}/${path.subcategory}/${path.family}/${path.product}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map((path) => ({
     segment: path.segment,
     subcategory: path.subcategory,
     family: path.family,
@@ -23,6 +41,18 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: ProductItemPageProps): Promise<Metadata> {
   const { segment, subcategory, family, product } = await params;
+  const catalogMatch = getCatalogProductBySlug(segment, subcategory, family, product);
+
+  if (catalogMatch) {
+    return {
+      title: `${catalogMatch.product.name} | ${catalogMatch.family.name} | BioAxis`,
+      description: catalogMatch.product.description,
+      alternates: {
+        canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}/${catalogMatch.product.slug}`
+      }
+    };
+  }
+
   const match = getProductItemBySlug(segment, subcategory, family, product);
 
   if (!match) {
@@ -42,6 +72,19 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
 
 export default async function ProductItemPage({ params }: ProductItemPageProps) {
   const { segment, subcategory, family, product } = await params;
+  const catalogMatch = getCatalogProductBySlug(segment, subcategory, family, product);
+
+  if (catalogMatch) {
+    return (
+      <CatalogProductPage
+        segment={catalogMatch.segment}
+        category={catalogMatch.category}
+        family={catalogMatch.family}
+        product={catalogMatch.product}
+      />
+    );
+  }
+
   const match = getProductItemBySlug(segment, subcategory, family, product);
 
   if (!match) {

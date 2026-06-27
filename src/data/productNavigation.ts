@@ -1,4 +1,4 @@
-import { productTaxonomy } from "@/data/productTaxonomy";
+import { productCatalogMenuSegments } from "@/data/productCatalog";
 
 export type ProductNavigationFamilyLink = {
   label: string;
@@ -16,7 +16,7 @@ export type ProductNavigationCategory = {
 };
 
 export type ProductNavigationSegment = {
-  index: number;
+  index: string;
   label: string;
   shortDescription: string;
   href: string;
@@ -25,19 +25,19 @@ export type ProductNavigationSegment = {
   familyLinks: ProductNavigationFamilyLink[];
 };
 
-export const productNavigationSegments: ProductNavigationSegment[] = productTaxonomy.map((segment) => {
-  const categories = segment.subcategories.map((category) => {
-    const categoryHref = `/products/${segment.slug}/${category.slug}`;
-    const families = category.productFamilies.map((family) => ({
-      label: family.title,
+export const productNavigationSegments: ProductNavigationSegment[] = productCatalogMenuSegments.map((segment) => {
+  const categories = segment.categories.map((category) => {
+    const categoryHref = segment.slug === "private-label" ? "/private-label" : segment.slug === "documents-compliance" ? "/resources" : `/products/${segment.slug}/${category.slug}`;
+    const families = category.families.map((family) => ({
+      label: family.name,
       href: `${categoryHref}/${family.slug}`,
-      categoryLabel: category.title,
+      categoryLabel: category.name,
       categorySlug: category.slug,
       familySlug: family.slug
     }));
 
     return {
-      label: category.title,
+      label: category.name,
       href: categoryHref,
       slug: category.slug,
       families
@@ -46,9 +46,9 @@ export const productNavigationSegments: ProductNavigationSegment[] = productTaxo
 
   return {
     index: segment.index,
-    label: segment.title,
+    label: segment.name,
     shortDescription: segment.shortDescription,
-    href: `/products/${segment.slug}`,
+    href: segment.slug === "private-label" ? "/private-label" : segment.slug === "documents-compliance" ? "/resources" : `/products/${segment.slug}`,
     slug: segment.slug,
     categories,
     familyLinks: categories.flatMap((category) => category.families)

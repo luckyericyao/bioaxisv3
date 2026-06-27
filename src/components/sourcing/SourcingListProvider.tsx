@@ -19,6 +19,7 @@ export type SourcingListItem = {
   quantity: string;
   currentSupplier: string;
   catalogNumber: string;
+  requestedAction: string;
   equivalentNeeded: boolean;
   sampleNeeded: boolean;
   documentationNeeded: boolean;
@@ -33,13 +34,16 @@ type SourcingListInput = Omit<
   | "quantity"
   | "currentSupplier"
   | "catalogNumber"
+  | "requestedAction"
   | "equivalentNeeded"
   | "sampleNeeded"
   | "documentationNeeded"
   | "notes"
   | "sourcePageUrl"
   | "addedAt"
->;
+> & {
+  requestedAction?: string;
+};
 
 type SourcingListContextValue = {
   items: SourcingListItem[];
@@ -65,6 +69,7 @@ function emptyFields(item: SourcingListInput): SourcingListItem {
     quantity: "",
     currentSupplier: "",
     catalogNumber: "",
+    requestedAction: item.requestedAction ?? "Quote",
     equivalentNeeded: false,
     sampleNeeded: false,
     documentationNeeded: false,
@@ -88,13 +93,14 @@ function readStoredItems() {
 }
 
 function formatSubmission(items: SourcingListItem[]) {
-  const header = "Product / family | Path | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
+  const header = "Product / family | Path | Requested action | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
   const rows = items.map((item) => {
     const path = [item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ");
 
     return [
       item.title,
       path || item.href,
+      item.requestedAction || "Quote",
       item.quantity || "-",
       item.currentSupplier || "-",
       item.catalogNumber || "-",
@@ -217,6 +223,20 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                       <DrawerField label="Current supplier" value={item.currentSupplier} onChange={(currentSupplier) => value.updateItem(item.id, { currentSupplier })} />
                       <DrawerField label="Catalog number" value={item.catalogNumber} onChange={(catalogNumber) => value.updateItem(item.id, { catalogNumber })} />
                     </div>
+                    <label className="mt-4 block">
+                      <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Requested action</span>
+                      <select
+                        value={item.requestedAction}
+                        onChange={(event) => value.updateItem(item.id, { requestedAction: event.target.value })}
+                        className="field-focus min-h-10 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
+                      >
+                        <option>Quote</option>
+                        <option>Equivalent</option>
+                        <option>Sample</option>
+                        <option>Documents</option>
+                        <option>Recurring supply</option>
+                      </select>
+                    </label>
                     <div className="mt-4 grid gap-2 md:grid-cols-3">
                       <DrawerToggle label="Equivalent needed" checked={item.equivalentNeeded} onChange={(equivalentNeeded) => value.updateItem(item.id, { equivalentNeeded })} />
                       <DrawerToggle label="Sample needed" checked={item.sampleNeeded} onChange={(sampleNeeded) => value.updateItem(item.id, { sampleNeeded })} />
@@ -242,7 +262,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                 onClick={submitSourcingList}
                 className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
               >
-                Submit sourcing list
+                Continue to RFQ
               </button>
             </div>
           </div>

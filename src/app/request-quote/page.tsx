@@ -4,6 +4,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { normalizeRequestType } from "@/data/requestTypes";
 import { getFamilyBySlug, labelFromProductContext } from "@/data/productTaxonomy";
 import { getProductItemBySlug } from "@/data/productItems";
+import { getFamilyBySlug as getCatalogFamilyBySlug, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 
 export const metadata: Metadata = {
@@ -33,13 +34,26 @@ function labelize(value: string | undefined) {
     : "";
 }
 
+function requestTypeFromNeed(value: string | undefined) {
+  const normalized = value?.toLowerCase() ?? "";
+
+  if (normalized.includes("document") || normalized.includes("coa") || normalized.includes("sds")) return "documentation";
+  if (normalized.includes("equivalent") || normalized.includes("alternative")) return "equivalent";
+  if (normalized.includes("sample")) return "sample";
+  if (normalized.includes("recurring") || normalized.includes("monthly")) return "recurring-supply";
+  if (normalized.includes("product-list") || normalized.includes("list")) return "product-list-review";
+
+  return undefined;
+}
+
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
   const subcategory = first(params?.subcategory) ?? first(params?.category);
   const family = first(params?.family);
   const product = first(params?.product);
-  const requestType = normalizeRequestType(first(params?.type) ?? first(params?.requestType) ?? first(params?.inquiryType) ?? "quote");
+  const need = first(params?.need);
+  const requestType = normalizeRequestType(first(params?.type) ?? first(params?.requestType) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const productList = first(params?.productList) ?? first(params?.list) ?? "";
@@ -52,24 +66,29 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const labels = labelFromProductContext({ segment, subcategory, family });
   const productMatch = segment && subcategory && family && product ? getProductItemBySlug(segment, subcategory, family, product) : null;
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
+  const catalogProductMatch = segment && subcategory && family && product ? getCatalogProductBySlug(segment, subcategory, family, product) : null;
+  const catalogFamilyMatch = segment && subcategory && family ? getCatalogFamilyBySlug(segment, subcategory, family) : null;
   const sourceProductUrl = sourcePage || buildSourceProductUrl({ segment, subcategory, family, product });
-  const productCategory = productCategoryParam || labels.subcategoryName || labelize(subcategory) || "";
-  const productName = productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
+  const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || "";
+  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
     segment || subcategory || family || product || query || sourcePage
       ? {
           requestType: requestType ?? "quote",
           productName,
-          productFamily: labels.familyName || labelize(family),
+          productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family),
           productCategory,
-          productSegment: labels.segmentName || labelize(segment),
+          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment),
           productUrl: sourceProductUrl,
           sourcePageUrl: sourceProductUrl,
           relevantSpecs:
+            catalogProductMatch ? catalogProductMatch.product.tags.slice(0, 8) :
+            catalogFamilyMatch ? catalogFamilyMatch.family.typicalSpecs.slice(0, 8) :
             productMatch?.productItem.commonSpecifications.slice(0, 8) ??
             familyMatch?.family.keySpecifications.slice(0, 8) ??
             [],
           documentationNotes:
+            catalogProductMatch ? Object.entries(catalogProductMatch.product.documents).map(([key, value]) => `${key}: ${value}`) :
             productMatch?.productItem.documentationNeeds.slice(0, 8) ??
             familyMatch?.family.documentationChecklist.slice(0, 8) ??
             [],
@@ -94,7 +113,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
             quantity,
             timeline,
             productCategory,
-            requiredDocuments
+            requiredDocuments,
+            needs: need ? [labelize(need)] : []
           }}
           productContext={productContext}
         />

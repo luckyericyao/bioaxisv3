@@ -52,7 +52,19 @@ function requestHref(query?: string) {
   });
 }
 
-export default function EquivalentFinderPage() {
+type EquivalentFinderPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function EquivalentFinderPage({ searchParams }: EquivalentFinderPageProps) {
+  const params = await searchParams;
+  const initialQuery = first(params?.catalog) ?? first(params?.query) ?? first(params?.product) ?? "";
+  const initialSupplier = first(params?.supplier) ?? "";
+
   return (
     <>
       <PageHero
@@ -87,6 +99,7 @@ export default function EquivalentFinderPage() {
               Current product or catalog number
               <input
                 name="query"
+                defaultValue={initialQuery}
                 className="field-focus min-h-12 border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
                 placeholder="Supplier SKU, catalog number, or product name"
               />
@@ -95,6 +108,7 @@ export default function EquivalentFinderPage() {
               Current brand / supplier
               <input
                 name="supplier"
+                defaultValue={initialSupplier}
                 className="field-focus min-h-12 border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
                 placeholder="Current supplier or brand"
               />

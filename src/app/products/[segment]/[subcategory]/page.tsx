@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { CategoryPageTemplate } from "@/components/products/CategoryPageTemplate";
 import { getAllSubcategoryPaths, getSubcategoryBySlug } from "@/data/productTaxonomy";
 import { getPriorityProductContent } from "@/data/priorityProductContent";
+import { CatalogCategoryPage } from "@/components/products/catalog/CatalogPageTemplates";
+import { getAllCatalogCategoryPaths, getCategoryBySlug as getCatalogCategoryBySlug } from "@/data/productCatalog";
 
 type SubcategoryPageProps = {
   params: Promise<{
@@ -12,11 +14,31 @@ type SubcategoryPageProps = {
 };
 
 export function generateStaticParams() {
-  return getAllSubcategoryPaths();
+  const paths = [...getAllSubcategoryPaths(), ...getAllCatalogCategoryPaths()];
+  const seen = new Set<string>();
+
+  return paths.filter((path) => {
+    const key = `${path.segment}/${path.subcategory}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export async function generateMetadata({ params }: SubcategoryPageProps): Promise<Metadata> {
   const { segment: segmentSlug, subcategory: subcategorySlug } = await params;
+  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
+
+  if (catalogMatch) {
+    return {
+      title: `${catalogMatch.category.name} | ${catalogMatch.segment.name} | BioAxis`,
+      description: catalogMatch.category.description,
+      alternates: {
+        canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}`
+      }
+    };
+  }
+
   const match = getSubcategoryBySlug(segmentSlug, subcategorySlug);
 
   if (!match) {
@@ -38,6 +60,12 @@ export async function generateMetadata({ params }: SubcategoryPageProps): Promis
 
 export default async function ProductSubcategoryPage({ params }: SubcategoryPageProps) {
   const { segment: segmentSlug, subcategory: subcategorySlug } = await params;
+  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
+
+  if (catalogMatch) {
+    return <CatalogCategoryPage segment={catalogMatch.segment} category={catalogMatch.category} />;
+  }
+
   const match = getSubcategoryBySlug(segmentSlug, subcategorySlug);
 
   if (!match) {

@@ -9,6 +9,7 @@ type AddToSourcingListButtonProps = Omit<
   | "quantity"
   | "currentSupplier"
   | "catalogNumber"
+  | "requestedAction"
   | "equivalentNeeded"
   | "sampleNeeded"
   | "documentationNeeded"
@@ -17,9 +18,18 @@ type AddToSourcingListButtonProps = Omit<
   | "addedAt"
 > & {
   className?: string;
+  label?: string;
+  addedLabel?: string;
+  requestedAction?: string;
 };
 
-export function AddToSourcingListButton({ className = "", ...item }: AddToSourcingListButtonProps) {
+export function AddToSourcingListButton({
+  className = "",
+  label = "Add to sourcing list",
+  addedLabel = "Added to sourcing list",
+  requestedAction = "Quote",
+  ...item
+}: AddToSourcingListButtonProps) {
   const { addItem } = useSourcingList();
   const [added, setAdded] = useState(false);
 
@@ -27,7 +37,7 @@ export function AddToSourcingListButton({ className = "", ...item }: AddToSourci
     <button
       type="button"
       onClick={() => {
-        addItem(item);
+        addItem({ ...item, requestedAction });
         setAdded(true);
       }}
       className={[
@@ -35,7 +45,7 @@ export function AddToSourcingListButton({ className = "", ...item }: AddToSourci
         className
       ].join(" ")}
     >
-      {added ? "Added to sourcing list" : "Add to sourcing list"}
+      {added ? addedLabel : label}
     </button>
   );
 }

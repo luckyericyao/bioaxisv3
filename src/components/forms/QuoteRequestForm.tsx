@@ -42,6 +42,7 @@ type SourcingListSummaryItem = {
   quantity?: string;
   currentSupplier?: string;
   catalogNumber?: string;
+  requestedAction?: string;
   equivalentNeeded?: boolean;
   sampleNeeded?: boolean;
   documentationNeeded?: boolean;

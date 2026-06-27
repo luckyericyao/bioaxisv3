@@ -1,14 +1,12 @@
 import Link from "next/link";
-import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
+import type { ProductSubcategory, ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { buildRequestHref } from "@/data/productTaxonomy";
-import { getProductNavigationSegment, type ProductNavigationCategory } from "@/data/productNavigation";
 
 type ProductCategoryCardProps = {
   segment: ProductTaxonomySegment;
 };
 
 export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
-  const navigationSegment = getProductNavigationSegment(segment.slug);
   const keywordChips = segment.subcategories.slice(0, 5).map((subcategory) => subcategory.title);
 
   return (
@@ -30,7 +28,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
         ))}
       </div>
 
-      {navigationSegment ? <SegmentFamilyDisclosure categories={navigationSegment.categories} segmentHref={`/products/${segment.slug}`} /> : null}
+      <SegmentFamilyDisclosure categories={segment.subcategories} segmentHref={`/products/${segment.slug}`} segmentSlug={segment.slug} />
 
       <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
         <Link
@@ -56,7 +54,15 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
   );
 }
 
-function SegmentFamilyDisclosure({ categories, segmentHref }: { categories: ProductNavigationCategory[]; segmentHref: string }) {
+function SegmentFamilyDisclosure({
+  categories,
+  segmentHref,
+  segmentSlug
+}: {
+  categories: ProductSubcategory[];
+  segmentHref: string;
+  segmentSlug: string;
+}) {
   return (
     <details data-product-family-disclosure="true" className="mt-5 border-t border-bioaxis-line pt-4">
       <summary className="cursor-pointer text-xs font-bold uppercase text-bioaxis-accent">Show family links</summary>
@@ -65,19 +71,19 @@ function SegmentFamilyDisclosure({ categories, segmentHref }: { categories: Prod
           {categories.map((category) => (
             <div key={category.slug}>
               <Link
-                href={category.href}
+                href={`/products/${segmentSlug}/${category.slug}`}
                 className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-dim transition hover:text-bioaxis-accent"
               >
-                {category.label}
+                {category.title}
               </Link>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {category.families.map((family) => (
+                {category.families.slice(0, 8).map((family) => (
                   <Link
-                    key={family.href}
-                    href={family.href}
+                    key={family.slug}
+                    href={`/products/${segmentSlug}/${category.slug}/${family.slug}`}
                     className="border border-white/[0.1] bg-bioaxis-panel px-2 py-1 text-[11px] leading-5 text-bioaxis-steel transition hover:border-bioaxis-accent hover:bg-bioaxis-accent/10 hover:text-bioaxis-accent focus:border-bioaxis-accent focus:text-bioaxis-accent"
                   >
-                    {family.label}
+                    {family.title}
                   </Link>
                 ))}
               </div>

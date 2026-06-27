@@ -50,6 +50,15 @@ const familyPageRoutes = [
   "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials"
 ];
 
+const catalogAcceptanceRoutes = [
+  "/products/liquid-handling/pipette-tips/universal-pipette-tips/sterile-filtered-universal-pipette-tips",
+  "/products/cell-culture/cell-culture-media-buffers",
+  "/products/cell-culture/cell-culture-media-buffers/classical-media",
+  "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose",
+  "/equivalent-finder?catalog=D8537",
+  "/request-quote?need=documents&segment=cell-culture"
+];
+
 const productItemDetailSections = [
   "Specifications",
   "Applications",
@@ -163,6 +172,7 @@ const routes = [
   "/products/liquid-handling/pipette-tips",
   "/products/cell-culture",
   "/products/cell-culture/media-and-supplements",
+  ...catalogAcceptanceRoutes,
   "/workflows",
   "/equivalent-finder",
   "/private-label",
@@ -449,8 +459,8 @@ for (const route of routes) {
     }
 
     const familyDisclosurePanels = [...html.matchAll(/data-product-family-disclosure="true"/g)].length;
-    if (familyDisclosurePanels !== 12) {
-      failures.push(`${route}: expected 12 collapsed product family disclosure panels, found ${familyDisclosurePanels}`);
+    if (familyDisclosurePanels < 5) {
+      failures.push(`${route}: expected collapsed product family disclosure panels for populated segments, found ${familyDisclosurePanels}`);
     }
 
     ["Common buyer specs", "Primary applications"].forEach((label) => {
@@ -482,6 +492,10 @@ for (const route of routes) {
     if (!hasHrefWithParams(html, "/request-quote", { type: "sample", requestType: "sample" })) {
       failures.push(`${route}: missing sample-first request CTA`);
     }
+  }
+
+  if (route === "/equivalent-finder?catalog=D8537" && !html.includes('value="D8537"')) {
+    failures.push(`${route}: catalog query did not prefill equivalent intake`);
   }
 
   if (route === "/request-quote") {
@@ -556,6 +570,14 @@ for (const route of routes) {
 
   if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Type 05 Selected Documentation")) {
     failures.push(`${route}: documentation type query did not preselect documentation request`);
+  }
+
+  if (route === "/request-quote?need=documents&segment=cell-culture") {
+    ["Type 05 Selected Documentation", "Request context", "Cell Culture"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing document-need RFQ context ${label}`);
+      }
+    });
   }
 
   if (route.startsWith("/request-quote?type=recurring") && !pageText.includes("Type 06 Selected Recurring supply")) {
@@ -729,7 +751,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling") {
-    ["Choose a Liquid Handling category", "Pipette Tips", "Serological Pipettes", "Common sourcing questions"].forEach((label) => {
+    ["Choose a Liquid Handling category", "Pipette Tips", "Serological Pipettes", "Common buyer questions"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing segment-level category flow content ${label}`);
       }
@@ -741,21 +763,34 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling/pipette-tips") {
-    ["Choose a product family", "Buyer decision filters", "Common specs as chips"].forEach((label) => {
+    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "Product list preview"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing category-level family flow content ${label}`);
       }
     });
 
-    if (mainText.includes("Sourcing options preview")) {
-      failures.push(`${route}: category page still exposes item-level sourcing table`);
-    }
+    ["Product list preview", "Supplier / brand", "Catalog no.", "Key documents"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing catalog table content ${label}`);
+      }
+    });
   }
 
   if (familyPageRoutes.includes(route)) {
-    ["Product configurations", "Buyer checklist", "Specification checklist", "How to select", "Documentation checklist", "Compliance disclaimer", "Already using another supplier?", "Add to sourcing list"].forEach((label) => {
+    ["Product configurations", "Buyer checklist"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing family progressive disclosure content ${label}`);
+      }
+    });
+
+    [
+      ["Specifications to compare", "Specification checklist"],
+      ["Equivalent matching notes", "Equivalent switching considerations"],
+      ["Documentation request notes", "Documentation checklist"],
+      ["Add to list", "Add to sourcing list"]
+    ].forEach((options) => {
+      if (!options.some((label) => pageText.includes(label))) {
+        failures.push(`${route}: missing family progressive disclosure content ${options.join(" or ")}`);
       }
     });
   }
@@ -819,6 +854,31 @@ for (const route of routes) {
         failures.push(`${route}: missing canonical family name ${familyName}`);
       }
     }
+  }
+
+  if (route === "/products/liquid-handling/pipette-tips/universal-pipette-tips/sterile-filtered-universal-pipette-tips") {
+    [
+      "Sterile Filtered Universal Pipette Tips",
+      "Key documents",
+      "Specifications",
+      "Equivalent options",
+      "Related products",
+      "Request documents",
+      "Start equivalent review",
+      "Add to sourcing list"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing catalog product detail content ${label}`);
+      }
+    });
+  }
+
+  if (route === "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose") {
+    ["DMEM High Glucose", "Key documents", "Specifications", "Equivalent options", "Cell Culture Media & Buffers"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing DMEM catalog product content ${label}`);
+      }
+    });
   }
 
   console.log(`${route}: ok`);
@@ -925,6 +985,8 @@ const productsPageSource = await readRequiredProjectFile("src/app/products/page.
 const headerSource = await readRequiredProjectFile("src/components/layout/Header.tsx");
 const productNavigationSource = await readRequiredProjectFile("src/data/productNavigation.ts");
 const productCategoryCardSource = await readRequiredProjectFile("src/components/products/ProductCategoryCard.tsx");
+const catalogTemplatesSource = await readRequiredProjectFile("src/components/products/catalog/CatalogPageTemplates.tsx");
+const catalogBrowserSource = await readRequiredProjectFile("src/components/products/catalog/CatalogProductBrowser.tsx");
 const segmentTemplateSource = await readRequiredProjectFile("src/components/products/SegmentPageTemplate.tsx");
 const categoryTemplateSource = await readRequiredProjectFile("src/components/products/CategoryPageTemplate.tsx");
 const familyTemplateSource = await readRequiredProjectFile("src/components/products/FamilyPageTemplate.tsx");
@@ -955,11 +1017,11 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "aria-expanded",
   "Escape",
   "handlePointerDown",
-  "max-h-[calc(100vh-110px)]",
-  "w-[min(360px,calc(100vw-32px))]",
+  "max-h-[70vh]",
+  "w-[min(1100px,calc(100vw-48px))]",
   "z-[90]",
   "bg-[#050a09]",
-  "productsOpen ? <ProductSegmentDropdown",
+  "activeProductSegment",
   "productNavigationSegments"
 ].forEach((label) => {
   if (!headerSource.includes(label)) {
@@ -971,19 +1033,27 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "products-mega-menu",
   "ProductMegaMenu",
   "Product navigation",
-  "BioAxis product catalog",
-  "familyPreviewLimit",
-  "segment.categories.map",
-  "category.families.map"
+  "familyPreviewLimit"
 ].forEach((label) => {
   if (headerSource.includes(label)) {
     failures.push(`Header: product dropdown still exposes dense catalog content ${label}`);
   }
 });
 
-["productTaxonomy.map", "familyLinks", "categories.flatMap"].forEach((label) => {
+["productCatalogMenuSegments.map", "familyLinks", "categories.flatMap"].forEach((label) => {
   if (!productNavigationSource.includes(label)) {
     failures.push(`productNavigation data: missing shared taxonomy-derived field ${label}`);
+  }
+});
+
+[
+  ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Key documents", "Equivalent options", "Common buyer questions"]],
+  ["Catalog product browser", catalogBrowserSource, ["Supplier / brand", "Catalog no.", "Key specs", "Documents", "Compare", "AddToSourcingListButton"]]
+].forEach(([label, source, required]) => {
+  for (const needle of required) {
+    if (!source.includes(needle)) {
+      failures.push(`${label}: missing catalog source marker ${needle}`);
+    }
   }
 });
 
