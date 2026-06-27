@@ -7,8 +7,8 @@ import { SearchBox } from "@/components/ui/SearchBox";
 const heroTasks = [
   { label: "Paste product list", href: "/request-quote?type=product-list&requestType=product-list-review" },
   { label: "Find equivalent", href: "/equivalent-finder" },
-  { label: "Request quote", href: "/request-quote?type=rfq&requestType=quote" },
-  { label: "Browse products", href: "/products" }
+  { label: "Browse products", href: "/products" },
+  { label: "Request quote", href: "/request-quote?type=rfq&requestType=quote" }
 ];
 
 export function HeroSearchSection() {
@@ -32,14 +32,16 @@ export function HeroSearchSection() {
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
             {brand.headline}
           </h1>
-          <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">{brand.tagline}</p>
+          <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">
+            Paste a catalog number, supplier SKU, or product list.
+          </p>
           <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            Send us a product name, catalog number, supplier list, or current consumables workflow. BioAxis helps structure sourcing options, equivalent review, documentation needs, sample requests, and quote next steps.
+            BioAxis helps structure equivalent options, samples, documents, and quote-ready sourcing paths. {brand.tagline}
           </p>
         </div>
 
         <div className="mt-10 max-w-5xl">
-          <SearchBox helperText={brand.searchHelper} />
+          <SearchBox helperText={brand.searchHelper} placeholder="paste catalog number, supplier SKU, or product list" />
         </div>
 
         <div className="mt-5 flex max-w-5xl flex-wrap gap-2">

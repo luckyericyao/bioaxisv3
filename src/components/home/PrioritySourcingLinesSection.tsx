@@ -43,7 +43,7 @@ const priorityLines = [
     description:
       "Selected consumables where BioAxis can help evaluate private-label, neutral-label, or OEM-style sourcing options, including documentation, samples, packaging requirements, and RFQ preparation.",
     cta: "Explore private label options",
-    href: "/private-label"
+    href: "/private-label-oem"
   }
 ];
 

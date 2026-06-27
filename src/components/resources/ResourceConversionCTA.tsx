@@ -2,13 +2,13 @@ import Link from "next/link";
 
 const actions = [
   {
-    label: "Paste product list",
+    label: "Start RFQ",
     href: "/request-quote?type=product-list&requestType=product-list-review",
     primary: true
   },
   {
     label: "Find equivalent",
-    href: "/request-quote?type=equivalent&requestType=equivalent",
+    href: "/equivalent-finder?sourcePage=resource-guide",
     primary: false
   },
   {
@@ -24,7 +24,7 @@ export function ResourceConversionCTA() {
       <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing next step</p>
       <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Need help sourcing this product type?</h2>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-        Send BioAxis a product name, catalog number, current supplier, or product list. We can help organize equivalent review, documentation, sample, and quote next steps.
+        Paste your current supplier SKU or product list and BioAxis will help structure equivalent options, documents, samples, and quote next steps.
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {actions.map((action) => (

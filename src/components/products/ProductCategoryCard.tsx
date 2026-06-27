@@ -7,7 +7,11 @@ type ProductCategoryCardProps = {
 };
 
 export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
-  const keywordChips = segment.subcategories.slice(0, 5).map((subcategory) => subcategory.title);
+  const sourcingRequests = [
+    ...segment.rfqPrompts,
+    ...segment.equivalentPrompts,
+    ...segment.samplePrompts
+  ].slice(0, 5);
 
   return (
     <article
@@ -20,8 +24,8 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       </div>
       <p className="mt-4 flex-1 text-sm leading-6 text-bioaxis-muted">{segment.shortDescription}</p>
 
-      <div className="mt-5 flex flex-wrap gap-2" aria-label={`${segment.title} category keywords`}>
-        {keywordChips.map((chip) => (
+      <div className="mt-5 flex flex-wrap gap-2" aria-label={`${segment.title} common sourcing requests`}>
+        {sourcingRequests.map((chip) => (
           <span key={chip} className="border border-white/[0.12] bg-bioaxis-black px-2.5 py-1 text-[11px] font-semibold uppercase text-bioaxis-steel">
             {chip}
           </span>
@@ -35,7 +39,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           href={`/products/${segment.slug}`}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
-          View category
+          View families
         </Link>
         <Link
           href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}

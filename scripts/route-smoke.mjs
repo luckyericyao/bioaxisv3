@@ -176,6 +176,8 @@ const routes = [
   "/workflows",
   "/equivalent-finder",
   "/private-label",
+  "/private-label-oem",
+  "/trust-center",
   "/quality",
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
@@ -447,7 +449,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Show family links", "Pipette Tips", "Find equivalent", "Request quote", "View category"].forEach((label) => {
+    ["Show family links", "Pipette Tips", "Find equivalent", "Request quote", "View families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -515,20 +517,18 @@ for (const route of routes) {
 
     [
       "Send a product, catalog number, or list",
-      "Only your email is required. BioAxis will include product context automatically when available. Add details only if useful.",
-      "Use this page for RFQs, equivalent review, sample requests, documentation requests, recurring supply needs, or general sourcing questions. Only your email is required to start.",
-      "Contact",
-      "Only email is required.",
-      "Product context / list",
-      "Current supplier / brand optional",
-      "Catalog number / SKU optional",
+      "Paste what you have. BioAxis will structure the sourcing request.",
+      "Only your email is required. Paste a SKU, product name, supplier line, or product list when available.",
+      "Level 1 / always visible",
+      "Email *",
+      "Product / SKU / product list",
+      "Current supplier optional",
+      "Current SKU / catalog number optional",
       "Product category optional",
       "What do you need? optional",
       "What BioAxis can review",
       "What BioAxis does not claim",
-      "Email *",
-      "Company / organization optional",
-      "Add more details"
+      "Send sourcing request"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction RFQ copy ${label}`);
@@ -549,13 +549,13 @@ for (const route of routes) {
   }
 
   if (route.startsWith("/request-quote?type=product-list") || route.startsWith("/request-quote?requestType=product-list-review")) {
-    ["Product list", "Product context / list"].forEach((label) => {
+    ["Product list", "Product / SKU / product list"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-list RFQ field ${label}`);
       }
     });
 
-    if (!html.includes("Paste product names, catalog numbers")) {
+    if (!html.includes("Paste catalog number, supplier SKU")) {
       failures.push(`${route}: missing product-list textarea placeholder`);
     }
   }
@@ -659,6 +659,37 @@ for (const route of routes) {
     [/guaranteed inventory/i, /guaranteed pricing/i, /exclusive factory control/i, /BioAxis directly manufactures/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: private-label page overclaims ${pattern}`);
+      }
+    });
+  }
+
+  if (route === "/private-label-oem") {
+    [
+      "Private-label and OEM-style consumables sourcing for recurring lab supply.",
+      "Priority categories",
+      "Pipette tips",
+      "Automation-compatible consumables",
+      "Discuss private-label sourcing",
+      "Request recurring supply review",
+      "BioAxis does not claim factory ownership"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing private-label-oem content ${label}`);
+      }
+    });
+  }
+
+  if (route === "/trust-center") {
+    [
+      "Documentation review",
+      "Supplier screening",
+      "Sample-first evaluation",
+      "Equivalent review",
+      "What BioAxis does not claim",
+      "BioAxis does not claim live inventory for every listed product"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing trust-center content ${label}`);
       }
     });
   }
@@ -769,7 +800,7 @@ for (const route of routes) {
       }
     });
 
-    ["Product list preview", "Supplier / brand", "Catalog no.", "Key documents"].forEach((label) => {
+    ["Product list preview", "Supplier context", "Current SKU", "Key documents"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing catalog table content ${label}`);
       }
@@ -859,10 +890,10 @@ for (const route of routes) {
   if (route === "/products/liquid-handling/pipette-tips/universal-pipette-tips/sterile-filtered-universal-pipette-tips") {
     [
       "Sterile Filtered Universal Pipette Tips",
-      "Key documents",
-      "Specifications",
-      "Equivalent options",
-      "Related products",
+      "Documentation typically reviewed",
+      "Typical RFQ fields",
+      "Equivalent review considerations",
+      "Related sourcing configurations",
       "Request documents",
       "Start equivalent review",
       "Add to sourcing list"
@@ -874,7 +905,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose") {
-    ["DMEM High Glucose", "Key documents", "Specifications", "Equivalent options", "Cell Culture Media & Buffers"].forEach((label) => {
+    ["DMEM High Glucose", "Documentation typically reviewed", "Typical RFQ fields", "Equivalent review considerations", "Cell Culture Media & Buffers"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing DMEM catalog product content ${label}`);
       }
@@ -941,7 +972,7 @@ for (const href of resourceGuideLinks) {
     }
   });
 
-  ["Need help sourcing this product type?", "Paste product list", "Request documents"].forEach((label) => {
+  ["Need help sourcing this product type?", "Start RFQ", "Request documents"].forEach((label) => {
     if (!pageText.includes(label)) {
       failures.push(`/resources guide link ${href}: missing conversion CTA ${label}`);
     }
@@ -949,7 +980,7 @@ for (const href of resourceGuideLinks) {
 
   [
     { pathname: "/request-quote", params: { type: "product-list", requestType: "product-list-review" } },
-    { pathname: "/request-quote", params: { type: "equivalent", requestType: "equivalent" } },
+    { pathname: "/equivalent-finder", params: { sourcePage: "resource-guide" } },
     { pathname: "/request-quote", params: { type: "documentation", requestType: "documentation" } }
   ].forEach((cta) => {
     if (!hasHrefWithParams(html, cta.pathname, cta.params)) {
@@ -1047,8 +1078,8 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
 });
 
 [
-  ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Key documents", "Equivalent options", "Common buyer questions"]],
-  ["Catalog product browser", catalogBrowserSource, ["Supplier / brand", "Catalog no.", "Key specs", "Documents", "Compare", "AddToSourcingListButton"]]
+  ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Documentation typically reviewed", "Equivalent review considerations", "Common buyer questions"]],
+  ["Catalog product browser", catalogBrowserSource, ["Supplier context", "Current SKU", "Key specs", "Documents", "Compare", "AddToSourcingListButton"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
@@ -1057,7 +1088,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "View category"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "View families"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
@@ -1094,7 +1125,7 @@ if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes(
   failures.push("QuoteRequestForm: expected email-only validation mode");
 }
 
-["Add more details", "shouldOpenOptionalDetails", "<details"].forEach((label) => {
+["Add supplier, quantity, documents, timeline, shipping region", "shouldOpenOptionalDetails", "<details"].forEach((label) => {
   if (!quoteFormSource.includes(label)) {
     failures.push(`QuoteRequestForm: missing collapsed optional detail behavior ${label}`);
   }

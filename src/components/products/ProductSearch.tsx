@@ -22,7 +22,11 @@ const quickSearches = [
 const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product", "workflow", "resource"];
 
 function resultTypeLabel(type: ProductSearchResult["type"]) {
-  return type === "subcategory" ? "category" : type;
+  if (type === "subcategory") return "Family";
+  if (type === "resource") return "Guide";
+  if (type === "workflow") return "RFQ path";
+
+  return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
 function displayQueryLabel(value: string) {
@@ -163,6 +167,9 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <span className="border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-accent">
           {relevanceLabel(result)}
         </span>
+        <span className="border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
+          RFQ path
+        </span>
       </div>
       <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>
       <h3 className="mt-3 text-lg font-bold uppercase leading-snug text-bioaxis-text">{highlightText(result.title, query)}</h3>
@@ -188,7 +195,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           href={requestHref(result, "quote", query)}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
-          Request quote
+          Send as RFQ
         </Link>
         <Link
           href={requestHref(result, "equivalent", query)}

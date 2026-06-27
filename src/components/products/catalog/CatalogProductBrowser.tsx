@@ -53,8 +53,8 @@ function requestHref(row: CatalogProductRow, requestType: string, need?: string)
   });
 
   if (need) params.set("need", need);
-  if (row.product.supplier && !/dependent/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
-  if (row.product.catalogNumber && !/required/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
+  if (row.product.supplier && !/reviewed/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
+  if (row.product.catalogNumber && !/optional/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
 
   return `/request-quote?${params.toString()}`;
 }
@@ -68,8 +68,8 @@ function equivalentHref(row: CatalogProductRow) {
     sourcePage: row.href
   });
 
-  if (row.product.catalogNumber && !/required/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
-  if (row.product.supplier && !/dependent/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
+  if (row.product.catalogNumber && !/optional/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
+  if (row.product.supplier && !/reviewed/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
 
   return `/equivalent-finder?${params.toString()}`;
 }
@@ -186,7 +186,7 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
           <p className="text-xs font-bold uppercase text-bioaxis-accent">Filter products</p>
           <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{heading}</h2>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            Compare product names, supplier/catalog context, key specs, and documentation status before sending a quote-ready request.
+            Compare sourcing configurations, buyer-supplied SKU context, key specs, and documentation status before sending a quote-ready request.
           </p>
           <label className="mt-5 block">
             <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Search within list</span>
@@ -229,8 +229,8 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
                 <tr className="text-[11px] font-bold uppercase text-bioaxis-dim">
                   <th className="border-y border-l border-bioaxis-line bg-bioaxis-black px-3 py-3">Compare</th>
                   <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Product name</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Supplier / brand</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Catalog no.</th>
+                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Supplier context</th>
+                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Current SKU</th>
                   <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Key specs</th>
                   <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Documents</th>
                   <th className="border-y border-r border-bioaxis-line bg-bioaxis-black px-3 py-3">Actions</th>
@@ -254,8 +254,8 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
                       </Link>
                       <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.familyTitle}</p>
                     </td>
-                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.supplier ?? "Supplier dependent"}</td>
-                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.catalogNumber ?? "Catalog number required"}</td>
+                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.supplier ?? "Reviewed during sourcing intake"}</td>
+                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.catalogNumber ?? "Current SKU optional"}</td>
                     <td className="border-b border-bioaxis-line px-3 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {row.product.tags.slice(0, 4).map((tag) => (
@@ -296,8 +296,8 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
                   />
                 </div>
                 <div className="mt-4 grid gap-2 text-xs leading-5 text-bioaxis-steel">
-                  <p>Supplier / brand: {row.product.supplier ?? "Supplier dependent"}</p>
-                  <p>Catalog no.: {row.product.catalogNumber ?? "Catalog number required"}</p>
+                  <p>Supplier context: {row.product.supplier ?? "Reviewed during sourcing intake"}</p>
+                  <p>Current SKU: {row.product.catalogNumber ?? "Current SKU optional"}</p>
                   <DocsSummary product={row.product} />
                 </div>
                 <div className="mt-4">

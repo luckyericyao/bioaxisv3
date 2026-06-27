@@ -45,6 +45,19 @@ const commonEquivalentRequests = [
   "Single-use bags and connectors"
 ];
 
+const comparisonRows = [
+  "Supplier / SKU",
+  "Format / volume",
+  "Material",
+  "Sterility",
+  "Low-retention / surface treatment",
+  "Packaging",
+  "Automation fit",
+  "Documentation available",
+  "Sample path",
+  "Recurring supply feasibility"
+];
+
 function requestHref(query?: string) {
   return buildRequestHref({
     requestType: "equivalent",
@@ -154,6 +167,43 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
             ))}
           </div>
         </aside>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+        <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
+          <div>
+            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Comparison matrix</p>
+            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">How BioAxis compares equivalent candidates</h2>
+          </div>
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            BioAxis structures equivalent review around the current product, candidate option, and review notes. The output is a sourcing comparison path, not a guaranteed replacement claim.
+          </p>
+        </div>
+        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
+          <table className="min-w-full border-separate border-spacing-0 text-left">
+            <thead>
+              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Current product</th>
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Candidate option</th>
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map((row) => (
+                <tr key={row} className="align-top">
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">{row}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">Candidate data requested or compared during sourcing review</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">Review against buyer requirements, supplier documentation, sample needs, and workflow fit.</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            BioAxis supports equivalent review and sourcing comparison. Final suitability depends on supplier documentation, sample testing, and customer-side validation.
+          </p>
+        </div>
       </section>
 
       <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">

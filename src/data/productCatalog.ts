@@ -546,7 +546,7 @@ function makeCatalogProduct(segment: SegmentSeed, category: CategorySeed, family
     Material: materialFor(segment.slug),
     "Volume / Size": "Size and pack format reviewed during RFQ",
     Application: category.description,
-    Packaging: tags.find((tag) => /rack|bulk|bottle|plate|tube|bag/i.test(tag)) ?? "Packaging supplier dependent",
+    Packaging: tags.find((tag) => /rack|bulk|bottle|plate|tube|bag/i.test(tag)) ?? "Packaging reviewed during RFQ",
     Documentation: "SDS / CoA / specification sheet reviewed on request",
     "Compatible Platforms": compatibilityFor(segment.slug)
   };
@@ -555,8 +555,8 @@ function makeCatalogProduct(segment: SegmentSeed, category: CategorySeed, family
     id: `${segment.slug}-${category.slug}-${family.slug}-${slug}`,
     slug,
     name,
-    supplier: "Supplier dependent",
-    catalogNumber: "Catalog number required",
+    supplier: "Reviewed during sourcing intake",
+    catalogNumber: "Current SKU optional",
     description:
       override?.specs?.Description?.toString() ??
       `${name} sourcing profile for ${category.name.toLowerCase()} requests, equivalent review, documentation checks, and quote preparation.`,
@@ -572,10 +572,10 @@ function makeCatalogProduct(segment: SegmentSeed, category: CategorySeed, family
 }
 
 function materialFor(segmentSlug: string) {
-  if (segmentSlug === "sample-prep-filtration") return "Membrane / housing supplier dependent";
-  if (segmentSlug === "cell-culture") return "Formulation or treated plastic supplier dependent";
+  if (segmentSlug === "sample-prep-filtration") return "Membrane / housing reviewed by product type";
+  if (segmentSlug === "cell-culture") return "Formulation or treated plastic reviewed by workflow";
   if (segmentSlug === "molecular-biology-pcr") return "PCR-grade polymer or reagent format";
-  return "Polypropylene / polystyrene / supplier dependent";
+  return "Polypropylene / polystyrene / material reviewed during sourcing";
 }
 
 function compatibilityFor(segmentSlug: string) {
