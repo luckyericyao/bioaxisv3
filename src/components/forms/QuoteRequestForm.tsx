@@ -256,6 +256,16 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request received</p>
         <h2 className="mt-4 text-3xl font-bold uppercase text-bioaxis-text">BioAxis has the product context.</h2>
         <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">{submitted.message}</p>
+        <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">BioAxis will review</p>
+          <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+            {["Product context", "Equivalent path", "Documentation needs", "Sample / quote next step"].map((item) => (
+              <li key={item} className="border border-white/[0.12] px-3 py-2">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
         {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
@@ -326,7 +336,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
               />
               <TextArea
                 id="productList"
-                label="Product / SKU / product list / sourcing need"
+                label="Product, SKU, product list, or sourcing need"
                 value={formState.productList}
                 rows={10}
                 prominent

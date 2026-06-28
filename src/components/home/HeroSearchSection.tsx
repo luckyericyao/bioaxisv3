@@ -35,7 +35,8 @@ export function HeroSearchSection() {
         <div className="mt-10 max-w-5xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Search by product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type."
+            placeholder="Product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type."
+            submitLabel="Start sourcing"
           />
         </div>
 

@@ -13,7 +13,7 @@ const priorityLines = [
     href: "/products/cell-culture"
   },
   {
-    title: "Filtration Consumables",
+    title: "Sample Prep & Filtration",
     description: "Syringe filters, bottle-top filters, membranes, and sterile formats.",
     href: "/products/sample-prep-filtration"
   },
@@ -28,9 +28,9 @@ const priorityLines = [
     href: "/products/molecular-biology-pcr"
   },
   {
-    title: "Private Label / OEM",
-    description: "Recurring demand, neutral-label options, samples, packaging, documentation.",
-    href: "/private-label-oem"
+    title: "Automation-Compatible Consumables",
+    description: "Robotic tips, reservoirs, racks, barcode needs, and deck-compatible formats.",
+    href: "/products/automation-consumables"
   }
 ];
 

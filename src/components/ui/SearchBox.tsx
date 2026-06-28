@@ -7,6 +7,7 @@ type SearchBoxProps = {
   initialQuery?: string;
   helperText?: string;
   placeholder?: string;
+  submitLabel?: string;
   variant?: "hero" | "page";
   className?: string;
 };
@@ -15,6 +16,7 @@ export function SearchBox({
   initialQuery = "",
   helperText,
   placeholder = "search anything",
+  submitLabel = "Search",
   variant = "hero",
   className = ""
 }: SearchBoxProps) {
@@ -42,7 +44,7 @@ export function SearchBox({
   return (
     <form onSubmit={handleSubmit} className={["w-full", className].filter(Boolean).join(" ")}>
       <label htmlFor={inputId} className="sr-only">
-        Search BioAxis product universe
+        Paste SKU, catalog number, or product list
       </label>
       <div
         className={[
@@ -64,7 +66,7 @@ export function SearchBox({
           type="submit"
           className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
         >
-          Search
+          {submitLabel}
         </button>
       </div>
       {helperText ? <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{helperText}</p> : null}

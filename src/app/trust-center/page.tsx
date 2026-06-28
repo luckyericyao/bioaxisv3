@@ -64,6 +64,15 @@ const trustMatrix = [
   }
 ];
 
+const documentPackage = [
+  "CoA",
+  "SDS",
+  "Sterility certificate",
+  "Material statement",
+  "Lot-level documentation",
+  "Supplier specification sheet"
+];
+
 export default function TrustCenterPage() {
   return (
     <>
@@ -84,6 +93,23 @@ export default function TrustCenterPage() {
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{area.body}</p>
             </article>
           ))}
+        </div>
+        <div className="mt-4 border border-bioaxis-line bg-bioaxis-black p-6">
+          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.4fr] lg:items-start">
+            <div>
+              <p className="text-sm font-semibold uppercase text-bioaxis-accent">Document package BioAxis can help organize</p>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+                BioAxis can help request and organize supplier-provided files for buyer review. Final suitability, release, and validation decisions remain buyer-side.
+              </p>
+            </div>
+            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {documentPackage.map((document) => (
+                <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                  {document}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 

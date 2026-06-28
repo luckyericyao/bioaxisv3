@@ -37,17 +37,18 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
 
       <div className="mt-5">
         <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Common sourcing requests</p>
-        <div className="mt-2 flex flex-wrap gap-2" aria-label={`${segment.title} common sourcing requests`}>
+        <ul className="mt-3 grid gap-2" aria-label={`${segment.title} common sourcing requests`}>
           {commonRequests.slice(0, 3).map((request) => (
-            <span
+            <li
               key={request}
               data-common-sourcing-request="true"
-              className="border border-white/[0.12] bg-bioaxis-black px-2.5 py-1 text-[11px] font-semibold uppercase text-bioaxis-steel"
+              className="flex items-start gap-2 border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-[11px] font-semibold uppercase leading-5 text-bioaxis-steel"
             >
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-bioaxis-accent/70" aria-hidden="true" />
               {request}
-            </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
@@ -55,7 +56,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           href={`/products/${segment.slug}`}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
-          View families
+          Browse families
         </Link>
         <Link
           href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}

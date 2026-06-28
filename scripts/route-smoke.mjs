@@ -366,19 +366,18 @@ for (const route of routes) {
       "Priority sourcing lines",
       "Liquid Handling Consumables",
       "Cell Culture Consumables",
-      "Filtration Consumables",
+      "Sample Prep & Filtration",
       "Tubes, Plates & Storage",
       "PCR / qPCR Consumables",
-      "Private Label / OEM",
+      "Automation-Compatible Consumables",
       "Current supplier out of stock",
       "Need compatible equivalent",
-      "Need CoA / SDS / sterility documents",
-      "Need samples before switching",
-      "Lower-cost recurring supply",
-      "Automation-compatible consumables",
+      "Need documents before purchasing",
+      "Recurring supply / lower-cost review",
       "What BioAxis returns",
       "How BioAxis works",
-      "Final CTA",
+      "Ready to source?",
+      "Send the product context.",
       "Sample and documentation path",
       "Quote-ready fields"
     ].forEach((label) => {
@@ -387,7 +386,7 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes("Search by product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type.")) {
+    if (!html.includes("Product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type.")) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
@@ -429,7 +428,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Common sourcing requests", "Find equivalent", "Request quote", "View families"].forEach((label) => {
+    ["Common sourcing requests", "Find equivalent", "Request quote", "Browse families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -512,7 +511,7 @@ for (const route of routes) {
       "Only your email is required. Paste what you have. BioAxis can follow up for missing specs.",
       "Email required",
       "Email *",
-      "Product / SKU / product list / sourcing need *",
+      "Product, SKU, product list, or sourcing need *",
       "Current supplier optional",
       "Buyer SKU / catalog input optional",
       "Product category optional",
@@ -676,6 +675,9 @@ for (const route of routes) {
       "Supplier screening",
       "Sample-first evaluation",
       "Equivalent review",
+      "Document package BioAxis can help organize",
+      "Sterility certificate",
+      "Supplier specification sheet",
       "What BioAxis helps organize",
       "What remains buyer-side",
       "Recurring supply readiness",
@@ -1064,7 +1066,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "View families"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "Browse families"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }

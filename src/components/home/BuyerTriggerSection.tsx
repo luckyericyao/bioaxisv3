@@ -9,28 +9,18 @@ const buyerTriggers = [
   },
   {
     title: "Need compatible equivalent",
-    body: "Compare fit, format, documents, and sample path.",
+    body: "Compare fit, format, documents, samples, and automation constraints.",
     href: "/equivalent-finder?need=compatible-equivalent"
   },
   {
-    title: "Need CoA / SDS / sterility documents",
+    title: "Need documents before purchasing",
     body: "List the product and required evidence.",
     href: "/request-quote?requestType=documentation&need=documents"
   },
   {
-    title: "Need samples before switching",
-    body: "Coordinate samples before buyer-side evaluation.",
-    href: "/request-quote?requestType=sample&need=sample-before-switching"
-  },
-  {
-    title: "Lower-cost recurring supply",
-    body: "Share usage rhythm and required documents.",
+    title: "Recurring supply / lower-cost review",
+    body: "Share usage rhythm, format needs, and backup-source requirements.",
     href: "/request-quote?requestType=recurring-supply&need=recurring-supply"
-  },
-  {
-    title: "Automation-compatible consumables",
-    body: "Send platform, rack, barcode, and format constraints.",
-    href: "/request-quote?requestType=quote&need=automation-compatible"
   }
 ];
 
@@ -44,7 +34,7 @@ export function BuyerTriggerSection() {
             subtitle="Start from the buying problem. BioAxis routes it into RFQ, equivalent, sample, documentation, or recurring supply review."
           />
         </div>
-        <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid gap-3 md:grid-cols-2">
           {buyerTriggers.map((trigger, index) => (
             <Link
               key={trigger.title}
