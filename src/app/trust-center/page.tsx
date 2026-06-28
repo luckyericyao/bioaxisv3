@@ -126,8 +126,12 @@ export default function TrustCenterPage() {
             <tbody>
               {trustMatrix.map((row) => (
                 <tr key={row.area} className="align-top">
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-bold uppercase text-bioaxis-text">{row.area}</td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">{row.helps}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-bold uppercase text-bioaxis-text">
+                    {row.area}{" "}
+                  </td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">
+                    {row.helps}{" "}
+                  </td>
                   <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.buyer}</td>
                 </tr>
               ))}
