@@ -4,19 +4,19 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const cards = [
   {
     title: "Matched product family",
-    body: "Your SKU, product name, or list is mapped into sourcing context."
+    body: "BioAxis maps messy product input to the relevant segment, category, family, and sourcing template."
   },
   {
     title: "Equivalent review path",
-    body: "Comparable options are structured around fit, documents, and samples."
-  },
-  {
-    title: "Quote-ready fields",
-    body: "Product, quantity, timing, documents, and usage rhythm are organized."
+    body: "BioAxis structures fit criteria such as format, material, sterility, packaging, documentation, and workflow use."
   },
   {
     title: "Sample and documentation path",
-    body: "Sample needs and supplier evidence stay attached to the request."
+    body: "BioAxis identifies which supplier documents or sample steps are needed before switching."
+  },
+  {
+    title: "Quote-ready fields",
+    body: "BioAxis organizes supplier, SKU, quantity, timeline, documentation, and recurring usage context for follow-up."
   }
 ];
 

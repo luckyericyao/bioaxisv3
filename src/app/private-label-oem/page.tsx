@@ -23,12 +23,13 @@ const priorityCategories = [
 ];
 
 const reviewAreas = [
-  "Target product type and critical specs",
-  "Neutral-label or private-label packaging requirements",
-  "Documentation checklist and supplier evidence path",
-  "Sample request and buyer-side evaluation",
-  "Equivalent comparison against current products",
-  "Recurring supply rhythm and RFQ preparation"
+  "Recurring usage",
+  "Packaging expectations",
+  "Document requirements",
+  "Sample path",
+  "MOQ / lead-time discussion",
+  "Backup source logic",
+  "Category fit"
 ];
 
 export default function PrivateLabelOemPage() {
@@ -37,7 +38,7 @@ export default function PrivateLabelOemPage() {
       <PageHero
         eyebrow="Private-label / OEM-style sourcing"
         title="Private-label sourcing for recurring consumables demand"
-        subtitle="For repeat-use consumables, BioAxis helps evaluate neutral-label, private-label, and OEM-style sourcing paths with specs, packaging, documentation, samples, and RFQ preparation."
+        subtitle="BioAxis helps evaluate neutral-label, private-label, and OEM-style options across selected consumable categories, with documentation, sample, packaging, and recurring supply review."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
@@ -85,9 +86,9 @@ export default function PrivateLabelOemPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Careful sourcing note</p>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">What BioAxis does not claim</p>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-            BioAxis can help coordinate evaluation, RFQ preparation, sample requests, packaging requirement collection, and documentation review. BioAxis does not claim factory ownership, guaranteed inventory, automatic interchangeability, or final regulatory/quality release. Final suitability remains buyer-side.
+            BioAxis does not claim factory ownership, guaranteed inventory, automatic interchangeability, fixed lead time, or final customer-side validation. BioAxis can help coordinate evaluation, RFQ preparation, sample requests, packaging requirements, and documentation review.
           </p>
         </div>
       </section>

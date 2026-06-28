@@ -22,9 +22,9 @@ export function ResourceConversionCTA() {
   return (
     <section className="mt-12 border border-bioaxis-line bg-bioaxis-panel p-6">
       <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing next step</p>
-      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Need help sourcing this product type?</h2>
+      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Need sourcing help for this category?</h2>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-        Paste your current supplier SKU or product list and BioAxis will help structure equivalent options, documents, samples, and quote next steps.
+        Paste your current supplier SKU, catalog number, or product list. BioAxis can help structure equivalent options, documents, samples, and quote next steps.
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {actions.map((action) => (

@@ -8,21 +8,37 @@ type ProductCategoryCardProps = {
 
 const commonRequestsBySegment: Record<string, string[]> = {
   "liquid-handling": ["Filtered or low-retention tips", "Automation-compatible formats", "Recurring tip and reservoir usage"],
-  "lab-plasticware": ["Tubes and plates by format", "Sterile or DNase/RNase-free needs", "Storage and handling packs"],
-  "cell-culture": ["Media and supplement review", "Culture vessels and plates", "Sample-first switching path"],
+  "lab-plasticware": ["Sterile or DNase/RNase-free needs", "Storage and handling packs", "Tube and plate format review"],
+  "cell-culture": ["Media and supplement review", "Culture vessel format fit", "Sample-first switching path"],
   "molecular-biology-pcr": ["PCR/qPCR plates and seals", "DNase/RNase-free plastics", "Instrument-compatible formats"],
-  "sample-prep-filtration": ["Syringe filter equivalents", "Membrane and pore-size fit", "Sterile filtration documentation"],
-  "storage-cryopreservation": ["Cryovials and freezer storage", "Temperature and closure requirements", "Recurring sample storage formats"],
-  "automation-consumables": ["Robotic tip compatibility", "Rack, barcode, and deck fit", "Automation sample review"],
-  "assays-detection": ["Assay plates and seals", "ELISA and detection plastics", "Plate reader compatibility"],
-  "proteins-antibodies-immunology": ["Antibody and reagent inputs", "Documentation and CoA needs", "Equivalent review support"],
-  "buffers-chemicals-reagents": ["Buffer and reagent lists", "CoA/SDS request path", "Recurring lab supply planning"],
-  "small-lab-equipment": ["Benchtop equipment requests", "Accessory and consumable fit", "Documentation before purchase"],
+  "sample-prep-filtration": ["Syringe filter equivalents", "Membrane and pore-size fit", "Sterile filtration documents"],
+  "storage-cryopreservation": ["Cryovial and closure needs", "Temperature compatibility", "Recurring storage formats"],
+  "automation-consumables": ["Robotic tip compatibility", "Rack and deck fit", "Barcode or SBS format review"],
+  "assays-detection": ["Assay plate format", "Reader compatibility", "Detection workflow supplies"],
+  "proteins-antibodies-immunology": ["CoA and lot documentation", "Reagent equivalent support", "Immunoassay workflow fit"],
+  "buffers-chemicals-reagents": ["CoA/SDS request path", "Buffer and reagent lists", "Recurring lab supply planning"],
+  "small-lab-equipment": ["Accessory fit", "Documentation before purchase", "Equipment-linked consumables"],
   "early-bioprocess-single-use": ["Single-use bags and tubing", "Connector and assembly needs", "Early CMC sourcing support"]
+};
+
+const descriptionsBySegment: Record<string, string> = {
+  "liquid-handling": "Pipette tips, reservoirs, serological pipettes, and automation-compatible liquid handling formats.",
+  "lab-plasticware": "Tubes, plates, bottles, reservoirs, and everyday plasticware for research and QA workflows.",
+  "cell-culture": "Media, supplements, vessels, plates, flasks, and related consumables for culture workflows.",
+  "molecular-biology-pcr": "PCR/qPCR plastics, plates, seals, tubes, and molecular biology workflow consumables.",
+  "sample-prep-filtration": "Filtration, centrifugation, prep, and cleanup consumables for sample handling workflows.",
+  "storage-cryopreservation": "Cryovials, freezer boxes, storage plates, labels, and cold-chain sample storage formats.",
+  "automation-consumables": "Robotic tips, racks, reservoirs, plates, and consumables for automated liquid handling systems.",
+  "assays-detection": "Assay plates, detection consumables, ELISA-related plastics, and reader-compatible formats.",
+  "proteins-antibodies-immunology": "Reagent, antibody, immunology, and protein workflow inputs requiring documentation review.",
+  "buffers-chemicals-reagents": "Recurring reagent, buffer, and chemical supply inputs that require document and specification review.",
+  "small-lab-equipment": "Benchtop tools, accessories, and equipment-linked consumables requiring compatibility review.",
+  "early-bioprocess-single-use": "Single-use bags, tubing, connectors, assemblies, and early CMC consumable sourcing paths."
 };
 
 export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
   const commonRequests = commonRequestsBySegment[segment.slug] ?? segment.rfqPrompts.slice(0, 3);
+  const description = descriptionsBySegment[segment.slug] ?? segment.shortDescription;
 
   return (
     <article
@@ -33,7 +49,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
         <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{segment.title}</h2>
         <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
       </div>
-      <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{segment.shortDescription}</p>
+      <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
 
       <div className="mt-5">
         <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Common sourcing requests</p>
@@ -56,7 +72,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           href={`/products/${segment.slug}`}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
-          Browse families
+          View families
         </Link>
         <Link
           href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}

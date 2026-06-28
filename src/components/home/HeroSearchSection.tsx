@@ -22,13 +22,10 @@ export function HeroSearchSection() {
         <div className="max-w-6xl">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
-            ONE STOP FOR LIFE SCIENCE CONSUMABLES
+            Paste a catalog number, supplier SKU, or product list.
           </h1>
           <div className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            <p>Paste a catalog number, supplier SKU, or product list.</p>
-            <p className="mt-2">
-              BioAxis structures equivalent options, sample paths, documentation needs, and quote-ready sourcing next steps.
-            </p>
+            <p>BioAxis structures equivalent options, sample paths, documentation needs, and quote-ready sourcing next steps for life-science consumables.</p>
           </div>
         </div>
 

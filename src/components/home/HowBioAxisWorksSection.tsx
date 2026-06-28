@@ -3,15 +3,15 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const steps = [
   {
     title: "Paste what you have",
-    body: "Send a catalog number, supplier SKU, product list, or sourcing need."
+    body: "SKU, catalog number, product name, supplier line, spreadsheet, or sourcing need."
   },
   {
-    title: "BioAxis structures the path",
-    body: "The request is organized into product family, equivalent, sample, documentation, and quote context."
+    title: "BioAxis structures the request",
+    body: "Product family, equivalent criteria, documentation needs, sample path, and quote fields."
   },
   {
-    title: "Move to the next sourcing step",
-    body: "BioAxis can help prepare RFQ fields, collect documentation needs, and coordinate follow-up by email."
+    title: "Move to sourcing follow-up",
+    body: "BioAxis follows up with the missing context needed for equivalent review, documents, samples, or quote next steps."
   }
 ];
 

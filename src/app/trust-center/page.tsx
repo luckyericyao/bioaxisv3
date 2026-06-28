@@ -70,7 +70,9 @@ const documentPackage = [
   "Sterility certificate",
   "Material statement",
   "Lot-level documentation",
-  "Supplier specification sheet"
+  "Supplier specification sheet",
+  "Packaging / format information",
+  "Compatibility notes when supplier-provided"
 ];
 
 export default function TrustCenterPage() {
@@ -99,7 +101,7 @@ export default function TrustCenterPage() {
             <div>
               <p className="text-sm font-semibold uppercase text-bioaxis-accent">Document package BioAxis can help organize</p>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-                BioAxis can help request and organize supplier-provided files for buyer review. Final suitability, release, and validation decisions remain buyer-side.
+                BioAxis can help organize document requirements and request supplier-provided evidence. BioAxis does not certify, release, validate, or approve final product suitability.
               </p>
             </div>
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

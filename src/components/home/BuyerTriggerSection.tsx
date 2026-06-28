@@ -4,23 +4,27 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const buyerTriggers = [
   {
     title: "Current supplier out of stock",
-    body: "Send the current SKU, quantity, and timing.",
-    href: "/request-quote?requestType=quote&need=supplier-out-of-stock"
+    body: "Find sourcing paths when lead time, allocation, or availability blocks purchasing.",
+    href: "/request-quote?requestType=quote&need=supplier-out-of-stock",
+    cta: "Start RFQ"
   },
   {
     title: "Need compatible equivalent",
-    body: "Compare fit, format, documents, samples, and automation constraints.",
-    href: "/equivalent-finder?need=compatible-equivalent"
+    body: "Compare current SKU context against format, material, sterility, packaging, workflow fit, automation constraints, and sample needs.",
+    href: "/equivalent-finder?need=compatible-equivalent",
+    cta: "Find equivalent"
   },
   {
     title: "Need documents before purchasing",
-    body: "List the product and required evidence.",
-    href: "/request-quote?requestType=documentation&need=documents"
+    body: "Organize CoA, SDS, sterility, material, lot-level, or supplier specification requirements before purchasing.",
+    href: "/request-quote?requestType=documentation&need=documents",
+    cta: "Request documents"
   },
   {
     title: "Recurring supply / lower-cost review",
-    body: "Share usage rhythm, format needs, and backup-source requirements.",
-    href: "/request-quote?requestType=recurring-supply&need=recurring-supply"
+    body: "Review recurring demand, packaging, MOQ, lead-time, and backup-source options.",
+    href: "/request-quote?requestType=recurring-supply&need=recurring-supply",
+    cta: "Send product list"
   }
 ];
 
@@ -46,7 +50,7 @@ export function BuyerTriggerSection() {
                 {trigger.title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{trigger.body}</p>
-              <span className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">Start request</span>
+              <span className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">{trigger.cta}</span>
             </Link>
           ))}
         </div>

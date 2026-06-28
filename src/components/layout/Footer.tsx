@@ -11,7 +11,7 @@ export function Footer() {
             {brand.name.toUpperCase()}
           </Link>
           <p className="mt-4 max-w-xl text-sm leading-6 text-bioaxis-muted">
-            {brand.positioning}. Search products, compare compatible options, request samples, organize documentation, and prepare sourcing requests from one direct platform.
+            BioAxis is a sourcing-intake and consumables procurement support platform for product lists, equivalent review, samples, documentation, and RFQ preparation.
           </p>
         </div>
 

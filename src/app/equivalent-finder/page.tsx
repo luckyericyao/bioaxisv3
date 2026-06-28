@@ -115,7 +115,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
       <PageHero
         eyebrow="Equivalent finder"
         title="Find compatible alternatives for your current consumables"
-        subtitle="Paste a current supplier SKU, catalog number, product name, or product list. BioAxis organizes the comparison path around fit, documents, samples, and RFQ next steps."
+        subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
@@ -189,7 +189,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         <aside className="border border-bioaxis-line bg-bioaxis-black p-6">
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Fit assessment, not a name match.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            BioAxis helps turn current-product information into a practical alternatives review. Format, material, sterility, packaging, workflow fit, and documentation all matter.
+            BioAxis turns current-product information into a practical alternatives review across fit, evidence, sample path, and sourcing follow-up.
           </p>
           <div className="mt-6 grid gap-2">
             {["Format, material, sterility, packaging", "Workflow fit and automation constraints", "Documentation and sample path"].map((item) => (
@@ -223,8 +223,12 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
             <tbody>
               {comparisonRows.map((row) => (
                 <tr key={row.area} className="align-top">
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">{row.area}</td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">{row.candidate}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">
+                    {row.area}{" "}
+                  </td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">
+                    {row.candidate}{" "}
+                  </td>
                   <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.notes}</td>
                 </tr>
               ))}

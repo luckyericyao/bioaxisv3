@@ -7,7 +7,7 @@ import { productTaxonomy } from "@/data/productTaxonomy";
 export const metadata: Metadata = {
   title: "Products | BioAxis",
   description:
-    "Search the BioAxis product universe by product category, workflow, specification, equivalent, sample request, quote option, and documentation need.",
+    "Browse BioAxis life science consumables segments for equivalent review, product list intake, documentation support, samples, and RFQ paths.",
   alternates: {
     canonical: "/products"
   }
@@ -51,7 +51,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">One stop for life science consumables</p>
               <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
               <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-                Browse BioAxis product segments, drill into category and family pages, prepare equivalent reviews, request samples, and submit quote-ready sourcing requests. Availability, documentation, and pricing are confirmed through sourcing review.
+                Browse 12 BioAxis product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
@@ -79,7 +79,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mt-5 max-w-3xl text-sm leading-6 text-bioaxis-muted">
               {query
                 ? "Search results are ranked above. Use this compact directory when you want to browse across the full BioAxis product universe."
-                : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, filters, and quote/sample/equivalent request paths."}
+                : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields."}
             </p>
           </div>
         </div>

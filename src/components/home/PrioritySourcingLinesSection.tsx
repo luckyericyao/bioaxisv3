@@ -5,32 +5,38 @@ const priorityLines = [
   {
     title: "Liquid Handling Consumables",
     description: "Pipette tips, reservoirs, robotic tips, sterile formats.",
-    href: "/products/liquid-handling"
+    href: "/products/liquid-handling",
+    cta: "Explore liquid handling"
   },
   {
     title: "Cell Culture Consumables",
     description: "Media, supplements, sera, vessels, passaging support.",
-    href: "/products/cell-culture"
+    href: "/products/cell-culture",
+    cta: "Explore cell culture"
   },
   {
-    title: "Sample Prep & Filtration",
+    title: "Filtration Consumables",
     description: "Syringe filters, bottle-top filters, membranes, and sterile formats.",
-    href: "/products/sample-prep-filtration"
+    href: "/products/sample-prep-filtration",
+    cta: "Explore filtration"
   },
   {
     title: "Tubes, Plates & Storage",
     description: "Tubes, plates, cryovials, seals, racks, sample storage.",
-    href: "/products/storage-cryopreservation"
+    href: "/products/storage-cryopreservation",
+    cta: "Explore storage"
   },
   {
     title: "PCR / qPCR Consumables",
     description: "PCR plates, tubes, strips, optical seals, qPCR plastics.",
-    href: "/products/molecular-biology-pcr"
+    href: "/products/molecular-biology-pcr",
+    cta: "Explore PCR"
   },
   {
-    title: "Automation-Compatible Consumables",
-    description: "Robotic tips, reservoirs, racks, barcode needs, and deck-compatible formats.",
-    href: "/products/automation-consumables"
+    title: "Private Label / OEM",
+    description: "Neutral-label and OEM-style sourcing discussions for recurring consumables demand.",
+    href: "/private-label-oem",
+    cta: "Discuss private label"
   }
 ];
 
@@ -55,18 +61,12 @@ export function PrioritySourcingLinesSection() {
                 {line.title}
               </h2>
               <p className="mt-3 flex-1 text-sm leading-6 text-bioaxis-muted">{line.description}</p>
-              <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              <div className="mt-5">
                 <Link
                   href={line.href}
                   className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
                 >
-                  Explore
-                </Link>
-                <Link
-                  href={`/request-quote?requestType=quote&sourcePage=${encodeURIComponent(line.href)}`}
-                  className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-                >
-                  Request quote
+                  {line.cta}
                 </Link>
               </div>
             </article>

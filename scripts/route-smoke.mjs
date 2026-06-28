@@ -361,15 +361,15 @@ for (const route of routes) {
     }
 
     [
-      "ONE STOP FOR LIFE SCIENCE CONSUMABLES",
+      "One stop for life science consumables",
       "Paste a catalog number, supplier SKU, or product list.",
       "Priority sourcing lines",
       "Liquid Handling Consumables",
       "Cell Culture Consumables",
-      "Sample Prep & Filtration",
+      "Filtration Consumables",
       "Tubes, Plates & Storage",
       "PCR / qPCR Consumables",
-      "Automation-Compatible Consumables",
+      "Private Label / OEM",
       "Current supplier out of stock",
       "Need compatible equivalent",
       "Need documents before purchasing",
@@ -428,7 +428,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Common sourcing requests", "Find equivalent", "Request quote", "Browse families"].forEach((label) => {
+    ["Common sourcing requests", "Find equivalent", "Request quote", "View families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -511,7 +511,7 @@ for (const route of routes) {
       "Only your email is required. Paste what you have. BioAxis can follow up for missing specs.",
       "Email required",
       "Email *",
-      "Product, SKU, product list, or sourcing need *",
+      "Product / SKU / product list / sourcing need *",
       "Current supplier optional",
       "Buyer SKU / catalog input optional",
       "Product category optional",
@@ -678,6 +678,8 @@ for (const route of routes) {
       "Document package BioAxis can help organize",
       "Sterility certificate",
       "Supplier specification sheet",
+      "Packaging / format information",
+      "Compatibility notes when supplier-provided",
       "What BioAxis helps organize",
       "What remains buyer-side",
       "Recurring supply readiness",
@@ -950,7 +952,7 @@ for (const href of resourceGuideLinks) {
     }
   });
 
-  ["Need help sourcing this product type?", "Start RFQ", "Request documents"].forEach((label) => {
+  ["Need sourcing help for this category?", "Start RFQ", "Request documents"].forEach((label) => {
     if (!pageText.includes(label)) {
       failures.push(`/resources guide link ${href}: missing conversion CTA ${label}`);
     }
@@ -1066,7 +1068,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "Browse families"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "View families"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
