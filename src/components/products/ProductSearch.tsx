@@ -289,7 +289,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-dim">
-              Ranked across BioAxis product segments, categories, families, product configurations, specifications, applications, workflows, resources, aliases, and descriptions.
+              Ranked across BioAxis product segments, categories, families, sourcing templates, specifications, workflows, resources, aliases, and descriptions.
             </p>
           </div>
           <div>

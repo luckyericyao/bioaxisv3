@@ -555,8 +555,8 @@ function makeCatalogProduct(segment: SegmentSeed, category: CategorySeed, family
     id: `${segment.slug}-${category.slug}-${family.slug}-${slug}`,
     slug,
     name,
-    supplier: "Reviewed during sourcing intake",
-    catalogNumber: "Current SKU optional",
+    supplier: "Buyer supplier input optional",
+    catalogNumber: "Buyer SKU input optional",
     description:
       override?.specs?.Description?.toString() ??
       `${name} sourcing profile for ${category.name.toLowerCase()} requests, equivalent review, documentation checks, and quote preparation.`,

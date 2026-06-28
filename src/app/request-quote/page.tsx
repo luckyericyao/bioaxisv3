@@ -99,9 +99,9 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   return (
     <>
       <PageHero
-        eyebrow="Request quote"
+        eyebrow="Sourcing request"
         title="Send a product, catalog number, or list"
-        subtitle="Use this page for RFQs, equivalent review, sample requests, documentation requests, recurring supply needs, or general sourcing questions. Only your email is required to start."
+        subtitle="Only your email is required. Paste a SKU, supplier catalog number, product list, or sourcing need, and BioAxis can follow up for missing details."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <QuoteRequestForm

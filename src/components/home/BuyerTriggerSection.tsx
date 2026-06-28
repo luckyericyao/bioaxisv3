@@ -4,32 +4,32 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const buyerTriggers = [
   {
     title: "Current supplier out of stock",
-    body: "Paste the current supplier SKU, product name, quantity, and timing so BioAxis can structure a sourcing path.",
+    body: "Send the current SKU, quantity, and timing.",
     href: "/request-quote?requestType=quote&need=supplier-out-of-stock"
   },
   {
-    title: "Find compatible equivalent",
-    body: "Send a catalog number or product description for format, material, documentation, and sample-path review.",
+    title: "Need compatible equivalent",
+    body: "Compare fit, format, documents, and sample path.",
     href: "/equivalent-finder?need=compatible-equivalent"
   },
   {
-    title: "Request CoA / SDS / sterility documents",
-    body: "List the product and documents needed before procurement, qualification, or supplier switching.",
+    title: "Need CoA / SDS / sterility documents",
+    body: "List the product and required evidence.",
     href: "/request-quote?requestType=documentation&need=documents"
   },
   {
     title: "Need samples before switching",
-    body: "Request samples when cells, assays, automation decks, or QC workflows need buyer-side evaluation.",
+    body: "Coordinate samples before buyer-side evaluation.",
     href: "/request-quote?requestType=sample&need=sample-before-switching"
   },
   {
-    title: "Lower cost recurring supply",
-    body: "Share monthly or annual usage, packaging preference, and documentation needs for recurring supply review.",
+    title: "Lower-cost recurring supply",
+    body: "Share usage rhythm and required documents.",
     href: "/request-quote?requestType=recurring-supply&need=recurring-supply"
   },
   {
     title: "Automation-compatible consumables",
-    body: "Send platform, rack, barcode, conductivity, and format constraints for liquid-handler-compatible sourcing.",
+    body: "Send platform, rack, barcode, and format constraints.",
     href: "/request-quote?requestType=quote&need=automation-compatible"
   }
 ];
@@ -38,25 +38,11 @@ export function BuyerTriggerSection() {
   return (
     <section className="border-b border-bioaxis-line bg-bioaxis-black">
       <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+        <div className="max-w-4xl">
           <SectionHeader
             title="What are you trying to solve?"
-            subtitle="Start from the sourcing problem. BioAxis can turn a SKU, supplier name, product list, or short need into an RFQ, equivalent, sample, or documentation path."
+            subtitle="Start from the buying problem. BioAxis routes it into RFQ, equivalent, sample, documentation, or recurring supply review."
           />
-          <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
-            <Link
-              href="/request-quote?type=product-list&requestType=product-list-review"
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-            >
-              Paste product list
-            </Link>
-            <Link
-              href="/equivalent-finder"
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-            >
-              Find equivalent
-            </Link>
-          </div>
         </div>
         <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {buyerTriggers.map((trigger, index) => (

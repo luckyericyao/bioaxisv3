@@ -10,7 +10,7 @@ import { CatalogProductBrowser, type CatalogProductRow } from "./CatalogProductB
 const statusLabels: Record<DocumentStatus, string> = {
   available: "Available",
   request_required: "Request required",
-  supplier_dependent: "Supplier dependent"
+  supplier_dependent: "Supplier review required"
 };
 
 const documentLabels: Array<[keyof ProductCatalogItem["documents"], string]> = [
@@ -67,8 +67,8 @@ function catalogRequestHref({
   if (category) params.set("category", category.slug);
   if (family) params.set("family", family.slug);
   if (product) params.set("product", product.slug);
-  if (product?.supplier && !/reviewed/i.test(product.supplier)) params.set("supplier", product.supplier);
-  if (product?.catalogNumber && !/optional/i.test(product.catalogNumber)) params.set("catalog", product.catalogNumber);
+  if (product?.supplier && !/optional|input/i.test(product.supplier)) params.set("supplier", product.supplier);
+  if (product?.catalogNumber && !/optional|input/i.test(product.catalogNumber)) params.set("catalog", product.catalogNumber);
   if (need) params.set("need", need);
 
   return `/request-quote?${params.toString()}`;
@@ -84,8 +84,8 @@ function catalogEquivalentHref(segment: ProductCatalogSegment, category?: Produc
   if (category) params.set("category", category.slug);
   if (family) params.set("family", family.slug);
   if (product) params.set("product", product.slug);
-  if (product?.catalogNumber && !/optional/i.test(product.catalogNumber)) params.set("catalog", product.catalogNumber);
-  if (product?.supplier && !/reviewed/i.test(product.supplier)) params.set("supplier", product.supplier);
+  if (product?.catalogNumber && !/optional|input/i.test(product.catalogNumber)) params.set("catalog", product.catalogNumber);
+  if (product?.supplier && !/optional|input/i.test(product.supplier)) params.set("supplier", product.supplier);
 
   return `/equivalent-finder?${params.toString()}`;
 }
@@ -279,7 +279,7 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
             <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
-            Family pages show product configurations, buyer checklists, documentation status, and sourcing-list actions.
+            Family pages show sourcing configuration templates, buyer checklists, documentation requests, and sourcing-list actions.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -323,9 +323,9 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         {rows.length > 0 ? (
-          <CatalogProductBrowser rows={rows} heading="Product list preview" compact />
+          <CatalogProductBrowser rows={rows} heading="Sourcing template preview" compact />
         ) : (
-          <EmptyCatalogPanel title="Product list preview" body="This category is handled through RFQ context first. Send BioAxis the category and required documentation, sample, or equivalent need." />
+          <EmptyCatalogPanel title="Sourcing template preview" body="This category is handled through RFQ context first. Send BioAxis the category and required documentation, sample, or equivalent need." />
         )}
       </section>
 
@@ -385,14 +385,16 @@ export function CatalogFamilyPage({
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <CatalogProductBrowser rows={rows} heading="Product configurations" />
+          <CatalogProductBrowser rows={rows} heading="Sourcing configuration templates" />
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-3">
-          <Disclosure title="Specifications to compare" items={family.typicalSpecs} />
-          <Disclosure title="Equivalent matching notes" items={["Compare current supplier and catalog number", "Review critical dimensions, material, surface, formulation, sterility, and packaging", "Request samples when fit or workflow sensitivity matters"]} />
-          <Disclosure title="Documentation request notes" items={["CoA/SDS availability depends on product and supplier", "Sterility, animal-origin, lot-level, or material documents may require request", "BioAxis can collect document requirements for RFQ preparation"]} />
+          <Disclosure title="Typical RFQ fields" items={family.typicalSpecs} />
+          <Disclosure title="Documentation to request" items={["CoA/SDS availability depends on product and supplier review", "Sterility, animal-origin, lot-level, or material documents may require request", "BioAxis can collect document requirements for RFQ preparation"]} />
+          <Disclosure title="Equivalent review notes" items={["Compare current supplier and catalog number when available", "Review critical dimensions, material, surface, formulation, sterility, and packaging", "Request samples when fit or workflow sensitivity matters"]} />
+          <Disclosure title="Sample-first evaluation" items={["Use samples before switching workflow-sensitive consumables", "Review fit, handling, packaging, and documentation with buyer-side criteria", "Keep sample acceptance separate from final purchasing approval"]} />
+          <Disclosure title="Recurring supply considerations" items={["Share expected monthly or annual usage when available", "Clarify packaging, documentation, and shipping rhythm", "Use RFQ context to organize repeat sourcing rather than assuming live inventory"]} />
         </div>
       </section>
 
@@ -454,8 +456,8 @@ export function CatalogProductPage({
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation typically reviewed</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Status, not fake downloads.</h2>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation to request</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Request status, not fake downloads.</h2>
           <div className="mt-5 grid gap-3">
             {documentLabels.map(([key, label]) => {
               const status = product.documents[key];
@@ -494,7 +496,7 @@ export function CatalogProductPage({
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Equivalent review considerations</p>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Equivalent review notes</p>
           <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Compare before switching.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help compare supplier, catalog number, critical specs, documentation, sample needs, and workflow fit. Buyer-side technical review remains required before substitution.
@@ -507,7 +509,7 @@ export function CatalogProductPage({
           </Link>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sample path / recurring supply review</p>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sample-first evaluation</p>
           <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Review before larger-volume sourcing.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help organize sample requests, documentation requirements, packaging preferences, and recurring usage details before preparing RFQ follow-up.
@@ -517,6 +519,19 @@ export function CatalogProductPage({
             className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request sample path
+          </Link>
+        </section>
+        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Recurring supply considerations</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Plan repeat use after specs are clear.</h2>
+          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
+            Share monthly or annual usage, shipping region, preferred packaging, and documentation requirements so BioAxis can organize recurring supply review without implying live inventory.
+          </p>
+          <Link
+            href={catalogRequestHref({ requestType: "recurring-supply", segment, category, family, product, need: "recurring-supply" })}
+            className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          >
+            Review recurring supply
           </Link>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">

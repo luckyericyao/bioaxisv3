@@ -104,16 +104,6 @@ const needOptions = [
 
 const timelineOptions = ["Urgent", "This week", "This month", "Planning ahead", "Not sure"];
 
-const reviewBullets = [
-  "Product name or catalog number",
-  "Supplier / brand currently used",
-  "Compatible equivalent options",
-  "Sterility, material, packaging, and format fit",
-  "CoA, SDS, and lot-level documentation needs",
-  "Sample request path",
-  "Quote and recurring supply next steps"
-];
-
 type FieldErrors = Partial<Record<keyof QuoteFormState, string>>;
 
 type SubmitState = {
@@ -144,7 +134,6 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
   const [submitting, setSubmitting] = useState(false);
 
   const selectedRequestType = getRequestTypeById(formState.requestType);
-  const shouldOpenOptionalDetails = formState.requestType === "product-list-review";
   const selectedNeedsText = formState.needs.join(", ");
   const resolvedProductContext = useMemo(
     () => ({
@@ -307,8 +296,8 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
         <p className="text-sm font-semibold uppercase text-bioaxis-accent">One-click intake</p>
         <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Paste what you have. BioAxis will structure the sourcing request.</h2>
         <div className="mt-3 grid gap-2 text-sm leading-6 text-bioaxis-muted">
-          <p>Only your email is required. Paste a SKU, product name, supplier line, or product list when available.</p>
-          <p>BioAxis can follow up by email to clarify specs, equivalents, samples, documentation, quantities, or timeline.</p>
+          <p>Only your email is required. Paste what you have. BioAxis can follow up for missing specs.</p>
+          <p>Submit now, and BioAxis can follow up by email to clarify equivalents, samples, documentation, quantities, or timeline.</p>
         </div>
       </section>
 
@@ -316,28 +305,11 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
 
       {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Request type</h2>
-        <div className="mt-6">
-          <RequestTypeSelector
-            requestTypes={requestTypes}
-            selectedId={formState.requestType}
-            onSelect={(id) => {
-              updateField("requestType", id);
-              setSubmitted(null);
-            }}
-          />
-        </div>
-        <p className="mt-4 border border-bioaxis-line bg-bioaxis-black p-4 text-sm leading-6 text-bioaxis-muted">
-          {selectedRequestType.description}
-        </p>
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.42fr)]">
+      <section className="grid gap-5">
         <div className="grid gap-5">
           <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-8">
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Level 1 / always visible</p>
-            <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Email plus product context.</h2>
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Email required</p>
+            <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the product context with one click.</h2>
             <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
               Use the product field for a single SKU, supplier line, pasted product list, or rough sourcing need. Existing product page context is included automatically.
             </p>
@@ -354,27 +326,55 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
               />
               <TextArea
                 id="productList"
-                label="Product / SKU / product list"
+                label="Product / SKU / product list / sourcing need"
                 value={formState.productList}
                 rows={10}
                 prominent
+                required
                 placeholder="Paste catalog number, supplier SKU, product name, pack size, current brand, target equivalent, required documents, sample need, recurring usage, or a spreadsheet-style product list."
                 onChange={(value) => updateField("productList", value)}
               />
             </div>
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
+                Missing optional procurement details will not block submission.
+              </p>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+              >
+                {submitting ? "Submitting..." : "Send sourcing request"}
+              </button>
+            </div>
+            {submitError ? <p className="mt-4 text-sm text-bioaxis-accent">{submitError}</p> : null}
           </section>
 
-          <details className="group border border-bioaxis-line bg-bioaxis-panel" open={shouldOpenOptionalDetails ? true : undefined}>
+          <details className="group border border-bioaxis-line bg-bioaxis-panel">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left sm:p-8">
               <span>
-                <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add supplier, quantity, documents, timeline, shipping region</span>
+                <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add request type or more details</span>
                 <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">
-                  Optional fields for a more quote-ready sourcing request.
+                  Optional fields for request type, supplier, quantity, documents, timeline, or shipping region.
                 </span>
               </span>
               <span className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-5 border-t border-bioaxis-line p-5 md:grid-cols-2 sm:p-8">
+              <div className="md:col-span-2">
+                <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request type optional</p>
+                <div className="mt-4">
+                  <RequestTypeSelector
+                    requestTypes={requestTypes}
+                    selectedId={formState.requestType}
+                    onSelect={(id) => {
+                      updateField("requestType", id);
+                      setSubmitted(null);
+                    }}
+                  />
+                </div>
+                <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{selectedRequestType.description}</p>
+              </div>
               <Field id="name" label="Name optional" value={formState.name} onChange={(value) => updateField("name", value)} />
               <Field id="organization" label="Company optional" value={formState.organization} onChange={(value) => updateField("organization", value)} />
               <Field
@@ -386,7 +386,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
               />
               <Field
                 id="catalogNumber"
-                label="Current SKU / catalog number optional"
+                label="Buyer SKU / catalog input optional"
                 value={formState.catalogNumber}
                 placeholder="Paste one or multiple catalog numbers"
                 onChange={(value) => updateField("catalogNumber", value)}
@@ -429,41 +429,6 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
             </div>
           </details>
         </div>
-
-        <aside className="grid gap-5">
-          <section className="border border-bioaxis-line bg-bioaxis-panel p-5">
-            <h2 className="text-xl font-bold uppercase text-bioaxis-text">What BioAxis can review</h2>
-            <ul className="mt-5 grid gap-2 text-sm leading-6 text-bioaxis-muted">
-              {reviewBullets.map((item) => (
-                <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-3 py-2">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section className="border border-bioaxis-line bg-bioaxis-black p-5">
-            <h2 className="text-xl font-bold uppercase text-bioaxis-text">What BioAxis does not claim</h2>
-            <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-              BioAxis does not display unsupported real-time inventory, guaranteed equivalence, regulatory approval, or validated compatibility unless confirmed through supplier documentation, sample testing, or customer review.
-            </p>
-          </section>
-        </aside>
-      </section>
-
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">
-            Submit with only an email. BioAxis can ask follow-up questions if specs, equivalents, samples, documentation, or quantities need clarification.
-          </p>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-          >
-            {submitting ? "Submitting..." : "Send sourcing request"}
-          </button>
-        </div>
-        {submitError ? <p className="mt-4 text-sm text-bioaxis-accent">{submitError}</p> : null}
       </section>
     </form>
   );
@@ -684,6 +649,7 @@ function TextArea({
   rows = 5,
   placeholder,
   prominent = false,
+  required = false,
   onChange
 }: {
   id: keyof QuoteFormState;
@@ -692,12 +658,14 @@ function TextArea({
   rows?: number;
   placeholder?: string;
   prominent?: boolean;
+  required?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="md:col-span-2">
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
         {label}
+        {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
       <textarea
         id={id}

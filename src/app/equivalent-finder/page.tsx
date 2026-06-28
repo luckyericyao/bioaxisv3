@@ -4,7 +4,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
 
 export const metadata: Metadata = {
-  title: "Equivalent Finder | BioAxis",
+  title: "Find Compatible Alternatives | BioAxis",
   description:
     "Send BioAxis a catalog number, supplier, product description, or specification sheet for equivalent consumables review.",
   alternates: {
@@ -24,14 +24,6 @@ const intakePriorities = [
   "Sample before switching"
 ];
 
-const reviewSteps = [
-  "Identify current product",
-  "Clarify format, material, sterility, volume, packaging, and workflow requirements",
-  "Compare potential compatible options",
-  "Organize documentation and sample needs",
-  "Structure quote or supplier follow-up"
-];
-
 const commonEquivalentRequests = [
   "Pipette tips",
   "Filter tips",
@@ -46,16 +38,56 @@ const commonEquivalentRequests = [
 ];
 
 const comparisonRows = [
-  "Supplier / SKU",
-  "Format / volume",
-  "Material",
-  "Sterility",
-  "Low-retention / surface treatment",
-  "Packaging",
-  "Automation fit",
-  "Documentation available",
-  "Sample path",
-  "Recurring supply feasibility"
+  {
+    area: "Supplier / SKU",
+    candidate: "Candidate supplier name, catalog number, or sourcing reference once identified",
+    notes: "Check whether the candidate maps to the buyer's current product and procurement context."
+  },
+  {
+    area: "Format / volume",
+    candidate: "Tip volume, plate format, tube size, membrane diameter, pore size, or other physical format",
+    notes: "Confirm physical compatibility before equivalent review or sample request."
+  },
+  {
+    area: "Material",
+    candidate: "Resin, membrane, polymer, coating, and chemical-compatibility attributes",
+    notes: "Review material fit against sample type, reagent exposure, assay chemistry, or cell-contact requirements."
+  },
+  {
+    area: "Sterility",
+    candidate: "Sterile claim, irradiation method, aseptic handling statement, and packaging status",
+    notes: "Match sterility expectations to supplier evidence before requesting quotes or samples."
+  },
+  {
+    area: "Low-retention / surface treatment",
+    candidate: "Binding profile, surface treatment type, coating, and assay-impact considerations",
+    notes: "Compare recovery, adsorption, wetting behavior, and protocol sensitivity before switching."
+  },
+  {
+    area: "Packaging",
+    candidate: "Rack, bulk, reload, individually wrapped, sleeve, and case-pack configuration",
+    notes: "Confirm handling format, storage footprint, sterility boundary, and purchasing unit before RFQ."
+  },
+  {
+    area: "Automation fit",
+    candidate: "Deck compatibility, SBS footprint, conductivity, rack geometry, and barcode location",
+    notes: "Review candidate geometry against instrument method, gripper/tip pickup behavior, and scan requirements."
+  },
+  {
+    area: "Documentation available",
+    candidate: "CoA, SDS, sterility certificate, material statement, and lot-level document package",
+    notes: "Identify required evidence early so missing documents do not block sample or purchasing review."
+  },
+  {
+    area: "Sample path",
+    candidate: "Sample availability, minimum sample quantity, evaluation workflow, and acceptance criteria",
+    notes: "Use sample review to test fit, handling, documentation, and workflow performance before larger demand."
+  },
+  {
+    area: "Recurring supply feasibility",
+    candidate: "MOQ, lead time, recurring usage, backup source, and packaging consistency",
+    notes: "Assess repeat-demand feasibility without implying guaranteed inventory, pricing, or lead time."
+  }
 ];
 
 function requestHref(query?: string) {
@@ -82,8 +114,8 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
     <>
       <PageHero
         eyebrow="Equivalent finder"
-        title="Find compatible consumables alternatives"
-        subtitle="Send a current brand, catalog number, product format, or workflow requirement. BioAxis helps structure equivalent review based on fit, documentation, sample path, and sourcing options."
+        title="Find compatible alternatives for your current consumables"
+        subtitle="Paste a current supplier SKU, catalog number, product name, or product list. BioAxis organizes the comparison path around fit, documents, samples, and RFQ next steps."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
@@ -157,7 +189,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         <aside className="border border-bioaxis-line bg-bioaxis-black p-6">
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Fit assessment, not a name match.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            BioAxis uses compatible option, potential equivalent, and equivalent review language carefully. Final suitability depends on supplier documentation, sample testing, and customer review in the intended workflow.
+            BioAxis helps turn current-product information into a practical alternatives review. Format, material, sterility, packaging, workflow fit, and documentation all matter.
           </p>
           <div className="mt-6 grid gap-2">
             {["Format, material, sterility, packaging", "Workflow fit and automation constraints", "Documentation and sample path"].map((item) => (
@@ -173,10 +205,10 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
             <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Comparison matrix</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">How BioAxis compares equivalent candidates</h2>
+            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">A cleaner way to compare alternatives.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
-            BioAxis structures equivalent review around the current product, candidate option, and review notes. The output is a sourcing comparison path, not a guaranteed replacement claim.
+            BioAxis structures the inputs buyers need before requesting candidates, samples, documentation, or quotes.
           </p>
         </div>
         <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
@@ -190,10 +222,10 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
             </thead>
             <tbody>
               {comparisonRows.map((row) => (
-                <tr key={row} className="align-top">
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">{row}</td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">Candidate data requested or compared during sourcing review</td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">Review against buyer requirements, supplier documentation, sample needs, and workflow fit.</td>
+                <tr key={row.area} className="align-top">
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">{row.area}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">{row.candidate}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.notes}</td>
                 </tr>
               ))}
             </tbody>
@@ -203,20 +235,6 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
           <p className="text-sm leading-6 text-bioaxis-muted">
             BioAxis supports equivalent review and sourcing comparison. Final suitability depends on supplier documentation, sample testing, and customer-side validation.
           </p>
-        </div>
-      </section>
-
-      <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
-        <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">How BioAxis reviews equivalent requests</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-5">
-            {reviewSteps.map((step, index) => (
-              <article key={step} className="border border-bioaxis-line bg-bioaxis-black p-4">
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Step {String(index + 1).padStart(2, "0")}</p>
-                <h3 className="mt-3 text-sm font-bold uppercase leading-6 text-bioaxis-text">{step}</h3>
-              </article>
-            ))}
-          </div>
         </div>
       </section>
 

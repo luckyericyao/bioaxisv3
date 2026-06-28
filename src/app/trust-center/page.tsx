@@ -28,10 +28,39 @@ const trustAreas = [
   {
     title: "Equivalent review",
     body: "Equivalent review compares format, volume, material, sterility, packaging, automation fit, documentation, and customer-side validation needs."
+  }
+];
+
+const trustMatrix = [
+  {
+    area: "CoA / SDS / sterility documents",
+    helps: "Collect document requirements and request supplier-provided evidence.",
+    buyer: "Review document suitability for the intended use."
   },
   {
-    title: "What BioAxis does not claim",
-    body: "BioAxis does not claim live inventory for every listed product, automatic interchangeability, replacement of customer-side validation, or final regulatory or quality release decisions."
+    area: "Material / resin / specification review",
+    helps: "Organize critical specs, materials, dimensions, and format needs.",
+    buyer: "Confirm technical acceptance criteria."
+  },
+  {
+    area: "Supplier screening",
+    helps: "Compare supplier responsiveness, documentation path, and sourcing fit.",
+    buyer: "Approve supplier qualification decisions."
+  },
+  {
+    area: "Sample-first evaluation",
+    helps: "Coordinate sample request context before larger-volume sourcing.",
+    buyer: "Test samples in the intended workflow."
+  },
+  {
+    area: "Equivalent review",
+    helps: "Map current product context to compatible option review.",
+    buyer: "Validate final suitability before substitution."
+  },
+  {
+    area: "Recurring supply readiness",
+    helps: "Organize usage rhythm, documentation needs, and RFQ follow-up.",
+    buyer: "Confirm demand planning and quality requirements."
   }
 ];
 
@@ -57,6 +86,39 @@ export default function TrustCenterPage() {
           ))}
         </div>
       </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
+          <table className="min-w-full border-separate border-spacing-0 text-left">
+            <thead>
+              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Area</th>
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">What BioAxis helps organize</th>
+                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">What remains buyer-side</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trustMatrix.map((row) => (
+                <tr key={row.area} className="align-top">
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-bold uppercase text-bioaxis-text">{row.area}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">{row.helps}</td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.buyer}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="border border-bioaxis-line bg-bioaxis-black p-6">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">What BioAxis does not claim</p>
+          <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+            BioAxis does not claim live inventory for every listed product, automatic interchangeability, replacement of customer-side validation, or final regulatory or quality release decisions.
+          </p>
+        </div>
+      </section>
+
       <CTASection
         title="Need documents or equivalent review before switching?"
         body="Paste the product, current supplier SKU, or product list. BioAxis can help organize documentation, sample, equivalent, and RFQ next steps."

@@ -25,7 +25,7 @@ type CatalogProductBrowserProps = {
 const statusLabels: Record<DocumentStatus, string> = {
   available: "Available",
   request_required: "Request required",
-  supplier_dependent: "Supplier dependent"
+  supplier_dependent: "Supplier review required"
 };
 
 const documentLabels: Array<[keyof ProductCatalogItem["documents"], string]> = [
@@ -53,8 +53,8 @@ function requestHref(row: CatalogProductRow, requestType: string, need?: string)
   });
 
   if (need) params.set("need", need);
-  if (row.product.supplier && !/reviewed/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
-  if (row.product.catalogNumber && !/optional/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
+  if (row.product.supplier && !/optional|input/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
+  if (row.product.catalogNumber && !/optional|input/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
 
   return `/request-quote?${params.toString()}`;
 }
@@ -68,8 +68,8 @@ function equivalentHref(row: CatalogProductRow) {
     sourcePage: row.href
   });
 
-  if (row.product.catalogNumber && !/optional/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
-  if (row.product.supplier && !/reviewed/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
+  if (row.product.catalogNumber && !/optional|input/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
+  if (row.product.supplier && !/optional|input/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
 
   return `/equivalent-finder?${params.toString()}`;
 }
@@ -139,19 +139,18 @@ function DocsSummary({ product }: { product: ProductCatalogItem }) {
   );
 }
 
-export function CatalogProductBrowser({ rows, heading = "Product list preview", compact = false }: CatalogProductBrowserProps) {
+export function CatalogProductBrowser({ rows, heading = "Sourcing template preview", compact = false }: CatalogProductBrowserProps) {
   const [query, setQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedSterility, setSelectedSterility] = useState<string[]>([]);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
-  const [compareIds, setCompareIds] = useState<string[]>([]);
 
   const productTypes = useMemo(() => [...new Set(rows.map((row) => row.product.productType))].slice(0, 10), [rows]);
   const sterilityOptions = useMemo(
     () => [...new Set(rows.map((row) => fieldValue(row.product, "Sterility")).filter(Boolean))].slice(0, 8),
     [rows]
   );
-  const docOptions = ["Available", "Request required", "Supplier dependent"];
+  const docOptions = ["Available", "Request required", "Supplier review required"];
   const filteredRows = useMemo(() => {
     const normalizedQuery = normalize(query.trim());
 
@@ -175,25 +174,21 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
     setter(current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
   }
 
-  function toggleCompare(id: string) {
-    setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
-  }
-
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="lg:border-r lg:border-bioaxis-line lg:pr-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Filter products</p>
+          <p className="text-xs font-bold uppercase text-bioaxis-accent">Filter templates</p>
           <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{heading}</h2>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            Compare sourcing configurations, buyer-supplied SKU context, key specs, and documentation status before sending a quote-ready request.
+            Review template-level RFQ fields, documentation needs, equivalent notes, and next actions before sending a sourcing request.
           </p>
           <label className="mt-5 block">
             <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Search within list</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter by spec, family, catalog..."
+              placeholder="Filter by RFQ field, family, or specification..."
               className="field-focus min-h-10 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
             />
           </label>
@@ -205,18 +200,12 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
             onToggle={(value) => toggleFilter(value, selectedSterility, setSelectedSterility)}
           />
           <FilterGroup title="Key documents" values={docOptions} active={selectedDocs} onToggle={(value) => toggleFilter(value, selectedDocs, setSelectedDocs)} />
-          {compareIds.length > 0 ? (
-            <div className="mt-5 border border-bioaxis-accent/40 bg-bioaxis-black p-3">
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">{compareIds.length} item{compareIds.length === 1 ? "" : "s"} selected for comparison</p>
-              <p className="mt-2 text-xs leading-5 text-bioaxis-muted">Add selected products to the sourcing list from the row actions, then continue to RFQ.</p>
-            </div>
-          ) : null}
         </aside>
 
         <div className="min-w-0">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching products</p>
+              <p className="text-xs font-bold uppercase text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching templates</p>
               {compact && filteredRows.length > visibleRows.length ? (
                 <p className="mt-1 text-xs leading-5 text-bioaxis-muted">Preview list capped here. Open the family or product page for the full context.</p>
               ) : null}
@@ -227,35 +216,22 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
             <table className="min-w-full border-separate border-spacing-0 text-left">
               <thead>
                 <tr className="text-[11px] font-bold uppercase text-bioaxis-dim">
-                  <th className="border-y border-l border-bioaxis-line bg-bioaxis-black px-3 py-3">Compare</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Product name</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Supplier context</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Current SKU</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Key specs</th>
-                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Documents</th>
-                  <th className="border-y border-r border-bioaxis-line bg-bioaxis-black px-3 py-3">Actions</th>
+                  <th className="border-y border-l border-bioaxis-line bg-bioaxis-black px-3 py-3">Configuration type</th>
+                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Typical RFQ fields</th>
+                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Documentation to request</th>
+                  <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Equivalent review notes</th>
+                  <th className="border-y border-r border-bioaxis-line bg-bioaxis-black px-3 py-3">Best next action</th>
                 </tr>
               </thead>
               <tbody>
                 {visibleRows.map((row) => (
                   <tr key={row.product.id} className="align-top">
                     <td className="border-b border-l border-bioaxis-line px-3 py-4">
-                      <input
-                        type="checkbox"
-                        checked={compareIds.includes(row.product.id)}
-                        onChange={() => toggleCompare(row.product.id)}
-                        aria-label={`Compare ${row.product.name}`}
-                        className="h-4 w-4 accent-bioaxis-accent"
-                      />
-                    </td>
-                    <td className="border-b border-bioaxis-line px-3 py-4">
                       <Link href={row.href} className="text-sm font-bold uppercase text-bioaxis-text transition hover:text-bioaxis-accent">
                         {row.product.name}
                       </Link>
                       <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.familyTitle}</p>
                     </td>
-                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.supplier ?? "Reviewed during sourcing intake"}</td>
-                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-steel">{row.product.catalogNumber ?? "Current SKU optional"}</td>
                     <td className="border-b border-bioaxis-line px-3 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {row.product.tags.slice(0, 4).map((tag) => (
@@ -267,6 +243,9 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
                     </td>
                     <td className="border-b border-bioaxis-line px-3 py-4">
                       <DocsSummary product={row.product} />
+                    </td>
+                    <td className="border-b border-bioaxis-line px-3 py-4 text-xs leading-5 text-bioaxis-muted">
+                      {equivalentReviewNote(row)}
                     </td>
                     <td className="border-b border-r border-bioaxis-line px-3 py-4">
                       <RowActions row={row} />
@@ -280,24 +259,15 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
           <div className="grid gap-3 lg:hidden">
             {visibleRows.map((row) => (
               <article key={row.product.id} className="border border-bioaxis-line bg-bioaxis-black p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <Link href={row.href} className="text-base font-bold uppercase text-bioaxis-text">
-                      {row.product.name}
-                    </Link>
-                    <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.segmentTitle} / {row.categoryTitle} / {row.familyTitle}</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={compareIds.includes(row.product.id)}
-                    onChange={() => toggleCompare(row.product.id)}
-                    aria-label={`Compare ${row.product.name}`}
-                    className="h-4 w-4 accent-bioaxis-accent"
-                  />
+                <div>
+                  <Link href={row.href} className="text-base font-bold uppercase text-bioaxis-text">
+                    {row.product.name}
+                  </Link>
+                  <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.segmentTitle} / {row.categoryTitle} / {row.familyTitle}</p>
                 </div>
                 <div className="mt-4 grid gap-2 text-xs leading-5 text-bioaxis-steel">
-                  <p>Supplier context: {row.product.supplier ?? "Reviewed during sourcing intake"}</p>
-                  <p>Current SKU: {row.product.catalogNumber ?? "Current SKU optional"}</p>
+                  <p>Typical RFQ fields: {row.product.tags.slice(0, 4).join(", ")}</p>
+                  <p>Equivalent review notes: {equivalentReviewNote(row)}</p>
                   <DocsSummary product={row.product} />
                 </div>
                 <div className="mt-4">
@@ -310,6 +280,17 @@ export function CatalogProductBrowser({ rows, heading = "Product list preview", 
       </div>
     </section>
   );
+}
+
+function equivalentReviewNote(row: CatalogProductRow) {
+  const sterility = fieldValue(row.product, "Sterility");
+  const material = fieldValue(row.product, "Material");
+  const format = fieldValue(row.product, "Format") || row.product.productType;
+  const anchors = [format, material, sterility].filter(Boolean).slice(0, 3).join(", ");
+
+  return anchors
+    ? `Review ${anchors} against the current product before requesting samples or documentation.`
+    : "Review format, material, sterility, packaging, documentation, and sample needs before switching.";
 }
 
 function FilterGroup({

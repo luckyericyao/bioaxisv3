@@ -126,8 +126,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related product configurations</p>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other configurations in this family</h2>
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related sourcing templates</p>
+          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other request templates in this family</h2>
           {relatedConfigurations.length > 0 ? (
             <div className="mt-5 grid gap-3">
               {relatedConfigurations.map((item) => (
@@ -143,7 +143,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           ) : (
             <p className="mt-5 text-sm leading-6 text-bioaxis-muted">
-              This family currently has one product configuration path. BioAxis can still review alternate formats through the request form.
+              This family currently has one sourcing template path. BioAxis can still review alternate formats through the request form.
             </p>
           )}
         </section>

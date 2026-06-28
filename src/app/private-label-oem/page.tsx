@@ -15,8 +15,7 @@ export const metadata: Metadata = {
 
 const priorityCategories = [
   "Pipette tips",
-  "Tubes and plates",
-  "Sample storage",
+  "Tubes, plates, and storage",
   "Filtration consumables",
   "PCR / qPCR plastics",
   "Cell culture plastics",
@@ -37,8 +36,8 @@ export default function PrivateLabelOemPage() {
     <>
       <PageHero
         eyebrow="Private-label / OEM-style sourcing"
-        title="Private-label and OEM-style consumables sourcing for recurring lab supply."
-        subtitle="BioAxis helps evaluate neutral-label, private-label, and OEM-style options across selected life-science consumable categories, with documentation, sample, packaging, and recurring supply review."
+        title="Private-label sourcing for recurring consumables demand"
+        subtitle="For repeat-use consumables, BioAxis helps evaluate neutral-label, private-label, and OEM-style sourcing paths with specs, packaging, documentation, samples, and RFQ preparation."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
@@ -58,8 +57,8 @@ export default function PrivateLabelOemPage() {
 
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <SectionHeader
-          title="A commercial lane, not a marketplace listing."
-          subtitle="BioAxis does not claim factory ownership, guaranteed inventory, fixed lead time, or automatic interchangeability. The page is for careful sourcing discussions where product type, specs, packaging, documentation, and usage volume can be reviewed."
+          title="Built for recurring demand conversations."
+          subtitle="Use this path when the product family, expected usage, packaging requirements, and documentation needs are worth reviewing before a standard spot quote."
         />
         <div className="grid gap-3 sm:grid-cols-2">
           {reviewAreas.map((area) => (
@@ -88,7 +87,7 @@ export default function PrivateLabelOemPage() {
         <div className="border border-bioaxis-line bg-bioaxis-black p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Careful sourcing note</p>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-            BioAxis can help coordinate evaluation, RFQ preparation, sample requests, packaging requirement collection, and documentation review. Final suitability, regulatory use, and quality release decisions remain buyer-side responsibilities.
+            BioAxis can help coordinate evaluation, RFQ preparation, sample requests, packaging requirement collection, and documentation review. BioAxis does not claim factory ownership, guaranteed inventory, automatic interchangeability, or final regulatory/quality release. Final suitability remains buyer-side.
           </p>
         </div>
       </section>

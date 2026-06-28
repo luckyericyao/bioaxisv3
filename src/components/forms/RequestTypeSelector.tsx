@@ -11,10 +11,10 @@ type RequestTypeSelectorProps = {
 export function RequestTypeSelector({ requestTypes, selectedId, onSelect }: RequestTypeSelectorProps) {
   return (
     <ul className="grid list-none gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4" role="list" aria-label="Request type options">
-      {requestTypes.map((requestType, index) => {
+      {requestTypes.map((requestType) => {
         const selected = requestType.id === selectedId;
-        const typeNumber = (index + 1).toString().padStart(2, "0");
         const shortLabel = shortRequestTypeLabel(requestType.id);
+        const shortDescription = shortRequestTypeDescription(requestType.id);
 
         return (
           <li key={requestType.id}>
@@ -26,16 +26,13 @@ export function RequestTypeSelector({ requestTypes, selectedId, onSelect }: Requ
                 selected ? "border-bioaxis-accent bg-bioaxis-accent/10" : "border-bioaxis-line bg-bioaxis-black hover:border-bioaxis-accent/70"
               ].join(" ")}
               aria-pressed={selected}
-              aria-label={`Request type ${typeNumber}. ${shortLabel}. ${selected ? "Selected." : "Not selected."} ${requestType.description}`}
+              aria-label={`${shortLabel}. ${selected ? "Selected." : "Not selected."} ${shortDescription}`}
             >
-              <span className="flex items-center justify-between gap-3">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">Type {typeNumber}</span>
-                <span className={selected ? "text-[11px] font-bold uppercase text-bioaxis-accent" : "text-[11px] font-bold uppercase text-bioaxis-dim"}>
-                  {selected ? "Selected" : "Choose"}
-                </span>
+              <span className="flex items-start justify-between gap-3">
+                <span className="text-sm font-bold uppercase leading-tight text-bioaxis-text">{shortLabel}</span>
+                {selected ? <span className="text-[11px] font-bold uppercase text-bioaxis-accent">Selected</span> : null}
               </span>
-              <span className="mt-3 block text-sm font-bold uppercase text-bioaxis-text">{shortLabel}</span>
-              <span className="sr-only"> {requestType.description} End of {shortLabel} card.</span>
+              <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{shortDescription}</span>
             </button>
           </li>
         );
@@ -52,8 +49,22 @@ function shortRequestTypeLabel(id: string) {
     documentation: "Documentation",
     "recurring-supply": "Recurring supply",
     "product-list-review": "Product list",
-    contact: "Contact"
+    contact: "General sourcing question"
   };
 
   return labels[id] ?? id;
+}
+
+function shortRequestTypeDescription(id: string) {
+  const descriptions: Record<string, string> = {
+    quote: "Send product context for quote follow-up.",
+    "product-list-review": "Paste multiple lines or a spreadsheet-style list.",
+    equivalent: "Review alternatives for a current product.",
+    sample: "Request samples before switching.",
+    documentation: "Ask for CoA, SDS, sterility, or material documents.",
+    "recurring-supply": "Plan repeat demand and monthly usage.",
+    contact: "Ask a sourcing question."
+  };
+
+  return descriptions[id] ?? "Send sourcing context.";
 }

@@ -4,19 +4,19 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const cards = [
   {
     title: "Matched product family",
-    body: "Product names, supplier numbers, and workflow notes are mapped into the right segment, category, and family context."
+    body: "Your SKU, product name, or list is mapped into sourcing context."
   },
   {
     title: "Equivalent review path",
-    body: "Current products can be organized for format, fit, documentation, sample, and quote review."
+    body: "Comparable options are structured around fit, documents, and samples."
   },
   {
     title: "Quote-ready fields",
-    body: "BioAxis structures the useful fields: product, quantity, timeline, documents, and usage rhythm."
+    body: "Product, quantity, timing, documents, and usage rhythm are organized."
   },
   {
     title: "Sample and documentation path",
-    body: "Sample needs and supplier-provided documents can be attached to the request when they matter."
+    body: "Sample needs and supplier evidence stay attached to the request."
   }
 ];
 
@@ -25,7 +25,7 @@ export function WhatBioAxisDoesSection() {
     <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
       <SectionHeader
         title="What BioAxis returns"
-        subtitle="A search, product page, or pasted list becomes the next useful sourcing step."
+        subtitle="A pasted SKU or list becomes a sourcing path your team can act on."
       />
       <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (

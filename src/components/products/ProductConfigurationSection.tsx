@@ -19,11 +19,11 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
     <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Product configurations</p>
-          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a product item.</h2>
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Sourcing configuration templates</p>
+          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a sourcing template.</h2>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-          Product item pages contain the full item-level specifications, applications, documentation, equivalent inputs, and sample notes.
+          Product item pages contain the detailed RFQ fields, documentation requests, equivalent review inputs, and sample-first notes.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

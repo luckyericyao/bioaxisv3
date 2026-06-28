@@ -35,15 +35,6 @@ const visibleRepresentativeFamilyRoutes = [
   "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips"
 ];
 
-const visibleRepresentativeCategoryRoutes = [
-  "/products/liquid-handling/pipette-tips",
-  "/products/lab-plasticware/tubes",
-  "/products/cell-culture/media-and-supplements",
-  "/products/molecular-biology-pcr/pcr-plastics",
-  "/products/sample-prep-filtration/syringe-filters",
-  "/products/automation-consumables/robotic-pipette-tips"
-];
-
 const familyPageRoutes = [
   ...visibleRepresentativeFamilyRoutes,
   "/products/cell-culture/media-and-supplements/serum-free-media",
@@ -67,10 +58,10 @@ const productItemDetailSections = [
   "Equivalent matching",
   "Sample request notes",
   "Quote-ready details",
-  "Related product configurations"
+  "Related sourcing templates"
 ];
 
-const requiredHomeCtas = ["Browse products", "Paste product list", "Find equivalent", "Request quote"];
+const requiredHomeCtas = ["Paste product list", "Find equivalent", "Browse products", "Request quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -104,19 +95,19 @@ const requiredWorkflowCtaLabels = [
   "Source early CMC consumables",
   "Build QC supply list"
 ];
-const requestTypeLabels = ["Quote", "Equivalent", "Sample", "Documentation", "Recurring supply", "Product list", "Contact"];
+const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "General sourcing question"];
 const equivalentFinderContent = [
-  "Find compatible consumables alternatives",
+  "Find compatible alternatives for your current consumables",
   "Equivalent intake",
   "Start equivalent review",
-  "How BioAxis reviews equivalent requests",
+  "Fit assessment, not a name match.",
+  "A cleaner way to compare alternatives.",
   "Common equivalent requests",
-  "compatible option",
-  "potential equivalent",
-  "Final suitability depends on supplier documentation, sample testing, and customer review"
+  "BioAxis supports equivalent review and sourcing comparison",
+  "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
 ];
-const requiredPrimaryNavigation = ["Home", "Products", "Workflows", "Equivalent Finder", "Quality", "Samples", "Resources", "Request Quote"];
-const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Samples", "Quality", "Resources"];
+const requiredPrimaryNavigation = ["Products", "Equivalent Finder", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
+const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Workflows", "Samples", "Quality", "Trust Center", "Resources"];
 const requiredProductSegments = [
   "Liquid Handling",
   "Lab Plasticware",
@@ -354,6 +345,11 @@ for (const route of routes) {
   }
 
   if (route === "/") {
+    const homeSectionCount = [...mainBlock(html).matchAll(/<section\b/g)].length;
+    if (homeSectionCount !== 6) {
+      failures.push(`${route}: expected exactly 6 homepage sections, found ${homeSectionCount}`);
+    }
+
     requiredHomeCtas.forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing homepage command CTA ${label}`);
@@ -365,34 +361,35 @@ for (const route of routes) {
     }
 
     [
-      "Priority Sourcing Lines",
-      "Cell Culture Media & Supplements",
+      "ONE STOP FOR LIFE SCIENCE CONSUMABLES",
+      "Paste a catalog number, supplier SKU, or product list.",
+      "Priority sourcing lines",
       "Liquid Handling Consumables",
+      "Cell Culture Consumables",
       "Filtration Consumables",
       "Tubes, Plates & Storage",
       "PCR / qPCR Consumables",
-      "Sample Preparation Consumables",
-      "Private Label / OEM Consumables",
-      "Explore private label options",
-      "Request quote with a product list",
-      "Start with what you have",
-      "Catalog number",
-      "Product list",
-      "Current supplier",
-      "Workflow need",
-      "Common buyer triggers",
-      "Out-of-stock or long lead time",
+      "Private Label / OEM",
+      "Current supplier out of stock",
       "Need compatible equivalent",
-      "Have a product list?",
-      "Built for real purchasing situations",
-      "You need documents before purchasing",
+      "Need CoA / SDS / sterility documents",
+      "Need samples before switching",
+      "Lower-cost recurring supply",
+      "Automation-compatible consumables",
+      "What BioAxis returns",
       "How BioAxis works",
-      "What BioAxis returns"
+      "Final CTA",
+      "Sample and documentation path",
+      "Quote-ready fields"
     ].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing progressive homepage content ${label}`);
       }
     });
+
+    if (!html.includes("Search by product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type.")) {
+      failures.push(`${route}: missing hero search placeholder`);
+    }
 
     ["Matched product family", "Equivalent review path", "Quote-ready fields", "Sample and documentation path"].forEach((label) => {
       if (!mainText.includes(label)) {
@@ -412,23 +409,6 @@ for (const route of routes) {
   }
 
   if (route === "/products") {
-    [
-      "Browse by Product Type",
-      "Browse by Workflow",
-      "Browse by Buyer Need",
-      "Current supplier out of stock",
-      "Need lower-cost equivalent",
-      "Need sample before switching",
-      "Need sterile / DNase-free documentation",
-      "Need automation-compatible format",
-      "Need recurring monthly supply",
-      "Need quote from product list"
-    ].forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing buyer entry mode ${label}`);
-      }
-    });
-
     requiredProductSegments.forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation segment ${label}`);
@@ -449,9 +429,15 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Show family links", "Pipette Tips", "Find equivalent", "Request quote", "View families"].forEach((label) => {
+    ["Common sourcing requests", "Find equivalent", "Request quote", "View families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
+      }
+    });
+
+    ["Show family links", "Universal Pipette Tips", "Filtered Pipette Tips", "Microcentrifuge Tubes"].forEach((label) => {
+      if (mainText.includes(label)) {
+        failures.push(`${route}: product overview exposes family links by default: ${label}`);
       }
     });
 
@@ -460,9 +446,14 @@ for (const route of routes) {
       failures.push(`${route}: expected 12 compact segment cards, found ${compactSegmentCards}`);
     }
 
+    const commonRequestChips = [...html.matchAll(/data-common-sourcing-request="true"/g)].length;
+    if (commonRequestChips !== 36) {
+      failures.push(`${route}: expected exactly 36 common request chips across 12 cards, found ${commonRequestChips}`);
+    }
+
     const familyDisclosurePanels = [...html.matchAll(/data-product-family-disclosure="true"/g)].length;
-    if (familyDisclosurePanels < 5) {
-      failures.push(`${route}: expected collapsed product family disclosure panels for populated segments, found ${familyDisclosurePanels}`);
+    if (familyDisclosurePanels !== 0) {
+      failures.push(`${route}: product overview should not render family disclosure panels, found ${familyDisclosurePanels}`);
     }
 
     ["Common buyer specs", "Primary applications"].forEach((label) => {
@@ -507,27 +498,25 @@ for (const route of routes) {
       }
     });
 
-    if (/Request type 01\.?Selected request\.?Quote request/i.test(rawPageText) || /Quote requestEquivalent requestSample request/i.test(rawPageText)) {
+    if (/Request type 01/i.test(rawPageText) || /End of .* card/i.test(rawPageText) || /Choose Product list/i.test(rawPageText) || /Quote requestEquivalent requestSample request/i.test(rawPageText)) {
       failures.push(`${route}: request type cards are concatenated in raw text layer`);
     }
 
-    if (!pageText.includes("Type 01 Selected Quote")) {
-      failures.push(`${route}: missing compact selected request type card text`);
+    if (!pageText.includes("Quote") || !pageText.includes("Selected")) {
+      failures.push(`${route}: missing selected quote request type card text`);
     }
 
     [
       "Send a product, catalog number, or list",
       "Paste what you have. BioAxis will structure the sourcing request.",
-      "Only your email is required. Paste a SKU, product name, supplier line, or product list when available.",
-      "Level 1 / always visible",
+      "Only your email is required. Paste what you have. BioAxis can follow up for missing specs.",
+      "Email required",
       "Email *",
-      "Product / SKU / product list",
+      "Product / SKU / product list / sourcing need *",
       "Current supplier optional",
-      "Current SKU / catalog number optional",
+      "Buyer SKU / catalog input optional",
       "Product category optional",
       "What do you need? optional",
-      "What BioAxis can review",
-      "What BioAxis does not claim",
       "Send sourcing request"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -560,31 +549,31 @@ for (const route of routes) {
     }
   }
 
-  if (route.startsWith("/request-quote?type=equivalent") && !pageText.includes("Type 03 Selected Equivalent")) {
+  if (route.startsWith("/request-quote?type=equivalent") && !pageText.includes("Equivalent")) {
     failures.push(`${route}: equivalent type query did not preselect equivalent request`);
   }
 
-  if (route.startsWith("/request-quote?type=sample") && !pageText.includes("Type 04 Selected Sample")) {
+  if (route.startsWith("/request-quote?type=sample") && !pageText.includes("Sample")) {
     failures.push(`${route}: sample type query did not preselect sample request`);
   }
 
-  if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Type 05 Selected Documentation")) {
+  if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Documentation")) {
     failures.push(`${route}: documentation type query did not preselect documentation request`);
   }
 
   if (route === "/request-quote?need=documents&segment=cell-culture") {
-    ["Type 05 Selected Documentation", "Request context", "Cell Culture"].forEach((label) => {
+    ["Documentation", "Request context", "Cell Culture"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing document-need RFQ context ${label}`);
       }
     });
   }
 
-  if (route.startsWith("/request-quote?type=recurring") && !pageText.includes("Type 06 Selected Recurring supply")) {
+  if (route.startsWith("/request-quote?type=recurring") && !pageText.includes("Recurring supply")) {
     failures.push(`${route}: recurring type query did not preselect recurring supply request`);
   }
 
-  if (route.startsWith("/request-quote?type=unknown") && !pageText.includes("Type 01 Selected Quote")) {
+  if (route.startsWith("/request-quote?type=unknown") && !pageText.includes("Quote")) {
     failures.push(`${route}: unknown type query did not default to quote request`);
   }
 
@@ -665,9 +654,11 @@ for (const route of routes) {
 
   if (route === "/private-label-oem") {
     [
-      "Private-label and OEM-style consumables sourcing for recurring lab supply.",
+      "Private-label sourcing for recurring consumables demand",
+      "Built for recurring demand conversations.",
       "Priority categories",
       "Pipette tips",
+      "Tubes, plates, and storage",
       "Automation-compatible consumables",
       "Discuss private-label sourcing",
       "Request recurring supply review",
@@ -685,6 +676,9 @@ for (const route of routes) {
       "Supplier screening",
       "Sample-first evaluation",
       "Equivalent review",
+      "What BioAxis helps organize",
+      "What remains buyer-side",
+      "Recurring supply readiness",
       "What BioAxis does not claim",
       "BioAxis does not claim live inventory for every listed product"
     ].forEach((label) => {
@@ -766,6 +760,9 @@ for (const route of routes) {
 
   const primaryLabels = navLabels(navBlock(html, "Primary navigation"));
   const footerLabels = navLabels(navBlock(html, "Footer navigation"));
+  if (route === "/" && primaryLabels.length !== 6) {
+    failures.push(`${route}: expected exactly 6 primary nav labels, found ${primaryLabels.length}`);
+  }
   requiredPrimaryNavigation.forEach((label) => {
     if (!primaryLabels.includes(label)) {
       failures.push(`${route}: missing primary nav label ${label}`);
@@ -777,8 +774,8 @@ for (const route of routes) {
     }
   });
 
-  if (familyPageRoutes.includes(route) && !pageText.includes("Product configurations")) {
-    failures.push(`${route}: missing Product configurations section`);
+  if (familyPageRoutes.includes(route) && !pageText.includes("Sourcing configuration templates")) {
+    failures.push(`${route}: missing Sourcing configuration templates section`);
   }
 
   if (route === "/products/liquid-handling") {
@@ -794,13 +791,13 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling/pipette-tips") {
-    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "Product list preview"].forEach((label) => {
+    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "Sourcing template preview"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing category-level family flow content ${label}`);
       }
     });
 
-    ["Product list preview", "Supplier context", "Current SKU", "Key documents"].forEach((label) => {
+    ["Sourcing template preview", "Configuration type", "Typical RFQ fields", "Documentation to request", "Equivalent review notes", "Best next action"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing catalog table content ${label}`);
       }
@@ -808,16 +805,16 @@ for (const route of routes) {
   }
 
   if (familyPageRoutes.includes(route)) {
-    ["Product configurations", "Buyer checklist"].forEach((label) => {
+    ["Sourcing configuration templates", "Buyer checklist"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing family progressive disclosure content ${label}`);
       }
     });
 
     [
-      ["Specifications to compare", "Specification checklist"],
-      ["Equivalent matching notes", "Equivalent switching considerations"],
-      ["Documentation request notes", "Documentation checklist"],
+      ["Typical RFQ fields", "Specification checklist"],
+      ["Equivalent review notes", "Equivalent switching considerations"],
+      ["Documentation to request", "Documentation checklist"],
       ["Add to list", "Add to sourcing list"]
     ].forEach((options) => {
       if (!options.some((label) => pageText.includes(label))) {
@@ -890,9 +887,9 @@ for (const route of routes) {
   if (route === "/products/liquid-handling/pipette-tips/universal-pipette-tips/sterile-filtered-universal-pipette-tips") {
     [
       "Sterile Filtered Universal Pipette Tips",
-      "Documentation typically reviewed",
+      "Documentation to request",
       "Typical RFQ fields",
-      "Equivalent review considerations",
+      "Equivalent review notes",
       "Related sourcing configurations",
       "Request documents",
       "Start equivalent review",
@@ -905,7 +902,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose") {
-    ["DMEM High Glucose", "Documentation typically reviewed", "Typical RFQ fields", "Equivalent review considerations", "Cell Culture Media & Buffers"].forEach((label) => {
+    ["DMEM High Glucose", "Documentation to request", "Typical RFQ fields", "Equivalent review notes", "Cell Culture Media & Buffers"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing DMEM catalog product content ${label}`);
       }
@@ -913,12 +910,6 @@ for (const route of routes) {
   }
 
   console.log(`${route}: ok`);
-}
-
-for (const categoryRoute of visibleRepresentativeCategoryRoutes) {
-  if (!productsHtml.includes(`href="${categoryRoute}"`)) {
-    failures.push(`/products: missing segment-card category preview link ${categoryRoute}`);
-  }
 }
 
 const productCategoryLinks = [
@@ -933,27 +924,12 @@ const resourceGuideLinks = [
   ...new Set([...resourcesHtml.matchAll(/href="(\/resources\/[^"#?]+)"/g)].map((match) => match[1]))
 ];
 
-if (productCategoryLinks.length === 0) {
-  failures.push("/products: no representative category links discovered");
+if (productCategoryLinks.length !== 0) {
+  failures.push(`/products: overview should not expose category/family links by default, found ${productCategoryLinks.length}`);
 }
 
 if (resourceGuideLinks.length !== 12) {
   failures.push(`/resources: expected 12 guide links, found ${resourceGuideLinks.length}`);
-}
-
-for (const href of productCategoryLinks) {
-  const response = await fetch(new URL(href, baseUrl), { redirect: "manual" });
-  if (!response.ok) {
-    failures.push(`/products representative category link ${href}: HTTP ${response.status}`);
-    continue;
-  }
-
-  const html = await response.text();
-  const pageText = textOnly(html);
-  checkForbiddenVisibleStrings(href, pageText);
-  if (!pageText.includes("Choose a product family")) {
-    failures.push(`/products representative category link ${href}: missing category page family selection section`);
-  }
 }
 
 for (const href of resourceGuideLinks) {
@@ -1049,10 +1025,10 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "Escape",
   "handlePointerDown",
   "max-h-[70vh]",
-  "w-[min(1100px,calc(100vw-48px))]",
+  "w-[340px]",
   "z-[90]",
   "bg-[#050a09]",
-  "activeProductSegment",
+  "Product segments",
   "productNavigationSegments"
 ].forEach((label) => {
   if (!headerSource.includes(label)) {
@@ -1078,8 +1054,8 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
 });
 
 [
-  ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Documentation typically reviewed", "Equivalent review considerations", "Common buyer questions"]],
-  ["Catalog product browser", catalogBrowserSource, ["Supplier context", "Current SKU", "Key specs", "Documents", "Compare", "AddToSourcingListButton"]]
+  ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Documentation to request", "Equivalent review notes", "Common buyer questions"]],
+  ["Catalog product browser", catalogBrowserSource, ["Configuration type", "Typical RFQ fields", "Documentation to request", "Equivalent review notes", "Best next action", "AddToSourcingListButton"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
@@ -1088,13 +1064,13 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-product-family-disclosure=\"true\"", "SegmentFamilyDisclosure", "Show family links", "buildRequestHref", "View families"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "View families"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
 });
 
-["Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
+["data-product-family-disclosure", "SegmentFamilyDisclosure", "Show family links", "Representative families", "Common buyer specs", "Primary applications"].forEach((legacyPattern) => {
   if (productCategoryCardSource.includes(legacyPattern)) {
     failures.push(`ProductCategoryCard: still contains dense product directory content ${legacyPattern}`);
   }
@@ -1107,12 +1083,12 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
 });
 
 [
-  ["Products page", productsPageSource, ["CompactEntryPanel", "Choose one starting point"]],
+  ["Products page", productsPageSource, ["ProductCategoryGrid", "Browse the BioAxis product universe"]],
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
   ["Product item template", productItemTemplateSource, ["Product item details", "Specifications", "AddToSourcingListButton"]],
-  ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "min-h-20", "sr-only"]]
+  ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
@@ -1125,7 +1101,7 @@ if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes(
   failures.push("QuoteRequestForm: expected email-only validation mode");
 }
 
-["Add supplier, quantity, documents, timeline, shipping region", "shouldOpenOptionalDetails", "<details"].forEach((label) => {
+["Add request type or more details", "Optional fields for request type", "<details", "RequestTypeSelector"].forEach((label) => {
   if (!quoteFormSource.includes(label)) {
     failures.push(`QuoteRequestForm: missing collapsed optional detail behavior ${label}`);
   }

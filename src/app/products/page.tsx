@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { ProductCategoryGrid } from "@/components/products/ProductCategoryGrid";
 import { ProductSearch } from "@/components/products/ProductSearch";
 import { productTaxonomy } from "@/data/productTaxonomy";
-import { workflows } from "@/data/workflows";
 
 export const metadata: Metadata = {
   title: "Products | BioAxis",
@@ -28,111 +27,6 @@ function normalizeQuery(value: string | string[] | undefined) {
   return value ?? "";
 }
 
-const buyerNeedCards = [
-  {
-    title: "Current supplier out of stock",
-    body: "Send the supplier, catalog number, product description, quantity, and timing so BioAxis can help source available options.",
-    href: "/request-quote?requestType=quote&need=supplier-out-of-stock"
-  },
-  {
-    title: "Need lower-cost equivalent",
-    body: "Share the current product and non-negotiable specifications so BioAxis can help compare candidate alternatives.",
-    href: "/equivalent-finder?requestType=equivalent&need=lower-cost-equivalent"
-  },
-  {
-    title: "Need sample before switching",
-    body: "Request evaluation samples when fit, cells, assays, automation decks, or QC review could be affected.",
-    href: "/request-quote?requestType=sample&need=sample-before-switching"
-  },
-  {
-    title: "Need sterile / DNase-free documentation",
-    body: "List required documents such as CoA, SDS, sterility, DNase/RNase-free, material, or lot information.",
-    href: "/request-quote?requestType=documentation&need=sterile-dnase-documentation"
-  },
-  {
-    title: "Need automation-compatible format",
-    body: "Include liquid handler platform, rack format, conductivity, barcode needs, and validated method constraints.",
-    href: "/request-quote?requestType=quote&need=automation-compatible-format"
-  },
-  {
-    title: "Need recurring monthly supply",
-    body: "Share expected usage rhythm, preferred pack size, shipping region, timeline, and documentation requirements.",
-    href: "/request-quote?requestType=recurring-supply&need=monthly-supply"
-  },
-  {
-    title: "Need quote from product list",
-    body: "Paste product numbers, quantities, required documents, and delivery timing into a quote-ready sourcing list.",
-    href: "/request-quote?requestType=product-list-review&need=product-list-quote"
-  }
-];
-
-function BuyerEntryModes() {
-  return (
-    <section className="mx-auto w-full max-w-7xl px-5 pb-12 sm:px-8 lg:px-10">
-      <div className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
-        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase text-bioaxis-accent">Entry modes</p>
-            <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Choose one starting point.</h2>
-          </div>
-          <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-            Browse by product type, workflow, or buyer need. Each path leads to the next layer instead of exposing every detail at once.
-          </p>
-        </div>
-        <div className="grid gap-3 lg:grid-cols-3">
-          <CompactEntryPanel
-            title="Browse by Product Type"
-            href="#product-categories"
-            cta="View segments"
-            items={productTaxonomy.slice(0, 4).map((segment) => segment.name)}
-          />
-          <CompactEntryPanel
-            title="Browse by Workflow"
-            href="/workflows"
-            cta="Explore workflows"
-            items={workflows.slice(0, 4).map((workflow) => workflow.title)}
-          />
-          <article className="border border-bioaxis-line bg-bioaxis-black p-4">
-            <p className="text-xs font-bold uppercase text-bioaxis-accent">Browse by Buyer Need</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {buyerNeedCards.map((need) => (
-                <Link
-                  key={need.title}
-                  href={need.href}
-                  className="border border-white/[0.12] px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-                >
-                  {need.title}
-                </Link>
-              ))}
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CompactEntryPanel({ title, href, cta, items }: { title: string; href: string; cta: string; items: string[] }) {
-  return (
-    <article className="border border-bioaxis-line bg-bioaxis-black p-4">
-      <p className="text-xs font-bold uppercase text-bioaxis-accent">{title}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span key={item} className="border border-white/[0.12] px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
-            {item}
-          </span>
-        ))}
-      </div>
-      <Link
-        href={href}
-        className="mt-4 inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-      >
-        {cta}
-      </Link>
-    </article>
-  );
-}
-
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const query = normalizeQuery(params?.q).trim();
@@ -145,7 +39,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">BioAxis product universe search</p>
             <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
             <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-              Search across BioAxis segments, categories, families, product configurations, specifications, applications, workflows, resources, aliases, and descriptions. Results are ranked for sourcing relevance before the full directory appears below.
+              Search across BioAxis segments, categories, families, sourcing templates, specifications, workflows, resources, aliases, and descriptions. Results are ranked for sourcing relevance before the compact directory appears below.
             </p>
             <div className="mt-8">
               <ProductSearch initialQuery={query} />
@@ -159,18 +53,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
                 Browse BioAxis product segments, drill into category and family pages, prepare equivalent reviews, request samples, and submit quote-ready sourcing requests. Availability, documentation, and pricing are confirmed through sourcing review.
               </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {[
-                  { title: "Browse by category", body: "Start from 12 product segments and move into category and family pages." },
-                  { title: "Find an equivalent", body: "Submit a current supplier, catalog number, product description, or critical specification." },
-                  { title: "Request quote or sample", body: "Share quantity, timeline, documentation needs, and evaluation requirements." }
-                ].map((mode) => (
-                  <article key={mode.title} className="border border-bioaxis-line bg-bioaxis-panel/70 p-4">
-                    <h2 className="text-sm font-bold uppercase text-bioaxis-text">{mode.title}</h2>
-                    <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{mode.body}</p>
-                  </article>
-                ))}
-              </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
                   Browse categories
@@ -188,8 +70,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         )}
       </section>
 
-      {!query ? <BuyerEntryModes /> : null}
-
       <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
@@ -199,12 +79,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mt-5 max-w-3xl text-sm leading-6 text-bioaxis-muted">
               {query
                 ? "Search results are ranked above. Use this compact directory when you want to browse across the full BioAxis product universe."
-                : "Start with one of 12 top-level product segments. Each segment opens into category pages, product-family pages, sourcing-option previews, filters, and quote/sample/equivalent request paths."}
+                : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, filters, and quote/sample/equivalent request paths."}
             </p>
           </div>
-          <Link href="/workflows" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-            Browse workflows
-          </Link>
         </div>
         {query ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -218,52 +95,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         ) : (
           <ProductCategoryGrid segments={productTaxonomy} />
         )}
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <div className="border border-bioaxis-line bg-bioaxis-panel p-6 sm:p-8">
-          <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">How BioAxis sourcing works</p>
-          <div className="grid gap-3 md:grid-cols-5">
-            {[
-              { title: "Search", body: "Start from a product category, supplier name, catalog number, workflow, or required specification." },
-              { title: "Match", body: "BioAxis reviews format, material, sterility, compatibility, documentation, and equivalent options." },
-              { title: "Quote", body: "Submit quantity, target date, packaging preference, and required documents." },
-              { title: "Sample", body: "Request samples for fit, workflow compatibility, and switching evaluation." },
-              { title: "Supply", body: "Support recurring sourcing needs once specifications and documentation are aligned." }
-            ].map((step, index) => (
-              <div key={step.title} className="border border-bioaxis-line bg-bioaxis-black p-4">
-                <span className="text-xs font-bold text-bioaxis-dim">{String(index + 1).padStart(2, "0")}</span>
-                <h2 className="mt-3 text-lg font-bold uppercase text-bioaxis-text">{step.title}</h2>
-                <p className="mt-3 text-xs leading-5 text-bioaxis-muted">{step.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
-          <div>
-            <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">Sourcing support</p>
-            <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
-              Not sure where to start?
-            </h2>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-              Send a product name, catalog number, supplier, workflow, or specification. BioAxis can help structure the request, compare equivalent options, prepare documentation needs, and support quote or sample follow-up.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-            <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-              Find equivalent
-            </Link>
-            <Link href="/request-quote?requestType=quote" className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
-              Request quote
-            </Link>
-            <Link href="/request-quote?requestType=sample" className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-              Request sample
-            </Link>
-          </div>
-        </div>
       </section>
     </>
   );

@@ -1,29 +1,22 @@
-import { CTAButton } from "@/components/ui/CTAButton";
-import { SearchBox } from "@/components/ui/SearchBox";
+import Link from "next/link";
 
 export function FinalCTASection() {
   return (
-    <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
-      <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
+    <section className="border-t border-bioaxis-line bg-bioaxis-panel">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10">
         <div>
-          <h2 className="text-4xl font-bold uppercase leading-tight text-bioaxis-text sm:text-6xl">
-            SEND A PRODUCT LIST, CATALOG NUMBER, OR CURRENT SUPPLIER.
-          </h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            Enter a product name, supplier, catalog number, equivalent target, workflow, or consumable type. BioAxis helps organize quote paths, compatible options, samples, documentation, and recurring supply review from one place.
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Final CTA</p>
+          <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Send the product context.</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-bioaxis-muted">
+            Paste a SKU, supplier catalog number, product list, or sourcing need. BioAxis can follow up by email for missing details.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <CTAButton href="/request-quote?type=product-list&requestType=product-list-review">Paste Product List</CTAButton>
-            <CTAButton href="/request-quote?type=rfq&requestType=quote" variant="secondary">
-              Request Quote
-            </CTAButton>
-            <CTAButton href="/equivalent-finder" variant="secondary">
-              Find Equivalent
-            </CTAButton>
-          </div>
         </div>
-
-        <SearchBox helperText="Search the product universe or prepare a sourcing request when you need quote, sample, documentation, or equivalent review support." variant="page" />
+        <Link
+          href="/request-quote?requestType=product-list-review"
+          className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+        >
+          Paste product list
+        </Link>
       </div>
     </section>
   );

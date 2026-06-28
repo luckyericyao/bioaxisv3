@@ -1,15 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { brand } from "@/data/brand";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SearchBox } from "@/components/ui/SearchBox";
-
-const heroTasks = [
-  { label: "Paste product list", href: "/request-quote?type=product-list&requestType=product-list-review" },
-  { label: "Find equivalent", href: "/equivalent-finder" },
-  { label: "Browse products", href: "/products" },
-  { label: "Request quote", href: "/request-quote?type=rfq&requestType=quote" }
-];
 
 export function HeroSearchSection() {
   return (
@@ -30,41 +22,35 @@ export function HeroSearchSection() {
         <div className="max-w-6xl">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
-            {brand.headline}
+            ONE STOP FOR LIFE SCIENCE CONSUMABLES
           </h1>
-          <p className="mt-7 text-2xl font-semibold text-bioaxis-steel sm:text-4xl">
-            Paste a catalog number, supplier SKU, or product list.
-          </p>
-          <p className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            BioAxis helps structure equivalent options, samples, documents, and quote-ready sourcing paths. {brand.tagline}
-          </p>
+          <div className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+            <p>Paste a catalog number, supplier SKU, or product list.</p>
+            <p className="mt-2">
+              BioAxis structures equivalent options, sample paths, documentation needs, and quote-ready sourcing next steps.
+            </p>
+          </div>
         </div>
 
         <div className="mt-10 max-w-5xl">
-          <SearchBox helperText={brand.searchHelper} placeholder="paste catalog number, supplier SKU, or product list" />
-        </div>
-
-        <div className="mt-5 flex max-w-5xl flex-wrap gap-2">
-          {heroTasks.map((task) => (
-            <Link
-              key={task.label}
-              href={task.href}
-              className="border border-white/[0.16] bg-bioaxis-black/65 px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel backdrop-blur transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-            >
-              {task.label}
-            </Link>
-          ))}
+          <SearchBox
+            helperText={brand.searchHelper}
+            placeholder="Search by product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type."
+          />
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <CTAButton href="/request-quote?type=product-list&requestType=product-list-review">
-            Paste Product List
+          <CTAButton href="/request-quote?requestType=product-list-review">
+            Paste product list
           </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
-            Find Equivalent
+            Find equivalent
           </CTAButton>
           <CTAButton href="/products" variant="secondary">
-            Browse Products
+            Browse products
+          </CTAButton>
+          <CTAButton href="/request-quote?requestType=quote" variant="secondary">
+            Request quote
           </CTAButton>
         </div>
       </div>
