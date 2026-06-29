@@ -60,24 +60,46 @@ export const requestTypes: RequestType[] = [
 
 const requestTypeAliases: Record<string, string> = {
   rfq: "quote",
+  quote: "quote",
   "quote-request": "quote",
+  "request-quote": "quote",
   recurring: "recurring-supply",
+  "recurring supply": "recurring-supply",
+  "recurring-supply": "recurring-supply",
+  repeat: "recurring-supply",
+  monthly: "recurring-supply",
   "product-list": "product-list-review",
   "product-list-review": "product-list-review",
   "product list": "product-list-review",
+  "product list review": "product-list-review",
+  "product-list-request": "product-list-review",
+  list: "product-list-review",
+  equivalent: "equivalent",
   "equivalent-finding": "equivalent",
   "equivalent-review": "equivalent",
+  alternative: "equivalent",
   docs: "documentation",
+  document: "documentation",
   documents: "documentation",
+  "documentation-request": "documentation",
   sample: "sample",
+  "sample-request": "sample",
   documentation: "documentation",
   general: "contact",
+  "general-question": "contact",
+  "general-sourcing-question": "contact",
   contact: "contact",
   support: "contact"
 };
 
-export function normalizeRequestType(id: string) {
-  const normalizedId = requestTypeAliases[id] ?? id;
+export function normalizeRequestType(id: string | undefined) {
+  const normalizedInput = (id ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, "-")
+    .replace(/\s+/g, "-");
+  const spacedInput = normalizedInput.replace(/-/g, " ");
+  const normalizedId = requestTypeAliases[normalizedInput] ?? requestTypeAliases[spacedInput] ?? normalizedInput;
   return requestTypes.some((requestType) => requestType.id === normalizedId) ? normalizedId : "quote";
 }
 

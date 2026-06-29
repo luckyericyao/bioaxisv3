@@ -174,6 +174,14 @@ const routes = [
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
   "/request-quote",
+  "/request-quote?requestType=quote",
+  "/request-quote?requestType=product-list-review",
+  "/request-quote?requestType=equivalent",
+  "/request-quote?requestType=sample",
+  "/request-quote?requestType=documentation",
+  "/request-quote?requestType=recurring-supply",
+  "/request-quote?requestType=general-sourcing-question",
+  "/request-quote?type=quote",
   "/request-quote?type=product-list",
   "/request-quote?type=equivalent",
   "/request-quote?type=sample",
@@ -501,15 +509,51 @@ for (const route of routes) {
     failures.push(`${route}: catalog query did not prefill equivalent intake`);
   }
 
-  if (route === "/request-quote") {
+  if (route.startsWith("/request-quote")) {
     requestTypeLabels.forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing request type ${label}`);
       }
     });
 
+    [
+      "Sourcing request",
+      "Paste what you have. BioAxis will structure the sourcing request.",
+      "Email *",
+      "Product / SKU / product list / sourcing need *",
+      "Add request type or more details",
+      "Request type optional"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing canonical RFQ content ${label}`);
+      }
+    });
+
+    [
+      "Inquiry engine",
+      "Type 01 Selected",
+      "End of Quote card",
+      "Product context / list optional",
+      "Current supplier / brand optional"
+    ].forEach((label) => {
+      if (pageText.includes(label) || rawPageText.includes(label)) {
+        failures.push(`${route}: old RFQ content still rendered: ${label}`);
+      }
+    });
+
     if (/Request type 01/i.test(rawPageText) || /End of .* card/i.test(rawPageText) || /Choose Product list/i.test(rawPageText) || /Quote requestEquivalent requestSample request/i.test(rawPageText)) {
       failures.push(`${route}: request type cards are concatenated in raw text layer`);
+    }
+
+    const emailIndex = pageText.indexOf("Email *");
+    const requestTypeIndex = pageText.indexOf("Request type optional");
+    if (emailIndex === -1 || requestTypeIndex === -1 || requestTypeIndex < emailIndex) {
+      failures.push(`${route}: request type appears before email intake`);
+    }
+
+    const primaryNavLabels = navLabels(navBlock(html, "Primary navigation"));
+    if (JSON.stringify(primaryNavLabels) !== JSON.stringify(requiredPrimaryNavigation)) {
+      failures.push(`${route}: primary nav is not canonical RFQ nav (${primaryNavLabels.join(", ")})`);
     }
 
     if (!pageText.includes("Quote") || !pageText.includes("Selected")) {
@@ -559,15 +603,15 @@ for (const route of routes) {
     }
   }
 
-  if (route.startsWith("/request-quote?type=equivalent") && !pageText.includes("Equivalent")) {
+  if ((route.startsWith("/request-quote?type=equivalent") || route.startsWith("/request-quote?requestType=equivalent")) && !pageText.includes("Equivalent")) {
     failures.push(`${route}: equivalent type query did not preselect equivalent request`);
   }
 
-  if (route.startsWith("/request-quote?type=sample") && !pageText.includes("Sample")) {
+  if ((route.startsWith("/request-quote?type=sample") || route.startsWith("/request-quote?requestType=sample")) && !pageText.includes("Sample")) {
     failures.push(`${route}: sample type query did not preselect sample request`);
   }
 
-  if (route.startsWith("/request-quote?type=documentation") && !pageText.includes("Documentation")) {
+  if ((route.startsWith("/request-quote?type=documentation") || route.startsWith("/request-quote?requestType=documentation")) && !pageText.includes("Documentation")) {
     failures.push(`${route}: documentation type query did not preselect documentation request`);
   }
 
@@ -579,7 +623,7 @@ for (const route of routes) {
     });
   }
 
-  if (route.startsWith("/request-quote?type=recurring") && !pageText.includes("Recurring supply")) {
+  if ((route.startsWith("/request-quote?type=recurring") || route.startsWith("/request-quote?requestType=recurring-supply")) && !pageText.includes("Recurring supply")) {
     failures.push(`${route}: recurring type query did not preselect recurring supply request`);
   }
 

@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   }
 };
 
+export const dynamic = "force-dynamic";
+
 type RequestQuotePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -53,7 +55,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const family = first(params?.family);
   const product = first(params?.product);
   const need = first(params?.need);
-  const requestType = normalizeRequestType(first(params?.type) ?? first(params?.requestType) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
+  const requestType = normalizeRequestType(first(params?.requestType) ?? first(params?.type) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const productList = first(params?.productList) ?? first(params?.list) ?? "";
