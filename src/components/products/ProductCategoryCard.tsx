@@ -62,6 +62,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
             >
               <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-bioaxis-accent/70" aria-hidden="true" />
               {request}
+              <span className="sr-only">.</span>
             </li>
           ))}
         </ul>

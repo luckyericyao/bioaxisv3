@@ -76,11 +76,14 @@ export default function PrivateLabelOemPage() {
             title="Priority categories"
             subtitle="Private-label or OEM-style feasibility depends on product type, supplier qualification, documentation requirements, MOQ, destination market, and buyer-side compliance review."
           />
-          <div className="mt-8 flex flex-wrap gap-2">
+          <ul className="mt-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {priorityCategories.map((category) => (
-              <SpecTag key={category}>{category}</SpecTag>
+              <li key={category}>
+                <SpecTag>{category}</SpecTag>
+                <span className="sr-only">.</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 

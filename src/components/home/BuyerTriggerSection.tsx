@@ -43,6 +43,7 @@ export function BuyerTriggerSection() {
             <Link
               key={trigger.title}
               href={trigger.href}
+              data-buyer-trigger-card="true"
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
               <span className="text-xs font-bold text-bioaxis-dim">{String(index + 1).padStart(2, "0")}</span>

@@ -360,6 +360,11 @@ for (const route of routes) {
       failures.push(`${route}: legacy homepage capability chip row`);
     }
 
+    const buyerTriggerCards = [...html.matchAll(/data-buyer-trigger-card="true"/g)].length;
+    if (buyerTriggerCards !== 4) {
+      failures.push(`${route}: expected exactly 4 buyer trigger cards, found ${buyerTriggerCards}`);
+    }
+
     [
       "One stop for life science consumables",
       "Paste a catalog number, supplier SKU, or product list.",
@@ -448,6 +453,10 @@ for (const route of routes) {
     const commonRequestChips = [...html.matchAll(/data-common-sourcing-request="true"/g)].length;
     if (commonRequestChips !== 36) {
       failures.push(`${route}: expected exactly 36 common request chips across 12 cards, found ${commonRequestChips}`);
+    }
+
+    if (mainText.includes("Filtered or low-retention tips Automation-compatible formats Recurring tip and reservoir usage")) {
+      failures.push(`${route}: product chip text is concatenated without separators`);
     }
 
     const familyDisclosurePanels = [...html.matchAll(/data-product-family-disclosure="true"/g)].length;
@@ -667,6 +676,10 @@ for (const route of routes) {
         failures.push(`${route}: missing private-label-oem content ${label}`);
       }
     });
+
+    if (mainText.includes("Pipette tips Tubes, plates, and storage Filtration consumables")) {
+      failures.push(`${route}: private-label priority categories are concatenated without separators`);
+    }
   }
 
   if (route === "/trust-center") {
