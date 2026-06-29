@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
+import { pageVisuals } from "@/data/visualAssets";
 
 export const metadata: Metadata = {
   title: "Find Compatible Alternatives | BioAxis",
@@ -186,7 +188,18 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
           </button>
         </form>
 
-        <aside className="border border-bioaxis-line bg-bioaxis-black p-6">
+        <aside className="overflow-hidden border border-bioaxis-line bg-bioaxis-black">
+          <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panel">
+            <Image
+              src={pageVisuals.equivalentReview.src}
+              alt={pageVisuals.equivalentReview.alt}
+              fill
+              sizes="(min-width: 1024px) 38vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/75 via-transparent to-transparent" aria-hidden="true" />
+          </div>
+          <div className="p-6">
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Fit assessment, not a name match.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis turns current-product information into a practical alternatives review across fit, evidence, sample path, and sourcing follow-up.
@@ -197,6 +210,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
                 {item}
               </div>
             ))}
+          </div>
           </div>
         </aside>
       </section>

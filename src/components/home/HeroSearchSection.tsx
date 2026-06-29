@@ -2,23 +2,38 @@ import Image from "next/image";
 import { brand } from "@/data/brand";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { pageVisuals } from "@/data/visualAssets";
 
 export function HeroSearchSection() {
   return (
     <section className="relative overflow-hidden border-b border-bioaxis-line">
-      <div className="hero-mask absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero-lab-procurement.png"
+          src={pageVisuals.homeHero.src}
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.58]"
+          className="object-cover object-center opacity-[0.72]"
         />
       </div>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(2,3,4,0.35)_0%,rgba(2,3,4,0.7)_58%,#020304_100%)]" />
 
-      <div className="mx-auto flex min-h-[84svh] w-full max-w-7xl flex-col justify-center px-5 py-16 sm:px-8 lg:px-10">
+      <div className="pointer-events-none absolute bottom-24 right-8 z-0 hidden w-[30vw] max-w-[440px] overflow-hidden border border-white/[0.12] bg-bioaxis-black/70 shadow-2xl shadow-black/60 lg:block">
+        <div className="relative aspect-[16/9]">
+          <Image
+            src={pageVisuals.homeHero.src}
+            alt={pageVisuals.homeHero.alt}
+            fill
+            priority
+            sizes="30vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-bioaxis-black/5 to-bioaxis-black/35" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-[84svh] w-full max-w-7xl flex-col justify-center px-5 py-16 sm:px-8 lg:px-10">
         <div className="max-w-6xl">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
@@ -29,7 +44,7 @@ export function HeroSearchSection() {
           </div>
         </div>
 
-        <div className="mt-10 max-w-5xl">
+        <div className="mt-10 max-w-3xl">
           <SearchBox
             helperText={brand.searchHelper}
             placeholder="Product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type."

@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { buildRequestHref } from "@/data/productTaxonomy";
+import { segmentVisuals } from "@/data/visualAssets";
 
 type ProductCategoryCardProps = {
   segment: ProductTaxonomySegment;
@@ -39,54 +41,69 @@ const descriptionsBySegment: Record<string, string> = {
 export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
   const commonRequests = commonRequestsBySegment[segment.slug] ?? segment.rfqPrompts.slice(0, 3);
   const description = descriptionsBySegment[segment.slug] ?? segment.shortDescription;
+  const image = segmentVisuals[segment.slug];
 
   return (
     <article
       data-product-segment-card="compact"
-      className="group flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft focus-within:border-bioaxis-accent/70"
+      className="group flex h-full flex-col overflow-hidden border border-bioaxis-line bg-bioaxis-panel transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft focus-within:border-bioaxis-accent/70"
     >
-      <div className="flex items-start justify-between gap-4">
-        <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{segment.title}</h2>
-        <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
-      </div>
-      <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
+      {image ? (
+        <div className="relative aspect-[4/3] border-b border-bioaxis-line bg-bioaxis-black">
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/60 via-transparent to-transparent" aria-hidden="true" />
+        </div>
+      ) : null}
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{segment.title}</h2>
+          <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
+        </div>
+        <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
 
-      <div className="mt-5">
-        <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Example product types</p>
-        <ul className="mt-3 grid gap-2" aria-label={`${segment.title} example product types`}>
-          {commonRequests.slice(0, 3).map((request) => (
-            <li
-              key={request}
-              data-common-sourcing-request="true"
-              className="flex items-start gap-2 border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-[11px] font-semibold uppercase leading-5 text-bioaxis-steel"
-            >
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-bioaxis-accent/70" aria-hidden="true" />
-              {request}
-              <span className="sr-only">.</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+        <div className="mt-5">
+          <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Example product types</p>
+          <ul className="mt-3 grid gap-2" aria-label={`${segment.title} example product types`}>
+            {commonRequests.slice(0, 3).map((request) => (
+              <li
+                key={request}
+                data-common-sourcing-request="true"
+                className="flex items-start gap-2 border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-[11px] font-semibold uppercase leading-5 text-bioaxis-steel"
+              >
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-bioaxis-accent/70" aria-hidden="true" />
+                {request}
+                <span className="sr-only">.</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
-        <Link
-          href={`/products/${segment.slug}`}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-        >
-          View segment
-        </Link>
-        <Link
-          href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-        >
-          Request quote
-        </Link>
-        <Link
-          href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-        >
-          Find equivalent
-        </Link>
+        <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
+          <Link
+            href={`/products/${segment.slug}`}
+            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+          >
+            View segment
+          </Link>
+          <Link
+            href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}
+            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          >
+            Request quote
+          </Link>
+          <Link
+            href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
+            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          >
+            Find equivalent
+          </Link>
+        </div>
       </div>
     </article>
   );

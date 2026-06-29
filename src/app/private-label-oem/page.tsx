@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SpecTag } from "@/components/ui/SpecTag";
+import { pageVisuals } from "@/data/visualAssets";
 
 export const metadata: Metadata = {
   title: "Private-Label & OEM-Style Consumables Sourcing | BioAxis",
@@ -48,6 +50,17 @@ export default function PrivateLabelOemPage() {
         title="Private-label sourcing for recurring consumables demand"
         subtitle="BioAxis helps evaluate neutral-label, private-label, and OEM-style options across selected consumable categories, with documentation, sample, packaging, and recurring supply review."
       >
+        <div className="relative mb-6 aspect-[16/9] overflow-hidden border border-bioaxis-line bg-bioaxis-panel">
+          <Image
+            src={pageVisuals.privateLabelOem.src}
+            alt={pageVisuals.privateLabelOem.alt}
+            fill
+            priority
+            sizes="(min-width: 1024px) 38vw, 100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/70 via-transparent to-transparent" aria-hidden="true" />
+        </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/request-quote?requestType=quote&sourcePage=private-label-oem&need=private-label"

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { pageVisuals } from "@/data/visualAssets";
 
 export const metadata: Metadata = {
   title: "Trust Center | BioAxis",
@@ -96,21 +98,33 @@ export default function TrustCenterPage() {
             </article>
           ))}
         </div>
-        <div className="mt-4 border border-bioaxis-line bg-bioaxis-black p-6">
-          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.4fr] lg:items-start">
+        <div className="mt-4 overflow-hidden border border-bioaxis-line bg-bioaxis-black">
+          <div className="grid gap-0 lg:grid-cols-[0.9fr_1.35fr] lg:items-stretch">
             <div>
+              <div className="relative min-h-[240px] border-b border-bioaxis-line bg-bioaxis-panel lg:h-full lg:border-b-0 lg:border-r">
+                <Image
+                  src={pageVisuals.trustDocuments.src}
+                  alt={pageVisuals.trustDocuments.alt}
+                  fill
+                  sizes="(min-width: 1024px) 38vw, 100vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/70 via-transparent to-transparent" aria-hidden="true" />
+              </div>
+            </div>
+            <div className="p-6">
               <p className="text-sm font-semibold uppercase text-bioaxis-accent">Document package BioAxis can help organize</p>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
                 BioAxis can help organize document requirements and request supplier-provided evidence. BioAxis does not certify, release, validate, or approve final product suitability.
               </p>
+              <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {documentPackage.map((document) => (
+                  <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                    {document}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {documentPackage.map((document) => (
-                <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
-                  {document}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>
