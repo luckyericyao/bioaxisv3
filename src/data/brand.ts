@@ -7,7 +7,7 @@ export const brand = {
   mission: "Higher Quality. Faster Delivery. Stronger Support.",
   missionPillars: ["Higher Quality", "Faster Delivery", "Stronger Support"],
   searchHelper:
-    "Product name, catalog number, supplier, equivalent, workflow, or consumable type.",
+    "Paste SKU, catalog number, or product list.",
   platformBody:
     "BioAxis connects life science labs with consumables, suppliers, equivalents, samples, quotes, and support across research and development workflows."
 };
