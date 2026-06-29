@@ -22,14 +22,22 @@ const priorityCategories = [
   "Automation-compatible consumables"
 ];
 
-const reviewAreas = [
-  "Recurring usage",
-  "Packaging expectations",
-  "Document requirements",
-  "Sample path",
-  "MOQ / lead-time discussion",
-  "Backup source logic",
-  "Category fit"
+const conversionBlocks = [
+  {
+    title: "Pipette tips private-label review",
+    body: "Review tip format, sterility, rack or reload style, documentation needs, and recurring usage before RFQ.",
+    href: "/request-quote?requestType=quote&sourcePage=private-label-oem&need=pipette-tips-private-label"
+  },
+  {
+    title: "Tubes / plates recurring demand review",
+    body: "Organize tube, plate, storage, packaging, document, and volume context for repeat purchasing discussions.",
+    href: "/request-quote?requestType=recurring-supply&sourcePage=private-label-oem&need=tubes-plates-recurring"
+  },
+  {
+    title: "Filtration / PCR plastics OEM-style sourcing",
+    body: "Compare filtration formats, PCR plastics, packaging expectations, sample path, and supplier evidence needs.",
+    href: "/request-quote?requestType=quote&sourcePage=private-label-oem&need=filtration-pcr-oem"
+  }
 ];
 
 export default function PrivateLabelOemPage() {
@@ -61,10 +69,14 @@ export default function PrivateLabelOemPage() {
           title="Built for recurring demand conversations."
           subtitle="Use this path when the product family, expected usage, packaging requirements, and documentation needs are worth reviewing before a standard spot quote."
         />
-        <div className="grid gap-3 sm:grid-cols-2">
-          {reviewAreas.map((area) => (
-            <article key={area} className="border border-bioaxis-line bg-bioaxis-panel p-4">
-              <p className="text-sm font-semibold uppercase leading-6 text-bioaxis-steel">{area}</p>
+        <div className="grid gap-3 lg:grid-cols-3">
+          {conversionBlocks.map((block) => (
+            <article key={block.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
+              <h2 className="text-base font-bold uppercase leading-6 text-bioaxis-text">{block.title}</h2>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{block.body}</p>
+              <Link href={block.href} className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">
+                Start review
+              </Link>
             </article>
           ))}
         </div>

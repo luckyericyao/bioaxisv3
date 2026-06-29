@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { BuyerTriggerSection } from "@/components/home/BuyerTriggerSection";
 import { FinalCTASection } from "@/components/home/FinalCTASection";
 import { HeroSearchSection } from "@/components/home/HeroSearchSection";
-import { HowBioAxisWorksSection } from "@/components/home/HowBioAxisWorksSection";
 import { PrioritySourcingLinesSection } from "@/components/home/PrioritySourcingLinesSection";
 import { WhatBioAxisDoesSection } from "@/components/home/WhatBioAxisDoesSection";
 
@@ -22,7 +21,6 @@ export default function Home() {
       <BuyerTriggerSection />
       <PrioritySourcingLinesSection />
       <WhatBioAxisDoesSection />
-      <HowBioAxisWorksSection />
       <FinalCTASection />
     </>
   );

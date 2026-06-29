@@ -7,18 +7,18 @@ type ProductCategoryCardProps = {
 };
 
 const commonRequestsBySegment: Record<string, string[]> = {
-  "liquid-handling": ["Filtered or low-retention tips", "Automation-compatible formats", "Recurring tip and reservoir usage"],
-  "lab-plasticware": ["Sterile or DNase/RNase-free needs", "Storage and handling packs", "Tube and plate format review"],
-  "cell-culture": ["Media and supplement review", "Culture vessel format fit", "Sample-first switching path"],
-  "molecular-biology-pcr": ["PCR/qPCR plates and seals", "DNase/RNase-free plastics", "Instrument-compatible formats"],
-  "sample-prep-filtration": ["Syringe filter equivalents", "Membrane and pore-size fit", "Sterile filtration documents"],
-  "storage-cryopreservation": ["Cryovial and closure needs", "Temperature compatibility", "Recurring storage formats"],
-  "automation-consumables": ["Robotic tip compatibility", "Rack and deck fit", "Barcode or SBS format review"],
-  "assays-detection": ["Assay plate format", "Reader compatibility", "Detection workflow supplies"],
-  "proteins-antibodies-immunology": ["CoA and lot documentation", "Reagent equivalent support", "Immunoassay workflow fit"],
-  "buffers-chemicals-reagents": ["CoA/SDS request path", "Buffer and reagent lists", "Recurring lab supply planning"],
-  "small-lab-equipment": ["Accessory fit", "Documentation before purchase", "Equipment-linked consumables"],
-  "early-bioprocess-single-use": ["Single-use bags and tubing", "Connector and assembly needs", "Early CMC sourcing support"]
+  "liquid-handling": ["Filtered pipette tips", "Robotic reservoirs", "Serological pipettes"],
+  "lab-plasticware": ["Microcentrifuge tubes", "Deep-well plates", "Reagent bottles"],
+  "cell-culture": ["Serum-free media", "Culture flasks", "Multiwell plates"],
+  "molecular-biology-pcr": ["PCR plates", "qPCR seals", "PCR tube strips"],
+  "sample-prep-filtration": ["Syringe filters", "Spin columns", "Protein concentrators"],
+  "storage-cryopreservation": ["Cryovials", "Freezer boxes", "Storage plates"],
+  "automation-consumables": ["Robotic tips", "SBS plates", "Barcoded racks"],
+  "assays-detection": ["Assay plates", "ELISA plates", "Detection seals"],
+  "proteins-antibodies-immunology": ["Primary antibodies", "Protein reagents", "Immunoassay inputs"],
+  "buffers-chemicals-reagents": ["PBS buffers", "Tris buffers", "Recurring reagents"],
+  "small-lab-equipment": ["Mini centrifuges", "Tube racks", "Equipment accessories"],
+  "early-bioprocess-single-use": ["Single-use bags", "TPE tubing", "Connector assemblies"]
 };
 
 const descriptionsBySegment: Record<string, string> = {
@@ -52,8 +52,8 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
 
       <div className="mt-5">
-        <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Common sourcing requests</p>
-        <ul className="mt-3 grid gap-2" aria-label={`${segment.title} common sourcing requests`}>
+        <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Example product types</p>
+        <ul className="mt-3 grid gap-2" aria-label={`${segment.title} example product types`}>
           {commonRequests.slice(0, 3).map((request) => (
             <li
               key={request}
@@ -73,19 +73,19 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           href={`/products/${segment.slug}`}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
-          View families
-        </Link>
-        <Link
-          href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-        >
-          Find equivalent
+          View segment
         </Link>
         <Link
           href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Request quote
+        </Link>
+        <Link
+          href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
+          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        >
+          Find equivalent
         </Link>
       </div>
     </article>

@@ -346,8 +346,8 @@ for (const route of routes) {
 
   if (route === "/") {
     const homeSectionCount = [...mainBlock(html).matchAll(/<section\b/g)].length;
-    if (homeSectionCount !== 6) {
-      failures.push(`${route}: expected exactly 6 homepage sections, found ${homeSectionCount}`);
+    if (homeSectionCount !== 5) {
+      failures.push(`${route}: expected exactly 5 homepage sections, found ${homeSectionCount}`);
     }
 
     requiredHomeCtas.forEach((label) => {
@@ -380,7 +380,6 @@ for (const route of routes) {
       "Need documents before purchasing",
       "Recurring supply / lower-cost review",
       "What BioAxis returns",
-      "How BioAxis works",
       "Ready to source?",
       "Send the product context.",
       "Sample and documentation path",
@@ -433,7 +432,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Common sourcing requests", "Find equivalent", "Request quote", "View families"].forEach((label) => {
+    ["Example product types", "Find equivalent", "Request quote", "View segment"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -455,7 +454,10 @@ for (const route of routes) {
       failures.push(`${route}: expected exactly 36 common request chips across 12 cards, found ${commonRequestChips}`);
     }
 
-    if (mainText.includes("Filtered or low-retention tips Automation-compatible formats Recurring tip and reservoir usage")) {
+    if (
+      mainText.includes("Filtered or low-retention tips Automation-compatible formats Recurring tip and reservoir usage") ||
+      mainText.includes("Filtered pipette tips Robotic reservoirs Serological pipettes")
+    ) {
       failures.push(`${route}: product chip text is concatenated without separators`);
     }
 
@@ -665,6 +667,9 @@ for (const route of routes) {
       "Private-label sourcing for recurring consumables demand",
       "Built for recurring demand conversations.",
       "Priority categories",
+      "Pipette tips private-label review",
+      "Tubes / plates recurring demand review",
+      "Filtration / PCR plastics OEM-style sourcing",
       "Pipette tips",
       "Tubes, plates, and storage",
       "Automation-compatible consumables",
@@ -1081,7 +1086,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Common sourcing requests", "buildRequestHref", "View families"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Example product types", "buildRequestHref", "View segment"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }
