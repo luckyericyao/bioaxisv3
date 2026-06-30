@@ -44,7 +44,7 @@ export function SearchBox({
   return (
     <form onSubmit={handleSubmit} className={["w-full", className].filter(Boolean).join(" ")}>
       <label htmlFor={inputId} className="sr-only">
-        Search product name, catalog reference, supplier line, workflow, or consumable type
+        Paste SKU, catalog number, or product list
       </label>
       <div
         className={[

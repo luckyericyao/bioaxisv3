@@ -6,18 +6,18 @@ import { pageVisuals } from "@/data/visualAssets";
 const cards = [
   {
     title: "Matched product family",
-    body: "BioAxis maps messy product input to the relevant segment, category, family, and sourcing template."
+    body: "BioAxis maps each item to the right segment, category, product family, and sourcing template."
   },
   {
-    title: "Equivalent review path",
-    body: "BioAxis structures fit criteria such as format, material, sterility, packaging, documentation, and workflow use."
+    title: "Equivalent options",
+    body: "BioAxis structures fit criteria including format, material, sterility, packaging, workflow use, and automation compatibility."
   },
   {
-    title: "Sample and documentation path",
-    body: "BioAxis identifies which supplier documents or sample steps are needed before switching."
+    title: "Samples and documents",
+    body: "BioAxis identifies sample needs and required supplier documents before switching or purchasing."
   },
   {
-    title: "Quote-ready fields",
+    title: "Quote-ready sourcing brief",
     body: "BioAxis organizes supplier, SKU, quantity, timeline, documentation, and recurring usage context for follow-up."
   }
 ];
@@ -26,8 +26,8 @@ export function WhatBioAxisDoesSection() {
   return (
     <section className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
       <SectionHeader
-        title="What BioAxis returns"
-        subtitle="A pasted SKU or list becomes a sourcing path your team can act on."
+        title="From product list to sourcing action"
+        subtitle="A messy SKU, catalog number, or product list becomes a structured sourcing path your team can act on."
       />
       <div className="mt-8 grid gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:items-stretch">
         <div className="relative min-h-[260px] overflow-hidden border border-bioaxis-line bg-bioaxis-panel">

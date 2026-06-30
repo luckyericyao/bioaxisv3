@@ -37,13 +37,13 @@ export function HeroSearchSection() {
         <div className="max-w-6xl">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
-            Source life science consumables with clarity.
+            Source, compare, and quote lab consumables in one place.
           </h1>
           <div className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
             <p>
-              BioAxis helps labs and procurement teams structure product requests, identify equivalent
-              options, prepare documentation needs, and move from fragmented supplier information to
-              quote-ready sourcing paths.
+              Paste a catalog number, supplier SKU, or product list. BioAxis turns scattered
+              consumables requests into equivalent options, sample paths, documentation checks, and
+              quote-ready sourcing actions.
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export function HeroSearchSection() {
         <div className="mt-10 max-w-3xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Search product name, catalog reference, supplier line, workflow, or consumable type"
+            placeholder="Paste SKU, catalog number, or product list"
             submitLabel="Start sourcing"
           />
         </div>
@@ -61,7 +61,7 @@ export function HeroSearchSection() {
             Product list review
           </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
-            Find equivalents
+            Find equivalent
           </CTAButton>
           <CTAButton href="/products" variant="secondary">
             Explore product lines

@@ -6,9 +6,10 @@ export function FinalCTASection() {
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10">
         <div>
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Ready to source?</p>
-          <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Send the product context.</h2>
+          <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Ready to consolidate consumables sourcing?</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-bioaxis-muted">
-            Paste a SKU, catalog number, supplier line, or product list. BioAxis can structure the sourcing path from there.
+            Paste a SKU, supplier line, or product list. BioAxis helps turn fragmented sourcing work
+            into one clear path: equivalent, sample, document, quote, and supply review.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
