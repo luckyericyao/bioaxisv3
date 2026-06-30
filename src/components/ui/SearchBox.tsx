@@ -44,7 +44,7 @@ export function SearchBox({
   return (
     <form onSubmit={handleSubmit} className={["w-full", className].filter(Boolean).join(" ")}>
       <label htmlFor={inputId} className="sr-only">
-        Paste SKU, catalog number, or product list
+        Search product name, catalog reference, supplier line, workflow, or consumable type
       </label>
       <div
         className={[
@@ -58,7 +58,7 @@ export function SearchBox({
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
           className={[
-            "field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold lowercase text-bioaxis-text placeholder:text-bioaxis-dim",
+            "field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim",
             inputClass
           ].join(" ")}
         />

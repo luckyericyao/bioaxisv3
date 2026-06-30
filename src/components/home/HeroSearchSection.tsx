@@ -37,30 +37,34 @@ export function HeroSearchSection() {
         <div className="max-w-6xl">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-6xl text-5xl font-bold uppercase leading-[0.9] text-bioaxis-text sm:text-7xl lg:text-8xl">
-            Paste a catalog number, supplier SKU, or product list.
+            Source life science consumables with clarity.
           </h1>
           <div className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-            <p>BioAxis structures equivalent options, sample paths, documentation needs, and quote-ready sourcing next steps for life-science consumables.</p>
+            <p>
+              BioAxis helps labs and procurement teams structure product requests, identify equivalent
+              options, prepare documentation needs, and move from fragmented supplier information to
+              quote-ready sourcing paths.
+            </p>
           </div>
         </div>
 
         <div className="mt-10 max-w-3xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type."
+            placeholder="Search product name, catalog reference, supplier line, workflow, or consumable type"
             submitLabel="Start sourcing"
           />
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <CTAButton href="/request-quote?requestType=product-list-review">
-            Paste product list
+            Product list review
           </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
-            Find equivalent
+            Find equivalents
           </CTAButton>
           <CTAButton href="/products" variant="secondary">
-            Browse products
+            Explore product lines
           </CTAButton>
           <CTAButton href="/request-quote?requestType=quote" variant="secondary">
             Request quote
