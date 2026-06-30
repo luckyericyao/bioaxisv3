@@ -21,15 +21,16 @@ export function HeroSearchSection() {
 
       <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-16 sm:px-8 lg:min-h-[820px] lg:px-10">
         <div className="max-w-6xl min-w-0">
-          <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
-          <h1 className="max-w-full break-words text-3xl font-bold uppercase leading-none text-bioaxis-text min-[420px]:text-4xl sm:max-w-6xl sm:text-7xl sm:leading-[0.9] lg:text-8xl">
-            Source, compare, and quote lab consumables in one place.
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-bioaxis-accent sm:text-sm">
+            {brand.positioning}
+          </p>
+          <h1 className="max-w-full break-words text-4xl font-bold uppercase leading-[0.92] text-bioaxis-text sm:max-w-5xl sm:text-6xl lg:text-7xl">
+            {brand.headline}
           </h1>
-          <div className="mt-6 max-w-4xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+          <div className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
             <p>
-              Paste a catalog number, supplier SKU, or product list. BioAxis turns scattered
-              consumables requests into equivalent options, sample paths, documentation checks, and
-              quote-ready sourcing actions.
+              BioAxis helps labs compare equivalent options, coordinate samples and documents, and
+              prepare quote-ready sourcing paths.
             </p>
           </div>
         </div>
@@ -37,7 +38,7 @@ export function HeroSearchSection() {
         <div className="mt-10 max-w-3xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Paste SKU, catalog number, or product list"
+            placeholder="Product, catalog reference, or workflow"
             submitLabel="Start sourcing"
           />
         </div>

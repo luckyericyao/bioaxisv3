@@ -374,8 +374,9 @@ for (const route of routes) {
     }
 
     [
-      "One-stop life science consumables sourcing",
-      "Paste a catalog number, supplier SKU, or product list.",
+      "Life science consumables",
+      "Consumables sourcing, simplified.",
+      "BioAxis helps labs compare equivalent options, coordinate samples and documents, and prepare quote-ready sourcing paths.",
       "Priority sourcing lines",
       "Liquid Handling Consumables",
       "Cell Culture Consumables",
@@ -398,7 +399,7 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes("Paste SKU, catalog number, or product list")) {
+    if (!html.includes("Product, catalog reference, or workflow")) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
