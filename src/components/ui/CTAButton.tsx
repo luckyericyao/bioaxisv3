@@ -9,13 +9,13 @@ type CTAButtonProps = {
 };
 
 const baseClass =
-  "inline-flex min-h-12 items-center justify-center border px-6 text-sm font-semibold uppercase transition";
+  "inline-flex min-h-12 items-center justify-center border px-6 text-sm font-semibold uppercase shadow-sm transition";
 
 const variantClass = {
   primary:
-    "border-bioaxis-accent bg-bioaxis-accent text-bioaxis-black hover:bg-transparent hover:text-bioaxis-accent",
+    "border-bioaxis-text bg-bioaxis-text text-white hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text",
   secondary:
-    "border-white/[0.24] bg-white/5 text-bioaxis-text hover:border-bioaxis-text hover:bg-white/10"
+    "border-bioaxis-line bg-white/70 text-bioaxis-text hover:border-bioaxis-accent hover:bg-white"
 };
 
 export function CTAButton({

@@ -48,7 +48,7 @@ export function SearchBox({
       </label>
       <div
         className={[
-          "flex w-full flex-col gap-3 border border-white/[0.18] bg-black/[0.62] shadow-search backdrop-blur-md transition focus-within:border-bioaxis-accent/80 sm:flex-row sm:items-center",
+          "flex w-full flex-col gap-3 border border-white/70 bg-white/[0.82] shadow-search backdrop-blur-md transition focus-within:border-bioaxis-ice sm:flex-row sm:items-center",
           shellClass
         ].join(" ")}
       >
@@ -64,7 +64,7 @@ export function SearchBox({
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent sm:px-7"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
         >
           {submitLabel}
         </button>

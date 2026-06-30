@@ -1093,7 +1093,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "max-h-[70vh]",
   "w-[340px]",
   "z-[90]",
-  "bg-[#050a09]",
+  "bg-white shadow-2xl",
   "Product segments",
   "productNavigationSegments"
 ].forEach((label) => {

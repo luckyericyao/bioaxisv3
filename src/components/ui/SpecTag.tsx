@@ -3,6 +3,5 @@ type SpecTagProps = {
 };
 
 export function SpecTag({ children }: SpecTagProps) {
-  return <span className="border border-white/[0.12] bg-white/[0.03] px-3 py-1 text-xs text-bioaxis-muted">{children}</span>;
+  return <span className="border border-bioaxis-line bg-white/[0.72] px-3 py-1 text-xs text-bioaxis-muted shadow-sm">{children}</span>;
 }
-

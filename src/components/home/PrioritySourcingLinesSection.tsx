@@ -50,7 +50,7 @@ const priorityLines = [
 
 export function PrioritySourcingLinesSection() {
   return (
-    <section className="border-b border-bioaxis-line bg-bioaxis-black">
+    <section className="border-b border-bioaxis-line bg-[radial-gradient(circle_at_8%_12%,rgba(56,189,248,0.13),transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)]">
       <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
           <SectionHeader
@@ -63,17 +63,17 @@ export function PrioritySourcingLinesSection() {
           {priorityLines.map((line) => (
             <article
               key={line.title}
-              className="group flex h-full flex-col overflow-hidden border border-bioaxis-line bg-bioaxis-panel transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
+              className="group flex h-full flex-col overflow-hidden border border-white/80 bg-white/[0.82] shadow-[0_20px_70px_rgba(15,76,129,0.10)] backdrop-blur transition hover:border-bioaxis-ice hover:bg-white"
             >
-              <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-black">
+              <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panelSoft">
                 <Image
                   src={line.image.src}
                   alt={line.image.alt}
                   fill
                   sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                  className="object-cover grayscale-[8%] saturate-[0.82] transition duration-500 group-hover:scale-[1.03] group-hover:saturate-100"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/70 via-transparent to-transparent" aria-hidden="true" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,252,0.12)_0%,rgba(15,76,129,0.10)_100%)]" aria-hidden="true" />
               </div>
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
@@ -83,7 +83,7 @@ export function PrioritySourcingLinesSection() {
                 <div className="mt-5">
                   <Link
                     href={line.href}
-                    className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+                    className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-white"
                   >
                     {line.cta}
                   </Link>

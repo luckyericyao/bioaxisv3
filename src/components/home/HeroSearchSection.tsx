@@ -6,7 +6,7 @@ import { pageVisuals } from "@/data/visualAssets";
 
 export function HeroSearchSection() {
   return (
-    <section className="relative overflow-hidden border-b border-bioaxis-line">
+    <section className="relative overflow-hidden border-b border-bioaxis-line bg-[radial-gradient(circle_at_18%_8%,rgba(56,189,248,0.22),transparent_28rem),radial-gradient(circle_at_86%_18%,rgba(16,185,129,0.10),transparent_24rem),linear-gradient(135deg,#f8fafc_0%,#eef3f8_100%)]">
       <div className="absolute inset-0 -z-10">
         <Image
           src={pageVisuals.homeHero.src}
@@ -14,12 +14,12 @@ export function HeroSearchSection() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-[0.72]"
+          className="object-cover object-center opacity-[0.18] grayscale-[15%] saturate-[0.82]"
         />
       </div>
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(2,3,4,0.35)_0%,rgba(2,3,4,0.7)_58%,#020304_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(248,250,252,0.98)_0%,rgba(248,250,252,0.92)_58%,rgba(238,243,248,0.76)_100%)]" />
 
-      <div className="relative z-10 mx-auto flex min-h-[84svh] w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-16 sm:px-8 lg:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-16 sm:px-8 lg:min-h-[820px] lg:px-10">
         <div className="max-w-6xl min-w-0">
           <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{brand.positioning}</p>
           <h1 className="max-w-full break-words text-3xl font-bold uppercase leading-none text-bioaxis-text min-[420px]:text-4xl sm:max-w-6xl sm:text-7xl sm:leading-[0.9] lg:text-8xl">

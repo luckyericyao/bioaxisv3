@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --background: #020304;
-  --foreground: #f5f7f4;
+  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #111827;
 }
 
 * {
@@ -21,8 +21,9 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 50% 0%, rgba(174, 232, 220, 0.12), transparent 34rem),
-    linear-gradient(180deg, #020304 0%, #060808 48%, #020304 100%);
+    radial-gradient(circle at 12% 0%, rgba(56, 189, 248, 0.18), transparent 30rem),
+    radial-gradient(circle at 88% 14%, rgba(16, 185, 129, 0.12), transparent 26rem),
+    linear-gradient(180deg, #f8fafc 0%, #eef3f8 48%, #f8fafc 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -34,10 +35,10 @@ body::before {
   pointer-events: none;
   content: "";
   background-image:
-    linear-gradient(rgba(245, 247, 244, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(245, 247, 244, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(15, 76, 129, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 76, 129, 0.035) 1px, transparent 1px);
   background-size: 72px 72px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 78%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 78%);
 }
 
 a {
@@ -53,8 +54,8 @@ textarea {
 }
 
 ::selection {
-  background: rgba(174, 232, 220, 0.28);
-  color: #ffffff;
+  background: rgba(56, 189, 248, 0.28);
+  color: #111827;
 }
 
 .hero-mask {
@@ -66,7 +67,6 @@ textarea {
 }
 
 .field-focus:focus {
-  border-color: rgba(174, 232, 220, 0.74);
-  box-shadow: 0 0 0 1px rgba(174, 232, 220, 0.3);
+  border-color: rgba(56, 189, 248, 0.78);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
 }
-

@@ -48,7 +48,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-bioaxis-black/[0.88] backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-bioaxis-line bg-white/[0.86] shadow-sm backdrop-blur-md">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
         <Link
           href="/"
@@ -109,7 +109,7 @@ export function Header() {
                 href={item.href}
                 className={
                   item.label === "Request Quote"
-                    ? "ml-1 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+                    ? "ml-1 inline-flex min-h-10 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
                     : "px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text lg:px-3"
                 }
               >
@@ -121,7 +121,7 @@ export function Header() {
       </div>
 
       {menuOpen ? (
-        <nav aria-label="Mobile navigation" className="border-t border-bioaxis-line bg-bioaxis-black px-5 py-4 md:hidden">
+        <nav aria-label="Mobile navigation" className="border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg md:hidden">
           <div className="grid gap-2">
             {navigationItems.map((item) =>
               item.label === "Products" ? (
@@ -147,8 +147,8 @@ export function Header() {
                   onClick={closeMobileMenu}
                   className={
                     item.label === "Request Quote"
-                      ? "border border-bioaxis-accent px-4 py-3 text-sm font-semibold uppercase text-bioaxis-accent"
-                      : "border border-bioaxis-line px-4 py-3 text-sm font-semibold uppercase text-bioaxis-muted"
+                      ? "border border-bioaxis-text bg-bioaxis-text px-4 py-3 text-sm font-semibold uppercase text-white"
+                      : "border border-bioaxis-line bg-white/[0.72] px-4 py-3 text-sm font-semibold uppercase text-bioaxis-muted"
                   }
                 >
                   {item.label}
@@ -170,7 +170,7 @@ function ProductSegmentDropdown({
   return (
     <div
       id="products-segment-dropdown"
-      className="absolute left-0 top-16 z-[90] hidden w-[340px] overflow-hidden border border-white/[0.16] bg-[#050a09] shadow-2xl shadow-black/70 md:block"
+      className="absolute left-0 top-16 z-[90] hidden w-[340px] overflow-hidden border border-bioaxis-line bg-white shadow-2xl shadow-slate-900/18 md:block"
     >
       <div className="max-h-[70vh] overflow-y-auto p-2">
         <p className="px-3 pb-2 pt-2 text-[11px] font-bold uppercase text-bioaxis-accent">Product segments</p>
@@ -179,7 +179,7 @@ function ProductSegmentDropdown({
             key={segment.slug}
             href={segment.href}
             onClick={onNavigate}
-            className="group flex items-center justify-between gap-3 border border-transparent px-3 py-3 transition hover:border-white/[0.12] hover:bg-white/[0.06] focus:border-bioaxis-accent focus:bg-white/[0.06] focus:outline-none"
+            className="group flex items-center justify-between gap-3 border border-transparent px-3 py-3 transition hover:border-bioaxis-line hover:bg-bioaxis-panelSoft focus:border-bioaxis-accent focus:bg-bioaxis-panelSoft focus:outline-none"
           >
             <span className="flex min-w-0 items-start gap-3">
               <span className="mt-0.5 w-5 text-[11px] font-bold text-bioaxis-dim">{segment.index}</span>
@@ -199,14 +199,14 @@ function ProductSegmentDropdown({
 
 function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
   return (
-    <div id="mobile-products-navigation" className="border-t border-bioaxis-line bg-bioaxis-panel/70 p-3">
+    <div id="mobile-products-navigation" className="border-t border-bioaxis-line bg-bioaxis-panelSoft p-3">
       <div className="grid gap-2">
         {productNavigationSegments.map((segment) => (
           <Link
             key={segment.slug}
             href={segment.href}
             onClick={onNavigate}
-            className="flex items-center justify-between gap-3 border border-bioaxis-line bg-bioaxis-black px-3 py-3 text-sm font-bold uppercase text-bioaxis-text"
+            className="flex items-center justify-between gap-3 border border-bioaxis-line bg-white px-3 py-3 text-sm font-bold uppercase text-bioaxis-text shadow-sm"
           >
             <span>{segment.index} {segment.label}</span>
             <span className="text-bioaxis-accent" aria-hidden="true">→</span>
