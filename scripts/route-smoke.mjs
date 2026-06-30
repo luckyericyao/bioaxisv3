@@ -61,7 +61,7 @@ const productItemDetailSections = [
   "Related sourcing templates"
 ];
 
-const requiredHomeCtas = ["Paste product list", "Find equivalent", "Browse products", "Request quote"];
+const requiredHomeCtas = ["Product list review", "Find equivalent", "Explore product lines", "Request quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -374,7 +374,7 @@ for (const route of routes) {
     }
 
     [
-      "One stop for life science consumables",
+      "One-stop life science consumables sourcing",
       "Paste a catalog number, supplier SKU, or product list.",
       "Priority sourcing lines",
       "Liquid Handling Consumables",
@@ -383,26 +383,26 @@ for (const route of routes) {
       "Tubes, Plates & Storage",
       "PCR / qPCR Consumables",
       "Private Label / OEM",
-      "Current supplier out of stock",
+      "Supplier out of stock",
       "Need compatible equivalent",
-      "Need documents before purchasing",
-      "Recurring supply / lower-cost review",
-      "What BioAxis returns",
+      "Documents needed before purchase",
+      "Recurring supply or cost review",
+      "From product list to sourcing action",
       "Ready to source?",
-      "Send the product context.",
-      "Sample and documentation path",
-      "Quote-ready fields"
+      "Ready to consolidate consumables sourcing?",
+      "Samples and documents",
+      "Quote-ready sourcing brief"
     ].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing progressive homepage content ${label}`);
       }
     });
 
-    if (!html.includes("Product name, supplier SKU, catalog number, equivalent target, workflow, or consumable type.")) {
+    if (!html.includes("Paste SKU, catalog number, or product list")) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
-    ["Matched product family", "Equivalent review path", "Quote-ready fields", "Sample and documentation path"].forEach((label) => {
+    ["Matched product family", "Equivalent options", "Quote-ready sourcing brief", "Samples and documents"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing concise return card ${label}`);
       }

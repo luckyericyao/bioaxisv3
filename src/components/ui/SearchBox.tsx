@@ -33,12 +33,12 @@ export function SearchBox({
 
   const shellClass =
     variant === "hero"
-      ? "min-h-20 px-4 py-3 sm:min-h-24 sm:px-5"
+      ? "min-h-16 px-4 py-3 sm:min-h-[72px] sm:px-5"
       : "min-h-16 px-3 py-3 sm:px-4";
 
   const inputClass =
     variant === "hero"
-      ? "text-2xl sm:text-4xl lg:text-5xl"
+      ? "text-base sm:text-lg lg:text-xl"
       : "text-xl sm:text-2xl";
 
   return (
@@ -64,7 +64,7 @@ export function SearchBox({
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent sm:px-7"
         >
           {submitLabel}
         </button>
