@@ -11,12 +11,12 @@ type ProductSearchProps = {
 };
 
 const quickSearches = [
-  { label: "filtered 200 µL tips", href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips" },
-  { label: "serum-free media", href: "/products/cell-culture/media-and-supplements/serum-free-media/serum-free-cell-culture-media" },
+  { label: "Filtered 200 µL tips", href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips" },
+  { label: "Serum-free media", href: "/products/cell-culture/media-and-supplements/serum-free-media/serum-free-cell-culture-media" },
   { label: "96-well PCR plates", href: "/products/molecular-biology-pcr/pcr-plastics/96-well-pcr-plates/96-well-pcr-plates" },
   { label: "PES 0.22 µm syringe filters", href: "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters/pes-022um-syringe-filters" },
   { label: "Hamilton-compatible tips", href: "/products/automation-consumables/robotic-pipette-tips/hamilton-robotic-tips/hamilton-compatible-robotic-tips" },
-  { label: "cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials/sterile-cryogenic-vials" }
+  { label: "Cryogenic vials", href: "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials/sterile-cryogenic-vials" }
 ];
 
 const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product", "workflow", "resource"];
@@ -237,12 +237,12 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           id="product-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search pipette tips, serum-free media, PCR plates, PES syringe filters..."
-          className="field-focus min-h-12 min-w-0 flex-1 border-0 bg-transparent text-xl font-semibold text-bioaxis-text placeholder:text-bioaxis-dim sm:text-2xl"
+          placeholder="Product, catalog reference, or workflow"
+          className="field-focus min-h-12 min-w-0 flex-1 border-0 bg-transparent text-base font-semibold text-bioaxis-text placeholder:text-bioaxis-dim sm:text-lg"
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent sm:px-7"
         >
           Search
         </button>
@@ -258,7 +258,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <Link
             key={item.label}
             href={item.href}
-            className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             {item.label}
           </Link>

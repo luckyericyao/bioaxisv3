@@ -53,14 +53,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
                 Browse 12 BioAxis product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
+              <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
+                <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
                   Browse categories
                 </Link>
-                <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                   Find equivalent
                 </Link>
-                <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                   Request quote
                 </Link>
               </div>
