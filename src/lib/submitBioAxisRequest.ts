@@ -43,6 +43,7 @@ export type BioAxisRequestPayload = {
   productContext?: BioAxisProductContext;
   website?: string;
   startedAt?: number;
+  turnstileToken?: string;
 };
 
 export type BioAxisRequestResponse = {

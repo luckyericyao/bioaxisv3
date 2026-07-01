@@ -1062,6 +1062,7 @@ const quoteFormSource = await readRequiredProjectFile("src/components/forms/Quot
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
 const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
+const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
 const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
 const productsPageSource = await readRequiredProjectFile("src/app/products/page.tsx");
@@ -1086,6 +1087,22 @@ if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
 
 if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.includes("RESEND_API_KEY")) {
   failures.push("RFQ implementation: Resend API key appears in browser-facing code or NEXT_PUBLIC key is referenced");
+}
+
+[
+  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "turnstileToken", "siteverify"]],
+  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js"]],
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage"]]
+].forEach(([label, source, required]) => {
+  for (const needle of required) {
+    if (!source.includes(needle)) {
+      failures.push(`${label}: missing Turnstile anti-spam source marker ${needle}`);
+    }
+  }
+});
+
+if (turnstileWidgetSource.includes("TURNSTILE_SECRET_KEY")) {
+  failures.push("Turnstile widget: server secret must not appear in browser-facing code");
 }
 
 if (!submitHelperSource.includes('fetch("/api/rfq"')) {
@@ -1251,7 +1268,9 @@ const envMap = new Map(envLines.map((line) => {
   "RESEND_API_KEY",
   "BIOAXIS_RFQ_TO_EMAIL",
   "BIOAXIS_RFQ_FROM_EMAIL",
-  "BIOAXIS_RFQ_REPLY_TO_EMAIL"
+  "BIOAXIS_RFQ_REPLY_TO_EMAIL",
+  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+  "TURNSTILE_SECRET_KEY"
 ].forEach((name) => {
   if (!envMap.has(name)) {
     failures.push(`.env.example: missing ${name}`);
@@ -1260,6 +1279,10 @@ const envMap = new Map(envLines.map((line) => {
 
 if (envMap.get("RESEND_API_KEY")) {
   failures.push(".env.example: RESEND_API_KEY should be blank");
+}
+
+if (envMap.get("TURNSTILE_SECRET_KEY")) {
+  failures.push(".env.example: TURNSTILE_SECRET_KEY should be blank");
 }
 
 if ([...envMap.keys()].some((name) => name.startsWith("NEXT_PUBLIC_RESEND"))) {

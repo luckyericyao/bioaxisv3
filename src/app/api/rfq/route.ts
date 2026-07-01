@@ -32,6 +32,12 @@ type RfqPayload = {
   productContext?: unknown;
   website?: unknown;
   startedAt?: unknown;
+  turnstileToken?: unknown;
+};
+
+type TurnstileVerificationResponse = {
+  success?: boolean;
+  "error-codes"?: string[];
 };
 
 type NormalizedRfq = {
@@ -99,6 +105,7 @@ const maxSourcingListItems = 30;
 const minimumSubmitDelayMs = 700;
 
 const fallbackToEmail = "crazyowenyao@gmail.com";
+const verificationErrorMessage = "Please complete the verification and try again.";
 const requestTypeAliases: Record<string, string> = {
   rfq: "quote",
   "quote-request": "quote",
@@ -292,6 +299,51 @@ function validateRequest(request: NormalizedRfq) {
   }
 
   return "";
+}
+
+function remoteIpFromRequest(request: Request) {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers
+      .get("x-forwarded-for")
+      ?.split(",")
+      .map((item) => item.trim())
+      .find(Boolean) ||
+    ""
+  );
+}
+
+async function validateTurnstileToken(token: string, request: Request) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secret) {
+    return "";
+  }
+
+  if (!token) {
+    return verificationErrorMessage;
+  }
+
+  const formData = new FormData();
+  formData.append("secret", secret);
+  formData.append("response", token);
+
+  const remoteIp = remoteIpFromRequest(request);
+  if (remoteIp) {
+    formData.append("remoteip", remoteIp);
+  }
+
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: formData
+    });
+    const result = (await response.json()) as TurnstileVerificationResponse;
+
+    return result.success ? "" : verificationErrorMessage;
+  } catch {
+    return verificationErrorMessage;
+  }
 }
 
 function fieldLine(label: string, value: string) {
@@ -538,6 +590,12 @@ export async function POST(request: Request) {
       mode: "honeypot",
       message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
     });
+  }
+
+  const verificationError = await validateTurnstileToken(clean(payload.turnstileToken, 4096), request);
+
+  if (verificationError) {
+    return NextResponse.json({ error: verificationError }, { status: 400 });
   }
 
   const normalized = normalizePayload(payload, request);

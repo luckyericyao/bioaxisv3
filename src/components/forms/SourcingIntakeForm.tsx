@@ -8,6 +8,7 @@ import {
   submitBioAxisRequest
 } from "@/lib/submitBioAxisRequest";
 import { RequestTypeSelector } from "./RequestTypeSelector";
+import { TurnstileWidget } from "./TurnstileWidget";
 
 export type SourcingIntakeRequestType =
   | "quote"
@@ -86,6 +87,7 @@ const sourcingListStorageKey = "bioaxis:sourcing-list";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 const missingProductErrorMessage = "Please paste a SKU, product list, or short sourcing need.";
+const verificationErrorMessage = "Please complete the verification and try again.";
 const primaryHelperText = "Only your email is required to start. Add details only if useful.";
 const contextualHelperText = "BioAxis will include this page context automatically.";
 const optionalHelperText = "Missing optional procurement details will not block submission.";
@@ -193,6 +195,7 @@ export function SourcingIntakeForm({
   optionalChips
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
+  const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
   const startedAtRef = useRef(Date.now());
   const [state, setState] = useState<IntakeState>({
     requestType: normalizedRequestType,
@@ -216,6 +219,7 @@ export function SourcingIntakeForm({
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const resolvedProductContext = useMemo(
     () =>
@@ -271,6 +275,7 @@ export function SourcingIntakeForm({
   function validate() {
     if (!hasValidEmail(state.email)) return emailErrorMessage;
     if (!hasPageContext && !state.productInput.trim()) return missingProductErrorMessage;
+    if (turnstileEnabled && !turnstileToken) return verificationErrorMessage;
     return "";
   }
 
@@ -318,6 +323,7 @@ export function SourcingIntakeForm({
         productContext: resolvedProductContext,
         website: state.website,
         startedAt: startedAtRef.current,
+        turnstileToken,
         message: [state.notes, privateLabelNote, detailChipText].filter(Boolean).join("\n\n")
       });
 
@@ -364,6 +370,7 @@ export function SourcingIntakeForm({
           type="button"
           onClick={() => {
             setSubmitted(null);
+            setTurnstileToken("");
             startedAtRef.current = Date.now();
           }}
           className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
@@ -430,6 +437,9 @@ export function SourcingIntakeForm({
             }
             onChange={(value) => updateField("productInput", value)}
           />
+        </div>
+        <div className="mt-5">
+          <TurnstileWidget onTokenChange={setTurnstileToken} />
         </div>
         {error ? (
           <p role="alert" className="mt-4 text-sm font-semibold text-bioaxis-accent">
