@@ -38,13 +38,13 @@ export function SearchBox({
 
   const inputClass =
     variant === "hero"
-      ? "text-base sm:text-lg lg:text-xl"
+      ? "text-base sm:text-lg"
       : "text-xl sm:text-2xl";
 
   return (
     <form onSubmit={handleSubmit} className={["w-full", className].filter(Boolean).join(" ")}>
       <label htmlFor={inputId} className="sr-only">
-        Product, catalog reference, or workflow
+        {placeholder}
       </label>
       <div
         className={[
@@ -64,7 +64,7 @@ export function SearchBox({
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center whitespace-normal border border-bioaxis-text bg-bioaxis-text px-6 text-center text-sm font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
         >
           {submitLabel}
         </button>

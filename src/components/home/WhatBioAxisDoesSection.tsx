@@ -4,19 +4,19 @@ import { pageVisuals } from "@/data/visualAssets";
 const cards = [
   {
     title: "Matched product family",
-    body: "BioAxis maps each item to the right segment, category, product family, and sourcing template."
+    body: "Map each item to the right segment, category, product family, and sourcing template."
   },
   {
-    title: "Equivalent options",
-    body: "BioAxis structures fit criteria including format, material, sterility, packaging, workflow use, and automation compatibility."
+    title: "Equivalent criteria",
+    body: "Structure fit requirements across format, material, sterility, packaging, workflow use, and automation compatibility."
   },
   {
     title: "Samples and documents",
-    body: "BioAxis identifies sample needs and required supplier documents before switching or purchasing."
+    body: "Identify sample needs and required supplier documents before switching or purchasing."
   },
   {
-    title: "Quote-ready sourcing brief",
-    body: "BioAxis organizes supplier, SKU, quantity, timeline, documentation, and recurring usage context for follow-up."
+    title: "RFQ-ready brief",
+    body: "Organize supplier, SKU, quantity, timeline, documentation, and recurring usage context for follow-up."
   }
 ];
 
@@ -25,10 +25,10 @@ export function WhatBioAxisDoesSection() {
     <section className="bg-[#111827] text-white">
       <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
-          <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-ice">Structured sourcing output</p>
-          <h2 className="text-3xl font-bold uppercase leading-tight text-white sm:text-5xl">From product list to sourcing action</h2>
+          <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-ice">Structured sourcing workflow</p>
+          <h2 className="text-3xl font-bold uppercase leading-tight text-white sm:text-5xl">Turn scattered product inputs into a buyer-ready sourcing brief.</h2>
           <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg">
-            A messy SKU, catalog number, or product list becomes a structured sourcing path your team can act on.
+            BioAxis maps product context, equivalent criteria, document needs, sample paths, and quote details into one structured sourcing workflow.
           </p>
         </div>
         <div className="mt-8 grid gap-5 lg:grid-cols-[0.8fr_1.2fr] lg:items-stretch">

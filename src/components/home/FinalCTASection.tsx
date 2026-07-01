@@ -6,7 +6,7 @@ export function FinalCTASection() {
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10">
         <div>
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Ready to source?</p>
-          <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Ready to consolidate consumables sourcing?</h2>
+          <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Ready to structure your consumables sourcing?</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-bioaxis-muted">
             Paste a SKU, supplier line, or product list. BioAxis helps turn fragmented sourcing work
             into one clear path: equivalent, sample, document, quote, and supply review.
@@ -17,7 +17,7 @@ export function FinalCTASection() {
             href="/request-quote?requestType=quote"
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
           >
-            Request quote
+            Send sourcing request
           </Link>
           <Link
             href="/equivalent-finder"

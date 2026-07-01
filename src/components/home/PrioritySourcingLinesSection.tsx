@@ -5,43 +5,43 @@ import { pageVisuals, segmentVisuals } from "@/data/visualAssets";
 
 const priorityLines = [
   {
-    title: "Liquid Handling Consumables",
+    title: "Liquid Handling",
     description: "Pipette tips, reservoirs, robotic tips, sterile formats.",
     href: "/products/liquid-handling",
     cta: "Explore liquid handling",
     image: segmentVisuals["liquid-handling"]
   },
   {
-    title: "Cell Culture Consumables",
-    description: "Media, supplements, sera, vessels, passaging support.",
+    title: "Cell Culture",
+    description: "Vessels, media-related consumables, passaging support.",
     href: "/products/cell-culture",
     cta: "Explore cell culture",
     image: segmentVisuals["cell-culture"]
   },
   {
-    title: "Filtration Consumables",
-    description: "Syringe filters, bottle-top filters, membranes, and sterile formats.",
+    title: "Filtration",
+    description: "Syringe filters, membranes, bottle-top filters, sterile formats.",
     href: "/products/sample-prep-filtration",
     cta: "Explore filtration",
     image: segmentVisuals["sample-prep-filtration"]
   },
   {
     title: "Tubes, Plates & Storage",
-    description: "Tubes, plates, cryovials, seals, racks, sample storage.",
+    description: "Tubes, plates, cryovials, seals, racks.",
     href: "/products/storage-cryopreservation",
     cta: "Explore storage",
     image: segmentVisuals["storage-cryopreservation"]
   },
   {
-    title: "PCR / qPCR Consumables",
-    description: "PCR plates, tubes, strips, optical seals, qPCR plastics.",
+    title: "PCR / qPCR",
+    description: "PCR plates, tubes, strips, optical seals.",
     href: "/products/molecular-biology-pcr",
     cta: "Explore PCR",
     image: segmentVisuals["molecular-biology-pcr"]
   },
   {
     title: "Private Label / OEM",
-    description: "Neutral-label and OEM-style sourcing discussions for recurring consumables demand.",
+    description: "Neutral-label options for recurring consumables demand.",
     href: "/private-label-oem",
     cta: "Discuss private label",
     image: pageVisuals.privateLabelOem

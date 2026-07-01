@@ -24,34 +24,32 @@ export function HeroSearchSection() {
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-bioaxis-accent sm:text-sm">
             {brand.positioning}
           </p>
-          <h1 className="max-w-full break-words text-4xl font-bold uppercase leading-[0.92] text-bioaxis-text sm:max-w-5xl sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-full break-words text-4xl font-bold uppercase leading-[0.92] text-bioaxis-text sm:max-w-5xl sm:text-5xl lg:text-6xl">
             {brand.headline}
           </h1>
           <div className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
             <p>
-              BioAxis helps labs compare equivalent options, coordinate samples and documents, and
-              prepare quote-ready sourcing paths.
+              Paste a SKU, catalog number, supplier line, or product list. BioAxis turns fragmented
+              consumables requests into comparable options, required documents, sample paths, and
+              RFQ-ready sourcing briefs.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 max-w-3xl">
+        <div className="mt-10 max-w-5xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Product, catalog reference, or workflow"
-            submitLabel="Start sourcing"
+            placeholder="Paste SKU, catalog number, supplier line, or product list"
+            submitLabel="Structure my sourcing request"
           />
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <CTAButton href="/request-quote?requestType=product-list-review">
-            Product list review
-          </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
             Find equivalent
           </CTAButton>
           <CTAButton href="/products" variant="secondary">
-            Explore product lines
+            Browse product lines
           </CTAButton>
           <CTAButton href="/request-quote?requestType=quote" variant="secondary">
             Request quote

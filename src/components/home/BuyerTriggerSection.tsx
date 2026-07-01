@@ -3,26 +3,26 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const buyerTriggers = [
   {
-    title: "Supplier out of stock",
-    body: "Find alternative sourcing paths when lead time, allocation, or availability blocks purchasing.",
+    title: "Out of stock",
+    body: "Find backup sourcing paths when lead time, allocation, or availability blocks purchasing.",
     href: "/request-quote?requestType=quote&need=supplier-out-of-stock",
     cta: "Start RFQ"
   },
   {
-    title: "Need compatible equivalent",
-    body: "Compare SKU context against format, material, sterility, packaging, workflow fit, and automation constraints.",
+    title: "Need an equivalent",
+    body: "Compare format, material, sterility, packaging, workflow fit, and automation constraints before switching.",
     href: "/equivalent-finder?need=compatible-equivalent",
     cta: "Find equivalent"
   },
   {
-    title: "Documents needed before purchase",
+    title: "Documents required",
     body: "Organize CoA, SDS, sterility, material, lot-level, and supplier specification requirements.",
     href: "/request-quote?requestType=documentation&need=documents",
     cta: "Request documents"
   },
   {
-    title: "Recurring supply or cost review",
-    body: "Review recurring demand, MOQ, packaging, lead time, backup sources, and private-label/OEM options.",
+    title: "Recurring demand",
+    body: "Review MOQ, packaging, lead time, backup sources, and private-label / OEM options for repeat usage.",
     href: "/request-quote?requestType=recurring-supply&need=recurring-supply",
     cta: "Send product list"
   }
@@ -34,8 +34,8 @@ export function BuyerTriggerSection() {
       <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
           <SectionHeader
-            title="What are you trying to solve?"
-            subtitle="Start with the buying problem. BioAxis routes each request into the right path: urgent sourcing, equivalent review, sample request, documentation check, RFQ, or recurring supply planning."
+            title="Start with the sourcing problem, not the product category."
+            subtitle="BioAxis routes each request into the right path: urgent sourcing, equivalent review, sample request, documentation check, RFQ, or recurring supply planning."
           />
         </div>
         <div className="mt-8 grid gap-3 md:grid-cols-2">

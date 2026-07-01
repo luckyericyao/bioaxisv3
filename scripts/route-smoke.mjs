@@ -61,7 +61,7 @@ const productItemDetailSections = [
   "Related sourcing templates"
 ];
 
-const requiredHomeCtas = ["Product list review", "Find equivalent", "Explore product lines", "Request quote"];
+const requiredHomeCtas = ["Structure my sourcing request", "Find equivalent", "Browse product lines", "Request quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -374,36 +374,38 @@ for (const route of routes) {
     }
 
     [
-      "Life science consumables",
-      "Consumables sourcing, simplified.",
-      "BioAxis helps labs compare equivalent options, coordinate samples and documents, and prepare quote-ready sourcing paths.",
+      "One-stop life science consumables sourcing",
+      "Lab consumables sourcing, structured from the first SKU.",
+      "Paste a SKU, catalog number, supplier line, or product list.",
+      "Have a messy product list? Send it as-is. Only your email is required to start.",
       "Priority sourcing lines",
-      "Liquid Handling Consumables",
-      "Cell Culture Consumables",
-      "Filtration Consumables",
+      "Liquid Handling",
+      "Cell Culture",
+      "Filtration",
       "Tubes, Plates & Storage",
-      "PCR / qPCR Consumables",
+      "PCR / qPCR",
       "Private Label / OEM",
-      "Supplier out of stock",
-      "Need compatible equivalent",
-      "Documents needed before purchase",
-      "Recurring supply or cost review",
-      "From product list to sourcing action",
+      "Start with the sourcing problem, not the product category.",
+      "Out of stock",
+      "Need an equivalent",
+      "Documents required",
+      "Recurring demand",
+      "Turn scattered product inputs into a buyer-ready sourcing brief.",
       "Ready to source?",
-      "Ready to consolidate consumables sourcing?",
+      "Ready to structure your consumables sourcing?",
       "Samples and documents",
-      "Quote-ready sourcing brief"
+      "RFQ-ready brief"
     ].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing progressive homepage content ${label}`);
       }
     });
 
-    if (!html.includes("Product, catalog reference, or workflow")) {
+    if (!html.includes("Paste SKU, catalog number, supplier line, or product list")) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
-    ["Matched product family", "Equivalent options", "Quote-ready sourcing brief", "Samples and documents"].forEach((label) => {
+    ["Matched product family", "Equivalent criteria", "RFQ-ready brief", "Samples and documents"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing concise return card ${label}`);
       }
