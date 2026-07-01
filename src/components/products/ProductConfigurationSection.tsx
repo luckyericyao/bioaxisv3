@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buildEquivalentFinderHref, buildRequestHref, type ProductCategory, type ProductFamily, type ProductTaxonomySegment } from "@/data/productTaxonomy";
+import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 
 type ProductConfigurationSectionProps = {
@@ -36,11 +36,12 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
             product: productItem.slug,
             requestType: "quote"
           });
-          const equivalentHref = buildEquivalentFinderHref({
+          const equivalentHref = buildRequestHref({
             segment: segment.slug,
             category: category.slug,
             family: family.slug,
-            product: productItem.slug
+            product: productItem.slug,
+            requestType: "equivalent"
           });
 
           return (

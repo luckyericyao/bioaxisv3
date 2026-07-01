@@ -60,18 +60,7 @@ function requestHref(row: CatalogProductRow, requestType: string, need?: string)
 }
 
 function equivalentHref(row: CatalogProductRow) {
-  const params = new URLSearchParams({
-    product: row.product.slug,
-    segment: row.segmentSlug,
-    category: row.categorySlug,
-    family: row.familySlug,
-    sourcePage: row.href
-  });
-
-  if (row.product.catalogNumber && !/optional|input/i.test(row.product.catalogNumber)) params.set("catalog", row.product.catalogNumber);
-  if (row.product.supplier && !/optional|input/i.test(row.product.supplier)) params.set("supplier", row.product.supplier);
-
-  return `/equivalent-finder?${params.toString()}`;
+  return requestHref(row, "equivalent", "equivalent");
 }
 
 function normalize(value: string) {

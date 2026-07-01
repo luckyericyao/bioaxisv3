@@ -34,8 +34,8 @@ export function BuyerTriggerSection() {
       <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
           <SectionHeader
-            title="Start with the sourcing problem, not the product category."
-            subtitle="BioAxis routes each request into the right path: urgent sourcing, equivalent review, sample request, documentation check, RFQ, or recurring supply planning."
+            title="Route every consumables request into the right sourcing path."
+            subtitle="From urgent replacement to equivalent review, samples, documentation, RFQ, and recurring supply planning — BioAxis structures the next step."
           />
         </div>
         <div className="mt-8 grid gap-3 md:grid-cols-2">

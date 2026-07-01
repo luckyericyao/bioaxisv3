@@ -75,19 +75,7 @@ function catalogRequestHref({
 }
 
 function catalogEquivalentHref(segment: ProductCatalogSegment, category?: ProductCatalogCategory, family?: ProductCatalogFamily, product?: ProductCatalogItem) {
-  const href = productCatalogHref(segment.slug, category?.slug, family?.slug, product?.slug);
-  const params = new URLSearchParams({
-    segment: segment.slug,
-    sourcePage: href
-  });
-
-  if (category) params.set("category", category.slug);
-  if (family) params.set("family", family.slug);
-  if (product) params.set("product", product.slug);
-  if (product?.catalogNumber && !/optional|input/i.test(product.catalogNumber)) params.set("catalog", product.catalogNumber);
-  if (product?.supplier && !/optional|input/i.test(product.supplier)) params.set("supplier", product.supplier);
-
-  return `/equivalent-finder?${params.toString()}`;
+  return catalogRequestHref({ requestType: "equivalent", segment, category, family, product, need: "equivalent" });
 }
 
 function rowsForFamily(segment: ProductCatalogSegment, category: ProductCatalogCategory, family: ProductCatalogFamily): CatalogProductRow[] {

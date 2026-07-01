@@ -49,6 +49,7 @@ function shortRequestTypeLabel(id: string) {
     documentation: "Documentation",
     "recurring-supply": "Recurring supply",
     "product-list-review": "Product list",
+    "private-label": "Private label / OEM",
     contact: "General sourcing question"
   };
 
@@ -63,6 +64,7 @@ function shortRequestTypeDescription(id: string) {
     sample: "Request samples before switching.",
     documentation: "Ask for CoA, SDS, sterility, or material documents.",
     "recurring-supply": "Plan repeat demand and monthly usage.",
+    "private-label": "Discuss neutral-label or OEM-style sourcing.",
     contact: "Ask a sourcing question."
   };
 

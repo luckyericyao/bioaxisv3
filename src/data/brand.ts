@@ -1,6 +1,6 @@
 export const brand = {
   name: "BioAxis",
-  headline: "Lab consumables sourcing, structured from the first SKU.",
+  headline: "The structured sourcing layer for life science consumables.",
   tagline: "Search anything. Source everything.",
   positioning: "One-stop life science consumables sourcing",
   vision: "To become the one-stop sourcing platform for every life science lab.",

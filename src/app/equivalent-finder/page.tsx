@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { SourcingIntakeForm } from "@/components/forms/SourcingIntakeForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
 import { pageVisuals } from "@/data/visualAssets";
@@ -136,57 +137,15 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
       </PageHero>
 
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
-        <form action="/request-quote" method="get" className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
-          <input type="hidden" name="type" value="equivalent" />
-          <input type="hidden" name="requestType" value="equivalent" />
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Equivalent intake</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Send the current product context.</h2>
-          <div className="mt-6 grid gap-5 md:grid-cols-2">
-            <label className="grid gap-2 text-sm font-semibold uppercase text-bioaxis-steel">
-              Current product or catalog number
-              <input
-                name="query"
-                defaultValue={initialQuery}
-                className="field-focus min-h-12 border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
-                placeholder="Supplier SKU, catalog number, or product name"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold uppercase text-bioaxis-steel">
-              Current brand / supplier
-              <input
-                name="supplier"
-                defaultValue={initialSupplier}
-                className="field-focus min-h-12 border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
-                placeholder="Current supplier or brand"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold uppercase text-bioaxis-steel md:col-span-2">
-              Product type
-              <input
-                name="productCategory"
-                className="field-focus min-h-12 border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
-                placeholder="Pipette tips, cryovials, PCR plates, syringe filters..."
-              />
-            </label>
-            <fieldset className="md:col-span-2">
-              <legend className="mb-3 text-sm font-semibold uppercase text-bioaxis-steel">What matters most?</legend>
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                {intakePriorities.map((priority) => (
-                  <label key={priority} className="flex min-h-10 items-center gap-2 border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
-                    <input type="checkbox" name="need" value={priority} className="h-4 w-4 accent-bioaxis-accent" />
-                    <span>{priority}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-          <button
-            type="submit"
-            className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-          >
-            Start equivalent review
-          </button>
-        </form>
+        <SourcingIntakeForm
+          requestType="equivalent"
+          title="Send the current product. BioAxis will structure the equivalent review."
+          defaultMessage={[initialSupplier, initialQuery].filter(Boolean).join(" ")}
+          productFieldLabel="Current product / catalog number / supplier line"
+          submitLabel="Send equivalent request"
+          optionalChips={intakePriorities}
+          compact
+        />
 
         <aside className="overflow-hidden border border-bioaxis-line bg-bioaxis-black">
           <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panel">

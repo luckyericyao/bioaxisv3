@@ -31,6 +31,7 @@ type RfqPayload = {
   utm?: unknown;
   productContext?: unknown;
   website?: unknown;
+  startedAt?: unknown;
 };
 
 type NormalizedRfq = {
@@ -95,6 +96,7 @@ const maxProductListLength = 12_000;
 const maxMessageLength = 8_000;
 const maxFieldLength = 800;
 const maxSourcingListItems = 30;
+const minimumSubmitDelayMs = 700;
 
 const fallbackToEmail = "crazyowenyao@gmail.com";
 const requestTypeAliases: Record<string, string> = {
@@ -115,6 +117,10 @@ const requestTypeAliases: Record<string, string> = {
   "contact request": "contact",
   contact: "contact",
   "product list review": "product-list-review",
+  "private-label": "private-label",
+  "private-label-oem": "private-label",
+  "oem": "private-label",
+  "oem-style": "private-label",
   recurring: "recurring-supply",
   "product-list": "product-list-review",
   "product list": "product-list-review",
@@ -128,6 +134,7 @@ const requestTypeLabels: Record<string, string> = {
   sample: "Sample Request",
   documentation: "Documentation Request",
   "recurring-supply": "Recurring Supply Request",
+  "private-label": "Private Label / OEM Request",
   contact: "Contact Request",
   "product-list-review": "Product List Review"
 };
@@ -520,7 +527,16 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       mode: "honeypot",
-      message: "Request received. BioAxis will review the product context and follow up by email."
+      message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
+    });
+  }
+
+  const startedAt = typeof payload.startedAt === "number" ? payload.startedAt : Number(payload.startedAt ?? 0);
+  if (startedAt && Date.now() - startedAt < minimumSubmitDelayMs) {
+    return NextResponse.json({
+      ok: true,
+      mode: "honeypot",
+      message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
     });
   }
 
@@ -550,7 +566,7 @@ export async function POST(request: Request) {
       ok: true,
       mode: delivery.mode,
       referenceId,
-      message: "Request received. BioAxis will review the product context and follow up by email."
+      message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
     });
   } catch {
     return NextResponse.json(

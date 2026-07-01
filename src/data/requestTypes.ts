@@ -50,6 +50,13 @@ export const requestTypes: RequestType[] = [
     optionalFields: ["quantity", "sterility", "currentSupplier", "requiredSpecification", "notes"]
   },
   {
+    id: "private-label",
+    label: "Private label / OEM",
+    description: "Start a neutral-label, private-label, or OEM-style sourcing discussion with product family and recurring usage context.",
+    requiredFields: [],
+    optionalFields: ["productCategory", "currentSupplier", "quantity", "requiredSpecification", "notes"]
+  },
+  {
     id: "contact",
     label: "General sourcing question",
     description: "Ask a general sourcing, documentation, sample, or product-support question.",
@@ -74,6 +81,10 @@ const requestTypeAliases: Record<string, string> = {
   "product list review": "product-list-review",
   "product-list-request": "product-list-review",
   list: "product-list-review",
+  "private-label": "private-label",
+  "private-label-oem": "private-label",
+  "oem": "private-label",
+  "oem-style": "private-label",
   equivalent: "equivalent",
   "equivalent-finding": "equivalent",
   "equivalent-review": "equivalent",

@@ -9,6 +9,7 @@ type SearchBoxProps = {
   placeholder?: string;
   submitLabel?: string;
   variant?: "hero" | "page";
+  destination?: "products" | "sourcing";
   className?: string;
 };
 
@@ -18,6 +19,7 @@ export function SearchBox({
   placeholder = "search anything",
   submitLabel = "Search",
   variant = "hero",
+  destination = "products",
   className = ""
 }: SearchBoxProps) {
   const router = useRouter();
@@ -27,8 +29,21 @@ export function SearchBox({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedQuery = query.trim();
-    const destination = trimmedQuery ? `/products?q=${encodeURIComponent(trimmedQuery)}` : "/products";
-    router.push(destination);
+    if (destination === "sourcing") {
+      const params = new URLSearchParams();
+      const requestType = trimmedQuery.length > 80 || /\n|,|\t|\|/.test(trimmedQuery) ? "product-list" : "quote";
+      params.set("requestType", requestType);
+      params.set("type", requestType);
+      if (trimmedQuery) {
+        params.set("productList", trimmedQuery);
+        params.set("source", "homepage-hero");
+      }
+      router.push(`/request-quote?${params.toString()}`);
+      return;
+    }
+
+    const productDestination = trimmedQuery ? `/products?q=${encodeURIComponent(trimmedQuery)}` : "/products";
+    router.push(productDestination);
   }
 
   const shellClass =

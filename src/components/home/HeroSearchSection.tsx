@@ -29,9 +29,8 @@ export function HeroSearchSection() {
           </h1>
           <div className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
             <p>
-              Paste a SKU, catalog number, supplier line, or product list. BioAxis turns fragmented
-              consumables requests into comparable options, required documents, sample paths, and
-              RFQ-ready sourcing briefs.
+              BioAxis turns SKUs, catalog references, supplier lines, and product lists into
+              comparable options, required documents, sample paths, and RFQ-ready sourcing briefs.
             </p>
           </div>
         </div>
@@ -39,8 +38,9 @@ export function HeroSearchSection() {
         <div className="mt-10 max-w-5xl">
           <SearchBox
             helperText={brand.searchHelper}
-            placeholder="Paste SKU, catalog number, supplier line, or product list"
+            placeholder="SKU, catalog number, supplier line, or product list"
             submitLabel="Structure my sourcing request"
+            destination="sourcing"
           />
         </div>
 

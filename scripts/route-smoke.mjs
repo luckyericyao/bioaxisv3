@@ -95,11 +95,11 @@ const requiredWorkflowCtaLabels = [
   "Source early CMC consumables",
   "Build QC supply list"
 ];
-const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "General sourcing question"];
+const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "Private label / OEM", "General sourcing question"];
 const equivalentFinderContent = [
   "Find compatible alternatives for your current consumables",
-  "Equivalent intake",
-  "Start equivalent review",
+  "Send the current product. BioAxis will structure the equivalent review.",
+  "Send equivalent request",
   "Fit assessment, not a name match.",
   "A cleaner way to compare alternatives.",
   "Common equivalent requests",
@@ -375,8 +375,8 @@ for (const route of routes) {
 
     [
       "One-stop life science consumables sourcing",
-      "Lab consumables sourcing, structured from the first SKU.",
-      "Paste a SKU, catalog number, supplier line, or product list.",
+      "The structured sourcing layer for life science consumables.",
+      "BioAxis turns SKUs, catalog references, supplier lines, and product lists into comparable options, required documents, sample paths, and RFQ-ready sourcing briefs.",
       "Have a messy product list? Send it as-is. Only your email is required to start.",
       "Priority sourcing lines",
       "Liquid Handling",
@@ -385,14 +385,15 @@ for (const route of routes) {
       "Tubes, Plates & Storage",
       "PCR / qPCR",
       "Private Label / OEM",
-      "Start with the sourcing problem, not the product category.",
+      "Route every consumables request into the right sourcing path.",
+      "From urgent replacement to equivalent review, samples, documentation, RFQ, and recurring supply planning",
       "Out of stock",
       "Need an equivalent",
       "Documents required",
       "Recurring demand",
-      "Turn scattered product inputs into a buyer-ready sourcing brief.",
-      "Ready to source?",
-      "Ready to structure your consumables sourcing?",
+      "Turn scattered product inputs into a buyer-ready sourcing brief",
+      "Ready to structure your sourcing request?",
+      "Send the list. BioAxis will structure the sourcing path.",
       "Samples and documents",
       "RFQ-ready brief"
     ].forEach((label) => {
@@ -401,7 +402,7 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes("Paste SKU, catalog number, supplier line, or product list")) {
+    if (!html.includes("SKU, catalog number, supplier line, or product list")) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
@@ -508,7 +509,7 @@ for (const route of routes) {
     }
   }
 
-  if (route === "/equivalent-finder?catalog=D8537" && !html.includes('value="D8537"')) {
+  if (route === "/equivalent-finder?catalog=D8537" && !pageText.includes("D8537")) {
     failures.push(`${route}: catalog query did not prefill equivalent intake`);
   }
 
@@ -523,8 +524,7 @@ for (const route of routes) {
       "Sourcing request",
       "Paste what you have. BioAxis will structure the sourcing request.",
       "Email *",
-      "Product / SKU / product list / sourcing need *",
-      "Add request type or more details",
+      "Add details — optional",
       "Request type optional"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -536,8 +536,7 @@ for (const route of routes) {
       "Inquiry engine",
       "Type 01 Selected",
       "End of Quote card",
-      "Product context / list optional",
-      "Current supplier / brand optional"
+      "Product context / list optional"
     ].forEach((label) => {
       if (pageText.includes(label) || rawPageText.includes(label)) {
         failures.push(`${route}: old RFQ content still rendered: ${label}`);
@@ -566,20 +565,27 @@ for (const route of routes) {
     [
       "Send a product, catalog number, or list",
       "Paste what you have. BioAxis will structure the sourcing request.",
-      "Only your email is required. Paste what you have. BioAxis can follow up for missing specs.",
-      "Email required",
+      "Only your email is required to start. Add details only if useful.",
       "Email *",
-      "Product / SKU / product list / sourcing need *",
-      "Current supplier optional",
-      "Buyer SKU / catalog input optional",
-      "Product category optional",
-      "What do you need? optional",
+      "Current supplier / brand optional",
+      "Catalog number / SKU optional",
+      "Missing optional procurement details will not block submission.",
       "Send sourcing request"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction RFQ copy ${label}`);
       }
     });
+
+    const primaryNeedLabels = [
+      "Product / SKU / product list / sourcing need",
+      "Current product / catalog number / supplier line",
+      "Product / SKU / sample need",
+      "Message / sourcing question"
+    ];
+    if (!primaryNeedLabels.some((label) => pageText.includes(label))) {
+      failures.push(`${route}: missing primary sourcing need field label`);
+    }
 
     ["Name *", "Organization *", "Shipping region *", "Desired quantity *", "Target delivery date *"].forEach((label) => {
       if (pageText.includes(label)) {
@@ -601,7 +607,7 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes("Paste catalog number, supplier SKU")) {
+    if (!html.includes("Paste a SKU, product list")) {
       failures.push(`${route}: missing product-list textarea placeholder`);
     }
   }
@@ -1055,6 +1061,7 @@ const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisR
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
+const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
 const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
 const productsPageSource = await readRequiredProjectFile("src/app/products/page.tsx");
@@ -1166,25 +1173,25 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-if (!quoteFormSource.includes("emailErrorMessage") || !quoteFormSource.includes("data-rfq-mode=\"email-only\"")) {
-  failures.push("QuoteRequestForm: expected email-only validation mode");
+if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFormSource.includes("data-rfq-mode=\"email-plus-context\"")) {
+  failures.push("SourcingIntakeForm: expected email-plus-context validation mode");
 }
 
-["Add request type or more details", "Optional fields for request type", "<details", "RequestTypeSelector"].forEach((label) => {
-  if (!quoteFormSource.includes(label)) {
-    failures.push(`QuoteRequestForm: missing collapsed optional detail behavior ${label}`);
+["Add details — optional", "Request type optional", "<details", "RequestTypeSelector"].forEach((label) => {
+  if (!sourcingIntakeFormSource.includes(label)) {
+    failures.push(`SourcingIntakeForm: missing collapsed optional detail behavior ${label}`);
   }
 });
 
 ["selectedRequestType.requiredFields", "universalRequired", "productCategory: \"Product segment / category\""].forEach((legacyPattern) => {
-  if (quoteFormSource.includes(legacyPattern)) {
-    failures.push(`QuoteRequestForm: still contains legacy required-field logic ${legacyPattern}`);
+  if (sourcingIntakeFormSource.includes(legacyPattern)) {
+    failures.push(`SourcingIntakeForm: still contains legacy required-field logic ${legacyPattern}`);
   }
 });
 
-["data-product-context-summary=\"true\"", "data-sourcing-list-summary=\"true\"", "sourcingListItems", "productContext"].forEach((label) => {
-  if (!quoteFormSource.includes(label)) {
-    failures.push(`QuoteRequestForm: missing low-friction context/source wiring ${label}`);
+["data-product-context-summary=\"true\"", "data-sourcing-list-summary=\"true\"", "sourcingListItems", "productContext", "Pasted input captured"].forEach((label) => {
+  if (!sourcingIntakeFormSource.includes(label)) {
+    failures.push(`SourcingIntakeForm: missing low-friction context/source wiring ${label}`);
   }
 });
 
@@ -1204,22 +1211,26 @@ if (rfqRouteSource.includes("request.name") && rfqRouteSource.includes("Name is 
   }
 });
 
+if (!sourcingIntakeFormSource.includes("submitBioAxisRequest") || !sourcingIntakeFormSource.includes('data-api-endpoint="/api/rfq"')) {
+  failures.push("SourcingIntakeForm: expected form to submit through submitBioAxisRequest and declare /api/rfq endpoint");
+}
+
+if (!sourcingIntakeFormSource.includes("submitting") || !sourcingIntakeFormSource.includes("setError") || !sourcingIntakeFormSource.includes("submitted")) {
+  failures.push("SourcingIntakeForm: missing idle/submitting/success/error state wiring");
+}
+
 for (const [label, source] of [
   ["QuoteRequestForm", quoteFormSource],
   ["ContactForm", contactFormSource],
   ["SimpleRequestForm", simpleFormSource]
 ]) {
-  if (!source.includes("submitBioAxisRequest") || !source.includes('data-api-endpoint="/api/rfq"')) {
-    failures.push(`${label}: expected form to submit through submitBioAxisRequest and declare /api/rfq endpoint`);
-  }
-
-  if (!source.includes("submitting") || !source.includes("submitError") || !source.includes("submitted")) {
-    failures.push(`${label}: missing idle/submitting/success/error state wiring`);
+  if (!source.includes("SourcingIntakeForm")) {
+    failures.push(`${label}: expected wrapper to use SourcingIntakeForm`);
   }
 }
 
 [
-  "Request received. BioAxis will review the product context and follow up by email.",
+  "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
   "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly."
 ].forEach((message) => {
   if (!submitHelperSource.includes(message)) {

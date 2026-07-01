@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { SourcingIntakeForm } from "@/components/forms/SourcingIntakeForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SpecTag } from "@/components/ui/SpecTag";
@@ -93,6 +94,18 @@ export default function PrivateLabelOemPage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <SourcingIntakeForm
+          requestType="private-label"
+          sourcePage="/private-label-oem"
+          title="Send the recurring consumables context. BioAxis will structure the private-label review."
+          productFieldLabel="Product family, supplier line, or recurring demand"
+          submitLabel="Discuss private-label sourcing"
+          contextLocked
+          compact
+        />
       </section>
 
       <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">

@@ -42,6 +42,7 @@ export type BioAxisRequestPayload = {
   utm?: Record<string, string>;
   productContext?: BioAxisProductContext;
   website?: string;
+  startedAt?: number;
 };
 
 export type BioAxisRequestResponse = {
@@ -52,7 +53,7 @@ export type BioAxisRequestResponse = {
   error?: string;
 };
 
-export const requestSuccessMessage = "Request received. BioAxis will review the product context and follow up by email.";
+export const requestSuccessMessage = "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.";
 export const requestErrorMessage = "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.";
 
 function utmFromLocation() {

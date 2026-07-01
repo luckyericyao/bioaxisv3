@@ -26,7 +26,7 @@ export function WhatBioAxisDoesSection() {
       <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
           <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-ice">Structured sourcing workflow</p>
-          <h2 className="text-3xl font-bold uppercase leading-tight text-white sm:text-5xl">Turn scattered product inputs into a buyer-ready sourcing brief.</h2>
+          <h2 className="text-3xl font-bold uppercase leading-tight text-white sm:text-5xl">Turn scattered product inputs into a buyer-ready sourcing brief</h2>
           <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg">
             BioAxis maps product context, equivalent criteria, document needs, sample paths, and quote details into one structured sourcing workflow.
           </p>
