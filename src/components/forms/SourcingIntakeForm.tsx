@@ -86,6 +86,7 @@ type SubmitState = {
 const sourcingListStorageKey = "bioaxis:sourcing-list";
 const sourcingListSubmissionStorageKey = "bioaxis:sourcing-list-submission";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
+const sourcingListSubmittedEvent = "bioaxis:sourcing-list-submitted";
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 const verificationErrorMessage = "Please complete the verification and try again.";
 const primaryHelperText = "Only your email is required to start. Add details only if useful.";
@@ -163,6 +164,7 @@ function clearStoredSourcingSubmission() {
 
   window.sessionStorage.removeItem(sourcingListSubmissionStorageKey);
   window.sessionStorage.removeItem(sourcingListItemsStorageKey);
+  window.dispatchEvent(new Event(sourcingListSubmittedEvent));
 }
 
 function labelForProductField(requestType: string, hasContext: boolean, override?: string) {
@@ -389,6 +391,7 @@ export function SourcingIntakeForm({
       });
       clearStoredSourcingSubmission();
       setRestoredSessionInput(false);
+      setSourcingListItems([]);
     } catch {
       setError(requestErrorMessage);
       setSubmitted(null);

@@ -56,6 +56,7 @@ type SourcingListContextValue = {
 const storageKey = "bioaxis:sourcing-list";
 const submissionStorageKey = "bioaxis:sourcing-list-submission";
 const submissionItemsStorageKey = "bioaxis:sourcing-list-items";
+const submissionCompleteEvent = "bioaxis:sourcing-list-submitted";
 const SourcingListContext = createContext<SourcingListContextValue | null>(null);
 
 function itemKey(item: SourcingListInput) {
@@ -132,6 +133,17 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       window.localStorage.setItem(storageKey, JSON.stringify(items));
     }
   }, [hydrated, items]);
+
+  useEffect(() => {
+    function handleSubmissionComplete() {
+      setItems([]);
+      setDrawerOpen(false);
+      window.localStorage.removeItem(storageKey);
+    }
+
+    window.addEventListener(submissionCompleteEvent, handleSubmissionComplete);
+    return () => window.removeEventListener(submissionCompleteEvent, handleSubmissionComplete);
+  }, []);
 
   const value = useMemo<SourcingListContextValue>(
     () => ({
