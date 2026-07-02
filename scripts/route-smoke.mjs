@@ -73,7 +73,8 @@ const productSearchExpectations = {
   "/products?q=PES%200.22": ["PES", "0.22"],
   "/products?q=qPCR%20plates": ["qPCR", "PCR"],
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
-  "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"]
+  "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
+  "/products?q=zzzxqnotfound999": ["No direct catalog match", "Send the input anyway", "Send to BioAxis"]
 };
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
@@ -159,6 +160,7 @@ const routes = [
   "/products?q=qPCR%20plates",
   "/products?q=sterile%20syringe%20filter",
   "/products?q=low%20retention%20tips",
+  "/products?q=zzzxqnotfound999",
   "/products/liquid-handling",
   "/products/liquid-handling/pipette-tips",
   "/products/cell-culture",
@@ -332,13 +334,12 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
+    const noDirectMatch = pageText.includes("No direct catalog match");
+
     [
-      "Product search results",
+      "Sourcing matches",
       "Results for",
-      "Ranked across BioAxis",
-      "Search coverage",
-      "Category",
-      "Top matches",
+      "Direct product, family, path, and specification matches appear first",
       "Sourcing next steps",
       "Turn this search into a sourcing brief.",
       "Structure RFQ",
@@ -354,17 +355,33 @@ for (const route of routes) {
       }
     });
 
+    if (!noDirectMatch) {
+      ["Search coverage", "Category", "Top matches"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing search UX label ${label}`);
+        }
+      });
+    }
+
     ["quote", "equivalent", "documentation", "sample"].forEach((requestType) => {
       if (!hasHrefWithParams(html, "/request-quote", { requestType })) {
         failures.push(`${route}: missing search-to-RFQ action for ${requestType}`);
       }
     });
 
-    expectedTerms.forEach((term) => {
-      if (!new RegExp(term, "i").test(pageText)) {
-        failures.push(`${route}: missing expected search result term ${term}`);
-      }
-    });
+    if (noDirectMatch) {
+      ["Send the input anyway", "Send to BioAxis", "Browse product lines"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing no-result sourcing path ${label}`);
+        }
+      });
+    } else {
+      expectedTerms.forEach((term) => {
+        if (!new RegExp(term, "i").test(pageText)) {
+          failures.push(`${route}: missing expected search result term ${term}`);
+        }
+      });
+    }
   }
 
   if (route === "/products?q=cell") {

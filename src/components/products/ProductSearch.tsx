@@ -350,7 +350,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6 lg:p-8">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)] xl:items-start">
           <div>
-            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search results</p>
+            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Sourcing matches</p>
             <h2 className="mt-2 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
@@ -358,7 +358,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-dim">
-              Ranked across BioAxis product segments, categories, families, sourcing templates, specifications, workflows, resources, aliases, and descriptions.
+              Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
             </p>
           </div>
           <div>
@@ -459,16 +459,26 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </div>
         </section>
       ) : (
-        <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-5">
-          <p className="text-sm leading-6 text-bioaxis-muted">
-            No product-universe result matched this query. Submit the product name, current supplier, catalog number, or workflow and BioAxis can organize sourcing support.
+        <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">No direct catalog match</p>
+          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Send the input anyway.</h3>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
+            BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.
           </p>
-          <Link
-            href={productListSearchHref}
-            className="mt-4 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-          >
-            Submit product list or RFQ
-          </Link>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Link
+              href={productListSearchHref}
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            >
+              Send to BioAxis
+            </Link>
+            <Link
+              href="/products"
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              Browse product lines
+            </Link>
+          </div>
           <div className="mt-6">
             <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
           </div>
@@ -477,7 +487,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
       <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
         <p className="text-sm leading-6 text-bioaxis-muted">
-          Search results are ranked above. Browse all segments if you want to explore the full catalog.
+          Search results are ranked above. Browse all segments if you want to explore the full product line directory.
         </p>
         <Link
           href="/products#product-categories"
