@@ -59,7 +59,7 @@ export function Header() {
           {brand.name.toUpperCase()}
         </Link>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <button
             type="button"
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
@@ -71,7 +71,7 @@ export function Header() {
           </button>
         </div>
 
-        <nav id="primary-navigation" aria-label="Primary navigation" className="hidden items-center justify-end gap-1 md:flex lg:gap-2">
+        <nav id="primary-navigation" aria-label="Primary navigation" className="hidden items-center justify-end gap-1 lg:flex xl:gap-2">
           {navigationItems.map((item) =>
             item.label === "Products" ? (
               <div
@@ -93,7 +93,7 @@ export function Header() {
                   aria-haspopup="true"
                   aria-expanded={productsOpen}
                   aria-controls="products-segment-dropdown"
-                  className="inline-flex min-h-16 items-center px-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text lg:px-3"
+                  className="inline-flex min-h-16 items-center px-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
                 >
                   {item.label}
                 </Link>
@@ -110,7 +110,7 @@ export function Header() {
                 className={
                   item.label === "Request Quote"
                     ? "ml-1 inline-flex min-h-10 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
-                    : "px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text lg:px-3"
+                    : "px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
                 }
               >
                 {item.label}
@@ -121,7 +121,7 @@ export function Header() {
       </div>
 
       {menuOpen ? (
-        <nav aria-label="Mobile navigation" className="border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg md:hidden">
+        <nav aria-label="Mobile navigation" className="border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg lg:hidden">
           <div className="grid gap-2">
             {navigationItems.map((item) =>
               item.label === "Products" ? (
@@ -170,7 +170,7 @@ function ProductSegmentDropdown({
   return (
     <div
       id="products-segment-dropdown"
-      className="absolute left-0 top-16 z-[90] hidden w-[340px] overflow-hidden border border-bioaxis-line bg-white shadow-2xl shadow-slate-900/18 md:block"
+      className="absolute left-0 top-16 z-[90] hidden w-[340px] overflow-hidden border border-bioaxis-line bg-white shadow-2xl shadow-slate-900/18 lg:block"
     >
       <div className="max-h-[70vh] overflow-y-auto p-2">
         <p className="px-3 pb-2 pt-2 text-[11px] font-bold uppercase text-bioaxis-accent">Product segments</p>
