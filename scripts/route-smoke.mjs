@@ -744,28 +744,43 @@ for (const route of routes) {
   if (route === "/ready-supply") {
     [
       "Ready Supply",
-      "Priority consumable lines with stronger supplier access, clearer documentation paths, and faster quote handling.",
-      "Selected lines with clearer sourcing paths.",
-      "Ready Supply is not a live inventory marketplace.",
+      "Priority consumable lines where BioAxis has stronger supplier access, clearer documentation paths, and faster quote handling.",
+      "Ready Supply Board",
+      "Pipette & Robotic Tips",
+      "Priority access",
+      "Documentation-ready",
+      "Supplier visibility",
+      "Documentation path",
+      "Sample access",
+      "Recurring supply",
       "Pipette Tips & Robotic Tips",
       "PCR / qPCR Plastics",
       "Tubes, Plates & Storage",
       "Cell Culture Consumables",
       "Filtration",
       "Private Label / OEM Ready Lines",
-      "Availability visibility",
-      "Documentation support",
-      "Sample / quote path",
-      "Request availability",
+      "Check tip availability",
+      "Check PCR plastics",
+      "Check storage supply",
+      "Check cell culture lines",
+      "Check filtration options",
+      "Discuss OEM-ready lines",
+      "How to use Ready Supply",
+      "Current SKU or brand",
+      "Required specification",
+      "Estimated monthly / quarterly volume",
+      "Documentation requirement",
+      "Sample or delivery timeline",
+      "Not a real-time inventory feed",
       "Send us your current SKU, brand, or required specification.",
-      "We will check availability, equivalents, documentation, and supply options."
+      "We will check availability, equivalents, documentation, sample paths, and supply options."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing ready-supply content ${label}`);
       }
     });
 
-    [/real-time inventory/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
+    [/real-time inventory marketplace/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
       }
