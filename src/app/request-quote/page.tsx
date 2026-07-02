@@ -156,6 +156,33 @@ function defaultProductListFromSearch(query: string | undefined, requestType: st
   ].join("\n");
 }
 
+function defaultProductListFromNeed(need: string | undefined, requestType: string) {
+  const normalizedNeed = need?.toLowerCase() ?? "";
+  const normalizedRequestType = normalizeRequestType(requestType);
+
+  if (normalizedRequestType === "documentation" || normalizedNeed.includes("document")) {
+    return [
+      "Documentation request",
+      "Product or product family:",
+      "Documents needed: CoA, SDS, sterility, material statement, or lot-level documentation",
+      "Current supplier or catalog reference:",
+      "Purchase timing:"
+    ].join("\n");
+  }
+
+  if (normalizedRequestType === "recurring-supply" || normalizedNeed.includes("recurring")) {
+    return [
+      "Recurring supply review",
+      "Product list or product family:",
+      "Estimated monthly or annual usage:",
+      "Current supplier or catalog reference:",
+      "Packaging, lead time, or backup-source needs:"
+    ].join("\n");
+  }
+
+  return "";
+}
+
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
@@ -171,7 +198,9 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
-    (defaultProductListFromContext({ sourcePage, source, intent, need }) || defaultProductListFromSearch(query, requestType));
+    (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
+      defaultProductListFromSearch(query, requestType) ||
+      defaultProductListFromNeed(need, requestType));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";

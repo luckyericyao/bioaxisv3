@@ -181,7 +181,9 @@ const routes = [
   "/request-quote?requestType=equivalent",
   "/request-quote?requestType=sample",
   "/request-quote?requestType=documentation",
+  "/request-quote?requestType=documentation&need=documents",
   "/request-quote?requestType=recurring-supply",
+  "/request-quote?requestType=recurring-supply&need=recurring-supply",
   "/request-quote?requestType=general-sourcing-question",
   "/request-quote?type=quote",
   "/request-quote?type=product-list",
@@ -648,6 +650,14 @@ for (const route of routes) {
     failures.push(`${route}: documentation type query did not preselect documentation request`);
   }
 
+  if (route === "/request-quote?requestType=documentation&need=documents") {
+    ["Pasted input captured", "Documentation request", "Documents needed: CoA, SDS, sterility, material statement, or lot-level documentation", "Purchase timing"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing documentation starter ${label}`);
+      }
+    });
+  }
+
   if (route === "/request-quote?need=documents&segment=cell-culture") {
     ["Documentation", "Request context", "Cell Culture"].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -682,6 +692,14 @@ for (const route of routes) {
 
   if ((route.startsWith("/request-quote?type=recurring") || route.startsWith("/request-quote?requestType=recurring-supply")) && !pageText.includes("Recurring supply")) {
     failures.push(`${route}: recurring type query did not preselect recurring supply request`);
+  }
+
+  if (route === "/request-quote?requestType=recurring-supply&need=recurring-supply") {
+    ["Pasted input captured", "Recurring supply review", "Estimated monthly or annual usage", "Packaging, lead time, or backup-source needs"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing recurring-supply starter ${label}`);
+      }
+    });
   }
 
   if (route.startsWith("/request-quote?type=unknown") && !pageText.includes("Quote")) {
