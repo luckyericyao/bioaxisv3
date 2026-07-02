@@ -25,7 +25,7 @@ export function SimpleRequestForm({ title, submitLabel, requestType = "sample" }
       submitLabel={submitLabel}
       optionalChips={
         requestType === "sample"
-          ? ["Application / workflow", "Estimated monthly usage", "Shipping region", "Evaluation timeline", "Specifications or notes"]
+          ? ["Application or workflow", "Estimated monthly usage", "Shipping region", "Evaluation timeline", "Specifications or notes"]
           : undefined
       }
       compact

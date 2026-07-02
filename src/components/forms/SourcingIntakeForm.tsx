@@ -97,11 +97,11 @@ const defaultEquivalentChips = [
   "Format match",
   "Sterility",
   "Material",
-  "Low retention / binding",
+  "Low retention or binding",
   "Automation compatibility",
   "Packaging",
   "Documentation",
-  "Price / availability",
+  "Price or availability",
   "Sample before switching"
 ];
 
@@ -110,11 +110,11 @@ const timelineOptions = ["Urgent", "This week", "This month", "Planning ahead", 
 const requestStarterTemplates = [
   {
     label: "Availability check",
-    value: "Need availability check for:\nCurrent SKU / catalog reference:\nQuantity and timing:"
+    value: "Need availability check for:\nCurrent SKU or catalog reference:\nQuantity and timing:"
   },
   {
     label: "Equivalent review",
-    value: "Current product or supplier line:\nEquivalent needs to match:\nFormat / material / sterility / packaging:"
+    value: "Current product or supplier line:\nEquivalent needs to match:\nFormat, material, sterility, packaging:"
   },
   {
     label: "Sample before switching",
@@ -126,7 +126,7 @@ const requestStarterTemplates = [
   },
   {
     label: "Recurring supply review",
-    value: "Recurring demand for:\nEstimated monthly / annual usage:\nPackaging, lead time, or backup-source requirements:"
+    value: "Recurring demand for:\nEstimated monthly or annual usage:\nPackaging, lead time, or backup-source requirements:"
   }
 ];
 
@@ -433,7 +433,7 @@ export function SourcingIntakeForm({
         <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">BioAxis will review</p>
           <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
-            {["Product context", "Equivalent path", "Documentation needs", "Sample / quote next step"].map((item) => (
+            {["Product context", "Equivalent path", "Documentation needs", "Sample or quote next step"].map((item) => (
               <li key={item} className="border border-white/[0.12] px-3 py-2">
                 {item}
               </li>
@@ -472,7 +472,7 @@ export function SourcingIntakeForm({
       </div>
 
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">One-click intake</p>
+        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing intake</p>
         <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
         <div className="mt-3 grid gap-2 text-sm leading-6 text-bioaxis-muted">
           <p>{primaryHelperText}</p>
@@ -513,12 +513,12 @@ export function SourcingIntakeForm({
           <div data-request-starters="true" className="md:col-span-2 border border-bioaxis-line bg-bioaxis-black/70 p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Not sure what to write?</p>
+                <p className="text-xs font-bold uppercase text-bioaxis-accent">Use a request starter</p>
                 <p className="mt-1 text-sm leading-6 text-bioaxis-muted">
                   Use a starter, then edit any line. BioAxis can follow up for missing details.
                 </p>
               </div>
-              <p className="text-xs font-semibold uppercase text-bioaxis-dim">Optional shortcuts</p>
+              <p className="text-xs font-semibold uppercase text-bioaxis-dim">Optional starters</p>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {requestStarterTemplates.map((starter) => (
@@ -607,12 +607,12 @@ export function SourcingIntakeForm({
             </fieldset>
           ) : null}
           <Field id="sourcing-name" label="Name optional" value={state.name} onChange={(value) => updateField("name", value)} />
-          <Field id="sourcing-company" label="Company / organization optional" value={state.company} onChange={(value) => updateField("company", value)} />
+          <Field id="sourcing-company" label="Company or organization optional" value={state.company} onChange={(value) => updateField("company", value)} />
           <Field id="sourcing-phone" label="Phone optional" value={state.phone} onChange={(value) => updateField("phone", value)} />
-          <Field id="sourcing-role" label="Role / title optional" value={state.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
-          <Field id="sourcing-supplier" label="Current supplier / brand optional" value={state.currentSupplier} onChange={(value) => updateField("currentSupplier", value)} />
-          <Field id="sourcing-catalog" label="Catalog number / SKU optional" value={state.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
-          <Field id="sourcing-quantity" label="Quantity / usage optional" value={state.quantity} onChange={(value) => updateField("quantity", value)} />
+          <Field id="sourcing-role" label="Role or title optional" value={state.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
+          <Field id="sourcing-supplier" label="Current supplier or brand optional" value={state.currentSupplier} onChange={(value) => updateField("currentSupplier", value)} />
+          <Field id="sourcing-catalog" label="Catalog number or SKU optional" value={state.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
+          <Field id="sourcing-quantity" label="Quantity or usage optional" value={state.quantity} onChange={(value) => updateField("quantity", value)} />
           <SelectField id="sourcing-timeline" label="Timeline optional" value={state.timeline} options={timelineOptions} onChange={(value) => updateField("timeline", value)} />
           <Field id="sourcing-region" label="Shipping region optional" value={state.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
           <TextArea

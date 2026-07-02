@@ -634,14 +634,14 @@ for (const route of routes) {
       "Paste what you have. BioAxis will structure the sourcing request.",
       "Only your email is required to start. Add details only if useful.",
       "Email *",
-      "Not sure what to write?",
+      "Use a request starter",
       "Availability check",
       "Equivalent review",
       "Sample before switching",
       "Documents before purchase",
       "Recurring supply review",
-      "Current supplier / brand optional",
-      "Catalog number / SKU optional",
+      "Current supplier or brand optional",
+      "Catalog number or SKU optional",
       "Missing optional procurement details will not block submission.",
       "Send sourcing request"
     ].forEach((label) => {
@@ -686,7 +686,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote" || route === "/request-quote?requestType=quote") {
-    ["Not sure what to write?", "Availability check"].forEach((label) => {
+    ["Use a request starter", "Availability check"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing direct quote intake affordance ${label}`);
       }
@@ -756,7 +756,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote?requestType=sample") {
-    ["Request draft ready", "Sample request", "Use case / workflow", "Sample quantity or evaluation timing"].forEach((label) => {
+    ["Request draft ready", "Sample request", "Use case or workflow", "Sample quantity or evaluation timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing sample starter ${label}`);
       }
@@ -784,7 +784,7 @@ for (const route of routes) {
   }
 
   if (route.includes("sourcePage=ready-supply")) {
-    ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU / brand", "Quantity / timing"].forEach((label) => {
+    ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU or brand", "Quantity and timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
       }
@@ -800,7 +800,7 @@ for (const route of routes) {
   }
 
   if (route.includes("sourcePage=private-label-oem")) {
-    ["Request context", "Request draft ready", "Private-label / OEM pipette tips review", "Target tip format", "Packaging / label requirements", "Estimated recurring demand"].forEach((label) => {
+    ["Request context", "Request draft ready", "Private-label / OEM pipette tips review", "Target tip format", "Packaging or label requirements", "Estimated recurring demand"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing private-label RFQ handoff ${label}`);
       }

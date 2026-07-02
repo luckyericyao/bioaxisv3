@@ -68,18 +68,18 @@ function defaultProductListFromContext({
     if (normalizedIntent.includes("current-sku")) {
       return [
         "Ready Supply current SKU review",
-        "Current SKU / brand:",
+        "Current SKU or brand:",
         "Consumable type or specification:",
-        "Quantity / timing:",
+        "Quantity and timing:",
         "Documents needed:"
       ].join("\n");
     }
 
     return [
       "Ready Supply availability check",
-      "Current SKU / brand:",
+      "Current SKU or brand:",
       "Key specification:",
-      "Quantity / timing:",
+      "Quantity and timing:",
       "Delivery region:"
     ].join("\n");
   }
@@ -90,7 +90,7 @@ function defaultProductListFromContext({
         "Private-label / OEM pipette tips review",
         "Target tip format:",
         "Current brand or catalog reference:",
-        "Packaging / label requirements:",
+        "Packaging or label requirements:",
         "Estimated recurring demand:",
         "Documents or samples needed:"
       ].join("\n");
@@ -102,7 +102,7 @@ function defaultProductListFromContext({
         "Target product family:",
         "Current brand or catalog reference:",
         "Estimated monthly or annual usage:",
-        "Packaging / label requirements:",
+        "Packaging or label requirements:",
         "Documents or samples needed:"
       ].join("\n");
     }
@@ -113,7 +113,7 @@ function defaultProductListFromContext({
         "Target product family:",
         "Current brand or catalog reference:",
         "Key format or material requirements:",
-        "Packaging / label requirements:",
+        "Packaging or label requirements:",
         "Documents or samples needed:"
       ].join("\n");
     }
@@ -122,7 +122,7 @@ function defaultProductListFromContext({
       "Private-label / OEM sourcing discussion",
       "Target product family:",
       "Current brand or catalog reference:",
-      "Packaging / label requirements:",
+      "Packaging or label requirements:",
       "Estimated recurring demand:",
       "Documents or samples needed:"
     ].join("\n");
@@ -142,8 +142,8 @@ function defaultProductListFromSearch(query: string | undefined, requestType: st
     return [
       "BioAxis product search handoff",
       `Search term: ${trimmedQuery}`,
-      "Product list / supplier lines:",
-      "Quantity / timing:",
+      "Product list or supplier lines:",
+      "Quantity and timing:",
       "Documents, samples, or equivalent needs:"
     ].join("\n");
   }
@@ -152,7 +152,7 @@ function defaultProductListFromSearch(query: string | undefined, requestType: st
     "BioAxis product search handoff",
     `Search term: ${trimmedQuery}`,
     "Sourcing need:",
-    "Quantity / timing:",
+    "Quantity and timing:",
     "Documents or samples needed:"
   ].join("\n");
 }
@@ -230,7 +230,7 @@ function defaultProductListFromRequestType(requestType: string, hasRouteContext:
       "Sample request",
       "Product or product family:",
       "Current supplier or catalog reference:",
-      "Use case / workflow:",
+      "Use case or workflow:",
       "Sample quantity or evaluation timing:",
       "Documents needed:"
     ].join("\n");
@@ -240,7 +240,7 @@ function defaultProductListFromRequestType(requestType: string, hasRouteContext:
     return [
       "Product list review",
       "Paste product list or supplier lines:",
-      "Quantity / timing:",
+      "Quantity and timing:",
       "Equivalent, sample, or documentation needs:",
       "Recurring usage if known:"
     ].join("\n");
