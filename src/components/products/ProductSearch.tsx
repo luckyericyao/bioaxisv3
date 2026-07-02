@@ -22,7 +22,7 @@ const quickSearches = [
 const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product", "workflow", "resource"];
 
 function resultTypeLabel(type: ProductSearchResult["type"]) {
-  if (type === "subcategory") return "Family";
+  if (type === "subcategory") return "Category";
   if (type === "resource") return "Guide";
   if (type === "workflow") return "RFQ path";
 
@@ -237,7 +237,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           id="product-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Product, catalog reference, or workflow"
+          placeholder="Search product name, catalog reference, supplier line, or consumable type"
           className="field-focus min-h-12 min-w-0 flex-1 border-0 bg-transparent text-base font-semibold text-bioaxis-text placeholder:text-bioaxis-dim sm:text-lg"
         />
         <button
@@ -281,7 +281,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6 lg:p-8">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)] xl:items-start">
           <div>
-            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search command center</p>
+            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search results</p>
             <h2 className="mt-2 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
@@ -305,7 +305,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 href={quoteSearchHref}
                 className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
               >
-                Prepare request
+                Send search to BioAxis
               </Link>
             </div>
           </div>
@@ -395,7 +395,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               ))}
             </div>
             <p className="mt-5 text-sm leading-6 text-bioaxis-muted">
-              BioAxis can help compare equivalent options, samples, documentation, and quote-ready sourcing lists.
+              Send the current search when you need BioAxis to organize equivalent options, samples, documentation, and quote-ready sourcing details.
             </p>
             <Link
               href={productListSearchHref}

@@ -322,7 +322,7 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    ["Results for", "Ranked across BioAxis", "Search coverage", "Top matches", "Sourcing next steps", "Clear search", "Browse all product segments"].forEach((label) => {
+    ["Product search results", "Results for", "Ranked across BioAxis", "Search coverage", "Category", "Top matches", "Sourcing next steps", "Clear search", "Send search to BioAxis", "Browse all product segments"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
