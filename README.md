@@ -38,12 +38,13 @@ BIOAXIS_RFQ_TO_EMAIL=crazyowenyao@gmail.com
 BIOAXIS_RFQ_FROM_EMAIL=rfq@your-verified-domain.example
 BIOAXIS_RFQ_REPLY_TO_EMAIL=crazyowenyao@gmail.com
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
+TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
 ```
 
 Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. During development, if no verified sender is available, leave it blank and the API route uses Resend's safe test sender.
 
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is the public Cloudflare Turnstile widget key. `TURNSTILE_SECRET_KEY` is server-only and must never be exposed with a `NEXT_PUBLIC_` prefix. When `TURNSTILE_SECRET_KEY` is configured, `POST /api/rfq` validates the Turnstile token before sending email.
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is the public Cloudflare Turnstile widget key. `TURNSTILE_SITE_KEY` is an optional server-served alias for the same public site key, useful when you want the browser to fetch the key from `/api/turnstile/config` at runtime. `TURNSTILE_SECRET_KEY` is server-only and must never be exposed with a `NEXT_PUBLIC_` prefix. When both a site key and `TURNSTILE_SECRET_KEY` are configured, `POST /api/rfq` validates the Turnstile token before sending email.
 
 ### Vercel, Resend, and Turnstile setup
 
@@ -51,7 +52,7 @@ Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. 
 2. Create a Resend API key.
 3. Verify the production sender domain in Resend before using a branded sender address.
 4. Create a Cloudflare Turnstile widget for the production domain.
-5. Add `RESEND_API_KEY`, `BIOAXIS_RFQ_TO_EMAIL`, `BIOAXIS_RFQ_FROM_EMAIL`, `BIOAXIS_RFQ_REPLY_TO_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, and `TURNSTILE_SECRET_KEY` in Vercel Project Settings -> Environment Variables.
+5. Add `RESEND_API_KEY`, `BIOAXIS_RFQ_TO_EMAIL`, `BIOAXIS_RFQ_FROM_EMAIL`, `BIOAXIS_RFQ_REPLY_TO_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` or `TURNSTILE_SITE_KEY`, and `TURNSTILE_SECRET_KEY` in Vercel Project Settings -> Environment Variables.
 6. Redeploy the Vercel project so the API route can read the variables.
 7. Submit a test RFQ from `/request-quote`.
 8. Check the destination inbox and spam folder.

@@ -25,13 +25,58 @@ declare global {
 
 type TurnstileWidgetProps = {
   onTokenChange: (token: string) => void;
+  onAvailabilityChange?: (available: boolean) => void;
 };
 
-export function TurnstileWidget({ onTokenChange }: TurnstileWidgetProps) {
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+type TurnstileConfigResponse = {
+  enabled?: boolean;
+  siteKey?: string;
+};
+
+const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+
+export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
+  const [configLoaded, setConfigLoaded] = useState(Boolean(buildTimeSiteKey));
   const [scriptReady, setScriptReady] = useState(false);
+
+  useEffect(() => {
+    if (buildTimeSiteKey) {
+      onAvailabilityChange?.(true);
+      return;
+    }
+
+    let ignore = false;
+
+    async function loadRuntimeConfig() {
+      try {
+        const response = await fetch("/api/turnstile/config", { cache: "no-store" });
+        const config = (await response.json()) as TurnstileConfigResponse;
+
+        if (!ignore) {
+          setSiteKey(config.enabled && config.siteKey ? config.siteKey : "");
+          onAvailabilityChange?.(Boolean(config.enabled && config.siteKey));
+        }
+      } catch {
+        if (!ignore) {
+          setSiteKey("");
+          onAvailabilityChange?.(false);
+        }
+      } finally {
+        if (!ignore) {
+          setConfigLoaded(true);
+        }
+      }
+    }
+
+    loadRuntimeConfig();
+
+    return () => {
+      ignore = true;
+    };
+  }, [onAvailabilityChange]);
 
   useEffect(() => {
     if (!siteKey || !scriptReady || !containerRef.current || !window.turnstile || widgetIdRef.current) {
@@ -56,7 +101,11 @@ export function TurnstileWidget({ onTokenChange }: TurnstileWidgetProps) {
   }, [onTokenChange, scriptReady, siteKey]);
 
   if (!siteKey) {
-    return null;
+    return configLoaded ? null : (
+      <div className="border border-bioaxis-line bg-bioaxis-black p-4" data-turnstile-widget="loading">
+        <p className="text-xs font-bold uppercase text-bioaxis-dim">Loading verification</p>
+      </div>
+    );
   }
 
   return (

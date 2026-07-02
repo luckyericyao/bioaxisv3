@@ -1056,6 +1056,7 @@ if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.inc
 }
 
 const rfqRouteSource = await readRequiredProjectFile("src/app/api/rfq/route.ts");
+const turnstileConfigRouteSource = await readRequiredProjectFile("src/app/api/turnstile/config/route.ts");
 const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
 const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisRequest.ts");
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
@@ -1090,9 +1091,10 @@ if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.
 }
 
 [
-  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "turnstileToken", "siteverify"]],
-  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js"]],
-  ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage"]]
+  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify"]],
+  ["Turnstile config route", turnstileConfigRouteSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "no-store"]],
+  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js"]],
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
@@ -1270,6 +1272,7 @@ const envMap = new Map(envLines.map((line) => {
   "BIOAXIS_RFQ_FROM_EMAIL",
   "BIOAXIS_RFQ_REPLY_TO_EMAIL",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+  "TURNSTILE_SITE_KEY",
   "TURNSTILE_SECRET_KEY"
 ].forEach((name) => {
   if (!envMap.has(name)) {

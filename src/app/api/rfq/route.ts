@@ -301,6 +301,15 @@ function validateRequest(request: NormalizedRfq) {
   return "";
 }
 
+function turnstileSiteKey() {
+  return (
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+    process.env.TURNSTILE_SITE_KEY ||
+    process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ||
+    ""
+  );
+}
+
 function remoteIpFromRequest(request: Request) {
   return (
     request.headers.get("cf-connecting-ip") ||
@@ -316,7 +325,7 @@ function remoteIpFromRequest(request: Request) {
 async function validateTurnstileToken(token: string, request: Request) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
-  if (!secret) {
+  if (!secret || !turnstileSiteKey()) {
     return "";
   }
 

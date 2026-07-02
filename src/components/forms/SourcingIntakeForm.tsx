@@ -195,7 +195,6 @@ export function SourcingIntakeForm({
   optionalChips
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
-  const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
   const startedAtRef = useRef(Date.now());
   const [state, setState] = useState<IntakeState>({
     requestType: normalizedRequestType,
@@ -220,6 +219,7 @@ export function SourcingIntakeForm({
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileAvailable, setTurnstileAvailable] = useState(Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY));
 
   const resolvedProductContext = useMemo(
     () =>
@@ -275,7 +275,7 @@ export function SourcingIntakeForm({
   function validate() {
     if (!hasValidEmail(state.email)) return emailErrorMessage;
     if (!hasPageContext && !state.productInput.trim()) return missingProductErrorMessage;
-    if (turnstileEnabled && !turnstileToken) return verificationErrorMessage;
+    if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
     return "";
   }
 
@@ -439,7 +439,7 @@ export function SourcingIntakeForm({
           />
         </div>
         <div className="mt-5">
-          <TurnstileWidget onTokenChange={setTurnstileToken} />
+          <TurnstileWidget onAvailabilityChange={setTurnstileAvailable} onTokenChange={setTurnstileToken} />
         </div>
         {error ? (
           <p role="alert" className="mt-4 text-sm font-semibold text-bioaxis-accent">
