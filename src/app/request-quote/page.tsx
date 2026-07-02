@@ -183,8 +183,18 @@ function defaultProductListFromNeed(need: string | undefined, requestType: strin
   return "";
 }
 
-function defaultProductListFromRequestType(requestType: string) {
+function defaultProductListFromRequestType(requestType: string, hasRouteContext: boolean) {
   const normalizedRequestType = normalizeRequestType(requestType);
+
+  if (normalizedRequestType === "quote" && !hasRouteContext) {
+    return [
+      "Quote request",
+      "Product, SKU, catalog reference, or product list:",
+      "Quantity / timing:",
+      "Documents, samples, or equivalent needs:",
+      "Delivery region if relevant:"
+    ].join("\n");
+  }
 
   if (normalizedRequestType === "equivalent") {
     return [
@@ -226,19 +236,21 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const subcategory = first(params?.subcategory) ?? first(params?.category);
   const family = first(params?.family);
   const product = first(params?.product);
+  const productNameParam = first(params?.productName) ?? first(params?.product_name);
   const need = first(params?.need);
   const requestType = normalizeRequestType(first(params?.requestType) ?? first(params?.type) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
+  const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || sourcePage || query);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
       defaultProductListFromSearch(query, requestType) ||
       defaultProductListFromNeed(need, requestType) ||
-      defaultProductListFromRequestType(requestType));
+      defaultProductListFromRequestType(requestType, hasRouteContext));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
@@ -252,9 +264,9 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const catalogFamilyMatch = segment && subcategory && family ? getCatalogFamilyBySlug(segment, subcategory, family) : null;
   const sourceProductUrl = sourcePage || buildSourceProductUrl({ segment, subcategory, family, product });
   const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || "";
-  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || labelize(family) || query || "";
+  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
-    segment || subcategory || family || product || query || sourcePage
+    segment || subcategory || family || product || productNameParam || query || sourcePage
       ? {
           requestType: requestType ?? "quote",
           productName,

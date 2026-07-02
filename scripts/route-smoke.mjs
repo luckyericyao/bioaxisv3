@@ -196,6 +196,7 @@ const routes = [
   "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
   "/request-quote?requestType=quote&sourcePage=private-label-oem&need=pipette-tips-private-label",
+  "/request-quote?requestType=quote&productName=filtered%20pipette%20tips",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -622,6 +623,22 @@ for (const route of routes) {
     [/Product segment\s*\/\s*category\s+\*/i, /Product or equivalent product\s+\*/i, /Required specification/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: procurement field still appears required or heavy: ${pattern}`);
+      }
+    });
+  }
+
+  if (route === "/request-quote" || route === "/request-quote?requestType=quote") {
+    ["Pasted input captured", "Quote request", "Product, SKU, catalog reference, or product list", "Delivery region if relevant"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing generic quote starter ${label}`);
+      }
+    });
+  }
+
+  if (route.includes("productName=filtered%20pipette%20tips")) {
+    ["Request context", "filtered pipette tips", "BioAxis will include this product context with your request"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing productName RFQ context ${label}`);
       }
     });
   }
