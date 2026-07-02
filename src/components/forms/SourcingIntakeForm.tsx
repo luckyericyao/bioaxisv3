@@ -284,6 +284,9 @@ export function SourcingIntakeForm({
   const chips = optionalChips ?? (state.requestType === "equivalent" ? defaultEquivalentChips : []);
   const selectedRequestType = getRequestTypeById(state.requestType);
   const productLabel = labelForProductField(state.requestType, hasPageContext, productFieldLabel);
+  const productFieldHelper = hasPageContext
+    ? "Optional. This page context is already included; add specs, supplier, quantity, or documents only if useful."
+    : "Optional. Submit with email only, or paste any SKU, supplier line, product list, or rough sourcing need.";
   const currentSubmitLabel = submitLabelFor(state.requestType, submitLabel);
 
   useEffect(() => {
@@ -497,6 +500,7 @@ export function SourcingIntakeForm({
             label={productLabel}
             value={state.productInput}
             rows={compact ? 4 : 6}
+            helperText={productFieldHelper}
             placeholder={
               hasPageContext
                 ? "Product context from this page will be included automatically. Add details only if useful."
@@ -762,6 +766,7 @@ function TextArea({
   value,
   rows = 5,
   required = false,
+  helperText,
   placeholder,
   onChange
 }: {
@@ -770,9 +775,12 @@ function TextArea({
   value: string;
   rows?: number;
   required?: boolean;
+  helperText?: string;
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
+  const helperId = helperText ? `${id}-helper` : undefined;
+
   return (
     <div className="md:col-span-2">
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
@@ -784,9 +792,15 @@ function TextArea({
         value={value}
         rows={rows}
         placeholder={placeholder}
+        aria-describedby={helperId}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base leading-7 text-bioaxis-text placeholder:text-bioaxis-dim"
       />
+      {helperText ? (
+        <p id={helperId} className="mt-2 text-sm leading-6 text-bioaxis-muted">
+          {helperText}
+        </p>
+      ) : null}
     </div>
   );
 }

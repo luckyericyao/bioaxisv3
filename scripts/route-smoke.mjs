@@ -646,6 +646,10 @@ for (const route of routes) {
       }
     });
 
+    if (!pageText.includes("Optional. Submit with email only") && !pageText.includes("Optional. This page context is already included")) {
+      failures.push(`${route}: missing optional primary input reassurance`);
+    }
+
     const primaryNeedLabels = [
       "Product / SKU / product list / sourcing need",
       "Current product / catalog number / supplier line",
@@ -696,7 +700,7 @@ for (const route of routes) {
   }
 
   if (route.includes("productName=filtered%20pipette%20tips")) {
-    ["Request context", "filtered pipette tips", "BioAxis will include this product context with your request"].forEach((label) => {
+    ["Request context", "filtered pipette tips", "BioAxis will include this product context with your request", "Optional. This page context is already included"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing productName RFQ context ${label}`);
       }
