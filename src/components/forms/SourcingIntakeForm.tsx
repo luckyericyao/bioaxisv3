@@ -106,6 +106,29 @@ const defaultEquivalentChips = [
 
 const timelineOptions = ["Urgent", "This week", "This month", "Planning ahead", "Not sure"];
 
+const requestStarterTemplates = [
+  {
+    label: "Availability check",
+    value: "Need availability check for:\nCurrent SKU / catalog reference:\nQuantity and timing:"
+  },
+  {
+    label: "Equivalent review",
+    value: "Current product or supplier line:\nEquivalent needs to match:\nFormat / material / sterility / packaging:"
+  },
+  {
+    label: "Sample before switching",
+    value: "Need sample review for:\nCurrent use case:\nKey specs to compare:"
+  },
+  {
+    label: "Documents before purchase",
+    value: "Need documents for:\nRequired documents: CoA, SDS, sterility, material statement, or lot-level documentation\nPurchase timing:"
+  },
+  {
+    label: "Recurring supply review",
+    value: "Recurring demand for:\nEstimated monthly / annual usage:\nPackaging, lead time, or backup-source requirements:"
+  }
+];
+
 function apiRequestType(requestType: string) {
   if (requestType === "product-list") return "product-list-review";
   if (requestType === "recurring") return "recurring-supply";
@@ -269,6 +292,18 @@ export function SourcingIntakeForm({
         ? current.detailChips.filter((item) => item !== chip)
         : [...current.detailChips, chip]
     }));
+    setError("");
+  }
+
+  function applyStarterTemplate(value: string) {
+    setState((current) => {
+      const currentInput = current.productInput.trim();
+
+      return {
+        ...current,
+        productInput: currentInput ? `${currentInput}\n\n${value}` : value
+      };
+    });
     setError("");
   }
 
@@ -437,6 +472,30 @@ export function SourcingIntakeForm({
             }
             onChange={(value) => updateField("productInput", value)}
           />
+          <div data-request-starters="true" className="md:col-span-2 border border-bioaxis-line bg-bioaxis-black/70 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase text-bioaxis-accent">Not sure what to write?</p>
+                <p className="mt-1 text-sm leading-6 text-bioaxis-muted">
+                  Use a starter, then edit any line. BioAxis can follow up for missing details.
+                </p>
+              </div>
+              <p className="text-xs font-semibold uppercase text-bioaxis-dim">Optional shortcuts</p>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {requestStarterTemplates.map((starter) => (
+                <button
+                  key={starter.label}
+                  type="button"
+                  onClick={() => applyStarterTemplate(starter.value)}
+                  className="min-h-10 border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-left text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+                  aria-label={`Use ${starter.label} request starter`}
+                >
+                  {starter.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         <div className="mt-5">
           <TurnstileWidget onAvailabilityChange={setTurnstileAvailable} onTokenChange={setTurnstileToken} />
