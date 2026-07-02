@@ -4,6 +4,7 @@ export type NavigationItem = {
 };
 
 export const navigationItems: NavigationItem[] = [
+  { label: "Ready Supply", href: "/ready-supply" },
   { label: "Products", href: "/products" },
   { label: "Equivalent Finder", href: "/equivalent-finder" },
   { label: "Private Label / OEM", href: "/private-label-oem" },
@@ -15,6 +16,7 @@ export const navigationItems: NavigationItem[] = [
 export const footerNavigationItems: NavigationItem[] = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
+  { label: "Ready Supply", href: "/ready-supply" },
   { label: "Private Label / OEM", href: "/private-label-oem" },
   { label: "Products", href: "/products" },
   { label: "Request Quote", href: "/request-quote" },

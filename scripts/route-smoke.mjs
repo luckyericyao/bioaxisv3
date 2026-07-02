@@ -106,8 +106,8 @@ const equivalentFinderContent = [
   "BioAxis supports equivalent review and sourcing comparison",
   "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
 ];
-const requiredPrimaryNavigation = ["Products", "Equivalent Finder", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
-const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Products", "Request Quote", "Equivalent Finder", "Workflows", "Samples", "Quality", "Trust Center", "Resources"];
+const requiredPrimaryNavigation = ["Ready Supply", "Products", "Equivalent Finder", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
+const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Ready Supply", "Products", "Request Quote", "Equivalent Finder", "Workflows", "Samples", "Quality", "Trust Center", "Resources"];
 const requiredProductSegments = [
   "Liquid Handling",
   "Lab Plasticware",
@@ -165,6 +165,7 @@ const routes = [
   "/products/cell-culture/media-and-supplements",
   ...catalogAcceptanceRoutes,
   "/workflows",
+  "/ready-supply",
   "/equivalent-finder",
   "/private-label",
   "/private-label-oem",
@@ -740,6 +741,37 @@ for (const route of routes) {
     }
   }
 
+  if (route === "/ready-supply") {
+    [
+      "Ready Supply",
+      "Priority consumable lines with stronger supplier access, clearer documentation paths, and faster quote handling.",
+      "Selected lines with clearer sourcing paths.",
+      "Ready Supply is not a live inventory marketplace.",
+      "Pipette Tips & Robotic Tips",
+      "PCR / qPCR Plastics",
+      "Tubes, Plates & Storage",
+      "Cell Culture Consumables",
+      "Filtration",
+      "Private Label / OEM Ready Lines",
+      "Availability visibility",
+      "Documentation support",
+      "Sample / quote path",
+      "Request availability",
+      "Send us your current SKU, brand, or required specification.",
+      "We will check availability, equivalents, documentation, and supply options."
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing ready-supply content ${label}`);
+      }
+    });
+
+    [/real-time inventory/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
+      if (pattern.test(pageText)) {
+        failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
+      }
+    });
+  }
+
   if (route === "/trust-center") {
     [
       "Documentation review",
@@ -835,8 +867,11 @@ for (const route of routes) {
 
   const primaryLabels = navLabels(navBlock(html, "Primary navigation"));
   const footerLabels = navLabels(navBlock(html, "Footer navigation"));
-  if (route === "/" && primaryLabels.length !== 6) {
-    failures.push(`${route}: expected exactly 6 primary nav labels, found ${primaryLabels.length}`);
+  if (route === "/" && primaryLabels.length !== 7) {
+    failures.push(`${route}: expected exactly 7 primary nav labels, found ${primaryLabels.length}`);
+  }
+  if (primaryLabels.includes("Ready Supply") && primaryLabels.includes("Products") && primaryLabels.indexOf("Ready Supply") > primaryLabels.indexOf("Products")) {
+    failures.push(`${route}: Ready Supply should appear before Products in primary navigation`);
   }
   requiredPrimaryNavigation.forEach((label) => {
     if (!primaryLabels.includes(label)) {
