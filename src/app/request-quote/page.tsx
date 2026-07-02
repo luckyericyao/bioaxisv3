@@ -183,6 +183,43 @@ function defaultProductListFromNeed(need: string | undefined, requestType: strin
   return "";
 }
 
+function defaultProductListFromRequestType(requestType: string) {
+  const normalizedRequestType = normalizeRequestType(requestType);
+
+  if (normalizedRequestType === "equivalent") {
+    return [
+      "Equivalent review request",
+      "Current product / catalog number:",
+      "Must-match specs or workflow constraints:",
+      "Documents or samples needed:",
+      "Timing or recurring usage:"
+    ].join("\n");
+  }
+
+  if (normalizedRequestType === "sample") {
+    return [
+      "Sample request",
+      "Product or product family:",
+      "Current supplier or catalog reference:",
+      "Use case / workflow:",
+      "Sample quantity or evaluation timing:",
+      "Documents needed:"
+    ].join("\n");
+  }
+
+  if (normalizedRequestType === "product-list-review") {
+    return [
+      "Product list review",
+      "Paste product list or supplier lines:",
+      "Quantity / timing:",
+      "Equivalent, sample, or documentation needs:",
+      "Recurring usage if known:"
+    ].join("\n");
+  }
+
+  return "";
+}
+
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
@@ -200,7 +237,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     explicitProductList ??
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
       defaultProductListFromSearch(query, requestType) ||
-      defaultProductListFromNeed(need, requestType));
+      defaultProductListFromNeed(need, requestType) ||
+      defaultProductListFromRequestType(requestType));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";

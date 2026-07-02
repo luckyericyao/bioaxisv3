@@ -633,6 +633,14 @@ for (const route of routes) {
       }
     });
 
+    if (route === "/request-quote?requestType=product-list-review") {
+      ["Pasted input captured", "Product list review", "Paste product list or supplier lines", "Equivalent, sample, or documentation needs"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing product-list starter ${label}`);
+        }
+      });
+    }
+
     if (!html.includes("Paste a SKU, product list")) {
       failures.push(`${route}: missing product-list textarea placeholder`);
     }
@@ -642,8 +650,24 @@ for (const route of routes) {
     failures.push(`${route}: equivalent type query did not preselect equivalent request`);
   }
 
+  if (route === "/request-quote?requestType=equivalent") {
+    ["Pasted input captured", "Equivalent review request", "Must-match specs or workflow constraints", "Timing or recurring usage"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing equivalent starter ${label}`);
+      }
+    });
+  }
+
   if ((route.startsWith("/request-quote?type=sample") || route.startsWith("/request-quote?requestType=sample")) && !pageText.includes("Sample")) {
     failures.push(`${route}: sample type query did not preselect sample request`);
+  }
+
+  if (route === "/request-quote?requestType=sample") {
+    ["Pasted input captured", "Sample request", "Use case / workflow", "Sample quantity or evaluation timing"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing sample starter ${label}`);
+      }
+    });
   }
 
   if ((route.startsWith("/request-quote?type=documentation") || route.startsWith("/request-quote?requestType=documentation")) && !pageText.includes("Documentation")) {
