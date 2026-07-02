@@ -389,6 +389,7 @@ for (const route of routes) {
       "Route every consumables request into the right sourcing path.",
       "From urgent replacement to equivalent review, samples, documentation, RFQ, and recurring supply planning",
       "Out of stock",
+      "Check ready supply",
       "Need an equivalent",
       "Documents required",
       "Recurring demand",
@@ -405,6 +406,10 @@ for (const route of routes) {
 
     if (!html.includes("SKU, catalog number, supplier line, or product list")) {
       failures.push(`${route}: missing hero search placeholder`);
+    }
+
+    if (!html.includes('href="/ready-supply"')) {
+      failures.push(`${route}: out-of-stock buyer path should link to Ready Supply`);
     }
 
     ["Matched product family", "Equivalent criteria", "RFQ-ready brief", "Samples and documents"].forEach((label) => {

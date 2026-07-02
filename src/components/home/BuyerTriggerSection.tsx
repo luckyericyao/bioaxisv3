@@ -4,9 +4,9 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const buyerTriggers = [
   {
     title: "Out of stock",
-    body: "Find backup sourcing paths when lead time, allocation, or availability blocks purchasing.",
-    href: "/request-quote?requestType=quote&need=supplier-out-of-stock",
-    cta: "Start RFQ"
+    body: "Check Ready Supply paths when lead time, allocation, or availability blocks purchasing.",
+    href: "/ready-supply",
+    cta: "Check ready supply"
   },
   {
     title: "Need an equivalent",
