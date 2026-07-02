@@ -744,43 +744,54 @@ for (const route of routes) {
   if (route === "/ready-supply") {
     [
       "Ready Supply",
-      "Priority consumable lines where BioAxis has stronger supplier access, clearer documentation paths, and faster quote handling.",
-      "Ready Supply Board",
-      "Pipette & Robotic Tips",
-      "Priority access",
-      "Documentation-ready",
-      "Supplier visibility",
-      "Documentation path",
-      "Sample access",
-      "Recurring supply",
-      "Pipette Tips & Robotic Tips",
-      "PCR / qPCR Plastics",
-      "Tubes, Plates & Storage",
-      "Cell Culture Consumables",
-      "Filtration",
-      "Private Label / OEM Ready Lines",
-      "Check tip availability",
-      "Check PCR plastics",
-      "Check storage supply",
-      "Check cell culture lines",
-      "Check filtration options",
-      "Discuss OEM-ready lines",
-      "How to use Ready Supply",
-      "Current SKU or brand",
-      "Required specification",
-      "Estimated monthly / quarterly volume",
-      "Documentation requirement",
-      "Sample or delivery timeline",
-      "Not a real-time inventory feed",
-      "Send us your current SKU, brand, or required specification.",
-      "We will check availability, equivalents, documentation, sample paths, and supply options."
+      "Warehouse-backed consumables for faster lab procurement.",
+      "Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.",
+      "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
+      "BioAxis Ready Supply",
+      "Warehouse inventory",
+      "Available for selected lines",
+      "Dispatch coordination",
+      "Faster response path",
+      "Quality consistency",
+      "Stable batch control",
+      "COA / sterility / compliance check",
+      "Repeat supply planning",
+      "Fast dispatch",
+      "BioAxis warehouse",
+      "Stable quality",
+      "Reliable replenishment",
+      "BioAxis-controlled warehouse inventory",
+      "batch traceability",
+      "How Ready Supply Works",
+      "Stocked / controlled supply",
+      "Fast availability check",
+      "Quality and documentation review",
+      "Dispatch and replenishment",
+      "Typical ready-supply coverage",
+      "Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.",
+      "Availability is confirmed per request rather than shown as a public inventory feed.",
+      "Need stable consumables with faster delivery?",
+      "Request ready-stock availability"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing ready-supply content ${label}`);
       }
     });
 
-    [/real-time inventory marketplace/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
+    [
+      "Pipette Tips & Robotic Tips",
+      "PCR / qPCR Plastics",
+      "Tubes, Plates & Storage",
+      "Check tip availability",
+      "Check PCR plastics",
+      "Discuss OEM-ready lines"
+    ].forEach((legacyProductCardCopy) => {
+      if (pageText.includes(legacyProductCardCopy)) {
+        failures.push(`${route}: still renders product-introduction card copy ${legacyProductCardCopy}`);
+      }
+    });
+
+    [/real-time inventory/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
       }
