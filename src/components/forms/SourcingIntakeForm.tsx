@@ -130,6 +130,27 @@ const requestStarterTemplates = [
   }
 ];
 
+function createInitialIntakeState(requestType: string, productInput = ""): IntakeState {
+  return {
+    requestType,
+    email: "",
+    productInput,
+    name: "",
+    company: "",
+    currentSupplier: "",
+    catalogNumber: "",
+    quantity: "",
+    timeline: "",
+    shippingRegion: "",
+    requiredDocuments: "",
+    notes: "",
+    phone: "",
+    roleTitle: "",
+    website: "",
+    detailChips: []
+  };
+}
+
 function apiRequestType(requestType: string) {
   if (requestType === "product-list") return "product-list-review";
   if (requestType === "recurring") return "recurring-supply";
@@ -228,24 +249,7 @@ export function SourcingIntakeForm({
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
-  const [state, setState] = useState<IntakeState>({
-    requestType: normalizedRequestType,
-    email: "",
-    productInput: defaultMessage,
-    name: "",
-    company: "",
-    currentSupplier: "",
-    catalogNumber: "",
-    quantity: "",
-    timeline: "",
-    shippingRegion: "",
-    requiredDocuments: "",
-    notes: "",
-    phone: "",
-    roleTitle: "",
-    website: "",
-    detailChips: []
-  });
+  const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage));
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
@@ -327,6 +331,19 @@ export function SourcingIntakeForm({
     if (!hasValidEmail(state.email)) return emailErrorMessage;
     if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
     return "";
+  }
+
+  function startAnotherRequest() {
+    setSubmitted(null);
+    setError("");
+    setTurnstileToken("");
+    setRestoredSessionInput(false);
+    setSourcingListItems([]);
+    startedAtRef.current = Date.now();
+    setState((current) => ({
+      ...createInitialIntakeState(current.requestType),
+      email: current.email
+    }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -421,11 +438,7 @@ export function SourcingIntakeForm({
         {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
         <button
           type="button"
-          onClick={() => {
-            setSubmitted(null);
-            setTurnstileToken("");
-            startedAtRef.current = Date.now();
-          }}
+          onClick={startAnotherRequest}
           className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
           Start another request

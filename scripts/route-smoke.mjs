@@ -1477,6 +1477,12 @@ if (!sourcingIntakeFormSource.includes("submitting") || !sourcingIntakeFormSourc
   failures.push("SourcingIntakeForm: missing idle/submitting/success/error state wiring");
 }
 
+["createInitialIntakeState", "startAnotherRequest", "setState((current) =>", "email: current.email", "setSourcingListItems([])"].forEach((label) => {
+  if (!sourcingIntakeFormSource.includes(label)) {
+    failures.push(`SourcingIntakeForm: missing clean follow-up request reset behavior ${label}`);
+  }
+});
+
 for (const [label, source] of [
   ["QuoteRequestForm", quoteFormSource],
   ["ContactForm", contactFormSource],
