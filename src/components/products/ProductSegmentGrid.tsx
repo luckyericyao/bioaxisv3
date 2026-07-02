@@ -40,7 +40,7 @@ export function ProductSegmentGrid({ limit, query = "", mode = "preview" }: Prod
         <p className="text-sm font-semibold uppercase text-bioaxis-muted">No matching directory segment</p>
         <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text">Request sourcing support.</h2>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-bioaxis-muted">
-          The first product universe is organized by workflow segments. If your search uses a catalog number, supplier, or exact equivalent, send it through the quote flow so BioAxis can prepare sourcing options.
+          BioAxis product lines are organized by sourcing path. If your search uses a catalog number, supplier, or exact equivalent, send it through the quote flow so BioAxis can prepare sourcing options.
         </p>
         <Link
           href="/request-quote"

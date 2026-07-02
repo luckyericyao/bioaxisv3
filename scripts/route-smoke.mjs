@@ -1420,7 +1420,7 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
 });
 
 [
-  ["Products page", productsPageSource, ["ProductCategoryGrid", "Browse the BioAxis product universe"]],
+  ["Products page", productsPageSource, ["ProductCategoryGrid", "Browse BioAxis product lines"]],
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],

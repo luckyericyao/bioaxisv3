@@ -55,7 +55,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </p>
               <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
                 <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
-                  Browse categories
+                  Browse product lines
                 </Link>
                 <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                   Find equivalent
@@ -74,11 +74,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="mb-8 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <h2 className={query ? "text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl" : "text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl"}>
-              {query ? "Browse all product segments" : "Browse the BioAxis product universe"}
+              {query ? "Browse all product lines" : "Browse BioAxis product lines"}
             </h2>
             <p className="mt-5 max-w-3xl text-sm leading-6 text-bioaxis-muted">
               {query
-                ? "Search results are ranked above. Use this compact directory when you want to browse across the full BioAxis product universe."
+                ? "Search results are ranked above. Use this compact directory when you want to browse across BioAxis product lines."
                 : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields."}
             </p>
           </div>
