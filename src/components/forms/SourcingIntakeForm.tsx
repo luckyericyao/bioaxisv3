@@ -190,10 +190,10 @@ function clearStoredSourcingSubmission() {
 
 function labelForProductField(requestType: string, hasContext: boolean, override?: string) {
   if (override) return override;
-  if (requestType === "equivalent") return "Current product / catalog number / supplier line";
-  if (requestType === "sample") return "Product / SKU / sample need";
-  if (requestType === "contact") return "Message / sourcing question";
-  return hasContext ? "Product / SKU / product list / sourcing need optional" : "Product / SKU / product list / sourcing need";
+  if (requestType === "equivalent") return "Current product, catalog number, or supplier line";
+  if (requestType === "sample") return "Product, SKU, or sample need";
+  if (requestType === "contact") return "Message or sourcing question";
+  return hasContext ? "Product, SKU, product list, or sourcing need optional" : "Product, SKU, product list, or sourcing need";
 }
 
 function submitLabelFor(requestType: string, override?: string) {

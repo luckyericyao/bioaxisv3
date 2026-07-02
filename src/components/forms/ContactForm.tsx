@@ -5,7 +5,7 @@ export function ContactForm() {
     <SourcingIntakeForm
       requestType="contact"
       title="Send the question. BioAxis will route the next step."
-      productFieldLabel="Message / sourcing question"
+      productFieldLabel="Message or sourcing question"
       submitLabel="Send sourcing question"
       compact
     />

@@ -218,7 +218,7 @@ function defaultProductListFromRequestType(requestType: string, hasRouteContext:
   if (normalizedRequestType === "equivalent") {
     return [
       "Equivalent review request",
-      "Current product / catalog number:",
+      "Current product or catalog number:",
       "Must-match specs or workflow constraints:",
       "Documents or samples needed:",
       "Timing or recurring usage:"

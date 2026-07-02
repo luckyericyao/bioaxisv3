@@ -21,7 +21,7 @@ export function SimpleRequestForm({ title, submitLabel, requestType = "sample" }
     <SourcingIntakeForm
       requestType={requestType}
       title={title}
-      productFieldLabel={requestType === "sample" ? "Product / SKU / sample need" : undefined}
+      productFieldLabel={requestType === "sample" ? "Product, SKU, or sample need" : undefined}
       submitLabel={submitLabel}
       optionalChips={
         requestType === "sample"

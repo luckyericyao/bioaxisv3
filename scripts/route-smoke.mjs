@@ -573,7 +573,7 @@ for (const route of routes) {
   }
 
   if (route === "/equivalent-finder?need=compatible-equivalent") {
-    ["Need compatible equivalent review", "Current product / catalog number", "Workflow or instrument constraints", "Documents or sample needed"].forEach((label) => {
+    ["Need compatible equivalent review", "Current product or catalog number", "Workflow or instrument constraints", "Documents or sample needed"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing compatible-equivalent starter ${label}`);
       }
@@ -655,10 +655,10 @@ for (const route of routes) {
     }
 
     const primaryNeedLabels = [
-      "Product / SKU / product list / sourcing need",
-      "Current product / catalog number / supplier line",
-      "Product / SKU / sample need",
-      "Message / sourcing question"
+      "Product, SKU, product list, or sourcing need",
+      "Current product, catalog number, or supplier line",
+      "Product, SKU, or sample need",
+      "Message or sourcing question"
     ];
     if (!primaryNeedLabels.some((label) => pageText.includes(label))) {
       failures.push(`${route}: missing primary sourcing need field label`);
@@ -720,7 +720,7 @@ for (const route of routes) {
   }
 
   if (route.startsWith("/request-quote?type=product-list") || route.startsWith("/request-quote?requestType=product-list-review")) {
-    ["Product list", "Product / SKU / product list"].forEach((label) => {
+    ["Product list", "Product, SKU, product list"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-list RFQ field ${label}`);
       }
@@ -1042,7 +1042,7 @@ for (const route of routes) {
       "Send the question as-is.",
       "Current product or supplier line",
       "A messy product list",
-      "Message / sourcing question"
+      "Message or sourcing question"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction contact copy ${label}`);

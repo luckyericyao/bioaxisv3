@@ -118,7 +118,7 @@ function defaultEquivalentMessage({ query, supplier, need }: { query?: string; s
   if (need?.toLowerCase().includes("compatible")) {
     return [
       "Need compatible equivalent review",
-      "Current product / catalog number:",
+      "Current product or catalog number:",
       "Must match format, material, sterility, packaging:",
       "Workflow or instrument constraints:",
       "Documents or sample needed:"
@@ -167,7 +167,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
           requestType="equivalent"
           title="Send the current product. BioAxis will structure the equivalent review."
           defaultMessage={defaultMessage}
-          productFieldLabel="Current product / catalog number / supplier line"
+          productFieldLabel="Current product, catalog number, or supplier line"
           submitLabel="Send equivalent request"
           optionalChips={intakePriorities}
           compact
