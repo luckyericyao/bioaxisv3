@@ -330,9 +330,31 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    ["Product search results", "Results for", "Ranked across BioAxis", "Search coverage", "Category", "Top matches", "Sourcing next steps", "Clear search", "Send search to BioAxis", "Browse all product segments"].forEach((label) => {
+    [
+      "Product search results",
+      "Results for",
+      "Ranked across BioAxis",
+      "Search coverage",
+      "Category",
+      "Top matches",
+      "Sourcing next steps",
+      "Turn this search into a sourcing brief.",
+      "Structure RFQ",
+      "Review equivalent",
+      "Request documents",
+      "Request sample",
+      "Clear search",
+      "Send search to BioAxis",
+      "Browse all product segments"
+    ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
+      }
+    });
+
+    ["quote", "equivalent", "documentation", "sample"].forEach((requestType) => {
+      if (!hasHrefWithParams(html, "/request-quote", { requestType })) {
+        failures.push(`${route}: missing search-to-RFQ action for ${requestType}`);
       }
     });
 

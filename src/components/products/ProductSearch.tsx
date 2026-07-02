@@ -66,6 +66,17 @@ function requestHref(result: ProductSearchResult, requestType: "quote" | "equiva
   return buildRequestHref({ ...context, requestType });
 }
 
+function searchRequestHref(requestType: "quote" | "equivalent" | "sample" | "documentation", query: string) {
+  const params = new URLSearchParams({
+    requestType,
+    query,
+    q: query,
+    sourcePage: `/products?q=${query}`
+  });
+
+  return `/request-quote?${params.toString()}`;
+}
+
 function detailHref(result: ProductSearchResult, query: string) {
   if (result.type === "workflow" || result.type === "resource") {
     return result.href;
@@ -205,6 +216,64 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         </Link>
       </div>
     </article>
+  );
+}
+
+function SearchSourcingActions({ query, productListHref }: { query: string; productListHref: string }) {
+  const actions = [
+    {
+      title: "Structure RFQ",
+      body: "Turn this search into a quote-ready sourcing brief with quantity, timing, and documentation context.",
+      href: searchRequestHref("quote", query)
+    },
+    {
+      title: "Review equivalent",
+      body: "Compare format, material, sterility, packaging, workflow fit, and automation constraints before switching.",
+      href: searchRequestHref("equivalent", query)
+    },
+    {
+      title: "Request documents",
+      body: "Ask BioAxis to organize CoA, SDS, sterility, material, or lot-level documentation needs.",
+      href: searchRequestHref("documentation", query)
+    },
+    {
+      title: "Request sample",
+      body: "Start a sample-first review path before moving the item into purchasing or recurring supply.",
+      href: searchRequestHref("sample", query)
+    }
+  ];
+
+  return (
+    <aside className="border border-bioaxis-line bg-bioaxis-panel p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Sourcing next steps</p>
+          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Turn this search into a sourcing brief.</h3>
+        </div>
+        <Link
+          href={productListHref}
+          className="inline-flex min-h-10 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+        >
+          Send product list
+        </Link>
+      </div>
+      <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+        BioAxis can use the current search term as intake context, then follow up only where specs, documents, samples, or quantities need clarification.
+      </p>
+      <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {actions.map((action) => (
+          <li key={action.title}>
+            <Link
+              href={action.href}
+              className="block h-full border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+            >
+              <span className="text-sm font-bold uppercase text-bioaxis-text">{action.title}</span>
+              <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{action.body}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }
 
@@ -385,25 +454,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             ) : null}
           </div>
 
-          <aside className="mt-8 border border-bioaxis-line bg-bioaxis-panel p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Sourcing next steps</p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-4">
-              {["View product details", "Request quote", "Find equivalent", "Send product list"].map((action) => (
-                <div key={action} className="border border-bioaxis-line bg-bioaxis-black px-3 py-3 text-xs font-semibold uppercase text-bioaxis-steel">
-                  {action}
-                </div>
-              ))}
-            </div>
-            <p className="mt-5 text-sm leading-6 text-bioaxis-muted">
-              Send the current search when you need BioAxis to organize equivalent options, samples, documentation, and quote-ready sourcing details.
-            </p>
-            <Link
-              href={productListSearchHref}
-              className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-            >
-              Send product list
-            </Link>
-          </aside>
+          <div className="mt-8">
+            <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
+          </div>
         </section>
       ) : (
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-5">
@@ -416,6 +469,9 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           >
             Submit product list or RFQ
           </Link>
+          <div className="mt-6">
+            <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
+          </div>
         </section>
       )}
 
