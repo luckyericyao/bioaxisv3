@@ -199,6 +199,8 @@ const routes = [
   "/request-quote?requestType=quote&productName=filtered%20pipette%20tips",
   "/request-quote?requestType=quote&workflow=screening-hit-identification",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
+  "/request-quote?requestType=product-list-review&source=sourcing-list&storedInput=1",
+  "/request-quote?requestType=product-list-review&type=product-list-review&source=homepage-hero&storedInput=1",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
   "/products/cell-culture/media-and-supplements/serum-free-media",
@@ -1264,6 +1266,7 @@ if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.inc
 const rfqRouteSource = await readRequiredProjectFile("src/app/api/rfq/route.ts");
 const turnstileConfigRouteSource = await readRequiredProjectFile("src/app/api/turnstile/config/route.ts");
 const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
+const requestQuotePageSource = await readRequiredProjectFile("src/app/request-quote/page.tsx");
 const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisRequest.ts");
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
@@ -1275,6 +1278,7 @@ const requestTypeSelectorSource = await readRequiredProjectFile("src/components/
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
 const productsPageSource = await readRequiredProjectFile("src/app/products/page.tsx");
 const headerSource = await readRequiredProjectFile("src/components/layout/Header.tsx");
+const searchBoxSource = await readRequiredProjectFile("src/components/ui/SearchBox.tsx");
 const productNavigationSource = await readRequiredProjectFile("src/data/productNavigation.ts");
 const productCategoryCardSource = await readRequiredProjectFile("src/components/products/ProductCategoryCard.tsx");
 const catalogTemplatesSource = await readRequiredProjectFile("src/components/products/catalog/CatalogPageTemplates.tsx");
@@ -1428,7 +1432,9 @@ if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFo
 });
 
 [
-  ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", 'source: "sourcing-list"', "product-list-review"]],
+  ["SearchBox", searchBoxSource, ["bioaxis:sourcing-list-submission", "window.sessionStorage.setItem", 'params.set("storedInput", "1")', 'params.set("source", "homepage-hero")', "product-list-review"]],
+  ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review"]],
+  ["Request quote page", requestQuotePageSource, ["usesStoredInput", 'source === "sourcing-list"', 'source === "homepage-hero"', 'first(params?.storedInput) === "1"', 'usesStoredInput ? ""']],
   ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "sessionProductList", "window.sessionStorage.getItem", "productInput: sessionProductList"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
@@ -1438,8 +1444,13 @@ if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFo
   }
 });
 
-if (sourcingListProviderSource.includes("productList\n    }") || sourcingListProviderSource.includes("productList,") || sourcingListProviderSource.includes("productList: productList")) {
-  failures.push("SourcingListProvider: should not put full product-list submission into the URL query");
+if (
+  sourcingListProviderSource.includes("productList\n    }") ||
+  sourcingListProviderSource.includes("productList,") ||
+  sourcingListProviderSource.includes("productList: productList") ||
+  searchBoxSource.includes('params.set("productList"')
+) {
+  failures.push("Sourcing handoff: should not put full product-list submission into the URL query");
 }
 
 if (rfqRouteSource.includes("request.name") && rfqRouteSource.includes("Name is required")) {

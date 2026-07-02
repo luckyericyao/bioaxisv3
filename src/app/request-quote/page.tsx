@@ -270,15 +270,17 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
+  const usesStoredInput = first(params?.storedInput) === "1" || source === "sourcing-list" || source === "homepage-hero";
   const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
+    (usesStoredInput ? "" :
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
       defaultProductListFromSearch(query, requestType) ||
       defaultProductListFromNeed(need, requestType) ||
       defaultProductListFromWorkflow(workflowMatch?.title, requestType) ||
-      defaultProductListFromRequestType(requestType, hasRouteContext));
+      defaultProductListFromRequestType(requestType, hasRouteContext)));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";

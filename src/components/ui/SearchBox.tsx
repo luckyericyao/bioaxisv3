@@ -13,6 +13,8 @@ type SearchBoxProps = {
   className?: string;
 };
 
+const sourcingInputStorageKey = "bioaxis:sourcing-list-submission";
+
 export function SearchBox({
   initialQuery = "",
   helperText,
@@ -31,12 +33,13 @@ export function SearchBox({
     const trimmedQuery = query.trim();
     if (destination === "sourcing") {
       const params = new URLSearchParams();
-      const requestType = trimmedQuery.length > 80 || /\n|,|\t|\|/.test(trimmedQuery) ? "product-list" : "quote";
+      const requestType = trimmedQuery.length > 80 || /\n|,|\t|\|/.test(trimmedQuery) ? "product-list-review" : "quote";
       params.set("requestType", requestType);
       params.set("type", requestType);
       if (trimmedQuery) {
-        params.set("productList", trimmedQuery);
         params.set("source", "homepage-hero");
+        params.set("storedInput", "1");
+        window.sessionStorage.setItem(sourcingInputStorageKey, trimmedQuery);
       }
       router.push(`/request-quote?${params.toString()}`);
       return;
