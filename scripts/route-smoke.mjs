@@ -192,6 +192,7 @@ const routes = [
   "/request-quote?type=unknown",
   "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
+  "/request-quote?requestType=quote&sourcePage=private-label-oem&need=pipette-tips-private-label",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -658,6 +659,14 @@ for (const route of routes) {
     ["Request context", "Pasted input captured", "BioAxis product search handoff", "Search term: serum-free media", "Sourcing need"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-search RFQ handoff ${label}`);
+      }
+    });
+  }
+
+  if (route.includes("sourcePage=private-label-oem")) {
+    ["Request context", "Pasted input captured", "Private-label / OEM pipette tips review", "Target tip format", "Packaging / label requirements", "Estimated recurring demand"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing private-label RFQ handoff ${label}`);
       }
     });
   }

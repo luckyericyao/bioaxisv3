@@ -51,36 +51,83 @@ function requestTypeFromNeed(value: string | undefined) {
 function defaultProductListFromContext({
   sourcePage,
   source,
-  intent
+  intent,
+  need
 }: {
   sourcePage?: string;
   source?: string;
   intent?: string;
+  need?: string;
 }) {
   const normalizedSource = `${sourcePage ?? ""} ${source ?? ""}`.toLowerCase();
   const normalizedIntent = intent?.toLowerCase() ?? "";
+  const normalizedNeed = need?.toLowerCase() ?? "";
 
-  if (!normalizedSource.includes("ready-supply")) {
-    return "";
-  }
+  if (normalizedSource.includes("ready-supply")) {
+    if (normalizedIntent.includes("current-sku")) {
+      return [
+        "Ready Supply current SKU review",
+        "Current SKU / brand:",
+        "Consumable type or specification:",
+        "Quantity / timing:",
+        "Documents needed:"
+      ].join("\n");
+    }
 
-  if (normalizedIntent.includes("current-sku")) {
     return [
-      "Ready Supply current SKU review",
+      "Ready Supply availability check",
       "Current SKU / brand:",
-      "Consumable type or specification:",
+      "Key specification:",
       "Quantity / timing:",
-      "Documents needed:"
+      "Delivery region:"
     ].join("\n");
   }
 
-  return [
-    "Ready Supply availability check",
-    "Current SKU / brand:",
-    "Key specification:",
-    "Quantity / timing:",
-    "Delivery region:"
-  ].join("\n");
+  if (normalizedSource.includes("private-label-oem")) {
+    if (normalizedNeed.includes("pipette")) {
+      return [
+        "Private-label / OEM pipette tips review",
+        "Target tip format:",
+        "Current brand or catalog reference:",
+        "Packaging / label requirements:",
+        "Estimated recurring demand:",
+        "Documents or samples needed:"
+      ].join("\n");
+    }
+
+    if (normalizedNeed.includes("tubes") || normalizedNeed.includes("plates") || normalizedNeed.includes("recurring")) {
+      return [
+        "Private-label / OEM recurring supply review",
+        "Target product family:",
+        "Current brand or catalog reference:",
+        "Estimated monthly or annual usage:",
+        "Packaging / label requirements:",
+        "Documents or samples needed:"
+      ].join("\n");
+    }
+
+    if (normalizedNeed.includes("filtration") || normalizedNeed.includes("pcr")) {
+      return [
+        "Private-label / OEM filtration or PCR plastics review",
+        "Target product family:",
+        "Current brand or catalog reference:",
+        "Key format or material requirements:",
+        "Packaging / label requirements:",
+        "Documents or samples needed:"
+      ].join("\n");
+    }
+
+    return [
+      "Private-label / OEM sourcing discussion",
+      "Target product family:",
+      "Current brand or catalog reference:",
+      "Packaging / label requirements:",
+      "Estimated recurring demand:",
+      "Documents or samples needed:"
+    ].join("\n");
+  }
+
+  return "";
 }
 
 function defaultProductListFromSearch(query: string | undefined, requestType: string) {
@@ -124,7 +171,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
-    (defaultProductListFromContext({ sourcePage, source, intent }) || defaultProductListFromSearch(query, requestType));
+    (defaultProductListFromContext({ sourcePage, source, intent, need }) || defaultProductListFromSearch(query, requestType));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
