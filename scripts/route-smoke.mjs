@@ -167,6 +167,7 @@ const routes = [
   "/workflows",
   "/ready-supply",
   "/equivalent-finder",
+  "/equivalent-finder?need=compatible-equivalent",
   "/private-label",
   "/private-label-oem",
   "/trust-center",
@@ -520,6 +521,14 @@ for (const route of routes) {
 
   if (route === "/equivalent-finder?catalog=D8537" && !pageText.includes("D8537")) {
     failures.push(`${route}: catalog query did not prefill equivalent intake`);
+  }
+
+  if (route === "/equivalent-finder?need=compatible-equivalent") {
+    ["Need compatible equivalent review", "Current product / catalog number", "Workflow or instrument constraints", "Documents or sample needed"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing compatible-equivalent starter ${label}`);
+      }
+    });
   }
 
   if (route.startsWith("/request-quote")) {

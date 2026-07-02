@@ -108,10 +108,36 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function defaultEquivalentMessage({ query, supplier, need }: { query?: string; supplier?: string; need?: string }) {
+  const providedContext = [supplier, query].filter(Boolean).join(" ").trim();
+
+  if (providedContext) {
+    return providedContext;
+  }
+
+  if (need?.toLowerCase().includes("compatible")) {
+    return [
+      "Need compatible equivalent review",
+      "Current product / catalog number:",
+      "Must match format, material, sterility, packaging:",
+      "Workflow or instrument constraints:",
+      "Documents or sample needed:"
+    ].join("\n");
+  }
+
+  return "";
+}
+
 export default async function EquivalentFinderPage({ searchParams }: EquivalentFinderPageProps) {
   const params = await searchParams;
   const initialQuery = first(params?.catalog) ?? first(params?.query) ?? first(params?.product) ?? "";
   const initialSupplier = first(params?.supplier) ?? "";
+  const initialNeed = first(params?.need) ?? "";
+  const defaultMessage = defaultEquivalentMessage({
+    query: initialQuery,
+    supplier: initialSupplier,
+    need: initialNeed
+  });
 
   return (
     <>
@@ -140,7 +166,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         <SourcingIntakeForm
           requestType="equivalent"
           title="Send the current product. BioAxis will structure the equivalent review."
-          defaultMessage={[initialSupplier, initialQuery].filter(Boolean).join(" ")}
+          defaultMessage={defaultMessage}
           productFieldLabel="Current product / catalog number / supplier line"
           submitLabel="Send equivalent request"
           optionalChips={intakePriorities}
