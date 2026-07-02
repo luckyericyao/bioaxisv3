@@ -49,15 +49,16 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       className="group flex h-full flex-col overflow-hidden border border-bioaxis-line bg-bioaxis-panel transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft focus-within:border-bioaxis-accent/70"
     >
       {image ? (
-        <div className="relative aspect-[4/3] border-b border-bioaxis-line bg-bioaxis-black">
+        <div className="relative aspect-[16/7] border-b border-bioaxis-line bg-bioaxis-black">
           <Image
             src={image.src}
             alt={image.alt}
             fill
             sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="object-cover opacity-80 grayscale-[18%] saturate-[0.72] transition duration-500 group-hover:scale-[1.02] group-hover:opacity-90"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/60 via-transparent to-transparent" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(17,24,39,0.82),rgba(15,76,129,0.22)_52%,rgba(16,185,129,0.12))]" aria-hidden="true" />
+          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bioaxis-panel to-transparent" aria-hidden="true" />
         </div>
       ) : null}
       <div className="flex flex-1 flex-col p-5">
