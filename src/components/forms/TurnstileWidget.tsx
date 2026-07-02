@@ -34,6 +34,7 @@ type TurnstileConfigResponse = {
 };
 
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+const fallbackEmail = "crazyowenyao@gmail.com";
 
 export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -41,6 +42,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
   const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
   const [configLoaded, setConfigLoaded] = useState(Boolean(buildTimeSiteKey));
   const [scriptReady, setScriptReady] = useState(false);
+  const [widgetIssue, setWidgetIssue] = useState("");
 
   useEffect(() => {
     if (buildTimeSiteKey) {
@@ -88,8 +90,14 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
       theme: "light",
       size: "normal",
       callback: (token) => onTokenChange(token),
-      "expired-callback": () => onTokenChange(""),
-      "error-callback": () => onTokenChange("")
+      "expired-callback": () => {
+        onTokenChange("");
+        setWidgetIssue("Verification expired. Please complete the check again before submitting.");
+      },
+      "error-callback": () => {
+        onTokenChange("");
+        setWidgetIssue(`Verification could not complete. Try again, or email ${fallbackEmail} directly.`);
+      }
     });
 
     return () => {
@@ -113,10 +121,24 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
-        onReady={() => setScriptReady(true)}
+        onReady={() => {
+          setWidgetIssue("");
+          setScriptReady(true);
+        }}
+        onError={() => setWidgetIssue(`Verification could not load. Email ${fallbackEmail} directly if the form is blocked.`)}
       />
-      <p className="mb-3 text-xs font-bold uppercase text-bioaxis-dim">Verification</p>
+      <div className="mb-3">
+        <p className="text-xs font-bold uppercase text-bioaxis-dim">Verification</p>
+        <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
+          This check protects the request form from spam. It should take only a moment.
+        </p>
+      </div>
       <div ref={containerRef} className="cf-turnstile min-h-[65px]" />
+      {widgetIssue ? (
+        <p role="alert" className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent">
+          {widgetIssue}
+        </p>
+      ) : null}
     </div>
   );
 }
