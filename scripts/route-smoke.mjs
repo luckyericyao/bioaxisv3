@@ -177,6 +177,7 @@ const routes = [
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
+  "/contact",
   "/request-quote",
   "/request-quote?requestType=quote",
   "/request-quote?requestType=product-list-review",
@@ -1028,6 +1029,28 @@ for (const route of routes) {
     if (!hasHrefWithParams(html, "/equivalent-finder", { requestType: "equivalent" })) {
       failures.push(`${route}: missing equivalent finder CTA`);
     }
+  }
+
+  if (route === "/contact") {
+    [
+      "Ask a sourcing question. Send what you have.",
+      "Only your email is required.",
+      "Useful context, not required fields.",
+      "Send the question as-is.",
+      "Current product or supplier line",
+      "A messy product list",
+      "Message / sourcing question"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing low-friction contact copy ${label}`);
+      }
+    });
+
+    ["Use this page for quote requests", "What to include"].forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: still shows generic contact copy ${label}`);
+      }
+    });
   }
 
   if (route === "/workflows") {

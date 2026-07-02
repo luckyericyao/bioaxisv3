@@ -13,11 +13,10 @@ export const metadata: Metadata = {
 };
 
 const contactPaths = [
-  { title: "For quotes", body: "Send product category, product name, quantity, sterile status, target date, and any current supplier or catalog number." },
-  { title: "For equivalent product matching", body: "Include the current supplier, catalog number, required specifications, documentation constraints, and whether sample testing is needed." },
-  { title: "For sample evaluation", body: "Share the workflow, acceptance criteria, quantity needed for testing, and timeline for switching or scale-up." },
-  { title: "For documentation requests", body: "List the documents needed, such as CoA, SDS, sterility statement, DNase/RNase-free statement, material declaration, or lot traceability." },
-  { title: "For recurring supply support", body: "Provide monthly or annual usage, shipping region, packaging preference, documentation requirements, and timing constraints." }
+  { title: "Current product or supplier line", body: "A name, catalog reference, supplier line, or rough description is enough to begin." },
+  { title: "What you need next", body: "Quote, equivalent review, sample path, document check, recurring supply, or a general sourcing question." },
+  { title: "Any constraints you know", body: "Format, sterility, material, workflow fit, documentation, timing, or shipping region if already known." },
+  { title: "A messy product list", body: "Paste it as-is. BioAxis can help organize the sourcing path and follow up for missing details." }
 ];
 
 export default function ContactPage() {
@@ -25,14 +24,14 @@ export default function ContactPage() {
     <>
       <PageHero
         eyebrow="Contact BioAxis"
-        title="Send a sourcing question or product request."
-        subtitle="Use this page for quote requests, equivalent product matching, sample evaluation, documentation requests, and recurring supply support. BioAxis routes contact requests through the same sourcing request backend as the RFQ flow."
+        title="Ask a sourcing question. Send what you have."
+        subtitle="Only your email is required. BioAxis can route a rough product note, supplier line, catalog reference, product list, or workflow question into the right sourcing next step."
       />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <div>
           <SectionHeader
-            title="What to include"
-            subtitle="A clear request helps BioAxis organize sourcing review faster and reduces back-and-forth around product fit, documentation, samples, and recurring supply context."
+            title="Useful context, not required fields."
+            subtitle="Send the question as-is. These details simply help BioAxis reduce back-and-forth around product fit, documentation, samples, and recurring supply context."
           />
           <div className="mt-8 grid gap-4">
             {contactPaths.map((item) => (
