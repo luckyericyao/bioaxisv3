@@ -202,9 +202,9 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             <div className="flex items-start justify-between gap-4 border-b border-bioaxis-line p-5">
               <div>
                 <p className="text-xs font-bold uppercase text-bioaxis-accent">Sourcing list</p>
-                <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Prepare product-list RFQ details.</h2>
+                <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Review items before sending.</h2>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                  This is a sourcing intake list, not a cart. Add quantities, supplier context, sample needs, and documentation needs before submitting.
+                  Add quantities, supplier context, sample needs, and documentation needs. BioAxis will carry the list into a structured sourcing request.
                 </p>
               </div>
               <button type="button" onClick={() => setDrawerOpen(false)} className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
@@ -275,7 +275,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                 onClick={submitSourcingList}
                 className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
               >
-                Continue to RFQ
+                Send list for review
               </button>
             </div>
           </div>
