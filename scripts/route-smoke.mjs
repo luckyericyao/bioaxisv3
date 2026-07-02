@@ -1261,6 +1261,7 @@ const quoteFormSource = await readRequiredProjectFile("src/components/forms/Quot
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
 const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
+const sourcingListProviderSource = await readRequiredProjectFile("src/components/sourcing/SourcingListProvider.tsx");
 const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
 const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
@@ -1411,6 +1412,21 @@ if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFo
     failures.push(`SourcingIntakeForm: missing low-friction context/source wiring ${label}`);
   }
 });
+
+[
+  ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", 'source: "sourcing-list"', "product-list-review"]],
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "sessionProductList", "window.sessionStorage.getItem", "productInput: sessionProductList"]]
+].forEach(([label, source, required]) => {
+  for (const needle of required) {
+    if (!source.includes(needle)) {
+      failures.push(`${label}: missing short sourcing-list RFQ handoff marker ${needle}`);
+    }
+  }
+});
+
+if (sourcingListProviderSource.includes("productList\n    }") || sourcingListProviderSource.includes("productList,") || sourcingListProviderSource.includes("productList: productList")) {
+  failures.push("SourcingListProvider: should not put full product-list submission into the URL query");
+}
 
 if (rfqRouteSource.includes("request.name") && rfqRouteSource.includes("Name is required")) {
   failures.push("src/app/api/rfq/route.ts: still requires name");

@@ -164,7 +164,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     window.sessionStorage.setItem(submissionItemsStorageKey, JSON.stringify(items));
     const params = new URLSearchParams({
       requestType: "product-list-review",
-      productList
+      source: "sourcing-list"
     });
 
     router.push(`/request-quote?${params.toString()}`);

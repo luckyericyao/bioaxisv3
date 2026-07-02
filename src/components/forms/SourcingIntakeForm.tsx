@@ -84,6 +84,7 @@ type SubmitState = {
 };
 
 const sourcingListStorageKey = "bioaxis:sourcing-list";
+const sourcingListSubmissionStorageKey = "bioaxis:sourcing-list-submission";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 const missingProductErrorMessage = "Please paste a SKU, product list, or short sourcing need.";
@@ -277,7 +278,12 @@ export function SourcingIntakeForm({
 
     const sessionItems = readStoredSourcingItems(window.sessionStorage.getItem(sourcingListItemsStorageKey));
     const localItems = readStoredSourcingItems(window.localStorage.getItem(sourcingListStorageKey));
+    const sessionProductList = window.sessionStorage.getItem(sourcingListSubmissionStorageKey)?.trim() ?? "";
+
     setSourcingListItems(sessionItems.length > 0 ? sessionItems : localItems);
+    if (sessionProductList) {
+      setState((current) => (current.productInput.trim() ? current : { ...current, productInput: sessionProductList }));
+    }
   }, []);
 
   function updateField<K extends keyof IntakeState>(field: K, value: IntakeState[K]) {
