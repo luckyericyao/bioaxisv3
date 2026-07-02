@@ -190,6 +190,7 @@ const routes = [
   "/request-quote?type=rfq",
   "/request-quote?type=recurring",
   "/request-quote?type=unknown",
+  "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
@@ -649,6 +650,14 @@ for (const route of routes) {
     ["Request context", "Pasted input captured", "Ready Supply availability check", "Current SKU / brand", "Quantity / timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
+      }
+    });
+  }
+
+  if (route.includes("query=serum-free%20media")) {
+    ["Request context", "Pasted input captured", "BioAxis product search handoff", "Search term: serum-free media", "Sourcing need"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing product-search RFQ handoff ${label}`);
       }
     });
   }

@@ -83,6 +83,32 @@ function defaultProductListFromContext({
   ].join("\n");
 }
 
+function defaultProductListFromSearch(query: string | undefined, requestType: string) {
+  const trimmedQuery = query?.trim();
+
+  if (!trimmedQuery) {
+    return "";
+  }
+
+  if (normalizeRequestType(requestType) === "product-list-review") {
+    return [
+      "BioAxis product search handoff",
+      `Search term: ${trimmedQuery}`,
+      "Product list / supplier lines:",
+      "Quantity / timing:",
+      "Documents, samples, or equivalent needs:"
+    ].join("\n");
+  }
+
+  return [
+    "BioAxis product search handoff",
+    `Search term: ${trimmedQuery}`,
+    "Sourcing need:",
+    "Quantity / timing:",
+    "Documents or samples needed:"
+  ].join("\n");
+}
+
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
@@ -95,7 +121,10 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
-  const productList = first(params?.productList) ?? first(params?.list) ?? defaultProductListFromContext({ sourcePage, source, intent });
+  const explicitProductList = first(params?.productList) ?? first(params?.list);
+  const productList =
+    explicitProductList ??
+    (defaultProductListFromContext({ sourcePage, source, intent }) || defaultProductListFromSearch(query, requestType));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
