@@ -1004,6 +1004,24 @@ for (const route of routes) {
   }
 
   if (route === "/samples") {
+    [
+      "Start a sample-first review path.",
+      "Only your email is required to start.",
+      "Request a sample path. BioAxis will follow up by email.",
+      "Compare a current supplier product before switching",
+      "Plan pilot evaluation before recurring supply"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing low-friction sample copy ${label}`);
+      }
+    });
+
+    ["Sample request form"].forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: still shows generic sample form copy ${label}`);
+      }
+    });
+
     if (!hasHrefWithParams(html, "/request-quote", { requestType: "sample" })) {
       failures.push(`${route}: missing sample request CTA`);
     }

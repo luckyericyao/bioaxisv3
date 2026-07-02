@@ -20,22 +20,21 @@ export default function SamplesPage() {
     <>
       <PageHero
         eyebrow="Samples"
-        title="Request samples before you switch or scale."
-        subtitle="BioAxis helps labs evaluate consumables before larger-volume purchasing, especially when switching suppliers, evaluating equivalents, or qualifying new formats."
+        title="Start a sample-first review path."
+        subtitle="Send the product context you have. BioAxis can help organize sample needs, fit criteria, documentation, and quote follow-up before larger-volume purchasing."
       />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <div>
           <SectionHeader
-            title="Evaluate before you switch"
-            subtitle="Use samples to reduce switching risk, review workflow fit, and support specification review before recurring supply decisions."
+            title="Use samples to reduce switching risk."
+            subtitle="Only your email is required to start. Add a product, current supplier, workflow, or acceptance criteria only if it helps BioAxis review the sample path."
           />
           <div className="mt-8 grid gap-3">
             {[
-              "Switching from a current supplier",
-              "Validating an equivalent consumable",
-              "Testing sterile, low-bind, or low-retention formats",
-              "Checking automation compatibility",
-              "Running a pilot purchase before recurring supply"
+              "Compare a current supplier product before switching",
+              "Check sterile, low-bind, low-retention, or documentation needs",
+              "Confirm automation, workflow, or packaging fit",
+              "Plan pilot evaluation before recurring supply"
             ].map((item) => (
               <div key={item} className="border border-bioaxis-line bg-bioaxis-panel p-4 text-sm font-semibold uppercase text-bioaxis-steel">
                 {item}
@@ -47,7 +46,7 @@ export default function SamplesPage() {
           </Link>
         </div>
         <SimpleRequestForm
-          title="Sample request form"
+          title="Request a sample path. BioAxis will follow up by email."
           requestType="sample"
           submitLabel="Request sample"
           confirmation="Your sample request has been prepared. BioAxis can use this information to review product fit, sample options, documentation needs, and quote paths where available."
