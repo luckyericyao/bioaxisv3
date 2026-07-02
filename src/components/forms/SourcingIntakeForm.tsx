@@ -476,7 +476,9 @@ export function SourcingIntakeForm({
       </section>
 
       {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} /> : null}
-      {capturedInput || restoredSessionInput ? <CapturedInputCard restored={restoredSessionInput && !capturedInput} /> : null}
+      {capturedInput || restoredSessionInput ? (
+        <CapturedInputCard restored={restoredSessionInput && !capturedInput} captured={capturedInput} />
+      ) : null}
       {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
       <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-8">
@@ -625,15 +627,18 @@ export function SourcingIntakeForm({
   );
 }
 
-function CapturedInputCard({ restored = false }: { restored?: boolean }) {
+function CapturedInputCard({ restored = false, captured = false }: { restored?: boolean; captured?: boolean }) {
+  const title = restored ? "Pasted input captured" : "Request draft ready";
+  const body = restored
+    ? "BioAxis restored the input you sent from the previous page. Review or edit it below before submitting."
+    : captured
+      ? "BioAxis prepared this request context from the link you used. Review or edit it below before submitting."
+      : "BioAxis will carry this input into the request form so you do not need to paste it again.";
+
   return (
     <section data-pasted-input-captured="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-5 sm:p-8">
-      <p className="text-sm font-semibold uppercase text-bioaxis-accent">Pasted input captured</p>
-      <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-        {restored
-          ? "BioAxis restored the input you sent from the previous page. Review or edit it below before submitting."
-          : "BioAxis will carry this input into the request form so you do not need to paste it again."}
-      </p>
+      <p className="text-sm font-semibold uppercase text-bioaxis-accent">{title}</p>
+      <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{body}</p>
     </section>
   );
 }

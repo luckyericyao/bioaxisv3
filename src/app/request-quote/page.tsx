@@ -212,13 +212,7 @@ function defaultProductListFromRequestType(requestType: string, hasRouteContext:
   const normalizedRequestType = normalizeRequestType(requestType);
 
   if (normalizedRequestType === "quote" && !hasRouteContext) {
-    return [
-      "Quote request",
-      "Product, SKU, catalog reference, or product list:",
-      "Quantity / timing:",
-      "Documents, samples, or equivalent needs:",
-      "Delivery region if relevant:"
-    ].join("\n");
+    return "";
   }
 
   if (normalizedRequestType === "equivalent") {

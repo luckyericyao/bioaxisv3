@@ -678,9 +678,19 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote" || route === "/request-quote?requestType=quote") {
-    ["Pasted input captured", "Quote request", "Product, SKU, catalog reference, or product list", "Delivery region if relevant"].forEach((label) => {
+    ["Not sure what to write?", "Availability check"].forEach((label) => {
       if (!pageText.includes(label)) {
-        failures.push(`${route}: missing generic quote starter ${label}`);
+        failures.push(`${route}: missing direct quote intake affordance ${label}`);
+      }
+    });
+
+    if (!html.includes("Paste a SKU, product list")) {
+      failures.push(`${route}: missing direct quote textarea placeholder`);
+    }
+
+    ["Pasted input captured", "Request draft ready", "Quote request Product, SKU"].forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: direct quote page should not show prefilled/captured input state ${label}`);
       }
     });
   }
@@ -709,7 +719,7 @@ for (const route of routes) {
     });
 
     if (route === "/request-quote?requestType=product-list-review") {
-      ["Pasted input captured", "Product list review", "Paste product list or supplier lines", "Equivalent, sample, or documentation needs"].forEach((label) => {
+      ["Request draft ready", "Product list review", "Paste product list or supplier lines", "Equivalent, sample, or documentation needs"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing product-list starter ${label}`);
         }
@@ -726,7 +736,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote?requestType=equivalent") {
-    ["Pasted input captured", "Equivalent review request", "Must-match specs or workflow constraints", "Timing or recurring usage"].forEach((label) => {
+    ["Request draft ready", "Equivalent review request", "Must-match specs or workflow constraints", "Timing or recurring usage"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing equivalent starter ${label}`);
       }
@@ -738,7 +748,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote?requestType=sample") {
-    ["Pasted input captured", "Sample request", "Use case / workflow", "Sample quantity or evaluation timing"].forEach((label) => {
+    ["Request draft ready", "Sample request", "Use case / workflow", "Sample quantity or evaluation timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing sample starter ${label}`);
       }
@@ -750,7 +760,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote?requestType=documentation&need=documents") {
-    ["Pasted input captured", "Documentation request", "Documents needed: CoA, SDS, sterility, material statement, or lot-level documentation", "Purchase timing"].forEach((label) => {
+    ["Request draft ready", "Documentation request", "Documents needed: CoA, SDS, sterility, material statement, or lot-level documentation", "Purchase timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing documentation starter ${label}`);
       }
@@ -766,7 +776,7 @@ for (const route of routes) {
   }
 
   if (route.includes("sourcePage=ready-supply")) {
-    ["Request context", "Pasted input captured", "Ready Supply availability check", "Current SKU / brand", "Quantity / timing"].forEach((label) => {
+    ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU / brand", "Quantity / timing"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
       }
@@ -774,7 +784,7 @@ for (const route of routes) {
   }
 
   if (route.includes("query=serum-free%20media")) {
-    ["Request context", "Pasted input captured", "BioAxis product search handoff", "Search term: serum-free media", "Sourcing need"].forEach((label) => {
+    ["Request context", "Request draft ready", "BioAxis product search handoff", "Search term: serum-free media", "Sourcing need"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-search RFQ handoff ${label}`);
       }
@@ -782,7 +792,7 @@ for (const route of routes) {
   }
 
   if (route.includes("sourcePage=private-label-oem")) {
-    ["Request context", "Pasted input captured", "Private-label / OEM pipette tips review", "Target tip format", "Packaging / label requirements", "Estimated recurring demand"].forEach((label) => {
+    ["Request context", "Request draft ready", "Private-label / OEM pipette tips review", "Target tip format", "Packaging / label requirements", "Estimated recurring demand"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing private-label RFQ handoff ${label}`);
       }
@@ -794,7 +804,7 @@ for (const route of routes) {
   }
 
   if (route === "/request-quote?requestType=recurring-supply&need=recurring-supply") {
-    ["Pasted input captured", "Recurring supply review", "Estimated monthly or annual usage", "Packaging, lead time, or backup-source needs"].forEach((label) => {
+    ["Request draft ready", "Recurring supply review", "Estimated monthly or annual usage", "Packaging, lead time, or backup-source needs"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing recurring-supply starter ${label}`);
       }
