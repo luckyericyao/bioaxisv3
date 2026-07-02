@@ -48,6 +48,41 @@ function requestTypeFromNeed(value: string | undefined) {
   return undefined;
 }
 
+function defaultProductListFromContext({
+  sourcePage,
+  source,
+  intent
+}: {
+  sourcePage?: string;
+  source?: string;
+  intent?: string;
+}) {
+  const normalizedSource = `${sourcePage ?? ""} ${source ?? ""}`.toLowerCase();
+  const normalizedIntent = intent?.toLowerCase() ?? "";
+
+  if (!normalizedSource.includes("ready-supply")) {
+    return "";
+  }
+
+  if (normalizedIntent.includes("current-sku")) {
+    return [
+      "Ready Supply current SKU review",
+      "Current SKU / brand:",
+      "Consumable type or specification:",
+      "Quantity / timing:",
+      "Documents needed:"
+    ].join("\n");
+  }
+
+  return [
+    "Ready Supply availability check",
+    "Current SKU / brand:",
+    "Key specification:",
+    "Quantity / timing:",
+    "Delivery region:"
+  ].join("\n");
+}
+
 export default async function RequestQuotePage({ searchParams }: RequestQuotePageProps) {
   const params = await searchParams;
   const segment = first(params?.segment);
@@ -58,7 +93,9 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const requestType = normalizeRequestType(first(params?.requestType) ?? first(params?.type) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
-  const productList = first(params?.productList) ?? first(params?.list) ?? "";
+  const source = first(params?.source) ?? "";
+  const intent = first(params?.intent) ?? "";
+  const productList = first(params?.productList) ?? first(params?.list) ?? defaultProductListFromContext({ sourcePage, source, intent });
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";

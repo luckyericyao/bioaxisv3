@@ -190,6 +190,7 @@ const routes = [
   "/request-quote?type=rfq",
   "/request-quote?type=recurring",
   "/request-quote?type=unknown",
+  "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -640,6 +641,14 @@ for (const route of routes) {
     ["Documentation", "Request context", "Cell Culture"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing document-need RFQ context ${label}`);
+      }
+    });
+  }
+
+  if (route.includes("sourcePage=ready-supply")) {
+    ["Request context", "Pasted input captured", "Ready Supply availability check", "Current SKU / brand", "Quantity / timing"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
       }
     });
   }
