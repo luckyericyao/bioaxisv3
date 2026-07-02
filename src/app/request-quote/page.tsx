@@ -5,6 +5,7 @@ import { normalizeRequestType } from "@/data/requestTypes";
 import { getFamilyBySlug, labelFromProductContext } from "@/data/productTaxonomy";
 import { getProductItemBySlug } from "@/data/productItems";
 import { getFamilyBySlug as getCatalogFamilyBySlug, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
+import { workflows } from "@/data/workflows";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 
 export const metadata: Metadata = {
@@ -183,6 +184,30 @@ function defaultProductListFromNeed(need: string | undefined, requestType: strin
   return "";
 }
 
+function defaultProductListFromWorkflow(workflowTitle: string | undefined, requestType: string) {
+  if (!workflowTitle) {
+    return "";
+  }
+
+  if (normalizeRequestType(requestType) === "documentation") {
+    return [
+      "Workflow documentation request",
+      `Workflow: ${workflowTitle}`,
+      "Product families or current supplier lines:",
+      "Documents needed:",
+      "Study, assay, or procurement timing:"
+    ].join("\n");
+  }
+
+  return [
+    "Workflow mapping request",
+    `Workflow: ${workflowTitle}`,
+    "Current protocol, assay, or product list:",
+    "Consumables to source or compare:",
+    "Equivalent, sample, documentation, or recurring supply needs:"
+  ].join("\n");
+}
+
 function defaultProductListFromRequestType(requestType: string, hasRouteContext: boolean) {
   const normalizedRequestType = normalizeRequestType(requestType);
 
@@ -237,19 +262,22 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const family = first(params?.family);
   const product = first(params?.product);
   const productNameParam = first(params?.productName) ?? first(params?.product_name);
+  const workflowSlug = first(params?.workflow);
+  const workflowMatch = workflows.find((workflow) => workflow.slug === workflowSlug || workflow.id === workflowSlug);
   const need = first(params?.need);
   const requestType = normalizeRequestType(first(params?.requestType) ?? first(params?.type) ?? first(params?.inquiryType) ?? requestTypeFromNeed(need) ?? "quote");
   const query = first(params?.query) ?? first(params?.q);
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
-  const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || sourcePage || query);
+  const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
       defaultProductListFromSearch(query, requestType) ||
       defaultProductListFromNeed(need, requestType) ||
+      defaultProductListFromWorkflow(workflowMatch?.title, requestType) ||
       defaultProductListFromRequestType(requestType, hasRouteContext));
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
@@ -262,17 +290,17 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
   const catalogProductMatch = segment && subcategory && family && product ? getCatalogProductBySlug(segment, subcategory, family, product) : null;
   const catalogFamilyMatch = segment && subcategory && family ? getCatalogFamilyBySlug(segment, subcategory, family) : null;
-  const sourceProductUrl = sourcePage || buildSourceProductUrl({ segment, subcategory, family, product });
+  const sourceProductUrl = sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
   const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || "";
-  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || labelize(family) || query || "";
+  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || workflowMatch?.title || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
-    segment || subcategory || family || product || productNameParam || query || sourcePage
+    segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage
       ? {
           requestType: requestType ?? "quote",
           productName,
           productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family),
-          productCategory,
-          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment),
+          productCategory: productCategory || (workflowMatch ? "Workflow mapping" : ""),
+          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || (workflowMatch ? "Drug R&D workflow" : ""),
           productUrl: sourceProductUrl,
           sourcePageUrl: sourceProductUrl,
           relevantSpecs:

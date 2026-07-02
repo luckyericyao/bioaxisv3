@@ -73,7 +73,7 @@ export default function ReadySupplyPage() {
       <section className="border-b border-bioaxis-line px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.8fr)] lg:items-end">
           <div>
-            <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">Ready Supply</p>
+            <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
             <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-6xl lg:text-7xl">
               Warehouse-backed consumables for faster lab procurement.
             </h1>
@@ -98,7 +98,7 @@ export default function ReadySupplyPage() {
 
           <aside className="border border-bioaxis-line bg-bioaxis-black p-5 shadow-2xl shadow-slate-900/12">
             <div className="mb-5 border-b border-bioaxis-line pb-4">
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">BioAxis Ready Supply</p>
+              <p className="text-xs font-bold uppercase text-bioaxis-accent">BIOAXIS READY SUPPLY</p>
               <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
                 Operational status areas for warehouse-backed supply, documentation, and replenishment planning.
               </p>

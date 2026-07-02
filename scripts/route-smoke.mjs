@@ -197,6 +197,7 @@ const routes = [
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
   "/request-quote?requestType=quote&sourcePage=private-label-oem&need=pipette-tips-private-label",
   "/request-quote?requestType=quote&productName=filtered%20pipette%20tips",
+  "/request-quote?requestType=quote&workflow=screening-hit-identification",
   "/request-quote?requestType=quote&segment=Cell%20Culture&category=Media%20and%20Supplements&family=Serum%20Free%20Media",
   "/request-quote?requestType=product-list-review&productList=Supplier%20%7C%20Catalog%20No.%20%7C%20Product",
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
@@ -643,6 +644,14 @@ for (const route of routes) {
     });
   }
 
+  if (route.includes("workflow=screening-hit-identification")) {
+    ["Request context", "Workflow mapping request", "Screening & Hit Identification", "Drug R&D workflow", "Consumables to source or compare"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing workflow RFQ context ${label}`);
+      }
+    });
+  }
+
   if (route.startsWith("/request-quote?type=product-list") || route.startsWith("/request-quote?requestType=product-list-review")) {
     ["Product list", "Product / SKU / product list"].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -853,7 +862,7 @@ for (const route of routes) {
       "Warehouse-backed consumables for faster lab procurement.",
       "Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.",
       "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
-      "BioAxis Ready Supply",
+      "BIOAXIS READY SUPPLY",
       "Warehouse inventory",
       "Available for selected lines",
       "Dispatch coordination",
