@@ -71,7 +71,7 @@ export default function AboutPage() {
         <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">How BioAxis helps</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            BioAxis helps teams prepare sourcing requests, compare equivalent candidates, request samples before switching, organize documentation requests, and plan recurring supply conversations. The platform is built for procurement clarity, not fake inventory counts or unsupported product claims.
+            BioAxis helps teams prepare sourcing requests, compare equivalent candidates, request samples before switching, organize documentation requests, and plan recurring supply conversations. The platform is built for procurement clarity without unsupported inventory counts or product claims.
           </p>
         </article>
         <article className="border border-bioaxis-line bg-bioaxis-panel p-6">

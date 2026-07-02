@@ -39,7 +39,7 @@ const typicalRfqFields = [
   "Compatibility requirement",
   "Documentation requirement",
   "Quantity / recurring usage",
-  "Current supplier SKU, if available"
+  "Current supplier line or catalog reference, if available"
 ];
 
 function catalogRequestHref({
@@ -433,7 +433,7 @@ export function CatalogProductPage({
       <section className="mx-auto w-full max-w-7xl px-5 pt-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Typical RFQ fields</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Use this page as a sourcing configuration, not a live-stock SKU page.</h2>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Use this page to prepare a sourcing request.</h2>
           <div className="mt-5 flex flex-wrap gap-2">
             {typicalRfqFields.map((field) => (
               <SpecTag key={field}>{field}</SpecTag>
@@ -445,7 +445,7 @@ export function CatalogProductPage({
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation to request</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Request status, not fake downloads.</h2>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Confirm document status before purchase.</h2>
           <div className="mt-5 grid gap-3">
             {documentLabels.map(([key, label]) => {
               const status = product.documents[key];

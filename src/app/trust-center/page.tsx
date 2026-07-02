@@ -167,7 +167,7 @@ export default function TrustCenterPage() {
 
       <CTASection
         title="Need documents or equivalent review before switching?"
-        body="Paste the product, current supplier SKU, or product list. BioAxis can help organize documentation, sample, equivalent, and RFQ next steps."
+        body="Send the product, current supplier line, catalog reference, or product list. BioAxis can help organize documentation, sample, equivalent, and RFQ next steps."
         primaryLabel="Start RFQ"
         primaryHref="/request-quote?requestType=documentation&sourcePage=trust-center"
         secondaryLabel="Find equivalent"
