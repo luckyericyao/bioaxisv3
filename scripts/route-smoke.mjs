@@ -1380,7 +1380,7 @@ if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.
   ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify"]],
   ["Turnstile config route", turnstileConfigRouteSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "no-store"]],
   ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "This check protects the request form from spam", "crazyowenyao@gmail.com"]],
-  ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable"]]
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable", "waitingForVerification", "Complete verification to send"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {

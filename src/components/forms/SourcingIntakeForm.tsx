@@ -288,6 +288,8 @@ export function SourcingIntakeForm({
     ? "Optional. This page context is already included; add specs, supplier, quantity, or documents only if useful."
     : "Optional. Submit with email only, or paste any SKU, supplier line, product list, or rough sourcing need.";
   const currentSubmitLabel = submitLabelFor(state.requestType, submitLabel);
+  const waitingForVerification = turnstileAvailable && !turnstileToken;
+  const submitButtonLabel = submitting ? "Sending..." : waitingForVerification ? "Complete verification to send" : currentSubmitLabel;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -541,6 +543,11 @@ export function SourcingIntakeForm({
             {error}
           </p>
         ) : null}
+        {waitingForVerification ? (
+          <p className="mt-4 text-sm font-semibold leading-6 text-bioaxis-muted">
+            Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly.
+          </p>
+        ) : null}
         <div className="sticky bottom-0 z-10 mt-6 flex flex-col gap-4 border-t border-bioaxis-line bg-bioaxis-panel/95 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">{optionalHelperText}</p>
           <button
@@ -548,7 +555,7 @@ export function SourcingIntakeForm({
             disabled={submitting}
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-wait disabled:opacity-70"
           >
-            {submitting ? "Sending..." : currentSubmitLabel}
+            {submitButtonLabel}
           </button>
         </div>
       </section>
