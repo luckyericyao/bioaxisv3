@@ -158,6 +158,13 @@ function readStoredSourcingItems(raw: string | null) {
   }
 }
 
+function clearStoredSourcingSubmission() {
+  if (typeof window === "undefined") return;
+
+  window.sessionStorage.removeItem(sourcingListSubmissionStorageKey);
+  window.sessionStorage.removeItem(sourcingListItemsStorageKey);
+}
+
 function labelForProductField(requestType: string, hasContext: boolean, override?: string) {
   if (override) return override;
   if (requestType === "equivalent") return "Current product / catalog number / supplier line";
@@ -241,6 +248,7 @@ export function SourcingIntakeForm({
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [restoredSessionInput, setRestoredSessionInput] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [turnstileAvailable, setTurnstileAvailable] = useState(Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY));
 
@@ -281,6 +289,7 @@ export function SourcingIntakeForm({
 
     setSourcingListItems(sessionItems.length > 0 ? sessionItems : localItems);
     if (sessionProductList) {
+      setRestoredSessionInput(true);
       setState((current) => (current.productInput.trim() ? current : { ...current, productInput: sessionProductList }));
     }
   }, []);
@@ -378,6 +387,8 @@ export function SourcingIntakeForm({
           "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
         referenceId: payload.referenceId
       });
+      clearStoredSourcingSubmission();
+      setRestoredSessionInput(false);
     } catch {
       setError(requestErrorMessage);
       setSubmitted(null);
@@ -449,7 +460,7 @@ export function SourcingIntakeForm({
       </section>
 
       {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} /> : null}
-      {capturedInput ? <CapturedInputCard /> : null}
+      {capturedInput || restoredSessionInput ? <CapturedInputCard restored={restoredSessionInput && !capturedInput} /> : null}
       {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
       <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-8">
@@ -598,12 +609,14 @@ export function SourcingIntakeForm({
   );
 }
 
-function CapturedInputCard() {
+function CapturedInputCard({ restored = false }: { restored?: boolean }) {
   return (
     <section data-pasted-input-captured="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-5 sm:p-8">
       <p className="text-sm font-semibold uppercase text-bioaxis-accent">Pasted input captured</p>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-        BioAxis will carry this input into the request form so you do not need to paste it again.
+        {restored
+          ? "BioAxis restored the input you sent from the previous page. Review or edit it below before submitting."
+          : "BioAxis will carry this input into the request form so you do not need to paste it again."}
       </p>
     </section>
   );

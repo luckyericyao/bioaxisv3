@@ -1435,7 +1435,7 @@ if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFo
   ["SearchBox", searchBoxSource, ["bioaxis:sourcing-list-submission", "window.sessionStorage.setItem", 'params.set("storedInput", "1")', 'params.set("source", "homepage-hero")', "product-list-review"]],
   ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review"]],
   ["Request quote page", requestQuotePageSource, ["usesStoredInput", 'source === "sourcing-list"', 'source === "homepage-hero"', 'first(params?.storedInput) === "1"', 'usesStoredInput ? ""']],
-  ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "sessionProductList", "window.sessionStorage.getItem", "productInput: sessionProductList"]]
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "sessionProductList", "window.sessionStorage.getItem", "productInput: sessionProductList", "restoredSessionInput", "clearStoredSourcingSubmission", "BioAxis restored the input"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
