@@ -87,7 +87,6 @@ const sourcingListStorageKey = "bioaxis:sourcing-list";
 const sourcingListSubmissionStorageKey = "bioaxis:sourcing-list-submission";
 const sourcingListItemsStorageKey = "bioaxis:sourcing-list-items";
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
-const missingProductErrorMessage = "Please paste a SKU, product list, or short sourcing need.";
 const verificationErrorMessage = "Please complete the verification and try again.";
 const primaryHelperText = "Only your email is required to start. Add details only if useful.";
 const contextualHelperText = "BioAxis will include this page context automatically.";
@@ -315,7 +314,6 @@ export function SourcingIntakeForm({
 
   function validate() {
     if (!hasValidEmail(state.email)) return emailErrorMessage;
-    if (!hasPageContext && !state.productInput.trim()) return missingProductErrorMessage;
     if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
     return "";
   }
@@ -469,7 +467,6 @@ export function SourcingIntakeForm({
             id="sourcing-product-input"
             label={productLabel}
             value={state.productInput}
-            required={!hasPageContext}
             rows={compact ? 4 : 6}
             placeholder={
               hasPageContext

@@ -643,7 +643,15 @@ for (const route of routes) {
       }
     });
 
-    [/Product segment\s*\/\s*category\s+\*/i, /Product or equivalent product\s+\*/i, /Required specification/i].forEach((pattern) => {
+    [
+      /Product segment\s*\/\s*category\s+\*/i,
+      /Product or equivalent product\s+\*/i,
+      /Product\s*\/\s*SKU\s*\/\s*product list\s*\/\s*sourcing need\s+\*/i,
+      /Current product\s*\/\s*catalog number\s*\/\s*supplier line\s+\*/i,
+      /Product\s*\/\s*SKU\s*\/\s*sample need\s+\*/i,
+      /Message\s*\/\s*sourcing question\s+\*/i,
+      /Required specification/i
+    ].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: procurement field still appears required or heavy: ${pattern}`);
       }
@@ -1404,6 +1412,12 @@ if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFo
 ["selectedRequestType.requiredFields", "universalRequired", "productCategory: \"Product segment / category\""].forEach((legacyPattern) => {
   if (sourcingIntakeFormSource.includes(legacyPattern)) {
     failures.push(`SourcingIntakeForm: still contains legacy required-field logic ${legacyPattern}`);
+  }
+});
+
+["missingProductErrorMessage", "!state.productInput.trim()", "required={!hasPageContext}"].forEach((legacyPattern) => {
+  if (sourcingIntakeFormSource.includes(legacyPattern)) {
+    failures.push(`SourcingIntakeForm: still blocks email-only RFQ submission with ${legacyPattern}`);
   }
 });
 
