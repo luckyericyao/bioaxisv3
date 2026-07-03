@@ -203,6 +203,9 @@ const routes = [
   "/request-quote?type=unknown",
   "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
+  "/request-quote?requestType=sample&sourcePage=support&supportPath=sample-path",
+  "/request-quote?requestType=documentation&sourcePage=support&supportPath=documentation-review",
+  "/request-quote?requestType=quote&sourcePage=support&supportPath=rfq-preparation",
   "/request-quote?requestType=quote&sourcePage=private-label-oem&need=pipette-tips-private-label",
   "/request-quote?requestType=quote&productName=filtered%20pipette%20tips",
   "/request-quote?requestType=quote&workflow=screening-hit-identification",
@@ -791,6 +794,38 @@ for (const route of routes) {
         failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
       }
     });
+  }
+
+  if (route.includes("sourcePage=support")) {
+    ["Request context", "BioAxis support", "Support routing", "Request draft ready"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing support RFQ handoff ${label}`);
+      }
+    });
+
+    if (route.includes("supportPath=sample-path")) {
+      ["Support path: sample request", "Use case or workflow", "Sample quantity or evaluation timing", "Documents needed"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing sample support starter ${label}`);
+        }
+      });
+    }
+
+    if (route.includes("supportPath=documentation-review")) {
+      ["Support path: documentation review", "Required documents: CoA, SDS, sterility, material statement, lot-level, or supplier specification sheet", "Purchase timing"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing documentation support starter ${label}`);
+        }
+      });
+    }
+
+    if (route.includes("supportPath=rfq-preparation")) {
+      ["Support path: RFQ preparation", "Quantity:", "Timeline or urgency:", "Documents, samples, or equivalent needs"].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing RFQ support starter ${label}`);
+        }
+      });
+    }
   }
 
   if (route.includes("query=serum-free%20media")) {

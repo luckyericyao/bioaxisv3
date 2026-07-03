@@ -131,6 +131,87 @@ function defaultProductListFromContext({
   return "";
 }
 
+function defaultProductListFromSupportPath(supportPath: string | undefined) {
+  const normalizedSupportPath = supportPath?.toLowerCase() ?? "";
+
+  if (normalizedSupportPath === "product-matching") {
+    return [
+      "Support path: product matching",
+      "Product name, catalog reference, or rough description:",
+      "Workflow or application:",
+      "Required specifications:",
+      "Equivalent, sample, documentation, or quote needs:"
+    ].join("\n");
+  }
+
+  if (normalizedSupportPath === "sample-path") {
+    return [
+      "Support path: sample request",
+      "Product or product family:",
+      "Current supplier or catalog reference:",
+      "Use case or workflow:",
+      "Sample quantity or evaluation timing:",
+      "Documents needed:"
+    ].join("\n");
+  }
+
+  if (normalizedSupportPath === "documentation-review") {
+    return [
+      "Support path: documentation review",
+      "Product or product family:",
+      "Required documents: CoA, SDS, sterility, material statement, lot-level, or supplier specification sheet",
+      "Current supplier or catalog reference:",
+      "Purchase timing:"
+    ].join("\n");
+  }
+
+  if (normalizedSupportPath === "rfq-preparation") {
+    return [
+      "Support path: RFQ preparation",
+      "Product list or product family:",
+      "Quantity:",
+      "Timeline or urgency:",
+      "Documents, samples, or equivalent needs:"
+    ].join("\n");
+  }
+
+  if (normalizedSupportPath === "recurring-supply") {
+    return [
+      "Support path: recurring supply planning",
+      "Product list or product family:",
+      "Estimated monthly or annual usage:",
+      "Target replenishment timing:",
+      "Backup source, packaging, or documentation needs:"
+    ].join("\n");
+  }
+
+  if (normalizedSupportPath === "automation-fit") {
+    return [
+      "Support path: automation compatibility review",
+      "Robot platform or instrument:",
+      "Consumable format:",
+      "Deck, rack, SBS, barcode, or conductivity requirements:",
+      "Current supplier or catalog reference:"
+    ].join("\n");
+  }
+
+  return "";
+}
+
+function labelFromSupportPath(supportPath: string | undefined) {
+  const normalizedSupportPath = supportPath?.toLowerCase() ?? "";
+
+  if (normalizedSupportPath === "product-matching") return "Product matching";
+  if (normalizedSupportPath === "equivalent-review") return "Equivalent review";
+  if (normalizedSupportPath === "sample-path") return "Sample path";
+  if (normalizedSupportPath === "documentation-review") return "Documentation review";
+  if (normalizedSupportPath === "rfq-preparation") return "RFQ preparation";
+  if (normalizedSupportPath === "recurring-supply") return "Recurring supply planning";
+  if (normalizedSupportPath === "automation-fit") return "Automation compatibility review";
+
+  return "";
+}
+
 function defaultProductListFromSearch(query: string | undefined, requestType: string) {
   const trimmedQuery = query?.trim();
 
@@ -264,13 +345,16 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
+  const supportPath = first(params?.supportPath) ?? first(params?.support);
+  const supportPathLabel = labelFromSupportPath(supportPath);
   const usesStoredInput = first(params?.storedInput) === "1" || source === "sourcing-list" || source === "homepage-hero";
-  const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query);
+  const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query || supportPathLabel);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
   const productList =
     explicitProductList ??
     (usesStoredInput ? "" :
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
+      defaultProductListFromSupportPath(supportPath) ||
       defaultProductListFromSearch(query, requestType) ||
       defaultProductListFromNeed(need, requestType) ||
       defaultProductListFromWorkflow(workflowMatch?.title, requestType) ||
@@ -286,17 +370,17 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
   const catalogProductMatch = segment && subcategory && family && product ? getCatalogProductBySlug(segment, subcategory, family, product) : null;
   const catalogFamilyMatch = segment && subcategory && family ? getCatalogFamilyBySlug(segment, subcategory, family) : null;
-  const sourceProductUrl = sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
+  const sourceProductUrl = sourcePage === "support" ? "/support" : sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
   const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || "";
-  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || workflowMatch?.title || labelize(family) || query || "";
+  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
-    segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage
+    segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage || supportPathLabel
       ? {
           requestType: requestType ?? "quote",
           productName,
           productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family),
-          productCategory: productCategory || (workflowMatch ? "Workflow mapping" : ""),
-          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || (workflowMatch ? "Drug R&D workflow" : ""),
+          productCategory: productCategory || (workflowMatch ? "Workflow mapping" : supportPathLabel ? "Support routing" : ""),
+          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
           productUrl: sourceProductUrl,
           sourcePageUrl: sourceProductUrl,
           relevantSpecs:
