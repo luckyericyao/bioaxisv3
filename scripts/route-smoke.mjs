@@ -182,6 +182,7 @@ const routes = [
   "/samples",
   "/services",
   "/support",
+  "/suppliers",
   "/contact",
   "/request-quote",
   "/request-quote?requestType=quote",
@@ -1088,6 +1089,44 @@ for (const route of routes) {
     ].forEach(([pathname, params]) => {
       if (!hasHrefWithParams(html, pathname, params)) {
         failures.push(`${route}: missing contextual support link ${pathname} ${JSON.stringify(params)}`);
+      }
+    });
+  }
+
+  if (route === "/suppliers") {
+    [
+      "Turn supplier lists into sourcing review.",
+      "Start with the supplier information you already have.",
+      "Normalize the input",
+      "Compare sourcing paths",
+      "Prepare the next request",
+      "Supplier line review",
+      "Equivalent comparison",
+      "Quote-ready supplier brief",
+      "Useful input",
+      "Supplier or brand",
+      "Catalog reference",
+      "Required documents",
+      "Send supplier lines for structured review"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing suppliers review content ${label}`);
+      }
+    });
+
+    [
+      ["/request-quote", { requestType: "product-list-review", sourcePage: "/suppliers", supportPath: "product-matching" }],
+      ["/request-quote", { requestType: "quote", sourcePage: "/suppliers", supportPath: "rfq-preparation" }],
+      ["/equivalent-finder", { sourcePage: "/suppliers", supportPath: "equivalent-review" }]
+    ].forEach(([pathname, params]) => {
+      if (!hasHrefWithParams(html, pathname, params)) {
+        failures.push(`${route}: missing suppliers contextual link ${pathname} ${JSON.stringify(params)}`);
+      }
+    });
+
+    ["universal stock", "automatic interchangeability"].forEach((carefulBoundary) => {
+      if (!pageText.includes(carefulBoundary)) {
+        failures.push(`${route}: missing suppliers cautious boundary ${carefulBoundary}`);
       }
     });
   }
