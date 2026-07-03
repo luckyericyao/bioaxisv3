@@ -4,7 +4,6 @@ import { ComparisonTable } from "@/components/ui/ComparisonTable";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { SpecTag } from "@/components/ui/SpecTag";
 
 export const metadata: Metadata = {
   title: "Quality & Documentation | BioAxis",
@@ -23,6 +22,15 @@ const documentationExamples = [
   "Material information",
   "Lot-level documentation where available",
   "Compatibility notes where available"
+];
+
+const packageInputs = [
+  "Product family or product name",
+  "Current supplier or catalog reference",
+  "Required documents",
+  "Workflow or intended use",
+  "Lot, sterility, or sample needs",
+  "Purchase timing or recurring usage"
 ];
 
 const trustSections = [
@@ -64,13 +72,15 @@ export default function QualityPage() {
         <div>
           <SectionHeader
             title="Documentation support"
-            subtitle="BioAxis helps request, organize, and support review of supplier documentation where available. Product documentation remains tied to the relevant supplier and product record."
+            subtitle="BioAxis helps request and organize supplier documentation where available. Product documentation remains tied to the relevant supplier and product record."
           />
-          <div className="mt-8 flex flex-wrap gap-2">
+          <ul className="mt-8 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
             {documentationExamples.map((item) => (
-              <SpecTag key={item}>{item}</SpecTag>
+              <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
+                {item}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
         <ComparisonTable
           rows={[
@@ -80,6 +90,26 @@ export default function QualityPage() {
             { label: "Human review", value: "A sourcing specialist can help review product matching, equivalent sourcing, and documentation needs with careful platform language." }
           ]}
         />
+      </section>
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
+        <div className="grid gap-6 border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6 lg:grid-cols-[0.85fr_1.15fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation package request</p>
+            <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">
+              Send the product context and document need together.
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
+              BioAxis can organize the request around supplier-provided evidence, specification review, sample-first evaluation, and recurring supply context without presenting documentation as BioAxis-issued certification.
+            </p>
+          </div>
+          <ul className="grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+            {packageInputs.map((item) => (
+              <li key={item} className="border border-white/[0.12] px-3 py-2">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-8">
@@ -110,11 +140,11 @@ export default function QualityPage() {
       </section>
       <CTASection
         title="Need documentation before purchasing?"
-        body="Submit product details and the documentation you need. BioAxis helps request and organize CoA, SDS, sterility, material, or lot-level documentation where available."
-        primaryLabel="Request documentation support"
-        primaryHref="/request-quote?requestType=documentation"
+        body="Submit product details, current supplier or catalog reference if known, intended workflow, and the documents you need. BioAxis helps request and organize CoA, SDS, sterility, material, or lot-level documentation where available."
+        primaryLabel="Request documentation package"
+        primaryHref="/request-quote?requestType=documentation&sourcePage=%2Fquality&supportPath=documentation-review"
         secondaryLabel="Submit current supplier/catalog number"
-        secondaryHref="/equivalent-finder?requestType=equivalent"
+        secondaryHref="/equivalent-finder?sourcePage=%2Fquality&supportPath=equivalent-review"
       />
     </>
   );

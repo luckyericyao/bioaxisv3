@@ -1226,8 +1226,38 @@ for (const route of routes) {
     });
   }
 
-  if (route === "/quality" && !hasHrefWithParams(html, "/request-quote", { requestType: "documentation" })) {
-    failures.push(`${route}: missing documentation support CTA`);
+  if (route === "/quality") {
+    [
+      "Documentation support",
+      "Documentation package request",
+      "Send the product context and document need together.",
+      "Product family or product name",
+      "Current supplier or catalog reference",
+      "Required documents",
+      "Workflow or intended use",
+      "Lot, sterility, or sample needs",
+      "Purchase timing or recurring usage",
+      "without presenting documentation as BioAxis-issued certification",
+      "Request documentation package"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing quality documentation content ${label}`);
+      }
+    });
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "documentation", sourcePage: "/quality", supportPath: "documentation-review" })) {
+      failures.push(`${route}: missing contextual documentation support CTA`);
+    }
+
+    if (!hasHrefWithParams(html, "/equivalent-finder", { sourcePage: "/quality", supportPath: "equivalent-review" })) {
+      failures.push(`${route}: missing quality equivalent review CTA`);
+    }
+
+    ["CoASDS", "SDSSterility", "Material informationLot-level"].forEach((concatenatedCopy) => {
+      if (mainText.includes(concatenatedCopy)) {
+        failures.push(`${route}: documentation list appears concatenated ${concatenatedCopy}`);
+      }
+    });
   }
 
   if (route === "/samples") {
