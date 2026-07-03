@@ -24,7 +24,7 @@ const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "f
 function resultTypeLabel(type: ProductSearchResult["type"]) {
   if (type === "subcategory") return "Category";
   if (type === "resource") return "Guide";
-  if (type === "workflow") return "RFQ path";
+  if (type === "workflow") return "Sourcing path";
 
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
@@ -179,7 +179,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           {relevanceLabel(result)}
         </span>
         <span className="border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
-          RFQ path
+          Sourcing path
         </span>
       </div>
       <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>
@@ -206,7 +206,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           href={requestHref(result, "quote", query)}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
-          Send as RFQ
+          Send as quote request
         </Link>
         <Link
           href={requestHref(result, "equivalent", query)}
@@ -222,7 +222,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
 function SearchSourcingActions({ query, productListHref }: { query: string; productListHref: string }) {
   const actions = [
     {
-      title: "Structure RFQ",
+      title: "Prepare quote request",
       body: "Turn this search into a quote-ready sourcing brief with quantity, timing, and documentation context.",
       href: searchRequestHref("quote", query)
     },

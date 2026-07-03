@@ -346,7 +346,7 @@ for (const route of routes) {
       "Direct product, family, path, and specification matches appear first",
       "Sourcing next steps",
       "Turn this search into a sourcing brief.",
-      "Structure RFQ",
+      "Prepare quote request",
       "Review equivalent",
       "Request documents",
       "Request sample",
