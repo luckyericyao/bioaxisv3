@@ -14,14 +14,15 @@ export function SupportCard({ supportType }: SupportCardProps) {
         <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">What to send</p>
         <ul className="grid gap-2 text-sm text-bioaxis-steel">
           {supportType.whatToSend.map((item) => (
-            <li key={item}>- {item}</li>
+            <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
+              {item}
+            </li>
           ))}
         </ul>
       </div>
-      <Link href="/request-quote" className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-        {supportType.relatedRequestType}
+      <Link href={supportType.requestHref} className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        {supportType.ctaLabel}
       </Link>
     </article>
   );
 }
-

@@ -20,13 +20,13 @@ export default function SupportPage() {
     <>
       <PageHero
         eyebrow="Support"
-        title="Dedicated sourcing support for life science labs."
-        subtitle="Not sure which consumable, equivalent, format, or supplier option fits your workflow? BioAxis provides human support for product matching, alternative sourcing, documentation, and quote preparation."
+        title="Choose the right sourcing support path."
+        subtitle="Send the product context you have. BioAxis routes it into product matching, equivalent review, sample coordination, documentation review, RFQ preparation, or recurring supply planning."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <SectionHeader
-          title="Support categories"
-          subtitle="Choose the support path that matches the sourcing problem your lab is trying to solve."
+          title="Start with the decision you need to make."
+          subtitle="Each path opens the right request flow with sourcing context already attached, so your team can start with a rough note rather than a perfect form."
         />
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {supportTypes.map((supportType) => (
@@ -55,4 +55,3 @@ export default function SupportPage() {
     </>
   );
 }
-

@@ -181,6 +181,7 @@ const routes = [
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
   "/services",
+  "/support",
   "/contact",
   "/request-quote",
   "/request-quote?requestType=quote",
@@ -1012,6 +1013,46 @@ for (const route of routes) {
     ["cart-first storefront", "not a cart", "Open service"].forEach((legacyCopy) => {
       if (pageText.includes(legacyCopy)) {
         failures.push(`${route}: legacy services copy still rendered ${legacyCopy}`);
+      }
+    });
+  }
+
+  if (route === "/support") {
+    [
+      "Choose the right sourcing support path.",
+      "BioAxis routes it into product matching, equivalent review, sample coordination, documentation review, RFQ preparation, or recurring supply planning.",
+      "Start with the decision you need to make.",
+      "Product matching",
+      "Equivalent review",
+      "Sample path",
+      "Documentation review",
+      "RFQ preparation",
+      "Recurring supply planning",
+      "Automation compatibility review",
+      "Send product context",
+      "Find equivalent",
+      "Request sample",
+      "Request documents",
+      "Prepare RFQ",
+      "Review recurring demand",
+      "Review automation fit"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing support path content ${label}`);
+      }
+    });
+
+    [
+      ["/request-quote", { requestType: "product-list-review", sourcePage: "support", supportPath: "product-matching" }],
+      ["/request-quote", { requestType: "sample", sourcePage: "support", supportPath: "sample-path" }],
+      ["/request-quote", { requestType: "documentation", sourcePage: "support", supportPath: "documentation-review" }],
+      ["/request-quote", { requestType: "quote", sourcePage: "support", supportPath: "rfq-preparation" }],
+      ["/request-quote", { requestType: "recurring-supply", sourcePage: "support", supportPath: "recurring-supply" }],
+      ["/request-quote", { requestType: "equivalent", sourcePage: "support", supportPath: "automation-fit" }],
+      ["/equivalent-finder", { sourcePage: "support", supportPath: "equivalent-review" }]
+    ].forEach(([pathname, params]) => {
+      if (!hasHrefWithParams(html, pathname, params)) {
+        failures.push(`${route}: missing contextual support link ${pathname} ${JSON.stringify(params)}`);
       }
     });
   }
