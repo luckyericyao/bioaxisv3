@@ -185,6 +185,7 @@ const routes = [
   "/services",
   "/support",
   "/suppliers",
+  "/supplier-qualification",
   "/contact",
   "/request-quote",
   "/request-quote?requestType=quote",
@@ -1256,6 +1257,43 @@ for (const route of routes) {
     ["CoASDS", "SDSSterility", "Material informationLot-level"].forEach((concatenatedCopy) => {
       if (mainText.includes(concatenatedCopy)) {
         failures.push(`${route}: documentation list appears concatenated ${concatenatedCopy}`);
+      }
+    });
+  }
+
+  if (route === "/supplier-qualification") {
+    [
+      "Supplier evidence review before switching or scaling.",
+      "What evidence buyers may request",
+      "without making unsupported claims or replacing buyer-side qualification",
+      "Supplier review request",
+      "Send supplier context before committing to a switch.",
+      "Supplier or brand under review",
+      "Product family or catalog reference",
+      "Required documents",
+      "Critical specification or workflow",
+      "Sample or pilot evaluation need",
+      "Recurring usage or backup-source context",
+      "Need supplier evidence before a sourcing decision?",
+      "Request supplier evidence review",
+      "Compare current supplier product"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing supplier qualification content ${label}`);
+      }
+    });
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "documentation", sourcePage: "/supplier-qualification", supportPath: "documentation-review" })) {
+      failures.push(`${route}: missing contextual supplier documentation CTA`);
+    }
+
+    if (!hasHrefWithParams(html, "/equivalent-finder", { sourcePage: "/supplier-qualification", supportPath: "equivalent-review" })) {
+      failures.push(`${route}: missing supplier equivalent review CTA`);
+    }
+
+    ["CoASDS", "SDSSterility", "Material declarationLot traceability"].forEach((concatenatedCopy) => {
+      if (mainText.includes(concatenatedCopy)) {
+        failures.push(`${route}: supplier evidence list appears concatenated ${concatenatedCopy}`);
       }
     });
   }
