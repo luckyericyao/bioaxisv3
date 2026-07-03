@@ -179,6 +179,7 @@ const routes = [
   "/quality",
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
+  "/applications",
   "/samples",
   "/services",
   "/support",
@@ -1127,6 +1128,41 @@ for (const route of routes) {
     ["universal stock", "automatic interchangeability"].forEach((carefulBoundary) => {
       if (!pageText.includes(carefulBoundary)) {
         failures.push(`${route}: missing suppliers cautious boundary ${carefulBoundary}`);
+      }
+    });
+  }
+
+  if (route === "/applications") {
+    [
+      "Start from the workflow. BioAxis maps the sourcing path.",
+      "Choose the application area closest to the work.",
+      "Cell Culture",
+      "Molecular Biology & PCR",
+      "Automation-Compatible Formats",
+      "View product lines",
+      "Map sourcing request",
+      "Review equivalent",
+      "Useful workflow context",
+      "Workflow or assay type",
+      "Current product or supplier line",
+      "Documents, samples, quantity, and timing",
+      "Have a workflow product list?",
+      "Map workflow sourcing"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing applications workflow content ${label}`);
+      }
+    });
+
+    [
+      ["/products/cell-culture", {}],
+      ["/request-quote", { requestType: "quote", sourcePage: "/applications", query: "cell culture consumables" }],
+      ["/request-quote", { requestType: "equivalent", sourcePage: "/applications", supportPath: "automation-fit" }],
+      ["/request-quote", { requestType: "product-list-review", sourcePage: "/applications" }],
+      ["/equivalent-finder", { sourcePage: "/applications" }]
+    ].forEach(([pathname, params]) => {
+      if (!hasHrefWithParams(html, pathname, params)) {
+        failures.push(`${route}: missing applications contextual link ${pathname} ${JSON.stringify(params)}`);
       }
     });
   }
