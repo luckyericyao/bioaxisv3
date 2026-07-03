@@ -926,9 +926,10 @@ for (const route of routes) {
   if (route === "/ready-supply") {
     [
       "Ready Supply",
+      "Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.",
       "Warehouse-backed consumables for faster lab procurement.",
       "Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.",
-      "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
+      "Built for labs, distributors, and procurement teams that need stronger supply certainty without repeated sourcing delays.",
       "BIOAXIS READY SUPPLY",
       "Warehouse inventory",
       "Available for selected lines",
@@ -945,6 +946,7 @@ for (const route of routes) {
       "BioAxis-controlled warehouse inventory",
       "batch traceability",
       "How Ready Supply Works",
+      "practical replenishment planning rather than public marketplace claims",
       "Stocked / controlled supply",
       "Fast availability check",
       "Quality and documentation review",
