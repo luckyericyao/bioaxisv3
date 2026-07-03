@@ -57,16 +57,6 @@ const readySupplySteps = [
   }
 ];
 
-const coverageItems = [
-  "Pipette tips",
-  "PCR plastics",
-  "Tubes",
-  "Plates",
-  "Filtration",
-  "Cell culture consumables",
-  "Selected private-label lines"
-];
-
 export default function ReadySupplyPage() {
   return (
     <>
@@ -84,7 +74,7 @@ export default function ReadySupplyPage() {
               Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-              Built for labs, distributors, and procurement teams that need stronger supply certainty without repeated sourcing delays.
+              Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <CTAButton href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock">
@@ -161,13 +151,6 @@ export default function ReadySupplyPage() {
           <p className="mt-4 max-w-4xl text-base leading-7 text-bioaxis-muted">
             Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.
           </p>
-          <ul className="mt-6 flex flex-wrap gap-2">
-            {coverageItems.map((item) => (
-              <li key={item} className="border border-white/[0.12] bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
-                {item}
-              </li>
-            ))}
-          </ul>
           <p className="mt-6 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             Availability is confirmed per request rather than shown as a public inventory feed.
           </p>
