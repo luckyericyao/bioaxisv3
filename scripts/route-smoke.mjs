@@ -180,6 +180,7 @@ const routes = [
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
   "/samples",
+  "/services",
   "/contact",
   "/request-quote",
   "/request-quote?requestType=quote",
@@ -978,6 +979,39 @@ for (const route of routes) {
     [/real-time inventory/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
+      }
+    });
+  }
+
+  if (route === "/services") {
+    [
+      "Sourcing workflows your team can act on.",
+      "BioAxis structures consumables requests into product matching, equivalent review, sample coordination, documentation checks, RFQ preparation, and recurring supply planning.",
+      "Product Matching",
+      "Equivalent Review",
+      "Sample Coordination",
+      "Documentation Review",
+      "RFQ Preparation",
+      "Recurring Supply Planning",
+      "Product List Review",
+      "Automation Compatibility Review",
+      "Send product context",
+      "Find equivalent",
+      "Request sample",
+      "Request documents",
+      "Prepare RFQ",
+      "Review recurring demand",
+      "Send product list",
+      "Review automation fit"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing services workflow content ${label}`);
+      }
+    });
+
+    ["cart-first storefront", "not a cart", "Open service"].forEach((legacyCopy) => {
+      if (pageText.includes(legacyCopy)) {
+        failures.push(`${route}: legacy services copy still rendered ${legacyCopy}`);
       }
     });
   }

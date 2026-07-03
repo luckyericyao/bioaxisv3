@@ -5,7 +5,7 @@ import { PageHero } from "@/components/ui/PageHero";
 export const metadata: Metadata = {
   title: "Services | BioAxis",
   description:
-    "BioAxis service areas for product matching, equivalent sourcing, samples, documentation, quotes, recurring supply, product-list review, and automation compatibility.",
+    "BioAxis sourcing workflows for product matching, equivalent review, sample coordination, documentation checks, RFQ preparation, and recurring supply planning.",
   alternates: {
     canonical: "/services"
   }
@@ -14,43 +14,51 @@ export const metadata: Metadata = {
 const services = [
   {
     title: "Product Matching",
-    description: "Map a product name, supplier, catalog number, or specification to the right sourcing path.",
-    href: "/support?topic=product-matching"
+    description: "Turn a product name, catalog reference, supplier line, or specification into the right sourcing path.",
+    href: "/request-quote?requestType=product-list-review",
+    cta: "Send product context"
   },
   {
-    title: "Equivalent Sourcing",
-    description: "Review current products against compatible alternatives, critical specifications, and sample needs.",
-    href: "/request-quote?requestType=equivalent"
+    title: "Equivalent Review",
+    description: "Compare current consumables against format, material, sterility, packaging, workflow fit, and sample needs.",
+    href: "/equivalent-finder",
+    cta: "Find equivalent"
   },
   {
     title: "Sample Coordination",
     description: "Prepare sample requests for products that need evaluation before switching or scaling.",
-    href: "/request-quote?requestType=sample"
+    href: "/request-quote?requestType=sample",
+    cta: "Request sample"
   },
   {
-    title: "Documentation Support",
-    description: "Organize CoA, SDS, sterility, material, and lot-level documentation requests where available.",
-    href: "/support?topic=documentation"
+    title: "Documentation Review",
+    description: "Organize CoA, SDS, sterility, material, lot-level, and supplier specification requirements before purchasing.",
+    href: "/request-quote?requestType=documentation",
+    cta: "Request documents"
   },
   {
-    title: "Quote Preparation",
+    title: "RFQ Preparation",
     description: "Turn product families, quantities, target dates, and documentation needs into sourcing-ready RFQs.",
-    href: "/request-quote?requestType=quote"
+    href: "/request-quote?requestType=quote",
+    cta: "Prepare RFQ"
   },
   {
     title: "Recurring Supply Planning",
     description: "Share usage rhythm, quantities, and delivery timing for recurring sourcing support.",
-    href: "/request-quote?requestType=recurring-supply"
+    href: "/request-quote?requestType=recurring-supply",
+    cta: "Review recurring demand"
   },
   {
     title: "Product List Review",
-    description: "Submit a product list for BioAxis to organize by segment, family, equivalent path, and documentation need.",
-    href: "/request-quote?requestType=product-list-review"
+    description: "Submit a messy list for BioAxis to organize by family, equivalent path, documentation need, and RFQ fields.",
+    href: "/request-quote?requestType=product-list-review",
+    cta: "Send product list"
   },
   {
     title: "Automation Compatibility Review",
     description: "Review tips, plates, reservoirs, seals, tubes, and accessories against platform and deck requirements.",
-    href: "/support?topic=automation-compatibility"
+    href: "/request-quote?requestType=equivalent&need=automation-compatible-format",
+    cta: "Review automation fit"
   }
 ];
 
@@ -59,8 +67,8 @@ export default function ServicesPage() {
     <>
       <PageHero
         eyebrow="Services"
-        title="Sourcing support around the product taxonomy."
-        subtitle="BioAxis is not a cart-first storefront. The service layer helps teams match equivalents, coordinate samples, prepare quotes, review documentation, and plan recurring supply."
+        title="Sourcing workflows your team can act on."
+        subtitle="BioAxis structures consumables requests into product matching, equivalent review, sample coordination, documentation checks, RFQ preparation, and recurring supply planning."
       />
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -72,7 +80,7 @@ export default function ServicesPage() {
                 href={service.href}
                 className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
               >
-                Open service
+                {service.cta}
               </Link>
             </article>
           ))}
