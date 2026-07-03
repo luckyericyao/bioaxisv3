@@ -554,11 +554,33 @@ for (const route of routes) {
   }
 
   if (route === "/resources") {
-    ["Filtered vs non-filtered pipette tips", "How to prepare a consumables RFQ", "How to source automation-compatible tips", "How to qualify equivalent lab consumables before switching"].forEach((label) => {
+    [
+      "Filtered vs non-filtered pipette tips",
+      "How to prepare a consumables RFQ",
+      "How to source automation-compatible tips",
+      "How to qualify equivalent lab consumables before switching",
+      "Read the guide",
+      "Send the context",
+      "BioAxis structures next steps",
+      "Use as request starter",
+      "Send product context"
+    ].forEach((label) => {
       if (!pageText.includes(label)) {
-        failures.push(`${route}: missing resource guide ${label}`);
+        failures.push(`${route}: missing resource content ${label}`);
       }
     });
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "product-list-review", sourcePage: "/resources" })) {
+      failures.push(`${route}: missing resources page contextual request CTA`);
+    }
+
+    if (!hasHrefWithParams(html, "/request-quote", { requestType: "product-list-review", sourcePage: "/resources/filtered-vs-non-filtered-pipette-tips", query: "Filtered vs non-filtered pipette tips" })) {
+      failures.push(`${route}: missing resource card request starter link`);
+    }
+
+    if (mainText.includes("Liquid HandlingAutomation Consumables") || mainText.includes("PCR/qPCRCell Culture")) {
+      failures.push(`${route}: resource tag text appears concatenated`);
+    }
   }
 
   if (route === "/equivalent-finder") {
