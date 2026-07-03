@@ -180,6 +180,7 @@ const routes = [
   "/resources",
   "/resources/how-to-prepare-a-consumables-rfq",
   "/applications",
+  "/about",
   "/samples",
   "/services",
   "/support",
@@ -1163,6 +1164,41 @@ for (const route of routes) {
     ].forEach(([pathname, params]) => {
       if (!hasHrefWithParams(html, pathname, params)) {
         failures.push(`${route}: missing applications contextual link ${pathname} ${JSON.stringify(params)}`);
+      }
+    });
+  }
+
+  if (route === "/about") {
+    [
+      "BioAxis turns consumables requests into sourcing paths.",
+      "What you can send",
+      "A catalog reference, supplier line, product list, workflow note, or rough sourcing need is enough to start.",
+      "Structure",
+      "Compare",
+      "Route",
+      "What BioAxis does not claim",
+      "without unsupported inventory counts, price guarantees, or final product-validation claims",
+      "Start with what you already have.",
+      "Send product context",
+      "Review equivalent"
+    ].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing about sourcing-platform content ${label}`);
+      }
+    });
+
+    [
+      ["/request-quote", { requestType: "product-list-review", sourcePage: "/about" }],
+      ["/equivalent-finder", { sourcePage: "/about" }]
+    ].forEach(([pathname, params]) => {
+      if (!hasHrefWithParams(html, pathname, params)) {
+        failures.push(`${route}: missing about contextual link ${pathname} ${JSON.stringify(params)}`);
+      }
+    });
+
+    ["- BioAxis does not", "- Biotech research"].forEach((legacyListPrefix) => {
+      if (mainText.includes(legacyListPrefix)) {
+        failures.push(`${route}: still renders manual list prefix ${legacyListPrefix}`);
       }
     });
   }
