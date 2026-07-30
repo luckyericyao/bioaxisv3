@@ -621,7 +621,7 @@ for (const route of routes) {
 
     [
       "Sourcing request",
-      "Paste what you have. BioAxis will structure the sourcing request.",
+      "Paste what you have.",
       "Email *",
       "Add details — optional",
       "Request type optional"
@@ -661,9 +661,16 @@ for (const route of routes) {
       failures.push(`${route}: missing selected quote request type card text`);
     }
 
+    const submitActionsTag = html.match(/<div[^>]*data-submit-actions="true"[^>]*>/i)?.[0] ?? "";
+    if (!submitActionsTag) {
+      failures.push(`${route}: missing RFQ submit actions`);
+    } else if (/\bsticky\b/.test(submitActionsTag)) {
+      failures.push(`${route}: RFQ submit actions must not overlay intake fields`);
+    }
+
     [
-      "Send a product, catalog number, or list",
-      "Paste what you have. BioAxis will structure the sourcing request.",
+      "Start a sourcing request",
+      "Paste what you have.",
       "Only your email is required to start. Add details only if useful.",
       "Email *",
       "Use a request starter",

@@ -434,10 +434,16 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     <>
       <PageHero
         eyebrow="Sourcing request"
-        title="Send a product, catalog number, or list"
-        subtitle="Only your email is required. Paste a SKU, supplier catalog number, product list, or sourcing need, and BioAxis can follow up for missing details."
+        title="Start a sourcing request"
+        subtitle={
+          <>
+            <span className="sm:hidden">Email is the only required field.</span>
+            <span className="hidden sm:inline">Email is the only required field. Add a product, catalog number, supplier line, or list when useful.</span>
+          </>
+        }
+        compact
       />
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-6 sm:px-8 lg:px-10">
         <QuoteRequestForm
           initialValues={{
             requestType: requestType ?? "quote",

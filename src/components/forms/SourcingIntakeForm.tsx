@@ -471,22 +471,21 @@ export function SourcingIntakeForm({
         />
       </div>
 
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing intake</p>
-        <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
-        <div className="mt-3 grid gap-2 text-sm leading-6 text-bioaxis-muted">
-          <p>{primaryHelperText}</p>
-          {hasPageContext ? <p>{contextualHelperText}</p> : null}
-        </div>
-      </section>
-
-      {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} /> : null}
-      {capturedInput || restoredSessionInput ? (
+      {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} /> : null}
+      {!hasPageContext && (capturedInput || restoredSessionInput) ? (
         <CapturedInputCard restored={restoredSessionInput && !capturedInput} captured={capturedInput} />
       ) : null}
       {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
-      <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-8">
+      <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-7">
+        <div className="mb-5">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing intake</p>
+          <h2 className="mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl">{title}</h2>
+          <div className="mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted">
+            <p>{primaryHelperText}</p>
+            {hasPageContext ? <p className="hidden sm:block">{contextualHelperText}</p> : null}
+          </div>
+        </div>
         <div className="grid gap-5">
           <Field
             id="sourcing-email"
@@ -548,7 +547,10 @@ export function SourcingIntakeForm({
             Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly.
           </p>
         ) : null}
-        <div className="sticky bottom-0 z-10 mt-6 flex flex-col gap-4 border-t border-bioaxis-line bg-bioaxis-panel/95 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          data-submit-actions="true"
+          className="mt-6 flex flex-col gap-4 border-t border-bioaxis-line pt-5 sm:flex-row sm:items-center sm:justify-between"
+        >
           <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">{optionalHelperText}</p>
           <button
             type="submit"
@@ -654,21 +656,45 @@ function CapturedInputCard({ restored = false, captured = false }: { restored?: 
   );
 }
 
-function RequestContextCard({ productContext }: { productContext: BioAxisProductContext }) {
+function RequestContextCard({
+  productContext,
+  draftReady
+}: {
+  productContext: BioAxisProductContext;
+  draftReady: boolean;
+}) {
   const rows = contextRows(productContext);
+  const mobileProductArea = [productContext.productSegment, productContext.productName].filter(Boolean).join(" / ");
 
   return (
-    <section data-product-context-summary="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-5 sm:p-8">
-      <p className="text-sm font-semibold uppercase text-bioaxis-accent">Request context</p>
-      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">BioAxis will include this page context automatically.</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-        BioAxis will include this product context with your request. You can add more details below, but it is not required.
+    <section data-product-context-summary="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase text-bioaxis-accent sm:text-sm">Request context</p>
+        <p className="text-[10px] font-semibold uppercase text-bioaxis-dim sm:text-xs">
+          <span className="sm:hidden">{draftReady ? "Draft ready" : "Captured"}</span>
+          <span className="hidden sm:inline">{draftReady ? "Request draft ready" : "Captured automatically"}</span>
+        </p>
+      </div>
+      <p className="mt-2 max-w-4xl text-sm leading-5 text-bioaxis-muted">
+        <span className="sm:hidden">Product context is included automatically.</span>
+        <span className="hidden sm:inline">
+          BioAxis will include this product context with your request. You can add more details below, but it is not required.
+        </span>
       </p>
-      <dl className="mt-6 grid gap-3 md:grid-cols-3">
+      <dl className="mt-3 grid border-t border-bioaxis-line md:grid-cols-[0.55fr_1.5fr_0.7fr] md:gap-2 md:border-0">
         {rows.map(([label, value]) => (
-          <div key={label} className="border border-bioaxis-line bg-bioaxis-black p-4">
+          <div key={label} className="border-b border-bioaxis-line py-2.5 last:border-b-0 md:border md:bg-bioaxis-black md:px-3">
             <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
-            <dd className="mt-2 text-sm font-semibold text-bioaxis-text">{value}</dd>
+            <dd className="mt-1 text-sm font-semibold leading-5 text-bioaxis-text">
+              {label === "Product area" && mobileProductArea ? (
+                <>
+                  <span className="sm:hidden">{mobileProductArea}</span>
+                  <span className="hidden sm:inline">{value}</span>
+                </>
+              ) : (
+                value
+              )}
+            </dd>
           </div>
         ))}
       </dl>

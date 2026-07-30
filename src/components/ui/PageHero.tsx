@@ -3,17 +3,28 @@ import type { ReactNode } from "react";
 type PageHeroProps = {
   eyebrow?: string;
   title: string;
-  subtitle: string;
+  subtitle: ReactNode;
   children?: ReactNode;
+  compact?: boolean;
 };
 
-export function PageHero({ eyebrow, title, subtitle, children }: PageHeroProps) {
+export function PageHero({ eyebrow, title, subtitle, children, compact = false }: PageHeroProps) {
   return (
-    <section className="border-b border-bioaxis-line px-5 py-16 sm:px-8 lg:px-10">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-end">
+    <section className={`border-b border-bioaxis-line px-5 sm:px-8 lg:px-10 ${compact ? "py-6 sm:py-7" : "py-16"}`}>
+      <div
+        className={`mx-auto grid w-full max-w-7xl lg:items-end ${
+          compact ? "gap-5 lg:grid-cols-[0.9fr_1fr] lg:gap-12" : "gap-8 lg:grid-cols-[1fr_0.72fr]"
+        }`}
+      >
         <div>
-          {eyebrow ? <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">{eyebrow}</p> : null}
-          <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-6xl lg:text-7xl">
+          {eyebrow ? <p className={`${compact ? "mb-3" : "mb-5"} text-sm font-semibold uppercase text-bioaxis-accent`}>{eyebrow}</p> : null}
+          <h1
+            className={`max-w-5xl font-bold text-bioaxis-text ${
+              compact
+                ? "text-4xl leading-[1.02] sm:text-5xl"
+                : "text-4xl uppercase leading-[0.95] sm:text-6xl lg:text-7xl"
+            }`}
+          >
             {title}
           </h1>
         </div>
@@ -25,4 +36,3 @@ export function PageHero({ eyebrow, title, subtitle, children }: PageHeroProps) 
     </section>
   );
 }
-
