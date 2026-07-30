@@ -131,6 +131,33 @@ function defaultProductListFromContext({
   return "";
 }
 
+function readySupplyRequestContext({
+  sourcePage,
+  source,
+  intent
+}: {
+  sourcePage?: string;
+  source?: string;
+  intent?: string;
+}) {
+  const normalizedSource = `${sourcePage ?? ""} ${source ?? ""}`.toLowerCase();
+
+  if (!normalizedSource.includes("ready-supply")) {
+    return null;
+  }
+
+  const productName = intent?.toLowerCase().includes("current-sku")
+    ? "Ready Supply current SKU review"
+    : "Ready Supply availability check";
+
+  return {
+    productName,
+    productFamily: "Fast dispatch and replenishment",
+    productCategory: "Warehouse-backed consumables",
+    productSegment: "Ready Supply"
+  };
+}
+
 function defaultProductListFromSupportPath(supportPath: string | undefined) {
   const normalizedSupportPath = supportPath?.toLowerCase() ?? "";
 
@@ -345,6 +372,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
+  const readySupplyContext = readySupplyRequestContext({ sourcePage, source, intent });
   const supportPath = first(params?.supportPath) ?? first(params?.support);
   const supportPathLabel = labelFromSupportPath(supportPath);
   const usesStoredInput = first(params?.storedInput) === "1" || source === "sourcing-list" || source === "homepage-hero";
@@ -370,17 +398,21 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const familyMatch = segment && subcategory && family ? getFamilyBySlug(segment, subcategory, family) : null;
   const catalogProductMatch = segment && subcategory && family && product ? getCatalogProductBySlug(segment, subcategory, family, product) : null;
   const catalogFamilyMatch = segment && subcategory && family ? getCatalogFamilyBySlug(segment, subcategory, family) : null;
-  const sourceProductUrl = sourcePage === "support" ? "/support" : sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
-  const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || "";
-  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
+  const sourceProductUrl = readySupplyContext
+    ? "/ready-supply"
+    : sourcePage === "support"
+      ? "/support"
+      : sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
+  const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || readySupplyContext?.productCategory || "";
+  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
-    segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage || supportPathLabel
+    segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage || supportPathLabel || readySupplyContext
       ? {
           requestType: requestType ?? "quote",
           productName,
-          productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family),
+          productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family) || readySupplyContext?.productFamily,
           productCategory: productCategory || (workflowMatch ? "Workflow mapping" : supportPathLabel ? "Support routing" : ""),
-          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
+          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || readySupplyContext?.productSegment || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
           productUrl: sourceProductUrl,
           sourcePageUrl: sourceProductUrl,
           relevantSpecs:

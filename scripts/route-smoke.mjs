@@ -207,6 +207,7 @@ const routes = [
   "/request-quote?type=unknown",
   "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
+  "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=current-sku",
   "/request-quote?requestType=sample&sourcePage=support&supportPath=sample-path",
   "/request-quote?requestType=documentation&sourcePage=support&supportPath=documentation-review",
   "/request-quote?requestType=quote&sourcePage=support&supportPath=rfq-preparation",
@@ -815,7 +816,11 @@ for (const route of routes) {
   }
 
   if (route.includes("sourcePage=ready-supply")) {
-    ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU or brand", "Quantity and timing"].forEach((label) => {
+    const readySupplyLabels = route.includes("intent=current-sku")
+      ? ["Request context", "Request draft ready", "Ready Supply current SKU review", "Current SKU or brand", "Quantity and timing"]
+      : ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU or brand", "Quantity and timing"];
+
+    [...readySupplyLabels, "Warehouse-backed consumables", "Fast dispatch and replenishment"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
       }
