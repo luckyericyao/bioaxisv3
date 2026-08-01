@@ -404,29 +404,29 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     : sourcePage === "support"
       ? "/support"
       : sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
-  const productCategory = productCategoryParam || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labels.subcategoryName || labelize(subcategory) || readySupplyContext?.productCategory || "";
-  const productName = catalogProductMatch?.product.name || productMatch?.productItem.name || labels.familyName || labelize(product) || productNameParam || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
+  const productCategory = productCategoryParam || labels.subcategoryName || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labelize(subcategory) || readySupplyContext?.productCategory || "";
+  const productName = productNameParam || productMatch?.productItem.name || catalogProductMatch?.product.name || labels.familyName || labelize(product) || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
     segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage || supportPathLabel || readySupplyContext
       ? {
           requestType: requestType ?? "quote",
           productName,
-          productFamily: catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family) || readySupplyContext?.productFamily,
+          productFamily: familyMatch?.family.name || catalogProductMatch?.family.name || catalogFamilyMatch?.family.name || labels.familyName || labelize(family) || readySupplyContext?.productFamily,
           productCategory: productCategory || (workflowMatch ? "Workflow mapping" : supportPathLabel ? "Support routing" : ""),
-          productSegment: catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labels.segmentName || labelize(segment) || readySupplyContext?.productSegment || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
+          productSegment: labels.segmentName || catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labelize(segment) || readySupplyContext?.productSegment || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
           productUrl: sourceProductUrl,
           sourcePageUrl: sourceProductUrl,
           relevantSpecs:
-            catalogProductMatch ? catalogProductMatch.product.tags.slice(0, 8) :
-            catalogFamilyMatch ? catalogFamilyMatch.family.typicalSpecs.slice(0, 8) :
             productMatch?.productItem.commonSpecifications.slice(0, 8) ??
             familyMatch?.family.keySpecifications.slice(0, 8) ??
-            [],
+            (catalogProductMatch ? catalogProductMatch.product.tags.slice(0, 8) :
+            catalogFamilyMatch ? catalogFamilyMatch.family.typicalSpecs.slice(0, 8) :
+            []),
           documentationNotes:
-            catalogProductMatch ? Object.entries(catalogProductMatch.product.documents).map(([key, value]) => `${key}: ${value}`) :
             productMatch?.productItem.documentationNeeds.slice(0, 8) ??
             familyMatch?.family.documentationChecklist.slice(0, 8) ??
-            [],
+            (catalogProductMatch ? Object.entries(catalogProductMatch.product.documents).map(([key, value]) => `${key}: ${value}`) :
+            []),
           timestamp: new Date().toISOString()
         }
       : undefined;
