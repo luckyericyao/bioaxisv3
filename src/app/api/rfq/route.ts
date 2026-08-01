@@ -537,7 +537,7 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   }
 
   const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
-  const senderName = request.productName || request.organization || request.name || request.email;
+  const senderName = request.organization || request.name || request.email;
   const subject = `[BioAxis RFQ] ${requestLabel} — ${senderName}`;
   const { text, html } = buildEmail(referenceId, request);
   const replyTo = isValidEmail(request.email) ? request.email : fallbackReplyTo;
