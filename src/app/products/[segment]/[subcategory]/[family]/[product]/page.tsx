@@ -41,6 +41,18 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: ProductItemPageProps): Promise<Metadata> {
   const { segment, subcategory, family, product } = await params;
+  const match = getProductItemBySlug(segment, subcategory, family, product);
+
+  if (match) {
+    return {
+      title: `${match.productItem.name} | ${match.family.name} | BioAxis`,
+      description: match.productItem.shortDescription,
+      alternates: {
+        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}/${match.productItem.slug}`
+      }
+    };
+  }
+
   const catalogMatch = getCatalogProductBySlug(segment, subcategory, family, product);
 
   if (catalogMatch) {
@@ -53,50 +65,38 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
     };
   }
 
-  const match = getProductItemBySlug(segment, subcategory, family, product);
-
-  if (!match) {
-    return {
-      title: "Product item | BioAxis"
-    };
-  }
-
   return {
-    title: `${match.productItem.name} | ${match.family.name} | BioAxis`,
-    description: match.productItem.shortDescription,
-    alternates: {
-      canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}/${match.productItem.slug}`
-    }
+    title: "Product item | BioAxis"
   };
 }
 
 export default async function ProductItemPage({ params }: ProductItemPageProps) {
   const { segment, subcategory, family, product } = await params;
-  const catalogMatch = getCatalogProductBySlug(segment, subcategory, family, product);
+  const match = getProductItemBySlug(segment, subcategory, family, product);
 
-  if (catalogMatch) {
+  if (match) {
     return (
-      <CatalogProductPage
-        segment={catalogMatch.segment}
-        category={catalogMatch.category}
-        family={catalogMatch.family}
-        product={catalogMatch.product}
+      <ProductItemPageTemplate
+        segment={match.segment}
+        category={match.category}
+        family={match.family}
+        productItem={match.productItem}
       />
     );
   }
 
-  const match = getProductItemBySlug(segment, subcategory, family, product);
+  const catalogMatch = getCatalogProductBySlug(segment, subcategory, family, product);
 
-  if (!match) {
+  if (!catalogMatch) {
     notFound();
   }
 
   return (
-    <ProductItemPageTemplate
-      segment={match.segment}
-      category={match.category}
-      family={match.family}
-      productItem={match.productItem}
+    <CatalogProductPage
+      segment={catalogMatch.segment}
+      category={catalogMatch.category}
+      family={catalogMatch.family}
+      product={catalogMatch.product}
     />
   );
 }

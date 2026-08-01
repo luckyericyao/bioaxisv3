@@ -28,50 +28,50 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: FamilyPageProps): Promise<Metadata> {
   const { segment: segmentSlug, subcategory: subcategorySlug, family: familySlug } = await params;
-  const catalogMatch = getCatalogFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
+  const match = getFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
 
-  if (catalogMatch) {
+  if (match) {
+    const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug, match.family.slug);
+
     return {
-      title: `${catalogMatch.family.name} | ${catalogMatch.category.name} | BioAxis`,
-      description: catalogMatch.family.description,
+      title: priorityContent?.metaTitle ?? match.family.seoTitle,
+      description: priorityContent?.metaDescription ?? match.family.metaDescription,
       alternates: {
-        canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}`
+        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}`
       }
     };
   }
 
-  const match = getFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
+  const catalogMatch = getCatalogFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
 
-  if (!match) {
+  if (!catalogMatch) {
     return {
       title: "Product family | BioAxis"
     };
   }
 
-  const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug, match.family.slug);
-
   return {
-    title: priorityContent?.metaTitle ?? match.family.seoTitle,
-    description: priorityContent?.metaDescription ?? match.family.metaDescription,
+    title: `${catalogMatch.family.name} | ${catalogMatch.category.name} | BioAxis`,
+    description: catalogMatch.family.description,
     alternates: {
-      canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}`
+      canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}`
     }
   };
 }
 
 export default async function ProductFamilyPage({ params }: FamilyPageProps) {
   const { segment: segmentSlug, subcategory: subcategorySlug, family: familySlug } = await params;
-  const catalogMatch = getCatalogFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
-
-  if (catalogMatch) {
-    return <CatalogFamilyPage segment={catalogMatch.segment} category={catalogMatch.category} family={catalogMatch.family} />;
-  }
-
   const match = getFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
 
-  if (!match) {
+  if (match) {
+    return <FamilyPageTemplate segment={match.segment} category={match.subcategory} family={match.family} />;
+  }
+
+  const catalogMatch = getCatalogFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
+
+  if (!catalogMatch) {
     notFound();
   }
 
-  return <FamilyPageTemplate segment={match.segment} category={match.subcategory} family={match.family} />;
+  return <CatalogFamilyPage segment={catalogMatch.segment} category={catalogMatch.category} family={catalogMatch.family} />;
 }

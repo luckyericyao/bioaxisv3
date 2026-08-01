@@ -18,48 +18,48 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: SegmentPageProps): Promise<Metadata> {
   const { segment: segmentSlug } = await params;
-  const catalogSegment = getCatalogSegmentBySlug(segmentSlug);
+  const segment = getTaxonomySegmentBySlug(segmentSlug);
 
-  if (catalogSegment) {
+  if (segment) {
     return {
-      title: `${catalogSegment.name} | BioAxis Products`,
-      description: catalogSegment.shortDescription,
+      title: segment.seoTitle,
+      description: segment.metaDescription,
       alternates: {
-        canonical: `/products/${catalogSegment.slug}`
+        canonical: `/products/${segment.slug}`
       }
     };
   }
 
-  const segment = getTaxonomySegmentBySlug(segmentSlug);
+  const catalogSegment = getCatalogSegmentBySlug(segmentSlug);
 
-  if (!segment) {
+  if (!catalogSegment) {
     return {
       title: "Product category | BioAxis"
     };
   }
 
   return {
-    title: segment.seoTitle,
-    description: segment.metaDescription,
+    title: `${catalogSegment.name} | BioAxis Products`,
+    description: catalogSegment.shortDescription,
     alternates: {
-      canonical: `/products/${segment.slug}`
+      canonical: `/products/${catalogSegment.slug}`
     }
   };
 }
 
 export default async function ProductSegmentPage({ params }: SegmentPageProps) {
   const { segment: segmentSlug } = await params;
-  const catalogSegment = getCatalogSegmentBySlug(segmentSlug);
-
-  if (catalogSegment) {
-    return <CatalogSegmentPage segment={catalogSegment} />;
-  }
-
   const segment = getTaxonomySegmentBySlug(segmentSlug);
 
-  if (!segment) {
+  if (segment) {
+    return <SegmentPageTemplate segment={segment} />;
+  }
+
+  const catalogSegment = getCatalogSegmentBySlug(segmentSlug);
+
+  if (!catalogSegment) {
     notFound();
   }
 
-  return <SegmentPageTemplate segment={segment} />;
+  return <CatalogSegmentPage segment={catalogSegment} />;
 }

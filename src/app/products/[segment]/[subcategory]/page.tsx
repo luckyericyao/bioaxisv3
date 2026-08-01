@@ -27,50 +27,50 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: SubcategoryPageProps): Promise<Metadata> {
   const { segment: segmentSlug, subcategory: subcategorySlug } = await params;
-  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
+  const match = getSubcategoryBySlug(segmentSlug, subcategorySlug);
 
-  if (catalogMatch) {
+  if (match) {
+    const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug);
+
     return {
-      title: `${catalogMatch.category.name} | ${catalogMatch.segment.name} | BioAxis`,
-      description: catalogMatch.category.description,
+      title: priorityContent?.metaTitle ?? match.subcategory.seoTitle,
+      description: priorityContent?.metaDescription ?? match.subcategory.metaDescription,
       alternates: {
-        canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}`
+        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}`
       }
     };
   }
 
-  const match = getSubcategoryBySlug(segmentSlug, subcategorySlug);
+  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
 
-  if (!match) {
+  if (!catalogMatch) {
     return {
       title: "Product subcategory | BioAxis"
     };
   }
 
-  const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug);
-
   return {
-    title: priorityContent?.metaTitle ?? match.subcategory.seoTitle,
-    description: priorityContent?.metaDescription ?? match.subcategory.metaDescription,
+    title: `${catalogMatch.category.name} | ${catalogMatch.segment.name} | BioAxis`,
+    description: catalogMatch.category.description,
     alternates: {
-      canonical: `/products/${match.segment.slug}/${match.subcategory.slug}`
+      canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}`
     }
   };
 }
 
 export default async function ProductSubcategoryPage({ params }: SubcategoryPageProps) {
   const { segment: segmentSlug, subcategory: subcategorySlug } = await params;
-  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
-
-  if (catalogMatch) {
-    return <CatalogCategoryPage segment={catalogMatch.segment} category={catalogMatch.category} />;
-  }
-
   const match = getSubcategoryBySlug(segmentSlug, subcategorySlug);
 
-  if (!match) {
+  if (match) {
+    return <CategoryPageTemplate segment={match.segment} category={match.subcategory} />;
+  }
+
+  const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
+
+  if (!catalogMatch) {
     notFound();
   }
 
-  return <CategoryPageTemplate segment={match.segment} category={match.subcategory} />;
+  return <CatalogCategoryPage segment={catalogMatch.segment} category={catalogMatch.category} />;
 }

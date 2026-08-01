@@ -417,6 +417,39 @@ for (const route of routes) {
     }
   }
 
+  const canonicalProductRouteChecks = {
+    "/products/liquid-handling": {
+      required: ["Choose a Liquid Handling category.", "Common sourcing questions"],
+      forbidden: ["Browse by buying need", "Product configuration"]
+    },
+    "/products/liquid-handling/pipette-tips": {
+      required: ["Choose a product family.", "Buyer decision filters", "View family"],
+      forbidden: ["Sourcing template preview"]
+    },
+    "/products/liquid-handling/pipette-tips/filtered-pipette-tips": {
+      required: ["Family overview", "Sourcing configuration templates", "Already using another supplier?"],
+      forbidden: ["Clarify these fields before RFQ"]
+    },
+    "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips": {
+      required: ["Product item details", "Already using another supplier?", "Request quote for this product"],
+      forbidden: ["Product fit note"]
+    }
+  };
+
+  if (canonicalProductRouteChecks[route]) {
+    const check = canonicalProductRouteChecks[route];
+    check.required.forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: canonical product route missing ${label}`);
+      }
+    });
+    check.forbidden.forEach((label) => {
+      if (pageText.includes(label)) {
+        failures.push(`${route}: canonical product route still renders legacy catalog content ${label}`);
+      }
+    });
+  }
+
   if (route === "/") {
     const homeSectionCount = [...mainBlock(html).matchAll(/<section\b/g)].length;
     if (homeSectionCount !== 5) {
@@ -1477,7 +1510,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling") {
-    ["Choose a Liquid Handling category", "Pipette Tips", "Serological Pipettes", "Common buyer questions"].forEach((label) => {
+    ["Choose a Liquid Handling category", "Pipette Tips", "Serological Pipettes", "Common sourcing questions"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing segment-level category flow content ${label}`);
       }
@@ -1489,15 +1522,9 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling/pipette-tips") {
-    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "Sourcing template preview"].forEach((label) => {
+    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "View family"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing category-level family flow content ${label}`);
-      }
-    });
-
-    ["Sourcing template preview", "Configuration type", "Typical RFQ fields", "Documentation to request", "Equivalent review notes", "Best next action"].forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing catalog table content ${label}`);
       }
     });
   }
