@@ -557,7 +557,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Example product types", "Find equivalent", "Request quote", "View segment"].forEach((label) => {
+    ["Example product types", "Find equivalent", "Request quote", "Browse families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -1816,7 +1816,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   }
 });
 
-["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Example product types", "buildRequestHref", "View segment"].forEach((label) => {
+["data-product-segment-card=\"compact\"", "data-common-sourcing-request=\"true\"", "Example product types", "buildRequestHref", "Browse families"].forEach((label) => {
   if (!productCategoryCardSource.includes(label)) {
     failures.push(`ProductCategoryCard: missing hover product discovery behavior ${label}`);
   }

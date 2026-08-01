@@ -90,7 +90,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
             href={`/products/${segment.slug}`}
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
-            View segment
+            Browse families
           </Link>
           <Link
             href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}
