@@ -384,40 +384,6 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
       {results.length > 0 ? (
         <section className="mt-6">
-          <div className="grid gap-4 border border-bioaxis-line bg-bioaxis-panel p-5 lg:grid-cols-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Search coverage</p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {typeCounts.map(([label, count]) => (
-                  <div key={label} className="flex items-center justify-between border border-bioaxis-line bg-bioaxis-black px-3 py-2">
-                    <span className="text-xs font-semibold uppercase text-bioaxis-steel">{label}</span>
-                    <span className="text-sm font-bold text-bioaxis-accent">{count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top product areas</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {topSegments.map(([segment, count]) => (
-                  <span key={segment} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
-                    {segment} <span className="text-bioaxis-accent">{count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Matched across</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {matchedFields.map(([field, count]) => (
-                  <span key={field} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
-                    {field} <span className="text-bioaxis-accent">{count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
           <div className="mt-8 min-w-0">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -453,6 +419,46 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               </div>
             ) : null}
           </div>
+
+          <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+              <span>Search coverage</span>
+              <span className="text-bioaxis-dim">Optional detail</span>
+            </summary>
+            <div className="grid gap-4 border-t border-bioaxis-line p-5 lg:grid-cols-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Search coverage</p>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {typeCounts.map(([label, count]) => (
+                    <div key={label} className="flex items-center justify-between border border-bioaxis-line bg-bioaxis-black px-3 py-2">
+                      <span className="text-xs font-semibold uppercase text-bioaxis-steel">{label}</span>
+                      <span className="text-sm font-bold text-bioaxis-accent">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top product areas</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {topSegments.map(([segment, count]) => (
+                    <span key={segment} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                      {segment} <span className="text-bioaxis-accent">{count}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Matched across</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {matchedFields.map(([field, count]) => (
+                    <span key={field} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                      {field} <span className="text-bioaxis-accent">{count}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </details>
 
           <div className="mt-8">
             <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
