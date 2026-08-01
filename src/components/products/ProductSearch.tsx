@@ -319,28 +319,30 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     </form>
   );
 
-  const quickSearchLinks = (
-    <div className="mt-4">
-      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Quick searches</p>
-      <div className="flex flex-wrap gap-2">
-        {quickSearches.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-          >
-            {item.label}
-          </Link>
-        ))}
+  function QuickSearchLinks({ className = "mt-4" }: { className?: string }) {
+    return (
+      <div className={className}>
+        <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Quick searches</p>
+        <div className="flex flex-wrap gap-2">
+          {quickSearches.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   if (!trimmedQuery) {
     return (
       <div className="w-full">
         {searchForm}
-        {quickSearchLinks}
+        <QuickSearchLinks />
       </div>
     );
   }
@@ -349,7 +351,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     <div className="w-full">
       <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6 lg:p-8">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)] xl:items-start">
-          <div>
+          <div className="order-2 xl:order-1">
             <p className="text-xs font-semibold uppercase text-bioaxis-dim">Sourcing matches</p>
             <h2 className="mt-2 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
@@ -357,11 +359,11 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             <p className="mt-4 text-base leading-7 text-bioaxis-muted">
               {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.
             </p>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-dim">
+            <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
               Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
             </p>
           </div>
-          <div>
+          <div className="order-1 xl:order-2">
             {searchForm}
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link
@@ -379,7 +381,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             </div>
           </div>
         </div>
-        {quickSearchLinks}
+        <QuickSearchLinks className="mt-4 hidden sm:block" />
       </section>
 
       {results.length > 0 ? (
