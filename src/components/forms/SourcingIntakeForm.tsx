@@ -53,6 +53,7 @@ export type SourcingIntakeFormProps = {
   compact?: boolean;
   contextLocked?: boolean;
   productContext?: BioAxisProductContext;
+  handoffNotice?: string;
   productFieldLabel?: string;
   submitLabel?: string;
   successTitle?: string;
@@ -242,6 +243,7 @@ export function SourcingIntakeForm({
   compact = false,
   contextLocked = false,
   productContext,
+  handoffNotice,
   productFieldLabel,
   submitLabel,
   successTitle = "Request received",
@@ -484,6 +486,7 @@ export function SourcingIntakeForm({
           <div className="mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted">
             <p>{primaryHelperText}</p>
             {hasPageContext ? <p className="hidden sm:block">{contextualHelperText}</p> : null}
+            {handoffNotice ? <p className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-bioaxis-steel">{handoffNotice}</p> : null}
           </div>
         </div>
         <div className="grid gap-5">
@@ -649,9 +652,12 @@ function CapturedInputCard({ restored = false, captured = false }: { restored?: 
       : "BioAxis will carry this input into the request form so you do not need to paste it again.";
 
   return (
-    <section data-pasted-input-captured="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-5 sm:p-8">
-      <p className="text-sm font-semibold uppercase text-bioaxis-accent">{title}</p>
-      <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{body}</p>
+    <section
+      data-pasted-input-captured="true"
+      className="flex flex-col gap-2 border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5"
+    >
+      <p className="shrink-0 text-sm font-semibold uppercase text-bioaxis-accent">{title}</p>
+      <p className="text-sm leading-5 text-bioaxis-muted sm:text-right">{body}</p>
     </section>
   );
 }

@@ -17,9 +17,10 @@ type QuoteRequestInitialValues = {
 type QuoteRequestFormProps = {
   initialValues?: QuoteRequestInitialValues;
   productContext?: BioAxisProductContext;
+  handoffNotice?: boolean;
 };
 
-export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRequestFormProps) {
+export function QuoteRequestForm({ initialValues = {}, productContext, handoffNotice = false }: QuoteRequestFormProps) {
   const requestType = normalizeRequestType(initialValues.requestType);
   const defaultMessage = initialValues.productList ?? "";
   const sourcePage = productContext?.sourcePageUrl ?? productContext?.productUrl ?? "";
@@ -36,6 +37,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext }: QuoteRe
       defaultMessage={defaultMessage}
       contextLocked={Boolean(productContext)}
       productContext={productContext}
+      handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Paste it below; only your email is required." : undefined}
       submitLabel="Send sourcing request"
     />
   );

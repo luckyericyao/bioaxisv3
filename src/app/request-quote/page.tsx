@@ -372,6 +372,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const sourcePage = first(params?.sourcePage) ?? first(params?.sourcePageUrl) ?? "";
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
+  const manualHandoff = first(params?.handoff) === "manual";
   const readySupplyContext = readySupplyRequestContext({ sourcePage, source, intent });
   const supportPath = first(params?.supportPath) ?? first(params?.support);
   const supportPathLabel = labelFromSupportPath(supportPath);
@@ -457,6 +458,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
             needs: need ? [labelize(need)] : []
           }}
           productContext={productContext}
+          handoffNotice={manualHandoff}
         />
       </section>
     </>

@@ -38,8 +38,12 @@ export function SearchBox({
       params.set("type", requestType);
       if (trimmedQuery) {
         params.set("source", "homepage-hero");
-        params.set("storedInput", "1");
-        window.sessionStorage.setItem(sourcingInputStorageKey, trimmedQuery);
+        try {
+          window.sessionStorage.setItem(sourcingInputStorageKey, trimmedQuery);
+          params.set("storedInput", "1");
+        } catch {
+          params.set("handoff", "manual");
+        }
       }
       router.push(`/request-quote?${params.toString()}`);
       return;
@@ -58,9 +62,22 @@ export function SearchBox({
     variant === "hero"
       ? "text-base sm:text-lg"
       : "text-xl sm:text-2xl";
+  const formAction = destination === "sourcing" ? "/request-quote" : "/products";
 
   return (
-    <form onSubmit={handleSubmit} className={["w-full", className].filter(Boolean).join(" ")}>
+    <form
+      action={formAction}
+      method="get"
+      onSubmit={handleSubmit}
+      data-native-sourcing-fallback={destination === "sourcing" ? "true" : undefined}
+      className={["w-full", className].filter(Boolean).join(" ")}
+    >
+      {destination === "sourcing" ? (
+        <>
+          <input type="hidden" name="requestType" value="quote" />
+          <input type="hidden" name="source" value="homepage-hero" />
+        </>
+      ) : null}
       <label htmlFor={inputId} className="sr-only">
         {placeholder}
       </label>
@@ -72,6 +89,7 @@ export function SearchBox({
       >
         <input
           id={inputId}
+          name={destination === "products" ? "q" : undefined}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
