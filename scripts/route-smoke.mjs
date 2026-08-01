@@ -1768,11 +1768,15 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   }
 });
 
-["productCatalogMenuSegments.map", "familyLinks", "categories.flatMap"].forEach((label) => {
+["productTaxonomy.map", "segment.subcategories", "familyLinks", "categories.flatMap"].forEach((label) => {
   if (!productNavigationSource.includes(label)) {
     failures.push(`productNavigation data: missing shared taxonomy-derived field ${label}`);
   }
 });
+
+if (productNavigationSource.includes("productCatalogMenuSegments") || productNavigationSource.includes('slug === "documents-compliance"')) {
+  failures.push("productNavigation data: still derives header segments from the legacy catalog menu");
+}
 
 [
   ["Catalog templates", catalogTemplatesSource, ["CatalogSegmentPage", "CatalogCategoryPage", "CatalogFamilyPage", "CatalogProductPage", "Documentation to request", "Equivalent review notes", "Common buyer questions"]],

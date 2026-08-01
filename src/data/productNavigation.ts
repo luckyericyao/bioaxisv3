@@ -1,4 +1,4 @@
-import { productCatalogMenuSegments } from "@/data/productCatalog";
+import { productTaxonomy } from "@/data/productTaxonomy";
 
 export type ProductNavigationFamilyLink = {
   label: string;
@@ -25,9 +25,9 @@ export type ProductNavigationSegment = {
   familyLinks: ProductNavigationFamilyLink[];
 };
 
-export const productNavigationSegments: ProductNavigationSegment[] = productCatalogMenuSegments.map((segment) => {
-  const categories = segment.categories.map((category) => {
-    const categoryHref = segment.slug === "private-label" ? "/private-label" : segment.slug === "documents-compliance" ? "/resources" : `/products/${segment.slug}/${category.slug}`;
+export const productNavigationSegments: ProductNavigationSegment[] = productTaxonomy.map((segment) => {
+  const categories = segment.subcategories.map((category) => {
+    const categoryHref = `/products/${segment.slug}/${category.slug}`;
     const families = category.families.map((family) => ({
       label: family.name,
       href: `${categoryHref}/${family.slug}`,
@@ -45,10 +45,10 @@ export const productNavigationSegments: ProductNavigationSegment[] = productCata
   });
 
   return {
-    index: segment.index,
+    index: String(segment.index).padStart(2, "0"),
     label: segment.name,
     shortDescription: segment.shortDescription,
-    href: segment.slug === "private-label" ? "/private-label" : segment.slug === "documents-compliance" ? "/resources" : `/products/${segment.slug}`,
+    href: `/products/${segment.slug}`,
     slug: segment.slug,
     categories,
     familyLinks: categories.flatMap((category) => category.families)
