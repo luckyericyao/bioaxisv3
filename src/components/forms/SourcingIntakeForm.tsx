@@ -226,7 +226,10 @@ function initialProductContext(props: SourcingIntakeFormProps, requestType: stri
 function contextRows(productContext: BioAxisProductContext) {
   return [
     ["Request type", requestTypeLabel(productContext.requestType ?? "quote")],
-    ["Product area", [productContext.productSegment, productContext.productCategory, productContext.productFamily, productContext.productName].filter(Boolean).join(" / ")],
+    ["Product", productContext.productName],
+    ["Family", productContext.productFamily],
+    ["Category", productContext.productCategory],
+    ["Segment", productContext.productSegment],
     ["Source page", productContext.productUrl || productContext.sourcePageUrl ? "Source page captured" : ""]
   ].filter((row): row is [string, string] => Boolean(row[1]));
 }
@@ -670,7 +673,6 @@ function RequestContextCard({
   draftReady: boolean;
 }) {
   const rows = contextRows(productContext);
-  const mobileProductArea = [productContext.productSegment, productContext.productName].filter(Boolean).join(" / ");
 
   return (
     <section data-product-context-summary="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:p-5">
@@ -692,14 +694,7 @@ function RequestContextCard({
           <div key={label} className="border-b border-bioaxis-line py-2.5 last:border-b-0 md:border md:bg-bioaxis-black md:px-3">
             <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
             <dd className="mt-1 text-sm font-semibold leading-5 text-bioaxis-text">
-              {label === "Product area" && mobileProductArea ? (
-                <>
-                  <span className="sm:hidden">{mobileProductArea}</span>
-                  <span className="hidden sm:inline">{value}</span>
-                </>
-              ) : (
-                value
-              )}
+              {value}
             </dd>
           </div>
         ))}

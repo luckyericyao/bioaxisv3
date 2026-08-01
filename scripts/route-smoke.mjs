@@ -953,6 +953,10 @@ for (const route of routes) {
       "Filtered Pipette Tips",
       "Pipette Tips",
       "Liquid Handling",
+      "Product",
+      "Family",
+      "Category",
+      "Segment",
       "Source page",
       "BioAxis will include this product context with your request. You can add more details below, but it is not required."
     ].forEach((label) => {
