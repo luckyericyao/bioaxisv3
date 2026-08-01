@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export type SourcingListItem = {
@@ -122,6 +122,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<SourcingListItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setItems(readStoredItems());
@@ -144,6 +145,23 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     window.addEventListener(submissionCompleteEvent, handleSubmissionComplete);
     return () => window.removeEventListener(submissionCompleteEvent, handleSubmissionComplete);
   }, []);
+
+  useEffect(() => {
+    if (!drawerOpen) {
+      return;
+    }
+
+    closeButtonRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDrawerOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [drawerOpen]);
 
   const value = useMemo<SourcingListContextValue>(
     () => ({
@@ -197,17 +215,33 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       ) : null}
 
       {drawerOpen ? (
-        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Sourcing list">
+        <div
+          className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sourcing-list-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setDrawerOpen(false);
+            }
+          }}
+        >
           <div className="ml-auto flex h-full w-full max-w-3xl flex-col border-l border-bioaxis-line bg-bioaxis-black shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-bioaxis-line p-5">
               <div>
                 <p className="text-xs font-bold uppercase text-bioaxis-accent">Sourcing list</p>
-                <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Review items before sending.</h2>
+                <h2 id="sourcing-list-title" className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Review items before sending.</h2>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
                   Add quantities, supplier context, sample needs, and documentation needs. BioAxis will carry the list into a structured sourcing request.
                 </p>
               </div>
-              <button type="button" onClick={() => setDrawerOpen(false)} className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close sourcing list"
+                className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              >
                 Close
               </button>
             </div>
