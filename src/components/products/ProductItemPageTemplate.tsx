@@ -59,7 +59,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           { label: productItem.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.title} / ${category.title} / ${family.title}`} title={productItem.name} subtitle={productItem.introduction}>
+      <PageHero eyebrow={`${segment.title} / ${category.title} / ${family.title}`} title={productItem.name} subtitle={productItem.introduction} compact>
         <div className="grid gap-5">
           <div className="flex flex-wrap gap-2">
             {productItem.commonSpecifications.slice(0, 5).map((specification) => (

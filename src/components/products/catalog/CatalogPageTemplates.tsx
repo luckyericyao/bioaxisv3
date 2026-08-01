@@ -416,7 +416,7 @@ export function CatalogProductPage({
           { label: product.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`}>
+      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact>
         <div className="grid gap-5">
           <div className="flex flex-wrap gap-2">
             {product.tags.slice(0, 6).map((tag) => (
