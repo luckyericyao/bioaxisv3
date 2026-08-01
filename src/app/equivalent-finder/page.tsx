@@ -145,6 +145,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         eyebrow="Equivalent finder"
         title="Find compatible alternatives for your current consumables"
         subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
+        compact
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
