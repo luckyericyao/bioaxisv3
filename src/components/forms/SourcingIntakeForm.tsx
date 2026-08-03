@@ -482,6 +482,7 @@ export function SourcingIntakeForm({
         <label htmlFor="sourcing-intake-website">Website</label>
         <input
           id="sourcing-intake-website"
+          name="website"
           tabIndex={-1}
           autoComplete="off"
           value={state.website}
@@ -508,10 +509,13 @@ export function SourcingIntakeForm({
         <div className="grid gap-5">
           <Field
             id="sourcing-email"
+            name="email"
             label="Email"
             type="email"
             value={state.email}
             required
+            autoComplete="email"
+            inputMode="email"
             placeholder="you@organization.com"
             onChange={(value) => updateField("email", value)}
           />
@@ -739,18 +743,24 @@ function SourcingListSummary({ items }: { items: SourcingListSummaryItem[] }) {
 
 function Field({
   id,
+  name,
   label,
   value,
   type = "text",
   required = false,
+  autoComplete,
+  inputMode,
   placeholder,
   onChange
 }: {
   id: string;
+  name?: string;
   label: string;
   value: string;
   type?: "email" | "text";
   required?: boolean;
+  autoComplete?: string;
+  inputMode?: "email" | "text";
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
@@ -762,9 +772,13 @@ function Field({
       </label>
       <input
         id={id}
+        name={name ?? id}
         type={type}
         value={value}
         placeholder={placeholder}
+        required={required}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
       />
@@ -792,6 +806,7 @@ function SelectField({
       </label>
       <select
         id={id}
+        name={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
@@ -836,9 +851,11 @@ function TextArea({
       </label>
       <textarea
         id={id}
+        name={id}
         value={value}
         rows={rows}
         placeholder={placeholder}
+        required={required}
         aria-describedby={helperId}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base leading-7 text-bioaxis-text placeholder:text-bioaxis-dim"
