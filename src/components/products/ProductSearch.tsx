@@ -404,7 +404,6 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             </div>
           </div>
         </div>
-        <QuickSearchLinks className="mt-4 hidden sm:block" />
       </section>
 
       {results.length > 0 ? (
