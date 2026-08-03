@@ -271,7 +271,18 @@ function productProfileFor(context: ProductItemContext): ProductProfile {
 }
 
 function buildIntroduction(name: string, context: ProductItemContext) {
-  return `BioAxis reviews ${name.toLowerCase()} as part of ${context.family.name.toLowerCase()} sourcing for ${context.subcategory.name.toLowerCase()} and ${context.segment.name.toLowerCase()} workflows. BioAxis uses application, specification, compatibility, documentation, quantity, and sample-evaluation context to prepare quote, equivalent, sample, or documentation requests.`;
+  return `BioAxis reviews ${sentenceLabel(name)} as part of ${sentenceLabel(context.family.name)} sourcing for ${sentenceLabel(context.subcategory.name)} and ${sentenceLabel(context.segment.name)} workflows. BioAxis uses application, specification, compatibility, documentation, quantity, and sample-evaluation context to prepare quote, equivalent, sample, or documentation requests.`;
+}
+
+function sentenceLabel(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/µl/g, "µL")
+    .replace(/\bul\b/g, "µL")
+    .replace(/\bum\b/g, "µm")
+    .replace(/\bqpcr\b/g, "qPCR")
+    .replace(/\bpcr\b/g, "PCR")
+    .replace(/\btpe\b/g, "TPE");
 }
 
 function buildGeneralProductItem(context: ProductItemContext): ProductItem {

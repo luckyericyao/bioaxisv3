@@ -6,13 +6,14 @@ type PageHeroProps = {
   subtitle: ReactNode;
   children?: ReactNode;
   compact?: boolean;
+  align?: "start" | "end";
 };
 
-export function PageHero({ eyebrow, title, subtitle, children, compact = false }: PageHeroProps) {
+export function PageHero({ eyebrow, title, subtitle, children, compact = false, align = "end" }: PageHeroProps) {
   return (
     <section className={`border-b border-bioaxis-line px-5 sm:px-8 lg:px-10 ${compact ? "py-6 sm:py-7" : "py-16"}`}>
       <div
-        className={`mx-auto grid w-full max-w-7xl lg:items-end ${
+        className={`mx-auto grid w-full max-w-7xl ${align === "start" ? "lg:items-start" : "lg:items-end"} ${
           compact ? "gap-5 lg:grid-cols-[0.9fr_1fr] lg:gap-12" : "gap-8 lg:grid-cols-[1fr_0.72fr]"
         }`}
       >
