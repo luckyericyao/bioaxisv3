@@ -19,7 +19,7 @@ export function HeroSearchSection() {
       </div>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(248,250,252,0.98)_0%,rgba(248,250,252,0.92)_58%,rgba(238,243,248,0.76)_100%)]" />
 
-      <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-16 sm:px-8 lg:min-h-[820px] lg:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-16 sm:px-8 lg:min-h-[630px] lg:px-10 lg:py-10">
         <div className="max-w-6xl min-w-0">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-bioaxis-accent sm:text-sm">
             {brand.positioning}
