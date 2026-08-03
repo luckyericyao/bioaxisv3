@@ -64,7 +64,7 @@ export function Header() {
             type="button"
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
             aria-expanded={menuOpen}
-            aria-controls="primary-navigation"
+            aria-controls="mobile-primary-navigation"
             onClick={() => setMenuOpen((current) => !current)}
           >
             Menu
@@ -121,7 +121,7 @@ export function Header() {
       </div>
 
       {menuOpen ? (
-        <nav aria-label="Mobile navigation" className="max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg lg:hidden">
+        <nav id="mobile-primary-navigation" aria-label="Mobile navigation" className="max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg lg:hidden">
           <div className="grid gap-2">
             {navigationItems.map((item) =>
               item.label === "Products" ? (

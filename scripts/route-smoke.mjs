@@ -1792,7 +1792,9 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "z-[90]",
   "bg-white shadow-2xl",
   "Product segments",
-  "productNavigationSegments"
+  "productNavigationSegments",
+  'aria-controls="mobile-primary-navigation"',
+  'id="mobile-primary-navigation"'
 ].forEach((label) => {
   if (!headerSource.includes(label)) {
     failures.push(`Header: missing product navigation capability ${label}`);
