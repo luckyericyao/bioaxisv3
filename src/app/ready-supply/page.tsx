@@ -60,11 +60,11 @@ const readySupplySteps = [
 export default function ReadySupplyPage() {
   return (
     <>
-      <section className="border-b border-bioaxis-line px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.8fr)] lg:items-end">
+      <section className="border-b border-bioaxis-line px-5 py-12 sm:px-8 sm:py-14 lg:px-10 lg:py-12">
+        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-end">
           <div>
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
-            <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-6xl lg:text-7xl">
+            <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
               Warehouse-backed consumables for faster lab procurement.
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
