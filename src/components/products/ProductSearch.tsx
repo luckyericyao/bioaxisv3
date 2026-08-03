@@ -285,6 +285,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, 18);
+  const visibleMatchCount = topMatches.length + relatedMatches.length;
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
@@ -357,7 +358,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
             <p className="mt-4 text-base leading-7 text-bioaxis-muted">
-              {results.length} ranked segment, category, family, product, workflow, or resource result{results.length === 1 ? "" : "s"}.
+              Showing {visibleMatchCount} ranked match{visibleMatchCount === 1 ? "" : "es"} from {results.length} indexed sourcing path{results.length === 1 ? "" : "s"}.
             </p>
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
               Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
