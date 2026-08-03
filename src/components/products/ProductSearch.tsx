@@ -21,12 +21,30 @@ const quickSearches = [
 
 const resultTypes: ProductSearchResult["type"][] = ["segment", "subcategory", "family", "product", "workflow", "resource"];
 
+const matchedFieldLabels: Record<string, string> = {
+  title: "Product title",
+  path: "Catalog path",
+  "representative families": "Family match",
+  aliases: "Related term",
+  specifications: "Specification",
+  description: "Product description",
+  applications: "Workflow use",
+  metadata: "Sourcing context",
+  "workflow tags": "Workflow fit",
+  "workflow details": "Workflow detail",
+  "resource body": "Guide content"
+};
+
 function resultTypeLabel(type: ProductSearchResult["type"]) {
   if (type === "subcategory") return "Category";
   if (type === "resource") return "Guide";
   if (type === "workflow") return "Sourcing path";
 
   return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+function matchedFieldLabel(field: string) {
+  return matchedFieldLabels[field] ?? "Related match";
 }
 
 function displayQueryLabel(value: string) {
@@ -170,7 +188,11 @@ function topCounts(values: string[], limit: number) {
 
 function ProductResultCard({ result, query }: { result: ProductSearchResult; query: string }) {
   return (
-    <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft">
+    <article
+      data-search-result-card="true"
+      data-search-result-type={result.type}
+      className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft"
+    >
       <div className="flex flex-wrap items-center gap-2">
         <span className="border border-bioaxis-line bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-dim">
           {resultTypeLabel(result.type)}
@@ -190,7 +212,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <div className="mt-4 flex flex-wrap gap-2">
           {result.matchedFields.slice(0, 5).map((field) => (
             <span key={field} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[0.68rem] font-semibold uppercase text-bioaxis-steel">
-              {field}
+              {matchedFieldLabel(field)}
             </span>
           ))}
         </div>

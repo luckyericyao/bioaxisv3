@@ -16,6 +16,7 @@ type ScoredResult = ProductSearchResult & {
   score: number;
   exactPhraseMatch: boolean;
   directMatch: boolean;
+  segmentScopeRank: number;
   order: number;
 };
 
@@ -59,6 +60,13 @@ function queryTokens(query: string) {
   return normalizeText(query)
     .split(" ")
     .filter(Boolean);
+}
+
+function titleContainsQueryTokens(title: string, query: string) {
+  const queryParts = queryTokens(query);
+  const titleParts = queryTokens(title);
+
+  return queryParts.length > 0 && queryParts.every((queryPart) => titleParts.some((titlePart) => tokenVariants(queryPart).includes(titlePart)));
 }
 
 function countTokenOccurrences(fieldTokens: string[], token: string) {
@@ -226,6 +234,9 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
 
   const results: ScoredResult[] = [];
   let order = 0;
+  const segmentIntentSlugs = new Set(
+    productTaxonomy.filter((segment) => titleContainsQueryTokens(segment.name, query)).map((segment) => segment.slug)
+  );
 
   function addResult(result: ProductSearchResult, fields: SearchField[]) {
     const scored = scoreResult(fields, query);
@@ -240,6 +251,13 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
       score: scored.score,
       exactPhraseMatch: scored.exactPhraseMatch,
       directMatch: scored.directMatch,
+      segmentScopeRank: result.segmentSlug && segmentIntentSlugs.has(result.segmentSlug)
+        ? result.type === "segment"
+          ? 3
+          : result.type === "family"
+            ? 2
+            : 1
+        : 0,
       order: order++
     });
   }
@@ -393,6 +411,8 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     .sort(
       (a, b) =>
         productUniverseRank(b.type) - productUniverseRank(a.type) ||
+        b.segmentScopeRank - a.segmentScopeRank ||
+        (b.segmentScopeRank === 2 && a.segmentScopeRank === 2 ? a.order - b.order : 0) ||
         Number(b.exactPhraseMatch) - Number(a.exactPhraseMatch) ||
         Number(b.directMatch) - Number(a.directMatch) ||
         b.score - a.score ||

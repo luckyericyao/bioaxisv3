@@ -407,6 +407,8 @@ for (const route of routes) {
       : pageText;
     const cellCultureIndex = rankedResultsText.search(/Cell Culture/i);
     const liquidHandlingIndex = rankedResultsText.indexOf("Liquid Handling");
+    const segmentResultIndex = html.indexOf('data-search-result-type="segment"');
+    const familyResultIndex = html.indexOf('data-search-result-type="family"');
 
     if (cellCultureIndex === -1) {
       failures.push(`${route}: missing Cell Culture result`);
@@ -414,6 +416,14 @@ for (const route of routes) {
 
     if (liquidHandlingIndex !== -1 && cellCultureIndex !== -1 && liquidHandlingIndex < cellCultureIndex) {
       failures.push(`${route}: Liquid Handling appears before Cell Culture for cell query`);
+    }
+
+    if (segmentResultIndex === -1) {
+      failures.push(`${route}: Cell Culture segment result is missing from ranked results`);
+    }
+
+    if (segmentResultIndex !== -1 && familyResultIndex !== -1 && segmentResultIndex > familyResultIndex) {
+      failures.push(`${route}: Cell Culture segment result appears after family results`);
     }
   }
 
