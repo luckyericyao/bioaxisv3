@@ -223,14 +223,27 @@ function initialProductContext(props: SourcingIntakeFormProps, requestType: stri
   };
 }
 
+function displaySourcePage(value: string) {
+  try {
+    const parsed = new URL(value, "https://bioaxis.local");
+    return `${parsed.pathname}${parsed.search}`
+      .replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
+      .replace(/\bu[lL]\b/g, "µL");
+  } catch {
+    return value;
+  }
+}
+
 function contextRows(productContext: BioAxisProductContext) {
+  const sourcePage = productContext.productUrl || productContext.sourcePageUrl || "";
+
   return [
     ["Request type", requestTypeLabel(productContext.requestType ?? "quote")],
     ["Product", productContext.productName],
     ["Family", productContext.productFamily],
     ["Category", productContext.productCategory],
     ["Segment", productContext.productSegment],
-    ["Source page", productContext.productUrl || productContext.sourcePageUrl ? "Source page captured" : ""]
+    ["Source page", sourcePage ? displaySourcePage(sourcePage) : ""]
   ].filter((row): row is [string, string] => Boolean(row[1]));
 }
 
@@ -693,7 +706,7 @@ function RequestContextCard({
         {rows.map(([label, value]) => (
           <div key={label} className="border-b border-bioaxis-line py-2.5 last:border-b-0 md:border md:bg-bioaxis-black md:px-3">
             <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
-            <dd className="mt-1 text-sm font-semibold leading-5 text-bioaxis-text">
+            <dd className="mt-1 break-words text-sm font-semibold leading-5 text-bioaxis-text">
               {value}
             </dd>
           </div>

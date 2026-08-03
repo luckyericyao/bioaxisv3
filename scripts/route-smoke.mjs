@@ -968,6 +968,7 @@ for (const route of routes) {
       "Category",
       "Segment",
       "Source page",
+      "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
       "BioAxis will include this product context with your request. You can add more details below, but it is not required."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
