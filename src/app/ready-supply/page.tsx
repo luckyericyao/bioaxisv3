@@ -64,13 +64,13 @@ export default function ReadySupplyPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(420px,0.8fr)] lg:items-end">
           <div>
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
-            <p className="mb-5 max-w-3xl text-sm font-semibold uppercase tracking-[0.18em] text-bioaxis-muted">
-              Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.
-            </p>
             <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-6xl lg:text-7xl">
               Warehouse-backed consumables for faster lab procurement.
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
+              Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted sm:text-base">
               Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
