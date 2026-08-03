@@ -35,6 +35,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       product={productContext?.productName}
       title="Paste what you have."
       defaultMessage={defaultMessage}
+      compact
       contextLocked={Boolean(productContext)}
       productContext={productContext}
       handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Paste it below; only your email is required." : undefined}
