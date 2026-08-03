@@ -12,7 +12,7 @@ type BreadcrumbsProps = {
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
     <nav aria-label="Breadcrumb" className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8 lg:px-10">
-      <ol className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase text-bioaxis-dim">
+      <ol className="flex flex-wrap items-center gap-2 text-xs font-semibold text-bioaxis-dim">
         {items.map((item, index) => (
           <li key={`${item.label}-${index}`} className="flex items-center gap-2">
             {item.href ? (
@@ -29,4 +29,3 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
     </nav>
   );
 }
-
