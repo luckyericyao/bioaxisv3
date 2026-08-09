@@ -1,6 +1,7 @@
 "use client";
 
 import { type SourcingListItem, useSourcingList } from "./SourcingListProvider";
+import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
 type AddToSourcingListButtonProps = Omit<
   SourcingListItem,
@@ -37,6 +38,9 @@ export function AddToSourcingListButton({
       type="button"
       aria-pressed={alreadyAdded}
       onClick={() => {
+        if (!alreadyAdded) {
+          trackBioAxisEvent("sourcing_list_add", { itemType: item.productSlug ? "product" : "family" });
+        }
         addItem({ ...item, requestedAction });
       }}
       className={[

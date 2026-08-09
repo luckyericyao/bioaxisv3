@@ -40,6 +40,8 @@ BIOAXIS_RFQ_REPLY_TO_EMAIL=crazyowenyao@gmail.com
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
+TELEGRAM_BOT_TOKEN=your_server_only_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
 ```
 
 Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. During development, if no verified sender is available, leave it blank and the API route uses Resend's safe test sender.
@@ -57,6 +59,10 @@ Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. 
 7. Submit a test RFQ from `/request-quote`.
 8. Check the destination inbox and spam folder.
 9. If email is not received, check Vercel function logs and Resend delivery logs.
+
+Telegram is optional. If `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured, the RFQ route sends a short server-side notification after the email path. Telegram failures are logged and do not block the request response or email delivery.
+
+Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics` and can be reviewed in Vercel function logs. The RFQ response includes a traceable `requestId`.
 
 To test email delivery:
 

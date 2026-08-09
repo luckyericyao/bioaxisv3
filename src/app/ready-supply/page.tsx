@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 };
 
 const statusRows = [
-  ["Warehouse inventory", "Available for selected lines"],
-  ["Dispatch coordination", "Faster response path"],
-  ["Quality consistency", "Stable batch control"],
-  ["Documentation", "COA / sterility / compliance check"],
+  ["Supply model", "Warehouse-backed or supplier-coordinated"],
+  ["Availability", "Selected lines; confirm per request"],
+  ["Dispatch coordination", "Timing confirmed per request"],
+  ["Quality documents", "COA / sterility / specification check"],
   ["Replenishment", "Repeat supply planning"]
 ];
 
@@ -26,34 +26,34 @@ const operationCards = [
   },
   {
     title: "BioAxis warehouse",
-    body: "Priority consumables are supported by BioAxis-controlled warehouse inventory and supplier coordination."
+    body: "Selected lines may be warehouse-backed; other lines are supplier-coordinated and confirmed per request."
   },
   {
     title: "Stable quality",
-    body: "Products are selected around consistent specifications, batch traceability, and repeat-use reliability."
+    body: "Review can focus on available specifications, batch evidence, documentation, and repeat-use requirements."
   },
   {
     title: "Reliable replenishment",
-    body: "For recurring demand, BioAxis can support repeat purchasing, planned replenishment, and supply continuity."
+    body: "For recurring demand, BioAxis can coordinate repeat purchasing, planned replenishment, and backup-source review."
   }
 ];
 
 const readySupplySteps = [
   {
     title: "Stocked / controlled supply",
-    body: "BioAxis maintains selected consumable lines through warehouse-backed or tightly coordinated supply."
+    body: "Selected lines may be warehouse-backed or supplier-coordinated; the supply path is confirmed per request."
   },
   {
     title: "Fast availability check",
-    body: "Send a SKU, brand, specification, or quantity requirement. We confirm availability and dispatch path."
+    body: "Send a SKU, brand, specification, or quantity requirement. BioAxis checks the selected-line availability and dispatch path."
   },
   {
     title: "Quality and documentation review",
-    body: "Batch, specification, sterility, COA, and compliance documents can be checked before order confirmation."
+    body: "Specification, sterility, CoA, and other supplier documents can be requested and reviewed before order confirmation."
   },
   {
     title: "Dispatch and replenishment",
-    body: "For qualified demand, BioAxis supports fast shipment and recurring supply planning."
+    body: "For qualified demand, BioAxis can coordinate dispatch and recurring supply planning subject to supplier confirmation."
   }
 ];
 
@@ -71,7 +71,7 @@ export default function ReadySupplyPage() {
               Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted sm:text-base">
-              Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.
+              Selected lab consumables with warehouse-backed or supplier-coordinated supply paths, documentation review, and faster dispatch coordination.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
               Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.
@@ -152,7 +152,10 @@ export default function ReadySupplyPage() {
             Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.
           </p>
           <p className="mt-6 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-            Availability is confirmed per request rather than shown as a public inventory feed.
+            Ready Supply is not a real-time inventory feed. Availability, batch information, documents, dispatch timing, and replenishment options are confirmed per request for selected lines. The supply path may be warehouse-backed or supplier-coordinated; BioAxis organizes the review but does not certify final suitability.
+          </p>
+          <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+            A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available. BioAxis can request and organize these records; the buyer remains responsible for technical and compliance review.
           </p>
         </div>
       </section>

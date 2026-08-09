@@ -74,7 +74,7 @@ const productSearchExpectations = {
   "/products?q=qPCR%20plates": ["qPCR", "PCR"],
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
-  "/products?q=zzzxqnotfound999": ["No direct catalog match", "Send the input anyway", "Send to BioAxis"]
+  "/products?q=zzzxqnotfound999": ["No direct catalog reference match", "Send this reference"]
 };
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
@@ -171,6 +171,8 @@ const routes = [
   ...catalogAcceptanceRoutes,
   "/workflows",
   "/ready-supply",
+  "/privacy",
+  "/terms",
   "/equivalent-finder",
   "/equivalent-finder?need=compatible-equivalent",
   "/private-label",
@@ -349,28 +351,32 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    const noDirectMatch = pageText.includes("No direct catalog match");
+    const noDirectMatch = pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match");
 
-    [
-      "Sourcing matches",
-      "Results for",
-      "Direct product, family, path, and specification matches appear first",
-      "Sourcing next steps",
-      "Turn this search into a sourcing brief.",
-      "Prepare quote request",
-      "Review equivalent",
-      "Request documents",
-      "Request sample",
-      "Clear search",
-      "Send search to BioAxis",
-      "Browse all product segments"
-    ].forEach((label) => {
+    ["Sourcing matches", "Results for", "Clear search"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
     });
 
     if (!noDirectMatch) {
+      if (!pageText.includes("Send search to BioAxis")) {
+        failures.push(`${route}: missing search UX label Send search to BioAxis`);
+      }
+      [
+        "Direct product, family, path, and specification matches appear first",
+        "Sourcing next steps",
+        "Turn this search into a sourcing brief.",
+        "Prepare quote request",
+        "Review equivalent",
+        "Request documents",
+        "Request sample",
+        "Browse all product segments"
+      ].forEach((label) => {
+        if (!pageText.includes(label)) {
+          failures.push(`${route}: missing search UX label ${label}`);
+        }
+      });
       ["Search coverage", "Category", "Top matches"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing search UX label ${label}`);
@@ -378,14 +384,18 @@ for (const route of routes) {
       });
     }
 
-    ["quote", "equivalent", "documentation", "sample"].forEach((requestType) => {
-      if (!hasHrefWithParams(html, "/request-quote", { requestType })) {
-        failures.push(`${route}: missing search-to-RFQ action for ${requestType}`);
-      }
-    });
+    if (!noDirectMatch) {
+      ["quote", "equivalent", "documentation", "sample"].forEach((requestType) => {
+        if (!hasHrefWithParams(html, "/request-quote", { requestType })) {
+          failures.push(`${route}: missing search-to-RFQ action for ${requestType}`);
+        }
+      });
+    } else if (!hasHrefWithParams(html, "/request-quote", { requestType: "product-list-review" })) {
+      failures.push(`${route}: missing no-result product-list RFQ handoff`);
+    }
 
     if (noDirectMatch) {
-      ["Send the input anyway", "Send to BioAxis", "Browse product lines"].forEach((label) => {
+      ["Send this reference", "Browse product lines"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing no-result sourcing path ${label}`);
         }
@@ -1066,22 +1076,21 @@ for (const route of routes) {
       "Ready Supply",
       "Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.",
       "Warehouse-backed consumables for faster lab procurement.",
-      "Selected lab consumables supported by BioAxis warehouse inventory, stable quality control, and faster dispatch coordination.",
+      "Selected lab consumables with warehouse-backed or supplier-coordinated supply paths, documentation review, and faster dispatch coordination.",
       "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
       "BIOAXIS READY SUPPLY",
-      "Warehouse inventory",
-      "Available for selected lines",
+      "Supply model",
+      "Warehouse-backed or supplier-coordinated",
+      "Selected lines; confirm per request",
       "Dispatch coordination",
-      "Faster response path",
-      "Quality consistency",
-      "Stable batch control",
-      "COA / sterility / compliance check",
+      "Timing confirmed per request",
+      "Quality documents",
+      "COA / sterility / specification check",
       "Repeat supply planning",
       "Fast dispatch",
       "BioAxis warehouse",
       "Stable quality",
       "Reliable replenishment",
-      "BioAxis-controlled warehouse inventory",
       "batch traceability",
       "How Ready Supply Works",
       "practical replenishment planning rather than public marketplace claims",
@@ -1091,7 +1100,8 @@ for (const route of routes) {
       "Dispatch and replenishment",
       "Typical ready-supply coverage",
       "Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.",
-      "Availability is confirmed per request rather than shown as a public inventory feed.",
+      "Ready Supply is not a real-time inventory feed.",
+      "A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available.",
       "Need stable consumables with faster delivery?",
       "Request ready-stock availability"
     ].forEach((label) => {
@@ -1113,7 +1123,7 @@ for (const route of routes) {
       }
     });
 
-    [/real-time inventory/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
+    [/real-time inventory available/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
         failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
       }
@@ -1721,6 +1731,7 @@ if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.inc
 }
 
 const rfqRouteSource = await readRequiredProjectFile("src/app/api/rfq/route.ts");
+const analyticsRouteSource = await readRequiredProjectFile("src/app/api/analytics/route.ts");
 const turnstileConfigRouteSource = await readRequiredProjectFile("src/app/api/turnstile/config/route.ts");
 const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
 const requestQuotePageSource = await readRequiredProjectFile("src/app/request-quote/page.tsx");
@@ -1748,6 +1759,14 @@ const envExampleSource = await readRequiredProjectFile(".env.example");
 
 if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("https://api.resend.com/emails")) {
   failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or Resend delivery call");
+}
+
+if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("TELEGRAM_BOT_TOKEN") || !rfqRouteSource.includes("sendTelegramNotification")) {
+  failures.push("src/app/api/rfq/route.ts: missing traceable request ID or optional Telegram notification path");
+}
+
+if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure")) {
+  failures.push("src/app/api/analytics/route.ts: missing funnel event allowlist");
 }
 
 if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
@@ -1981,7 +2000,9 @@ const envMap = new Map(envLines.map((line) => {
   "BIOAXIS_RFQ_REPLY_TO_EMAIL",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   "TURNSTILE_SITE_KEY",
-  "TURNSTILE_SECRET_KEY"
+  "TURNSTILE_SECRET_KEY",
+  "TELEGRAM_BOT_TOKEN",
+  "TELEGRAM_CHAT_ID"
 ].forEach((name) => {
   if (!envMap.has(name)) {
     failures.push(`.env.example: missing ${name}`);
@@ -2108,6 +2129,16 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
   const honeypotPayload = await honeypotResponse.json();
   if (!honeypotResponse.ok || honeypotPayload?.mode !== "honeypot") {
     failures.push(`/api/rfq honeypot: expected silent honeypot success, got ${honeypotResponse.status}`);
+  }
+
+  const analyticsResponse = await fetch(new URL("/api/analytics", baseUrl), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "search", path: "/products", properties: { queryLength: 4 } })
+  });
+  const analyticsPayload = await analyticsResponse.json();
+  if (!analyticsResponse.ok || analyticsPayload?.ok !== true) {
+    failures.push(`/api/analytics: expected accepted event, got ${analyticsResponse.status}`);
   }
 
   const legacyResponse = await fetch(new URL("/api/request-quote", baseUrl), {

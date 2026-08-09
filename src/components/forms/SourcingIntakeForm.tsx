@@ -7,6 +7,7 @@ import {
   requestErrorMessage,
   submitBioAxisRequest
 } from "@/lib/submitBioAxisRequest";
+import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 import { RequestTypeSelector } from "./RequestTypeSelector";
 import { TurnstileWidget } from "./TurnstileWidget";
 
@@ -323,6 +324,10 @@ export function SourcingIntakeForm({
     }
   }, []);
 
+  useEffect(() => {
+    trackBioAxisEvent("rfq_start", { requestType: normalizedRequestType, hasContext: hasPageContext });
+  }, [hasPageContext, normalizedRequestType]);
+
   function updateField<K extends keyof IntakeState>(field: K, value: IntakeState[K]) {
     setState((current) => ({ ...current, [field]: value }));
     setError("");
@@ -374,6 +379,10 @@ export function SourcingIntakeForm({
     const validationError = validate();
 
     if (validationError) {
+      trackBioAxisEvent("rfq_error", { reason: "validation", requestType: state.requestType });
+      if (turnstileAvailable && !turnstileToken) {
+        trackBioAxisEvent("turnstile_failure", { reason: "missing_token" });
+      }
       setError(validationError);
       setSubmitted(null);
       return;
@@ -418,6 +427,7 @@ export function SourcingIntakeForm({
       });
 
       if (!payload.ok) {
+        trackBioAxisEvent("rfq_error", { reason: "api", requestType: state.requestType });
         setError(payload.error || requestErrorMessage);
         setSubmitted(null);
         return;
@@ -429,10 +439,12 @@ export function SourcingIntakeForm({
           "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
         referenceId: payload.referenceId
       });
+      trackBioAxisEvent("rfq_success", { requestType: state.requestType, requestId: payload.referenceId });
       clearStoredSourcingSubmission();
       setRestoredSessionInput(false);
       setSourcingListItems([]);
     } catch {
+      trackBioAxisEvent("rfq_error", { reason: "network", requestType: state.requestType });
       setError(requestErrorMessage);
       setSubmitted(null);
     } finally {
@@ -489,12 +501,6 @@ export function SourcingIntakeForm({
           onChange={(event) => updateField("website", event.target.value)}
         />
       </div>
-
-      {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} /> : null}
-      {!hasPageContext && (capturedInput || restoredSessionInput) ? (
-        <CapturedInputCard restored={restoredSessionInput && !capturedInput} captured={capturedInput} />
-      ) : null}
-      {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
       <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-7">
         <div className="mb-5">
@@ -584,6 +590,12 @@ export function SourcingIntakeForm({
           </button>
         </div>
       </section>
+
+      {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} /> : null}
+      {!hasPageContext && (capturedInput || restoredSessionInput) ? (
+        <CapturedInputCard restored={restoredSessionInput && !capturedInput} captured={capturedInput} />
+      ) : null}
+      {sourcingListItems.length > 0 ? <SourcingListSummary items={sourcingListItems} /> : null}
 
       <details className="group border border-bioaxis-line bg-bioaxis-panel">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left sm:p-8">

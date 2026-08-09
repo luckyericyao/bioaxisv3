@@ -5,24 +5,31 @@ import { useEffect, useRef, useState } from "react";
 import { brand } from "@/data/brand";
 import { navigationItems } from "@/data/navigation";
 import { productNavigationSegments } from "@/data/productNavigation";
+import { useSourcingList } from "@/components/sourcing/SourcingListProvider";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const productsMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const { items: sourcingListItems, openDrawer } = useSourcingList();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setProductsOpen(false);
         setMobileProductsOpen(false);
+        if (menuOpen) {
+          setMenuOpen(false);
+          requestAnimationFrame(() => mobileMenuButtonRef.current?.focus());
+        }
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [menuOpen]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -61,6 +68,7 @@ export function Header() {
 
         <div className="flex items-center gap-2 lg:hidden">
           <button
+            ref={mobileMenuButtonRef}
             type="button"
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
             aria-expanded={menuOpen}
@@ -155,6 +163,18 @@ export function Header() {
                 </Link>
               )
             )}
+            {sourcingListItems.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  openDrawer(mobileMenuButtonRef.current);
+                  closeMobileMenu();
+                }}
+                className="border border-bioaxis-accent bg-bioaxis-accent/10 px-4 py-3 text-left text-sm font-semibold uppercase text-bioaxis-accent"
+              >
+                Review sourcing list ({sourcingListItems.length})
+              </button>
+            ) : null}
           </div>
         </nav>
       ) : null}

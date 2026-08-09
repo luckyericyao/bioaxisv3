@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getProductSearchResults } from "@/data/productSearch";
+import { getProductSearchIndexSize, getProductSearchResults } from "@/data/productSearch";
 import { buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
+import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
 type ProductSearchProps = {
   initialQuery?: string;
@@ -53,6 +54,11 @@ function displayQueryLabel(value: string) {
     .replace(/\bu[lL]\b/g, "µL")
     .replace(/\b([0-9]+(?:\.[0-9]+)?)\s*u[mM]\b/g, "$1 µm")
     .replace(/\bu[mM]\b/g, "µm");
+}
+
+function looksLikeCatalogReference(value: string) {
+  const normalized = value.trim();
+  return normalized.length >= 4 && /\d/.test(normalized) && /^[a-z0-9._/-]+$/i.test(normalized);
 }
 
 function resultPath(result: ProductSearchResult) {
@@ -220,18 +226,21 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       <div className="mt-auto flex flex-col gap-2 pt-5 sm:flex-row sm:flex-wrap">
         <Link
           href={detailHref(result, query)}
+          onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_details", resultType: result.type })}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
           View details
         </Link>
         <Link
           href={requestHref(result, "quote", query)}
+          onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_quote", resultType: result.type })}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Send as quote request
         </Link>
         <Link
           href={requestHref(result, "equivalent", query)}
+          onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_equivalent", resultType: result.type })}
           className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Find equivalent
@@ -274,6 +283,7 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
         </div>
         <Link
           href={productListHref}
+          onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_product_list" })}
           className="inline-flex min-h-10 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
           Send product list
@@ -287,6 +297,7 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
           <li key={action.title}>
             <Link
               href={action.href}
+              onClick={() => trackBioAxisEvent("cta_click", { cta: action.title })}
               className="block h-full border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
             >
               <span className="text-sm font-bold uppercase text-bioaxis-text">{action.title}</span>
@@ -305,6 +316,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const trimmedQuery = query.trim();
   const displayedQuery = displayQueryLabel(trimmedQuery);
   const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
+  const indexedPathCount = useMemo(() => getProductSearchIndexSize(), []);
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, 18);
   const visibleMatchCount = topMatches.length + relatedMatches.length;
@@ -314,33 +326,46 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
   const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
 
+  useEffect(() => {
+    if (!initialQuery.trim()) {
+      return;
+    }
+
+    trackBioAxisEvent("search", { queryLength: initialQuery.trim().length, matchCount: results.length });
+    if (results.length === 0) {
+      trackBioAxisEvent("search_no_result", { queryLength: initialQuery.trim().length });
+    }
+  }, [initialQuery, results.length]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     router.push(trimmedQuery ? `/products?q=${encodeURIComponent(trimmedQuery)}` : "/products");
   }
 
-  const searchForm = (
+  function searchForm(compact = false) {
+    return (
     <form onSubmit={handleSubmit} className="w-full">
       <label htmlFor="product-search" className="sr-only">
         Search BioAxis products
       </label>
-      <div className="flex w-full flex-col gap-3 border border-white/70 bg-white/[0.82] p-3 shadow-search backdrop-blur-md transition focus-within:border-bioaxis-ice sm:flex-row sm:items-center">
+      <div className={["flex w-full border border-white/70 bg-white/[0.82] shadow-search backdrop-blur-md transition focus-within:border-bioaxis-ice", compact ? "flex-row items-center gap-2 p-2 sm:gap-3 sm:p-3" : "flex-col gap-3 p-3 sm:flex-row sm:items-center"].join(" ")}>
         <input
           id="product-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search product name, catalog reference, supplier line, or consumable type"
-          className="field-focus min-h-12 min-w-0 flex-1 border-0 bg-transparent text-base font-semibold text-bioaxis-text placeholder:text-bioaxis-dim sm:text-lg"
+          className={["field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim", compact ? "min-h-10 text-sm sm:min-h-12 sm:text-base" : "min-h-12 text-base sm:text-lg"].join(" ")}
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
+          className={["inline-flex shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text", compact ? "min-h-10 px-3 text-[0.68rem] sm:min-h-12 sm:px-6 sm:text-sm" : "min-h-12 px-6 text-sm sm:px-7"].join(" ")}
         >
           Search
         </button>
       </div>
     </form>
-  );
+    );
+  }
 
   function QuickSearchLinks({ className = "mt-4" }: { className?: string }) {
     return (
@@ -364,7 +389,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   if (!trimmedQuery) {
     return (
       <div className="w-full">
-        {searchForm}
+        {searchForm()}
         <QuickSearchLinks />
       </div>
     );
@@ -372,35 +397,38 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
   return (
     <div className="w-full">
-      <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6 lg:p-8">
+      <section className="border border-bioaxis-line bg-bioaxis-panel p-3 sm:p-6 lg:p-8">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)] xl:items-start">
           <div className="order-2 xl:order-1">
             <p className="text-xs font-semibold uppercase text-bioaxis-dim">Sourcing matches</p>
-            <h2 className="mt-2 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
+            <h2 className="mt-2 text-2xl font-bold uppercase leading-tight text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
-            <p className="mt-4 text-base leading-7 text-bioaxis-muted">
-              Showing {visibleMatchCount} ranked match{visibleMatchCount === 1 ? "" : "es"} from {results.length} indexed sourcing path{results.length === 1 ? "" : "s"}.
+            <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
+              Showing {visibleMatchCount} ranked match{visibleMatchCount === 1 ? "" : "es"} from {indexedPathCount} indexed sourcing path{indexedPathCount === 1 ? "" : "s"}.
             </p>
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
               Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
             </p>
           </div>
           <div className="order-1 xl:order-2">
-            {searchForm}
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            {searchForm(true)}
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               <Link
                 href="/products"
-                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-2 text-[0.68rem] font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:px-4 sm:text-xs"
               >
                 Clear search
               </Link>
-              <Link
-                href={quoteSearchHref}
-                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-              >
-                Send search to BioAxis
-              </Link>
+              {results.length > 0 ? (
+                <Link
+                  href={quoteSearchHref}
+                  onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_quote" })}
+                  className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-2 text-[0.68rem] font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black sm:px-4 sm:text-xs"
+                >
+                  Send search to BioAxis
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>
@@ -489,9 +517,16 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </div>
         </section>
       ) : (
-        <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">No direct catalog match</p>
-          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Send the input anyway.</h3>
+        <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
+            {looksLikeCatalogReference(trimmedQuery) ? "No direct catalog reference match" : "No direct sourcing path match"}
+          </p>
+          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
+            No direct match in {indexedPathCount} indexed sourcing paths.
+          </p>
+          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">
+            {looksLikeCatalogReference(trimmedQuery) ? "Send this reference." : "Send the input anyway."}
+          </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.
           </p>
@@ -500,7 +535,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               href={productListSearchHref}
               className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
-              Send to BioAxis
+              Send this reference
             </Link>
             <Link
               href="/products"
@@ -509,13 +544,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               Browse product lines
             </Link>
           </div>
-          <div className="mt-6">
-            <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
-          </div>
         </section>
       )}
 
-      <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
+      {results.length > 0 ? <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
         <p className="text-sm leading-6 text-bioaxis-muted">
           Search results are ranked above. Browse all segments if you want to explore the full product line directory.
         </p>
@@ -525,7 +557,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
         >
           Browse all product segments
         </Link>
-      </div>
+      </div> : null}
     </div>
   );
 }

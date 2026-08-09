@@ -6,7 +6,6 @@ import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
-import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 import { SupplierComparisonModule } from "./SupplierComparisonModule";
 
 type ProductItemPageTemplateProps = {
@@ -62,7 +61,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       <PageHero
         eyebrow={`${segment.title} / ${category.title} / ${family.title}`}
         title={productItem.name}
-        subtitle={productItem.introduction}
+        subtitle={productItem.shortDescription}
         compact
         align="start"
       >
@@ -72,32 +71,56 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
               <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
             ))}
           </div>
-          <SourcingRequestButtonGroup
-            segment={segment.slug}
-            category={category.slug}
-            family={family.slug}
-            product={productItem.slug}
-            size="md"
-            layout="inline"
-            includeDocumentation
-          />
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <AddToSourcingListButton
-              title={productItem.name}
-              href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
-              segmentSlug={segment.slug}
-              categorySlug={category.slug}
-              familySlug={family.slug}
-              productSlug={productItem.slug}
-              segmentTitle={segment.title}
-              categoryTitle={category.title}
-              familyTitle={family.title}
-              productTitle={productItem.name}
-            />
-            <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-              Back to family
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Link
+              href={requestLinks[0].href}
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-center text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            >
+              Request quote for this product
+            </Link>
+            <Link
+              href={requestLinks[1].href}
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              Find equivalent
+            </Link>
+            <Link
+              href={requestLinks[2].href}
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              Request sample
             </Link>
           </div>
+          <details className="group border border-bioaxis-line bg-bioaxis-black">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+              <span>More sourcing actions</span>
+              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
+              <Link
+                href={requestLinks[3].href}
+                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              >
+                Ask for documents
+              </Link>
+              <AddToSourcingListButton
+                title={productItem.name}
+                href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
+                segmentSlug={segment.slug}
+                categorySlug={category.slug}
+                familySlug={family.slug}
+                productSlug={productItem.slug}
+                segmentTitle={segment.title}
+                categoryTitle={category.title}
+                familyTitle={family.title}
+                productTitle={productItem.name}
+                className="min-h-10 px-3 text-xs"
+              />
+              <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                Back to family
+              </Link>
+            </div>
+          </details>
         </div>
       </PageHero>
 

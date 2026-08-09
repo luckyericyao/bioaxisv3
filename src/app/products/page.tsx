@@ -36,12 +36,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-5 pt-4 sm:pb-6 sm:pt-6" : "pb-12 pt-16"}`}>
         {query ? (
           <div className="border-b border-bioaxis-line pb-6 pt-3 sm:pb-7 sm:pt-4">
-            <p className="mb-2 text-xs font-semibold uppercase text-bioaxis-accent sm:text-sm">Sourcing search</p>
-            <h1 className="max-w-5xl text-4xl font-bold uppercase leading-none text-bioaxis-text sm:text-5xl lg:text-6xl">Products</h1>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-bioaxis-muted sm:text-base">
-              Search by product name, catalog reference, supplier line, workflow, or consumable type. BioAxis ranks the closest sourcing paths first and keeps quote, document, sample, and equivalent actions close to the result.
-            </p>
-            <div className="mt-4">
+            <p className="mb-2 text-xs font-semibold uppercase text-bioaxis-accent">Sourcing search</p>
+            <h1 className="max-w-5xl text-3xl font-bold uppercase leading-none text-bioaxis-text sm:text-5xl">Products</h1>
+            <div className="mt-3">
               <ProductSearch initialQuery={query} />
             </div>
           </div>

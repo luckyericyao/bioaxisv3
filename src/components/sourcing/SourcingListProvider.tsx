@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export type SourcingListItem = {
@@ -50,7 +50,7 @@ type SourcingListContextValue = {
   addItem: (item: SourcingListInput) => void;
   updateItem: (id: string, patch: Partial<SourcingListItem>) => void;
   removeItem: (id: string) => void;
-  openDrawer: () => void;
+  openDrawer: (restoreFocusTo?: HTMLElement | null) => void;
 };
 
 const storageKey = "bioaxis:sourcing-list";
@@ -123,6 +123,33 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
+
+  const rememberActiveElement = useCallback(() => {
+    const activeElement = document.activeElement;
+    lastActiveElementRef.current = activeElement instanceof HTMLElement ? activeElement : null;
+  }, []);
+
+  const openDrawer = useCallback((restoreFocusTo?: HTMLElement | null) => {
+    if (restoreFocusTo) {
+      lastActiveElementRef.current = restoreFocusTo;
+    } else {
+      rememberActiveElement();
+    }
+    setDrawerOpen(true);
+  }, [rememberActiveElement]);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    requestAnimationFrame(() => {
+      const element = lastActiveElementRef.current;
+      if (element?.isConnected) {
+        element.focus();
+      }
+      lastActiveElementRef.current = null;
+    });
+  }, []);
 
   useEffect(() => {
     setItems(readStoredItems());
@@ -155,18 +182,49 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setDrawerOpen(false);
+        event.preventDefault();
+        closeDrawer();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+      if (!dialog) {
+        return;
+      }
+
+      const focusable = [...dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )].filter((element) => element.getAttribute("aria-hidden") !== "true");
+
+      if (focusable.length === 0) {
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [drawerOpen]);
+  }, [closeDrawer, drawerOpen]);
 
   const value = useMemo<SourcingListContextValue>(
     () => ({
       items,
       addItem: (input) => {
+        openDrawer();
         setItems((current) => {
           const id = itemKey(input);
           if (current.some((item) => item.id === id)) {
@@ -175,7 +233,6 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
 
           return [...current, emptyFields(input)];
         });
-        setDrawerOpen(true);
       },
       updateItem: (id, patch) => {
         setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
@@ -183,9 +240,9 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       removeItem: (id) => {
         setItems((current) => current.filter((item) => item.id !== id));
       },
-      openDrawer: () => setDrawerOpen(true)
+      openDrawer
     }),
-    [items]
+    [items, openDrawer]
   );
 
   function submitSourcingList() {
@@ -207,8 +264,8 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       {items.length > 0 ? (
         <button
           type="button"
-          onClick={() => setDrawerOpen(true)}
-          className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-bold uppercase text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent"
+          onClick={() => openDrawer()}
+          className="fixed bottom-5 right-5 z-50 hidden min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-bold uppercase text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent sm:inline-flex"
         >
           Sourcing list ({items.length})
         </button>
@@ -222,11 +279,11 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
           aria-labelledby="sourcing-list-title"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
-              setDrawerOpen(false);
+              closeDrawer();
             }
           }}
         >
-          <div className="ml-auto flex h-full w-full max-w-3xl flex-col border-l border-bioaxis-line bg-bioaxis-black shadow-2xl">
+          <div ref={dialogRef} id="sourcing-list-dialog" className="ml-auto flex h-full w-full max-w-3xl flex-col border-l border-bioaxis-line bg-bioaxis-black shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-bioaxis-line p-5">
               <div>
                 <p className="text-xs font-bold uppercase text-bioaxis-accent">Sourcing list</p>
@@ -238,7 +295,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
               <button
                 ref={closeButtonRef}
                 type="button"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeDrawer}
                 aria-label="Close sourcing list"
                 className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >

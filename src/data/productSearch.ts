@@ -421,3 +421,22 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     )
     .map(stripScore);
 }
+
+export function getProductSearchIndexSize() {
+  let count = workflows.length + resourceGuides.length;
+
+  productTaxonomy.forEach((segment) => {
+    count += 1;
+
+    segment.subcategories.forEach((subcategory) => {
+      count += 1;
+
+      subcategory.families.forEach((family) => {
+        count += 1;
+        count += getProductItemsForFamily(segment.slug, subcategory.slug, family.slug).length;
+      });
+    });
+  });
+
+  return count;
+}

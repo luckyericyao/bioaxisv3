@@ -26,5 +26,7 @@ export const footerNavigationItems: NavigationItem[] = [
   { label: "Quality", href: "/quality" },
   { label: "Supplier Qualification", href: "/supplier-qualification" },
   { label: "Trust Center", href: "/trust-center" },
-  { label: "Resources", href: "/resources" }
+  { label: "Resources", href: "/resources" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" }
 ];
