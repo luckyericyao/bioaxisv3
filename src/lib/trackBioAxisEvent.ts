@@ -1,3 +1,5 @@
+import { getBioAxisRequestId } from "./clientRequestId";
+
 export type BioAxisEventName =
   | "search"
   | "search_no_result"
@@ -16,9 +18,13 @@ export function trackBioAxisEvent(name: BioAxisEventName, properties: EventPrope
     return;
   }
 
+  const enrichedProperties = {
+    requestId: properties.requestId ?? getBioAxisRequestId(),
+    ...properties
+  };
   const body = JSON.stringify({
     name,
-    properties,
+    properties: enrichedProperties,
     path: window.location.pathname,
     timestamp: new Date().toISOString()
   });

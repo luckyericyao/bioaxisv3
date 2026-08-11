@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { readySupplyEvidenceRows, redactedEvidenceExample } from "@/data/readySupplyEvidence";
@@ -55,7 +56,7 @@ export default function ReadySupplyPage() {
     <>
       <section className="border-b border-bioaxis-line px-5 py-12 sm:px-8 sm:py-14 lg:px-10 lg:py-12">
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-end">
-          <div>
+          <div className="order-2 lg:order-1">
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
             <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
               Warehouse-backed consumables for faster lab procurement.
@@ -82,25 +83,21 @@ export default function ReadySupplyPage() {
             </div>
           </div>
 
-          <aside className="border border-bioaxis-line bg-bioaxis-black p-5 shadow-2xl shadow-slate-900/12">
-            <div className="mb-5 border-b border-bioaxis-line pb-4">
+          <div className="order-1 grid gap-3 lg:order-2">
+            <CompactSourcingIntake
+              requestType="quote"
+              sourcePage="/ready-supply"
+              title="Send the current supply need."
+              productFieldLabel="SKU, catalog number, supplier line, or product list"
+              submitLabel="Request availability"
+            />
+            <aside className="border border-bioaxis-line bg-bioaxis-black p-4">
               <p className="text-xs font-bold uppercase text-bioaxis-accent">BIOAXIS READY SUPPLY</p>
-              <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                Operational status areas for warehouse-backed supply, documentation, and replenishment planning.
+              <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
+                Selected-line status is confirmed per request, not shown as public live inventory.
               </p>
-            </div>
-            <div className="grid gap-2">
-              {readySupplyEvidenceRows.map(({ label, status, confirmation }) => (
-                <div
-                  key={label}
-                  className="grid gap-3 border border-white/[0.1] bg-bioaxis-panel px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center"
-                >
-                  <p className="text-sm font-bold uppercase leading-5 text-bioaxis-text">{label}</p>
-                  <p className="text-right text-xs font-semibold uppercase text-bioaxis-accent">{status}<span className="block mt-1 font-normal text-bioaxis-dim">{confirmation}</span></p>
-                </div>
-              ))}
-            </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </section>
 

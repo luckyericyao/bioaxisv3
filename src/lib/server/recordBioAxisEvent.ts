@@ -1,11 +1,12 @@
 import type { BioAxisEventName, EventProperties } from "@/lib/trackBioAxisEvent";
+import { alertBioAxisFailure } from "./alertBioAxisFailure";
 
 const maxPropertyLength = 180;
 
 function safeProperties(properties: EventProperties) {
   return Object.fromEntries(
     Object.entries(properties)
-      .filter(([, value]) => value !== undefined)
+      .filter(([, value]) => typeof value === "string" || typeof value === "number" || typeof value === "boolean")
       .map(([key, value]) => [key.slice(0, 80), typeof value === "string" ? value.slice(0, maxPropertyLength) : value])
   );
 }
@@ -44,12 +45,22 @@ export async function recordBioAxisEvent(name: BioAxisEventName, properties: Eve
 
     if (!response.ok) {
       console.warn("[BioAxis event] persistence failed", response.status);
+      void alertBioAxisFailure({
+        requestId: typeof properties.requestId === "string" ? properties.requestId : undefined,
+        stage: "analytics",
+        detail: `PostHog capture returned ${response.status}.`
+      });
       return { mode: "error" as const };
     }
 
     return { mode: "posthog" as const };
   } catch {
     console.warn("[BioAxis event] persistence unavailable");
+    void alertBioAxisFailure({
+      requestId: typeof properties.requestId === "string" ? properties.requestId : undefined,
+      stage: "analytics",
+      detail: "PostHog capture request failed or timed out."
+    });
     return { mode: "error" as const };
   }
 }

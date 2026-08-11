@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { getProductSearchIndexSize, getProductSearchResults } from "@/data/productSearch";
 import { buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
@@ -65,6 +66,18 @@ function displayQueryLabel(value: string) {
 function looksLikeCatalogReference(value: string) {
   const normalized = value.trim();
   return normalized.length >= 4 && /\d/.test(normalized) && /^[a-z0-9._/-]+$/i.test(normalized);
+}
+
+function queryStateLabel(query: string, results: ProductSearchResult[]) {
+  if (results.length === 0) {
+    return "Unresolved reference";
+  }
+
+  if (results.some((result) => result.matchKind === "catalog-reference")) {
+    return "Verified catalog reference match";
+  }
+
+  return looksLikeCatalogReference(query) ? "Taxonomy/path match — no verified catalog reference" : "Taxonomy/path match";
 }
 
 function resultPath(result: ProductSearchResult) {
@@ -326,9 +339,11 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, 18);
   const visibleMatchCount = topMatches.length + relatedMatches.length;
+  const searchState = queryStateLabel(trimmedQuery, results);
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
+  const intakeRequestType = /\n|,|\t|\|/.test(trimmedQuery) ? "product-list-review" : "quote";
   const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
   const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
 
@@ -410,15 +425,32 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             <h2 className="mt-2 text-2xl font-bold uppercase leading-tight text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
+            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Directory state: {searchState}</p>
             <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
               Showing {visibleMatchCount} ranked match{visibleMatchCount === 1 ? "" : "es"} from {indexedPathCount} indexed sourcing path{indexedPathCount === 1 ? "" : "s"}.
             </p>
+            <p className="mt-2 text-xs leading-5 text-bioaxis-dim">The indexed total counts BioAxis sourcing paths, not verified supplier catalog records.</p>
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
               Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
             </p>
           </div>
           <div className="order-1 xl:order-2">
-            {searchForm(true)}
+            <CompactSourcingIntake
+              requestType={intakeRequestType}
+              sourcePage={`/products?q=${encodeURIComponent(trimmedQuery)}`}
+              product={displayedQuery}
+              defaultMessage={displayedQuery}
+              title="Send the search context."
+              productFieldLabel="SKU, catalog number, supplier line, or product list"
+              submitLabel="Send sourcing request"
+            />
+            <details className="mt-3 border border-bioaxis-line bg-bioaxis-black">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+                <span>Refine directory search</span>
+                <span className="text-bioaxis-accent">Edit query</span>
+              </summary>
+              <div className="border-t border-bioaxis-line p-3">{searchForm(true)}</div>
+            </details>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               <Link
                 href="/products"
@@ -525,7 +557,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       ) : (
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
-            {looksLikeCatalogReference(trimmedQuery) ? "No direct catalog reference match" : "No direct sourcing path match"}
+            {looksLikeCatalogReference(trimmedQuery) ? "Unresolved reference — No direct catalog reference match" : "No direct sourcing path match"}
           </p>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
             No direct match in {indexedPathCount} indexed sourcing paths.

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
+import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import type { DocumentStatus, ProductCatalogCategory, ProductCatalogFamily, ProductCatalogItem, ProductCatalogSegment } from "@/data/productCatalog";
@@ -416,8 +417,19 @@ export function CatalogProductPage({
           { label: product.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact>
-        <div className="grid gap-5">
+      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact tight mobileContentFirst>
+        <div className="grid gap-3">
+          <CompactSourcingIntake
+            requestType="quote"
+            sourcePage={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
+            segment={segment.name}
+            category={category.name}
+            family={family.name}
+            product={product.name}
+            title="Send this product context."
+            productFieldLabel="SKU, catalog number, supplier line, or product list"
+            submitLabel="Send sourcing request"
+          />
           <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
             Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
           </p>

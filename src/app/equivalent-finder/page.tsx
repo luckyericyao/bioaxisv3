@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { SourcingIntakeForm } from "@/components/forms/SourcingIntakeForm";
+import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
 import { pageVisuals } from "@/data/visualAssets";
@@ -146,34 +146,30 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         title="Find compatible alternatives for your current consumables"
         subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
         compact
+        tight
+        mobileContentFirst
       >
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            href={requestHref()}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-          >
-            Start equivalent review
-          </Link>
+        <div className="grid gap-3">
+          <CompactSourcingIntake
+            requestType="equivalent"
+            sourcePage={initialQuery ? `/equivalent-finder?query=${encodeURIComponent(initialQuery)}` : "/equivalent-finder"}
+            product={initialQuery}
+            title="Send the current product."
+            defaultMessage={defaultMessage}
+            productFieldLabel="Current product, catalog number, or supplier line"
+            submitLabel="Send equivalent request"
+            optionalChips={intakePriorities}
+          />
           <Link
             href="/request-quote?type=sample&requestType=sample"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:justify-self-start"
           >
             Request sample first
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
-        <SourcingIntakeForm
-          requestType="equivalent"
-          title="Send the current product. BioAxis will structure the equivalent review."
-          defaultMessage={defaultMessage}
-          productFieldLabel="Current product, catalog number, or supplier line"
-          submitLabel="Send equivalent request"
-          optionalChips={intakePriorities}
-          compact
-        />
-
+      <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
         <aside className="overflow-hidden border border-bioaxis-line bg-bioaxis-black">
           <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panel">
             <Image

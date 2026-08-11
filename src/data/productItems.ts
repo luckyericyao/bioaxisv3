@@ -27,6 +27,7 @@ type ProductProfile = {
 type ConfiguredProductItem = {
   slug: string;
   name: string;
+  indexable?: boolean;
   shortDescription: string;
   introduction?: string;
   details?: string[];
@@ -312,7 +313,7 @@ function buildConfiguredProductItem(context: ProductItemContext, item: Configure
   return {
     slug: item.slug,
     name: item.name,
-    indexable: true,
+    indexable: item.indexable ?? !/-general$/i.test(item.slug),
     shortDescription: item.shortDescription,
     introduction: item.introduction ?? buildIntroduction(item.name, context),
     details: item.details ?? profile.details,

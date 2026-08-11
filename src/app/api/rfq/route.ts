@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 
 type RfqPayload = {
@@ -31,6 +32,7 @@ type RfqPayload = {
   referrer?: unknown;
   utm?: unknown;
   productContext?: unknown;
+  requestId?: unknown;
   website?: unknown;
   startedAt?: unknown;
   turnstileToken?: unknown;
@@ -42,6 +44,7 @@ type TurnstileVerificationResponse = {
 };
 
 type NormalizedRfq = {
+  requestId: string;
   name: string;
   email: string;
   organization: string;
@@ -179,6 +182,10 @@ function normalizeRequestType(value: unknown) {
   return requestTypeAliases[raw] ?? raw;
 }
 
+function normalizeRequestId(value: unknown) {
+  return clean(value, 100).replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
 function normalizeSupportedRequestType(value: unknown) {
   const normalized = normalizeRequestType(value);
   return supportedRequestTypes.has(normalized) ? normalized : "quote";
@@ -264,6 +271,7 @@ function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq 
   const resolvedSourcePageUrl = sourcePageUrl || productContext.sourcePageUrl || productContext.productUrl;
 
   return {
+    requestId: normalizeRequestId(payload.requestId),
     name: clean(payload.name, 180),
     email: clean(payload.email, 240),
     organization,
@@ -635,6 +643,9 @@ export async function POST(request: Request) {
   const verificationError = await validateTurnstileToken(clean(payload.turnstileToken, 4096), request);
 
   if (verificationError) {
+    const requestId = normalizeRequestId(payload.requestId);
+    void recordBioAxisEvent("turnstile_failure", { requestId, reason: "server_validation" }, "/api/rfq");
+    void alertBioAxisFailure({ requestId, stage: "turnstile", detail: "Server-side verification rejected the request." });
     return NextResponse.json({ error: verificationError }, { status: 400 });
   }
 
@@ -642,16 +653,18 @@ export async function POST(request: Request) {
   const validationError = validateRequest(normalized);
 
   if (validationError) {
+    void recordBioAxisEvent("rfq_error", { requestId: normalized.requestId, reason: "validation", requestType: normalized.requestType }, "/api/rfq");
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
-  const referenceId = `BIOAXIS-${Date.now().toString(36).toUpperCase()}`;
+  const referenceId = normalized.requestId || `BIOAXIS-${Date.now().toString(36).toUpperCase()}`;
 
   try {
     const delivery = await sendResendEmail(referenceId, normalized);
 
     if (delivery.mode === "error") {
       void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode: "not-attempted" }, "/api/rfq");
+      void alertBioAxisFailure({ requestId: referenceId, stage: "resend", detail: "Resend rejected or failed to deliver the RFQ email." });
       return NextResponse.json(
         {
           error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
@@ -669,6 +682,10 @@ export async function POST(request: Request) {
       telegramMode = "error";
     }
 
+    if (telegramMode === "error") {
+      void alertBioAxisFailure({ requestId: referenceId, stage: "telegram", detail: "Telegram notification failed after the email path completed." });
+    }
+
     void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode }, "/api/rfq");
 
     return NextResponse.json({
@@ -681,6 +698,7 @@ export async function POST(request: Request) {
     });
   } catch {
     void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: "error", telegramMode: "not-attempted" }, "/api/rfq");
+    void alertBioAxisFailure({ requestId: referenceId, stage: "rfq_delivery", detail: "Unexpected delivery failure in the RFQ route." });
     return NextResponse.json(
       {
         error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",

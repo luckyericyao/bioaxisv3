@@ -26,6 +26,7 @@ declare global {
 type TurnstileWidgetProps = {
   onTokenChange: (token: string) => void;
   onAvailabilityChange?: (available: boolean) => void;
+  onFailure?: (reason: string) => void;
   compact?: boolean;
 };
 
@@ -37,7 +38,7 @@ type TurnstileConfigResponse = {
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const fallbackEmail = "crazyowenyao@gmail.com";
 
-export function TurnstileWidget({ onTokenChange, onAvailabilityChange, compact = false }: TurnstileWidgetProps) {
+export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
@@ -93,10 +94,12 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, compact =
       callback: (token) => onTokenChange(token),
       "expired-callback": () => {
         onTokenChange("");
+        onFailure?.("expired");
         setWidgetIssue("Verification expired. Please complete the check again before submitting.");
       },
       "error-callback": () => {
         onTokenChange("");
+        onFailure?.("widget_error");
         setWidgetIssue(`Verification could not complete. Try again, or email ${fallbackEmail} directly.`);
       }
     });
@@ -107,7 +110,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, compact =
         widgetIdRef.current = null;
       }
     };
-  }, [compact, onTokenChange, scriptReady, siteKey]);
+  }, [compact, onFailure, onTokenChange, scriptReady, siteKey]);
 
   if (!siteKey) {
     return configLoaded ? null : (
@@ -126,7 +129,10 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, compact =
           setWidgetIssue("");
           setScriptReady(true);
         }}
-        onError={() => setWidgetIssue(`Verification could not load. Email ${fallbackEmail} directly if the form is blocked.`)}
+        onError={() => {
+          onFailure?.("script_error");
+          setWidgetIssue(`Verification could not load. Email ${fallbackEmail} directly if the form is blocked.`);
+        }}
       />
       <div className="mb-2">
         <p className="text-xs font-bold uppercase text-bioaxis-dim">Verification</p>

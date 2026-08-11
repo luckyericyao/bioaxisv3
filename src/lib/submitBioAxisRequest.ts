@@ -41,6 +41,7 @@ export type BioAxisRequestPayload = {
   referrer?: string;
   utm?: Record<string, string>;
   productContext?: BioAxisProductContext;
+  requestId?: string;
   website?: string;
   startedAt?: number;
   turnstileToken?: string;
@@ -51,6 +52,7 @@ export type BioAxisRequestResponse = {
   mode?: "email" | "captured" | "honeypot";
   message?: string;
   referenceId?: string;
+  requestId?: string;
   error?: string;
 };
 

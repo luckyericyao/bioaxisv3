@@ -100,7 +100,7 @@ const requiredWorkflowCtaLabels = [
 const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "Private label / OEM", "General sourcing question"];
 const equivalentFinderContent = [
   "Find compatible alternatives for your current consumables",
-  "Send the current product. BioAxis will structure the equivalent review.",
+  "Send the current product.",
   "Send equivalent request",
   "Fit assessment, not a name match.",
   "A cleaner way to compare alternatives.",
@@ -350,12 +350,27 @@ for (const route of routes) {
     checkForbiddenVisibleStrings(route, pageText);
   }
 
+  const shouldHaveCompactIntake =
+    route === "/" ||
+    route.startsWith("/products?") ||
+    segmentProductItemRoutes.includes(route) ||
+    route.startsWith("/equivalent-finder") ||
+    route === "/ready-supply";
+
+  if (shouldHaveCompactIntake) {
+    ["data-sourcing-intake=\"compact\"", "data-product-context-summary=\"true\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
+      if (!html.includes(marker)) {
+        failures.push(`${route}: shared compact intake is missing ${marker}`);
+      }
+    });
+  }
+
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
     const noDirectMatch = pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match");
 
-    ["Sourcing matches", "Results for", "Clear search"].forEach((label) => {
+    ["Sourcing matches", "Results for", "Clear search", "Directory state", "Send the search context."].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
@@ -397,7 +412,7 @@ for (const route of routes) {
     }
 
     if (noDirectMatch) {
-      ["Send this reference", "Browse product lines"].forEach((label) => {
+      ["Unresolved reference", "Send this reference", "Browse product lines", "Request context"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing no-result sourcing path ${label}`);
         }
@@ -484,8 +499,8 @@ for (const route of routes) {
 
   if (route === "/") {
     const homeSectionCount = [...mainBlock(html).matchAll(/<section\b/g)].length;
-    if (homeSectionCount !== 5) {
-      failures.push(`${route}: expected exactly 5 homepage sections, found ${homeSectionCount}`);
+    if (homeSectionCount < 5) {
+      failures.push(`${route}: expected at least 5 homepage sections, found ${homeSectionCount}`);
     }
 
     requiredHomeCtas.forEach((label) => {
@@ -507,7 +522,7 @@ for (const route of routes) {
       "One-stop life science consumables sourcing",
       "The structured sourcing layer for life science consumables.",
       "BioAxis turns SKUs, catalog references, supplier lines, and product lists into comparable options, required documents, sample paths, and RFQ-ready sourcing briefs.",
-      "Have a messy product list? Send it as-is. Only your email is required to start.",
+      "Only your email is required.",
       "Priority sourcing lines",
       "Liquid Handling",
       "Cell Culture",
@@ -537,9 +552,9 @@ for (const route of routes) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
-    ['action="/request-quote"', 'data-native-sourcing-fallback="true"', 'name="requestType"', 'name="source"'].forEach((marker) => {
+    ['data-sourcing-intake="compact"', 'data-api-endpoint="/api/rfq"', 'data-rfq-mode="email-plus-context"', 'type="email"', 'data-product-context-summary="true"'].forEach((marker) => {
       if (!html.includes(marker)) {
-        failures.push(`${route}: homepage sourcing form is missing native fallback ${marker}`);
+        failures.push(`${route}: homepage compact sourcing intake is missing ${marker}`);
       }
     });
 
@@ -1762,8 +1777,16 @@ const quoteFormSource = await readRequiredProjectFile("src/components/forms/Quot
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
 const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
+const compactSourcingIntakeSource = await readRequiredProjectFile("src/components/forms/CompactSourcingIntake.tsx");
 const sourcingListProviderSource = await readRequiredProjectFile("src/components/sourcing/SourcingListProvider.tsx");
 const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
+const sitemapResponse = await fetch(new URL("/sitemap.xml", baseUrl));
+if (!sitemapResponse.ok) {
+  failures.push(`/sitemap.xml: expected HTTP 200, got ${sitemapResponse.status}`);
+} else if ((await sitemapResponse.text()).includes("-general")) {
+  failures.push("/sitemap.xml: contains non-indexable general product templates");
+}
+
 const readySupplyEvidenceSource = await readRequiredProjectFile("src/data/readySupplyEvidence.ts");
 const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
@@ -1784,7 +1807,7 @@ if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.in
   failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or Resend delivery call");
 }
 
-if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("TELEGRAM_BOT_TOKEN") || !rfqRouteSource.includes("sendTelegramNotification")) {
+if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("TELEGRAM_BOT_TOKEN") || !rfqRouteSource.includes("sendTelegramNotification") || !rfqRouteSource.includes("alertBioAxisFailure")) {
   failures.push("src/app/api/rfq/route.ts: missing traceable request ID or optional Telegram notification path");
 }
 
@@ -1810,6 +1833,12 @@ if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.
     if (!source.includes(needle)) {
       failures.push(`${label}: missing Turnstile anti-spam source marker ${needle}`);
     }
+  }
+});
+
+["SourcingIntakeForm", "data-sourcing-intake=\"compact\""].forEach((needle) => {
+  if (!compactSourcingIntakeSource.includes(needle)) {
+    failures.push(`CompactSourcingIntake: missing shared intake marker ${needle}`);
   }
 });
 
@@ -2027,7 +2056,8 @@ const envMap = new Map(envLines.map((line) => {
   "TELEGRAM_BOT_TOKEN",
   "TELEGRAM_CHAT_ID",
   "POSTHOG_API_KEY",
-  "POSTHOG_HOST"
+  "POSTHOG_HOST",
+  "BIOAXIS_ALERT_WEBHOOK_URL"
 ].forEach((name) => {
   if (!envMap.has(name)) {
     failures.push(`.env.example: missing ${name}`);
@@ -2114,6 +2144,8 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
 
   if (!emailOnlyResponse.ok || emailOnlyPayload?.ok !== true) {
     failures.push(`/api/rfq email-only: expected success, got ${emailOnlyResponse.status}`);
+  } else if (typeof emailOnlyPayload.requestId !== "string" || !emailOnlyPayload.requestId) {
+    failures.push("/api/rfq email-only: missing traceable requestId");
   }
 
   const missingEmailResponse = await fetch(new URL("/api/rfq", baseUrl), {

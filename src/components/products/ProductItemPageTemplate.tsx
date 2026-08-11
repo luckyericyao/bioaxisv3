@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
@@ -63,9 +64,22 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         title={productItem.name}
         subtitle={productItem.shortDescription}
         compact
+        tight
+        mobileContentFirst
         align="start"
       >
-        <div className="grid gap-5">
+        <div className="grid gap-3">
+          <CompactSourcingIntake
+            requestType="quote"
+            sourcePage={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
+            segment={segment.title}
+            category={category.title}
+            family={family.title}
+            product={productItem.name}
+            title="Send this product context."
+            productFieldLabel="SKU, catalog number, supplier line, or product list"
+            submitLabel="Send sourcing request"
+          />
           <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
             Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
           </p>
@@ -73,26 +87,6 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             {productItem.commonSpecifications.slice(0, 5).map((specification) => (
               <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
             ))}
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            <Link
-              href={requestLinks[0].href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-center text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-            >
-              Request quote for this product
-            </Link>
-            <Link
-              href={requestLinks[1].href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-            >
-              Find equivalent
-            </Link>
-            <Link
-              href={requestLinks[2].href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-            >
-              Request sample
-            </Link>
           </div>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">

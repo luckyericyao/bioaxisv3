@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getRequestTypeById, normalizeRequestType, requestTypes } from "@/data/requestTypes";
+import { getBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
 import {
   type BioAxisProductContext,
   requestErrorMessage,
@@ -227,7 +228,7 @@ function initialProductContext(props: SourcingIntakeFormProps, requestType: stri
 function displaySourcePage(value: string) {
   try {
     const parsed = new URL(value, "https://bioaxis.local");
-    return `${parsed.pathname}${parsed.search}`
+    return decodeURIComponent(`${parsed.pathname}${parsed.search}`)
       .replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
       .replace(/\bu[lL]\b/g, "µL");
   } catch {
@@ -268,6 +269,7 @@ export function SourcingIntakeForm({
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
+  const requestIdRef = useRef(getBioAxisRequestId());
   const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage));
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [error, setError] = useState("");
@@ -326,8 +328,12 @@ export function SourcingIntakeForm({
   }, []);
 
   useEffect(() => {
-    trackBioAxisEvent("rfq_start", { requestType: normalizedRequestType, hasContext: hasPageContext });
+    trackBioAxisEvent("rfq_start", { requestId: requestIdRef.current, requestType: normalizedRequestType, hasContext: hasPageContext });
   }, [hasPageContext, normalizedRequestType]);
+
+  const handleTurnstileFailure = useCallback((reason: string) => {
+    trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current, reason });
+  }, []);
 
   function updateField<K extends keyof IntakeState>(field: K, value: IntakeState[K]) {
     setState((current) => ({ ...current, [field]: value }));
@@ -369,6 +375,7 @@ export function SourcingIntakeForm({
     setRestoredSessionInput(false);
     setSourcingListItems([]);
     startedAtRef.current = Date.now();
+    requestIdRef.current = rotateBioAxisRequestId();
     setState((current) => ({
       ...createInitialIntakeState(current.requestType),
       email: current.email
@@ -380,9 +387,9 @@ export function SourcingIntakeForm({
     const validationError = validate();
 
     if (validationError) {
-      trackBioAxisEvent("rfq_error", { reason: "validation", requestType: state.requestType });
+      trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "validation", requestType: state.requestType });
       if (turnstileAvailable && !turnstileToken) {
-        trackBioAxisEvent("turnstile_failure", { reason: "missing_token" });
+        trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current, reason: "missing_token" });
       }
       setError(validationError);
       setSubmitted(null);
@@ -396,6 +403,7 @@ export function SourcingIntakeForm({
       const detailChipText = state.detailChips.length ? `Selected review details: ${state.detailChips.join(", ")}` : "";
       const privateLabelNote = requestType === "private-label" ? "Original request mode: private-label / OEM sourcing discussion." : "";
       const payload = await submitBioAxisRequest({
+        requestId: requestIdRef.current,
         email: state.email,
         name: state.name,
         company: state.company,
@@ -428,7 +436,7 @@ export function SourcingIntakeForm({
       });
 
       if (!payload.ok) {
-        trackBioAxisEvent("rfq_error", { reason: "api", requestType: state.requestType });
+        trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "api", requestType: state.requestType });
         setError(payload.error || requestErrorMessage);
         setSubmitted(null);
         return;
@@ -440,12 +448,12 @@ export function SourcingIntakeForm({
           "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
         referenceId: payload.referenceId
       });
-      trackBioAxisEvent("rfq_success", { requestType: state.requestType, requestId: payload.referenceId });
+      trackBioAxisEvent("rfq_success", { requestId: payload.requestId ?? payload.referenceId ?? requestIdRef.current, requestType: state.requestType });
       clearStoredSourcingSubmission();
       setRestoredSessionInput(false);
       setSourcingListItems([]);
     } catch {
-      trackBioAxisEvent("rfq_error", { reason: "network", requestType: state.requestType });
+      trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "network", requestType: state.requestType });
       setError(requestErrorMessage);
       setSubmitted(null);
     } finally {
@@ -546,7 +554,12 @@ export function SourcingIntakeForm({
         </div>
         <div className="mt-4 grid gap-3">
           <div className="order-2 sm:order-1">
-          <TurnstileWidget compact={compact} onAvailabilityChange={setTurnstileAvailable} onTokenChange={setTurnstileToken} />
+          <TurnstileWidget
+            compact={compact}
+            onAvailabilityChange={setTurnstileAvailable}
+            onFailure={handleTurnstileFailure}
+            onTokenChange={setTurnstileToken}
+          />
           </div>
           {error ? (
             <p role="alert" className="order-3 text-sm font-semibold text-bioaxis-accent sm:order-2">
