@@ -6,9 +6,10 @@ export type BioAxisEventName =
   | "rfq_start"
   | "rfq_success"
   | "rfq_error"
-  | "turnstile_failure";
+  | "turnstile_failure"
+  | "rfq_delivery";
 
-type EventProperties = Record<string, string | number | boolean | undefined>;
+export type EventProperties = Record<string, string | number | boolean | undefined>;
 
 export function trackBioAxisEvent(name: BioAxisEventName, properties: EventProperties = {}) {
   if (typeof window === "undefined") {

@@ -292,6 +292,7 @@ function buildGeneralProductItem(context: ProductItemContext): ProductItem {
   return {
     slug: `${context.family.slug}-general`,
     name,
+    indexable: false,
     shortDescription: `General sourcing configuration for ${context.family.name.toLowerCase()} with buyer specifications, documentation needs, and evaluation criteria.`,
     introduction: buildIntroduction(name, context),
     details: profile.details,
@@ -311,6 +312,7 @@ function buildConfiguredProductItem(context: ProductItemContext, item: Configure
   return {
     slug: item.slug,
     name: item.name,
+    indexable: true,
     shortDescription: item.shortDescription,
     introduction: item.introduction ?? buildIntroduction(item.name, context),
     details: item.details ?? profile.details,
@@ -559,6 +561,10 @@ export function getProductItemsForFamily(segmentSlug: string, subcategorySlug: s
   return [general, ...configured];
 }
 
+export function getIndexableProductItemsForFamily(segmentSlug: string, subcategorySlug: string, familySlug: string) {
+  return getProductItemsForFamily(segmentSlug, subcategorySlug, familySlug).filter((productItem) => productItem.indexable);
+}
+
 export function getProductItemBySlug(segmentSlug: string, subcategorySlug: string, familySlug: string, productSlug: string): ProductItemMatch | null {
   const match = getFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
 
@@ -586,6 +592,22 @@ export function getAllProductItemPaths() {
     segment.subcategories.flatMap((subcategory) =>
       subcategory.families.flatMap((family) =>
         getProductItemsForFamily(segment.slug, subcategory.slug, family.slug).map((productItem) => ({
+          segment: segment.slug,
+          subcategory: subcategory.slug,
+          category: subcategory.slug,
+          family: family.slug,
+          product: productItem.slug
+        }))
+      )
+    )
+  );
+}
+
+export function getIndexableProductItemPaths() {
+  return productTaxonomy.flatMap((segment) =>
+    segment.subcategories.flatMap((subcategory) =>
+      subcategory.families.flatMap((family) =>
+        getIndexableProductItemsForFamily(segment.slug, subcategory.slug, family.slug).map((productItem) => ({
           segment: segment.slug,
           subcategory: subcategory.slug,
           category: subcategory.slug,

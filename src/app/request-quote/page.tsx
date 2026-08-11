@@ -443,6 +443,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           </>
         }
         compact
+        tight
       />
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-6 sm:px-8 lg:px-10">
         <QuoteRequestForm

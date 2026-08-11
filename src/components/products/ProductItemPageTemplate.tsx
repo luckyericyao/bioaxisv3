@@ -66,6 +66,9 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         align="start"
       >
         <div className="grid gap-5">
+          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
+            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+          </p>
           <div className="flex flex-wrap gap-2">
             {productItem.commonSpecifications.slice(0, 5).map((specification) => (
               <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>

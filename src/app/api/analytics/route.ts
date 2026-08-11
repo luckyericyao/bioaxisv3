@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import type { BioAxisEventName } from "@/lib/trackBioAxisEvent";
+import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +13,8 @@ const allowedEvents = new Set([
   "rfq_start",
   "rfq_success",
   "rfq_error",
-  "turnstile_failure"
+  "turnstile_failure",
+  "rfq_delivery"
 ]);
 
 function clean(value: unknown, limit: number) {
@@ -35,17 +38,9 @@ export async function POST(request: Request) {
     const path = clean(payload?.path, 180) || "/";
     const properties = payload?.properties && typeof payload.properties === "object" ? payload.properties : {};
 
-    console.info(
-      "[BioAxis event]",
-      JSON.stringify({
-        name,
-        path,
-        properties,
-        timestamp: clean(payload?.timestamp, 40)
-      })
-    );
+    const result = await recordBioAxisEvent(name as BioAxisEventName, properties, path);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, mode: result.mode });
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
   }

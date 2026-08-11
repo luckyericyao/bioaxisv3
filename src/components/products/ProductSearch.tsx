@@ -44,6 +44,12 @@ function resultTypeLabel(type: ProductSearchResult["type"]) {
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
+function matchKindLabel(result: ProductSearchResult) {
+  if (result.matchKind === "catalog-reference") return "Catalog reference";
+  if (result.matchKind === "content") return "Sourcing content";
+  return "Taxonomy path";
+}
+
 function matchedFieldLabel(field: string) {
   return matchedFieldLabels[field] ?? "Related match";
 }
@@ -207,7 +213,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           {relevanceLabel(result)}
         </span>
         <span className="border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
-          Sourcing path
+          {matchKindLabel(result)}
         </span>
       </div>
       <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>

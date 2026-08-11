@@ -74,7 +74,8 @@ const productSearchExpectations = {
   "/products?q=qPCR%20plates": ["qPCR", "PCR"],
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
-  "/products?q=zzzxqnotfound999": ["No direct catalog reference match", "Send this reference"]
+  "/products?q=zzzxqnotfound999": ["No direct catalog reference match", "Send this reference"],
+  "/products?q=430641": ["No direct catalog reference match", "Send this reference"]
 };
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
@@ -164,6 +165,7 @@ const routes = [
   "/products?q=sterile%20syringe%20filter",
   "/products?q=low%20retention%20tips",
   "/products?q=zzzxqnotfound999",
+  "/products?q=430641",
   "/products/liquid-handling",
   "/products/liquid-handling/pipette-tips",
   "/products/cell-culture",
@@ -434,6 +436,16 @@ for (const route of routes) {
 
     if (segmentResultIndex !== -1 && familyResultIndex !== -1 && segmentResultIndex > familyResultIndex) {
       failures.push(`${route}: Cell Culture segment result appears after family results`);
+    }
+  }
+
+  if (route === "/products?q=430641") {
+    if (!/No direct match in\s+\d+\s+indexed sourcing paths/.test(pageText)) {
+      failures.push(`${route}: missing honest indexed sourcing path count`);
+    }
+
+    if (pageText.includes("Browse all product segments")) {
+      failures.push(`${route}: no-result search should not render the full product directory`);
     }
   }
 
@@ -1079,13 +1091,20 @@ for (const route of routes) {
       "Selected lab consumables with warehouse-backed or supplier-coordinated supply paths, documentation review, and faster dispatch coordination.",
       "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
       "BIOAXIS READY SUPPLY",
-      "Supply model",
+      "Availability",
+      "Selected lines only",
+      "Confirm per request",
+      "Supply mode",
       "Warehouse-backed or supplier-coordinated",
-      "Selected lines; confirm per request",
+      "Supply path identified per request",
       "Dispatch coordination",
-      "Timing confirmed per request",
-      "Quality documents",
-      "COA / sterility / specification check",
+      "Timing assessed per request",
+      "Documents",
+      "CoA, SDS, sterility, and specification records where available",
+      "Sample path",
+      "Last confirmed",
+      "No public timestamp",
+      "Replenishment",
       "Repeat supply planning",
       "Fast dispatch",
       "BioAxis warehouse",
@@ -1102,6 +1121,9 @@ for (const route of routes) {
       "Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.",
       "Ready Supply is not a real-time inventory feed.",
       "A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available.",
+      "What is confirmed per request",
+      "Illustrative review record",
+      "not a live inventory record",
       "Need stable consumables with faster delivery?",
       "Request ready-stock availability"
     ].forEach((label) => {
@@ -1742,6 +1764,7 @@ const simpleFormSource = await readRequiredProjectFile("src/components/forms/Sim
 const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
 const sourcingListProviderSource = await readRequiredProjectFile("src/components/sourcing/SourcingListProvider.tsx");
 const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
+const readySupplyEvidenceSource = await readRequiredProjectFile("src/data/readySupplyEvidence.ts");
 const requestTypeSelectorSource = await readRequiredProjectFile("src/components/forms/RequestTypeSelector.tsx");
 const homePageSource = await readRequiredProjectFile("src/app/page.tsx");
 const productsPageSource = await readRequiredProjectFile("src/app/products/page.tsx");
@@ -1765,7 +1788,7 @@ if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("TELEGRAM_
   failures.push("src/app/api/rfq/route.ts: missing traceable request ID or optional Telegram notification path");
 }
 
-if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure")) {
+if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes("rfq_delivery") || !analyticsRouteSource.includes("recordBioAxisEvent")) {
   failures.push("src/app/api/analytics/route.ts: missing funnel event allowlist");
 }
 
@@ -2002,7 +2025,9 @@ const envMap = new Map(envLines.map((line) => {
   "TURNSTILE_SITE_KEY",
   "TURNSTILE_SECRET_KEY",
   "TELEGRAM_BOT_TOKEN",
-  "TELEGRAM_CHAT_ID"
+  "TELEGRAM_CHAT_ID",
+  "POSTHOG_API_KEY",
+  "POSTHOG_HOST"
 ].forEach((name) => {
   if (!envMap.has(name)) {
     failures.push(`.env.example: missing ${name}`);
@@ -2020,6 +2045,12 @@ if (envMap.get("TURNSTILE_SECRET_KEY")) {
 if ([...envMap.keys()].some((name) => name.startsWith("NEXT_PUBLIC_RESEND"))) {
   failures.push(".env.example: must not expose a NEXT_PUBLIC_RESEND key");
 }
+
+["readySupplyEvidenceRows", "redactedEvidenceExample", "No public timestamp"].forEach((label) => {
+  if (!readySupplyEvidenceSource.includes(label)) {
+    failures.push(`Ready Supply evidence source: missing ${label}`);
+  }
+});
 
 if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
   const rfqResponse = await fetch(new URL("/api/rfq", baseUrl), {

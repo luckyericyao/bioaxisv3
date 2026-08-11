@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllProductItemPaths } from "@/data/productItems";
+import { getIndexableProductItemPaths } from "@/data/productItems";
 import { getAllProductPaths } from "@/data/productTaxonomy";
 import { resourceGuides } from "@/data/resources";
 
@@ -30,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...productPaths.segments.map(({ segment }) => `/products/${segment}`),
     ...productPaths.subcategories.map(({ segment, subcategory }) => `/products/${segment}/${subcategory}`),
     ...productPaths.families.map(({ segment, subcategory, family }) => `/products/${segment}/${subcategory}/${family}`),
-    ...getAllProductItemPaths().map(({ segment, subcategory, family, product }) => `/products/${segment}/${subcategory}/${family}/${product}`)
+    ...getIndexableProductItemPaths().map(({ segment, subcategory, family, product }) => `/products/${segment}/${subcategory}/${family}/${product}`)
   ];
   const resourceRoutes = resourceGuides.map((guide) => `/resources/${guide.slug}`);
   const routes = [...new Set([...staticRoutes, ...productRoutes, ...resourceRoutes])];

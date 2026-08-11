@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 
 type RfqPayload = {
   name?: unknown;
@@ -650,6 +651,7 @@ export async function POST(request: Request) {
     const delivery = await sendResendEmail(referenceId, normalized);
 
     if (delivery.mode === "error") {
+      void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode: "not-attempted" }, "/api/rfq");
       return NextResponse.json(
         {
           error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
@@ -667,6 +669,8 @@ export async function POST(request: Request) {
       telegramMode = "error";
     }
 
+    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode }, "/api/rfq");
+
     return NextResponse.json({
       ok: true,
       mode: delivery.mode,
@@ -676,6 +680,7 @@ export async function POST(request: Request) {
       message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
     });
   } catch {
+    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: "error", telegramMode: "not-attempted" }, "/api/rfq");
     return NextResponse.json(
       {
         error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",

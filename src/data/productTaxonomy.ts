@@ -6,6 +6,7 @@ export type ProductRequestType = "quote" | "equivalent" | "sample" | "documentat
 export type ProductItem = {
   slug: string;
   name: string;
+  indexable: boolean;
   shortDescription: string;
   introduction: string;
   details: string[];
@@ -146,6 +147,7 @@ type SearchResultType = "segment" | "subcategory" | "family" | "product" | "work
 
 export type ProductSearchResult = {
   type: SearchResultType;
+  matchKind?: "taxonomy" | "catalog-reference" | "content";
   title: string;
   description: string;
   href: string;

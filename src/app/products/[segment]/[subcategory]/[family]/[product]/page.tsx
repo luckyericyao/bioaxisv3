@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
       description: match.productItem.shortDescription,
       alternates: {
         canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}/${match.productItem.slug}`
-      }
+      },
+      ...(match.productItem.indexable ? {} : { robots: { index: false, follow: true } })
     };
   }
 
@@ -61,7 +62,8 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
       description: catalogMatch.product.description,
       alternates: {
         canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}/${catalogMatch.product.slug}`
-      }
+      },
+      robots: { index: false, follow: true }
     };
   }
 

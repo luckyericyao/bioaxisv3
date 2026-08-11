@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { readySupplyEvidenceRows, redactedEvidenceExample } from "@/data/readySupplyEvidence";
 
 export const metadata: Metadata = {
   title: "Ready Supply | BioAxis",
@@ -10,14 +11,6 @@ export const metadata: Metadata = {
     canonical: "/ready-supply"
   }
 };
-
-const statusRows = [
-  ["Supply model", "Warehouse-backed or supplier-coordinated"],
-  ["Availability", "Selected lines; confirm per request"],
-  ["Dispatch coordination", "Timing confirmed per request"],
-  ["Quality documents", "COA / sterility / specification check"],
-  ["Replenishment", "Repeat supply planning"]
-];
 
 const operationCards = [
   {
@@ -97,13 +90,13 @@ export default function ReadySupplyPage() {
               </p>
             </div>
             <div className="grid gap-2">
-              {statusRows.map(([label, value]) => (
+              {readySupplyEvidenceRows.map(({ label, status, confirmation }) => (
                 <div
                   key={label}
                   className="grid gap-3 border border-white/[0.1] bg-bioaxis-panel px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center"
                 >
                   <p className="text-sm font-bold uppercase leading-5 text-bioaxis-text">{label}</p>
-                  <p className="text-xs font-semibold uppercase text-bioaxis-accent">{value}</p>
+                  <p className="text-right text-xs font-semibold uppercase text-bioaxis-accent">{status}<span className="block mt-1 font-normal text-bioaxis-dim">{confirmation}</span></p>
                 </div>
               ))}
             </div>
@@ -157,6 +150,37 @@ export default function ReadySupplyPage() {
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available. BioAxis can request and organize these records; the buyer remains responsible for technical and compliance review.
           </p>
+        </div>
+      </section>
+
+      <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
+        <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+          <SectionHeader
+            title="What is confirmed per request"
+            subtitle="Ready Supply is a selected-line pathway, not a public inventory promise. The status, evidence, sample path, and supply owner are clarified for each request."
+          />
+          <div className="mt-8 grid gap-3">
+            {readySupplyEvidenceRows.map((row) => (
+              <article key={row.label} className="grid gap-3 border border-bioaxis-line bg-bioaxis-black p-4 sm:grid-cols-[0.7fr_1fr_1fr_1fr] sm:items-start">
+                <p className="text-xs font-bold uppercase text-bioaxis-accent">{row.label}</p>
+                <p className="text-sm leading-6 text-bioaxis-text">{row.status}</p>
+                <p className="text-sm leading-6 text-bioaxis-steel">{row.confirmation}</p>
+                <p className="text-sm leading-6 text-bioaxis-muted">{row.boundary}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-5 border border-bioaxis-line bg-bioaxis-black p-5">
+            <p className="text-xs font-bold uppercase text-bioaxis-accent">Illustrative review record</p>
+            <p className="mt-2 text-sm leading-6 text-bioaxis-muted">Example format only. This is not a live inventory record, supplier certificate, or batch release.</p>
+            <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+              {redactedEvidenceExample.map(([label, value]) => (
+                <div key={label} className="border border-white/[0.1] bg-bioaxis-panel px-3 py-2">
+                  <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{label}</dt>
+                  <dd className="mt-1 text-sm leading-5 text-bioaxis-steel">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </div>
       </section>
 

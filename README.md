@@ -42,6 +42,8 @@ TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
 TELEGRAM_BOT_TOKEN=your_server_only_telegram_bot_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
+POSTHOG_API_KEY=your_server_only_posthog_project_api_key
+POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. During development, if no verified sender is available, leave it blank and the API route uses Resend's safe test sender.
@@ -62,7 +64,7 @@ Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. 
 
 Telegram is optional. If `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured, the RFQ route sends a short server-side notification after the email path. Telegram failures are logged and do not block the request response or email delivery.
 
-Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics` and can be reviewed in Vercel function logs. The RFQ response includes a traceable `requestId`.
+Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are always visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them in PostHog. The RFQ response includes a traceable `requestId`, and delivery status records include Resend and Telegram modes.
 
 To test email delivery:
 

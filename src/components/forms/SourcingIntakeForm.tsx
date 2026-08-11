@@ -306,6 +306,7 @@ export function SourcingIntakeForm({
   const productFieldHelper = hasPageContext
     ? "Optional. This page context is already included; add specs, supplier, quantity, or documents only if useful."
     : "Optional. Submit with email only, or paste any SKU, supplier line, product list, or rough sourcing need.";
+  const compactProductFieldHelper = hasPageContext ? "Context included. Add details if useful." : "Optional. Add details if useful.";
   const currentSubmitLabel = submitLabelFor(state.requestType, submitLabel);
   const waitingForVerification = turnstileAvailable && !turnstileToken;
   const submitButtonLabel = submitting ? "Sending..." : waitingForVerification ? "Complete verification to send" : currentSubmitLabel;
@@ -502,17 +503,20 @@ export function SourcingIntakeForm({
         />
       </div>
 
-      <section className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-7">
-        <div className="mb-5">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing intake</p>
-          <h2 className="mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl">{title}</h2>
-          <div className="mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted">
-            <p>{primaryHelperText}</p>
+      <section className={compact ? "border border-bioaxis-accent/70 bg-bioaxis-panel p-4 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-5" : "border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-7"}>
+        <div className={compact ? "mb-2" : "mb-4"}>
+          <p className={compact ? "sr-only" : "text-sm font-semibold uppercase text-bioaxis-accent"}>Sourcing intake</p>
+          <h2 className={compact ? "text-lg font-bold text-bioaxis-text sm:text-2xl" : "mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl"}>{title}</h2>
+          <div className={compact ? "mt-1 grid gap-1 text-xs leading-5 text-bioaxis-muted" : "mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted"}>
+            <p>{compact ? "Only your email is required." : primaryHelperText}</p>
+            {compact ? <span className="sr-only">{primaryHelperText}</span> : null}
             {hasPageContext ? <p className="hidden sm:block">{contextualHelperText}</p> : null}
             {handoffNotice ? <p className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-bioaxis-steel">{handoffNotice}</p> : null}
           </div>
         </div>
-        <div className="grid gap-5">
+        {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} compact={compact} /> : null}
+        {!hasPageContext && sourcingListItems.length > 0 ? <SourcingListNotice count={sourcingListItems.length} /> : null}
+        <div className={compact ? "grid gap-3" : "grid gap-5"}>
           <Field
             id="sourcing-email"
             name="email"
@@ -529,8 +533,8 @@ export function SourcingIntakeForm({
             id="sourcing-product-input"
             label={productLabel}
             value={state.productInput}
-            rows={compact ? 4 : 6}
-            helperText={productFieldHelper}
+            rows={compact ? 2 : 6}
+            helperText={compact ? compactProductFieldHelper : productFieldHelper}
             placeholder={
               hasPageContext
                 ? "Product context from this page will be included automatically. Add details only if useful."
@@ -538,17 +542,44 @@ export function SourcingIntakeForm({
             }
             onChange={(value) => updateField("productInput", value)}
           />
-          <div data-request-starters="true" className="md:col-span-2 border border-bioaxis-line bg-bioaxis-black/70 p-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Use a request starter</p>
-                <p className="mt-1 text-sm leading-6 text-bioaxis-muted">
-                  Use a starter, then edit any line. BioAxis can follow up for missing details.
-                </p>
-              </div>
-              <p className="text-xs font-semibold uppercase text-bioaxis-dim">Optional starters</p>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+          {compact ? <span className="sr-only">{productFieldHelper}</span> : null}
+        </div>
+        <div className="mt-4 grid gap-3">
+          <div className="order-2 sm:order-1">
+          <TurnstileWidget compact={compact} onAvailabilityChange={setTurnstileAvailable} onTokenChange={setTurnstileToken} />
+          </div>
+          {error ? (
+            <p role="alert" className="order-3 text-sm font-semibold text-bioaxis-accent sm:order-2">
+              {error}
+            </p>
+          ) : null}
+          {waitingForVerification ? (
+            <p className={compact ? "order-3 sr-only sm:order-2" : "order-3 text-sm font-semibold leading-6 text-bioaxis-muted sm:order-2"}>
+              {compact ? "Complete verification above to send." : "Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly."}
+            </p>
+          ) : null}
+          <div
+            data-submit-actions="true"
+            className="order-1 flex flex-col gap-3 border-t border-bioaxis-line pt-4 sm:order-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <button
+              type="submit"
+              disabled={submitting}
+              className="order-1 inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-wait disabled:opacity-70 sm:order-2"
+            >
+              {submitButtonLabel}
+            </button>
+            <p className="order-2 max-w-xl text-sm leading-6 text-bioaxis-muted sm:order-1">{optionalHelperText}</p>
+          </div>
+        </div>
+        <details data-request-starters="true" className="group mt-4 border border-bioaxis-line bg-bioaxis-black/70">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            <span>Use a request starter</span>
+            <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+          </summary>
+          <div className="border-t border-bioaxis-line p-3">
+            <p className="text-xs leading-5 text-bioaxis-muted">Use a starter, then edit any line. BioAxis can follow up for missing details.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
               {requestStarterTemplates.map((starter) => (
                 <button
                   key={starter.label}
@@ -562,36 +593,9 @@ export function SourcingIntakeForm({
               ))}
             </div>
           </div>
-        </div>
-        <div className="mt-5">
-          <TurnstileWidget onAvailabilityChange={setTurnstileAvailable} onTokenChange={setTurnstileToken} />
-        </div>
-        {error ? (
-          <p role="alert" className="mt-4 text-sm font-semibold text-bioaxis-accent">
-            {error}
-          </p>
-        ) : null}
-        {waitingForVerification ? (
-          <p className="mt-4 text-sm font-semibold leading-6 text-bioaxis-muted">
-            Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly.
-          </p>
-        ) : null}
-        <div
-          data-submit-actions="true"
-          className="mt-6 flex flex-col gap-4 border-t border-bioaxis-line pt-5 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="max-w-xl text-sm leading-6 text-bioaxis-muted">{optionalHelperText}</p>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-wait disabled:opacity-70"
-          >
-            {submitButtonLabel}
-          </button>
-        </div>
+        </details>
       </section>
 
-      {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} /> : null}
       {!hasPageContext && (capturedInput || restoredSessionInput) ? (
         <CapturedInputCard restored={restoredSessionInput && !capturedInput} captured={capturedInput} />
       ) : null}
@@ -694,40 +698,74 @@ function CapturedInputCard({ restored = false, captured = false }: { restored?: 
   );
 }
 
+function SourcingListNotice({ count }: { count: number }) {
+  return (
+    <div data-sourcing-list-context="true" className="mb-4 border border-bioaxis-accent/60 bg-bioaxis-black px-3 py-2.5">
+      <p className="text-xs font-semibold uppercase text-bioaxis-accent">Sourcing list context</p>
+      <p className="mt-1 text-xs leading-5 text-bioaxis-muted">
+        BioAxis will include {count} sourcing list {count === 1 ? "item" : "items"} with this request. Only your email is required.
+      </p>
+    </div>
+  );
+}
+
 function RequestContextCard({
   productContext,
-  draftReady
+  draftReady,
+  compact = false
 }: {
   productContext: BioAxisProductContext;
   draftReady: boolean;
+  compact?: boolean;
 }) {
   const rows = contextRows(productContext);
+  const compactPairs = [rows.slice(0, 2), rows.slice(2, 4), rows.slice(4, 6)].filter((pair) => pair.length > 0);
 
   return (
-    <section data-product-context-summary="true" className="border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:p-5">
+    <section data-product-context-summary="true" className={compact ? "mb-3 border border-bioaxis-accent/60 bg-bioaxis-panel p-2 sm:p-4" : "border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:p-5"}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase text-bioaxis-accent sm:text-sm">Request context</p>
-        <p className="text-[10px] font-semibold uppercase text-bioaxis-dim sm:text-xs">
+        <p className={compact ? "text-[10px] font-semibold uppercase text-bioaxis-accent sm:text-sm" : "text-xs font-semibold uppercase text-bioaxis-accent sm:text-sm"}>Request context</p>
+        <p className={compact ? "sr-only" : "text-[10px] font-semibold uppercase text-bioaxis-dim sm:text-xs"}>
           <span className="sm:hidden">{draftReady ? "Draft ready" : "Captured"}</span>
           <span className="hidden sm:inline">{draftReady ? "Request draft ready" : "Captured automatically"}</span>
         </p>
       </div>
-      <p className="mt-2 max-w-4xl text-sm leading-5 text-bioaxis-muted">
-        <span className="sm:hidden">Product context is included automatically.</span>
-        <span className="hidden sm:inline">
-          BioAxis will include this product context with your request. You can add more details below, but it is not required.
-        </span>
+      <p className={compact ? "sr-only" : "mt-2 max-w-4xl text-xs leading-5 text-bioaxis-muted sm:text-sm"}>
+        {compact ? (
+          <>
+            Context included automatically.
+            <span className="sr-only"> BioAxis will include this product context with your request. You can add more details below, but it is not required.</span>
+          </>
+        ) : (
+          <>
+            <span className="sm:hidden">Product context is included automatically.</span>
+            <span className="hidden sm:inline">BioAxis will include this product context with your request. You can add more details below, but it is not required.</span>
+          </>
+        )}
       </p>
-      <dl className="mt-3 grid border-t border-bioaxis-line md:grid-cols-[0.55fr_1.5fr_0.7fr] md:gap-2 md:border-0">
-        {rows.map(([label, value]) => (
-          <div key={label} className="border-b border-bioaxis-line py-2.5 last:border-b-0 md:border md:bg-bioaxis-black md:px-3">
-            <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
-            <dd className="mt-1 break-words text-sm font-semibold leading-5 text-bioaxis-text">
-              {value}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {compact ? (
+        <dl className="mt-1 grid gap-0 border-t border-bioaxis-line pt-1">
+          {compactPairs.map((pair, index) => (
+            <div key={`${pair[0]?.[0] ?? "context"}-${index}`} className="grid min-w-0 grid-cols-2 gap-3">
+              {pair.map(([label, value]) => (
+                <div key={label} className="flex min-w-0 items-baseline gap-1">
+                  <dt className="shrink-0 truncate text-[9px] font-bold uppercase text-bioaxis-dim">{label}:</dt>
+                  <dd className="min-w-0 truncate text-[10px] font-semibold leading-4 text-bioaxis-text" title={value}>{value}</dd>
+                </div>
+              ))}
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <dl className="mt-3 grid border-t border-bioaxis-line md:grid-cols-[0.55fr_1.5fr_0.7fr] md:gap-2 md:border-0">
+          {rows.map(([label, value]) => (
+            <div key={label} className="border-b border-bioaxis-line py-2.5 last:border-b-0 md:border md:bg-bioaxis-black md:px-3">
+              <dt className="text-xs font-bold uppercase text-bioaxis-dim">{label}</dt>
+              <dd className="mt-1 break-words text-sm font-semibold leading-5 text-bioaxis-text">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </section>
   );
 }

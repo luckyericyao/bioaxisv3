@@ -418,6 +418,9 @@ export function CatalogProductPage({
       />
       <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact>
         <div className="grid gap-5">
+          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
+            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+          </p>
           <div className="flex flex-wrap gap-2">
             {product.tags.slice(0, 6).map((tag) => (
               <SpecTag key={tag}>{tag}</SpecTag>

@@ -26,6 +26,7 @@ declare global {
 type TurnstileWidgetProps = {
   onTokenChange: (token: string) => void;
   onAvailabilityChange?: (available: boolean) => void;
+  compact?: boolean;
 };
 
 type TurnstileConfigResponse = {
@@ -36,7 +37,7 @@ type TurnstileConfigResponse = {
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const fallbackEmail = "crazyowenyao@gmail.com";
 
-export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: TurnstileWidgetProps) {
+export function TurnstileWidget({ onTokenChange, onAvailabilityChange, compact = false }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
@@ -88,7 +89,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       theme: "light",
-      size: "normal",
+      size: compact ? "compact" : "normal",
       callback: (token) => onTokenChange(token),
       "expired-callback": () => {
         onTokenChange("");
@@ -106,7 +107,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
         widgetIdRef.current = null;
       }
     };
-  }, [onTokenChange, scriptReady, siteKey]);
+  }, [compact, onTokenChange, scriptReady, siteKey]);
 
   if (!siteKey) {
     return configLoaded ? null : (
@@ -117,7 +118,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
   }
 
   return (
-    <div className="border border-bioaxis-line bg-bioaxis-black p-4" data-turnstile-widget="true">
+    <div className="border border-bioaxis-line bg-bioaxis-black p-3 sm:p-4" data-turnstile-widget="true">
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
@@ -127,13 +128,11 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange }: Turnsti
         }}
         onError={() => setWidgetIssue(`Verification could not load. Email ${fallbackEmail} directly if the form is blocked.`)}
       />
-      <div className="mb-3">
+      <div className="mb-2">
         <p className="text-xs font-bold uppercase text-bioaxis-dim">Verification</p>
-        <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
-          This check protects the request form from spam. It should take only a moment.
-        </p>
+        {!compact ? <p className="mt-2 text-xs leading-5 text-bioaxis-muted">This check protects the request form from spam. It should take only a moment.</p> : null}
       </div>
-      <div ref={containerRef} className="cf-turnstile min-h-[65px]" />
+      <div ref={containerRef} className="cf-turnstile min-h-[58px]" />
       {widgetIssue ? (
         <p role="alert" className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent">
           {widgetIssue}

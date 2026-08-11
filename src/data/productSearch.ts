@@ -1,4 +1,4 @@
-import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
+import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
 import { productTaxonomy, type ProductSearchResult } from "@/data/productTaxonomy";
 import { resourceArticles } from "@/data/resourceArticles";
 import { resourceGuides } from "@/data/resources";
@@ -211,6 +211,7 @@ function familyAliases(segmentSlug: string, familySlug: string) {
 function stripScore(result: ScoredResult): ProductSearchResult {
   return {
     type: result.type,
+    matchKind: result.matchKind,
     title: result.title,
     description: result.description,
     href: result.href,
@@ -247,6 +248,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
 
     results.push({
       ...result,
+      matchKind: result.matchKind ?? (result.type === "workflow" || result.type === "resource" ? "content" : "taxonomy"),
       matchedFields: scored.matchedFields,
       score: scored.score,
       exactPhraseMatch: scored.exactPhraseMatch,
@@ -336,7 +338,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
           ]
         );
 
-        getProductItemsForFamily(segment.slug, subcategory.slug, family.slug).forEach((productItem) => {
+        getIndexableProductItemsForFamily(segment.slug, subcategory.slug, family.slug).forEach((productItem) => {
           addResult(
             {
               type: "product",
@@ -433,7 +435,7 @@ export function getProductSearchIndexSize() {
 
       subcategory.families.forEach((family) => {
         count += 1;
-        count += getProductItemsForFamily(segment.slug, subcategory.slug, family.slug).length;
+        count += getIndexableProductItemsForFamily(segment.slug, subcategory.slug, family.slug).length;
       });
     });
   });
