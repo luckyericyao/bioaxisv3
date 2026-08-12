@@ -147,18 +147,27 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
         compact
         tight
+        align="start"
       >
         <div className="grid gap-3">
-          <CompactSourcingIntake
-            requestType="equivalent"
-            sourcePage={initialQuery ? `/equivalent-finder?query=${encodeURIComponent(initialQuery)}` : "/equivalent-finder"}
-            product={initialQuery}
-            title="Send the current product."
-            defaultMessage={defaultMessage}
-            productFieldLabel="Current product, catalog number, or supplier line"
-            submitLabel="Send equivalent request"
-            optionalChips={intakePriorities}
-          />
+          <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+              <span>Open equivalent review</span>
+              <span className="text-xs font-semibold text-bioaxis-accent">Email only to start · +</span>
+            </summary>
+            <div className="border-t border-bioaxis-line p-4 sm:p-5">
+              <CompactSourcingIntake
+                requestType="equivalent"
+                sourcePage={initialQuery ? `/equivalent-finder?query=${encodeURIComponent(initialQuery)}` : "/equivalent-finder"}
+                product={initialQuery}
+                title="Send the current product."
+                defaultMessage={defaultMessage}
+                productFieldLabel="Current product, catalog number, or supplier line"
+                submitLabel="Send equivalent request"
+                optionalChips={intakePriorities}
+              />
+            </div>
+          </details>
           <Link
             href="/request-quote?type=sample&requestType=sample"
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:justify-self-start"

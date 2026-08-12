@@ -113,7 +113,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           </details>
           <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+            Request context: supplier, catalog reference, documentation, and final fit are confirmed per request.
           </p>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">

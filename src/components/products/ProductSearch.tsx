@@ -70,14 +70,14 @@ function looksLikeCatalogReference(value: string) {
 
 function queryStateLabel(query: string, results: ProductSearchResult[]) {
   if (results.length === 0) {
-    return "Unresolved reference";
+    return looksLikeCatalogReference(query) ? "Reference not found" : "No direct product path match";
   }
 
   if (results.some((result) => result.matchKind === "catalog-reference")) {
-    return "Verified catalog reference match";
+    return "Verified catalog reference";
   }
 
-  return looksLikeCatalogReference(query) ? "Taxonomy/path match — no verified catalog reference" : "Taxonomy/path match";
+  return looksLikeCatalogReference(query) ? "Product path match — reference not verified" : "Product universe match";
 }
 
 function resultPath(result: ProductSearchResult) {
@@ -294,38 +294,43 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
   ];
 
   return (
-    <aside className="border border-bioaxis-line bg-bioaxis-panel p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Sourcing next steps</p>
-          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Turn this search into a sourcing brief.</h3>
+    <details className="border border-bioaxis-line bg-bioaxis-panel">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+        <span>Sourcing next steps</span>
+        <span className="text-bioaxis-dim">Optional actions · +</span>
+      </summary>
+      <div className="border-t border-bioaxis-line p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-2xl font-bold uppercase text-bioaxis-text">Turn this search into a sourcing brief.</h3>
+          </div>
+          <Link
+            href={productListHref}
+            onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_product_list" })}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+          >
+            Send product list
+          </Link>
         </div>
-        <Link
-          href={productListHref}
-          onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_product_list" })}
-          className="inline-flex min-h-10 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
-        >
-          Send product list
-        </Link>
+        <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+          BioAxis can use the current search term as intake context, then follow up only where specs, documents, samples, or quantities need clarification.
+        </p>
+        <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {actions.map((action) => (
+            <li key={action.title}>
+              <Link
+                href={action.href}
+                onClick={() => trackBioAxisEvent("cta_click", { cta: action.title })}
+                className="block h-full border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+              >
+                <span className="text-sm font-bold uppercase text-bioaxis-text">{action.title}</span>
+                <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{action.body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
-      <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-        BioAxis can use the current search term as intake context, then follow up only where specs, documents, samples, or quantities need clarification.
-      </p>
-      <ul className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {actions.map((action) => (
-          <li key={action.title}>
-            <Link
-              href={action.href}
-              onClick={() => trackBioAxisEvent("cta_click", { cta: action.title })}
-              className="block h-full border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
-            >
-              <span className="text-sm font-bold uppercase text-bioaxis-text">{action.title}</span>
-              <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{action.body}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </aside>
+    </details>
   );
 }
 
@@ -421,13 +426,13 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       <section className="border border-bioaxis-line bg-bioaxis-panel p-3 sm:p-6 lg:p-8">
         <div>
           <div>
-            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Sourcing matches</p>
+            <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search</p>
             <h2 className="mt-2 text-2xl font-bold uppercase leading-tight text-bioaxis-text sm:text-5xl">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
-            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Directory state: {searchState}</p>
+            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-bioaxis-accent">{searchState}</p>
             <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
-              Showing {visibleMatchCount} top match{visibleMatchCount === 1 ? "" : "es"} from {results.length} matching path{results.length === 1 ? "" : "s"}; the index contains {indexedPathCount} sourcing path{indexedPathCount === 1 ? "" : "s"}.
+              Showing {visibleMatchCount} strongest match{visibleMatchCount === 1 ? "" : "es"} from {results.length} matching path{results.length === 1 ? "" : "s"}. Search covers {indexedPathCount} BioAxis sourcing path{indexedPathCount === 1 ? "" : "s"}.
             </p>
             <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">The indexed total counts BioAxis sourcing paths, not verified supplier catalog records.</p>
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
@@ -454,7 +459,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_quote" })}
                 className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-2 text-[0.68rem] font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black sm:px-4 sm:text-xs"
               >
-                Send search to BioAxis
+                Send this search context
               </Link>
             ) : null}
           </div>
@@ -466,11 +471,11 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <div className="mt-4 min-w-0 sm:mt-8">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top matches</p>
-                <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{topMatches.length} highest relevance results</h3>
+                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Strongest matches</p>
+                <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{topMatches.length} strongest match{topMatches.length === 1 ? "" : "es"}</h3>
               </div>
               <p className="max-w-md text-sm leading-6 text-bioaxis-dim">
-                Direct title, path, family, and specification matches appear ahead of loose application-only matches.
+                Product and family matches appear before broader workflow or description matches.
               </p>
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
@@ -482,12 +487,12 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             {relatedMatches.length > 0 ? (
               <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-                  <span>Show related matches ({relatedMatches.length})</span>
+                  <span>Show more matches ({relatedMatches.length})</span>
                   <span className="text-bioaxis-dim">Optional detail</span>
                 </summary>
                 <div className="border-t border-bioaxis-line p-5">
                   <p className="mb-4 max-w-2xl text-sm leading-6 text-bioaxis-dim">
-                    Showing the highest-relevance paths first. Refine the query or send a product list when you need broader sourcing support.
+                    These are broader matches. Refine the query or send a product list when you need a wider sourcing review.
                   </p>
                   <div className="grid gap-4 xl:grid-cols-2">
                     {relatedMatches.map((result) => (
@@ -564,13 +569,13 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
       ) : (
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
-            {looksLikeCatalogReference(trimmedQuery) ? "Unresolved reference — No direct catalog reference match" : "No direct sourcing path match"}
+            {looksLikeCatalogReference(trimmedQuery) ? "Reference not found in the BioAxis product paths" : "No direct product path match"}
           </p>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            No direct match in {indexedPathCount} indexed sourcing paths.
+            No direct match in {indexedPathCount} searchable BioAxis sourcing paths.
           </p>
           <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">
-            {looksLikeCatalogReference(trimmedQuery) ? "Send this reference." : "Send the input anyway."}
+            {looksLikeCatalogReference(trimmedQuery) ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.

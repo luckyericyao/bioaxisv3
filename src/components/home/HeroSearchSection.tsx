@@ -35,16 +35,10 @@ export function HeroSearchSection() {
           </div>
         </div>
 
-        <div className="order-2 mt-0 max-w-5xl lg:order-2 lg:mt-7">
-          <CompactSourcingIntake
-            sourcePage="/"
-            title="Send the sourcing context."
-            productFieldLabel="SKU, catalog number, supplier line, or product list"
-            submitLabel="Structure my sourcing request"
-          />
-        </div>
-
-        <div className="order-3 mt-6 flex flex-col gap-3 sm:flex-row">
+        <div className="order-2 mt-8 flex max-w-5xl flex-col gap-3 sm:flex-row">
+          <CTAButton href="/request-quote?requestType=quote">
+            Structure my sourcing request
+          </CTAButton>
           <CTAButton href="/equivalent-finder" variant="secondary">
             Find equivalent
           </CTAButton>
@@ -55,6 +49,21 @@ export function HeroSearchSection() {
             Request quote
           </CTAButton>
         </div>
+
+        <details className="order-3 mt-6 max-w-5xl border border-bioaxis-line bg-white/[0.76] shadow-[0_18px_55px_rgba(15,76,129,0.08)] backdrop-blur">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-white focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <span>Open sourcing intake</span>
+            <span className="text-xs font-semibold text-bioaxis-accent">Email only to start · +</span>
+          </summary>
+          <div className="border-t border-bioaxis-line p-4 sm:p-5">
+            <CompactSourcingIntake
+              sourcePage="/"
+              title="Send the sourcing context."
+              productFieldLabel="SKU, catalog number, supplier line, or product list"
+              submitLabel="Structure my sourcing request"
+            />
+          </div>
+        </details>
       </div>
     </section>
   );

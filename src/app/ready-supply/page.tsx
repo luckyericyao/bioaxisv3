@@ -55,7 +55,7 @@ export default function ReadySupplyPage() {
   return (
     <>
       <section className="border-b border-bioaxis-line px-5 py-12 sm:px-8 sm:py-14 lg:px-10 lg:py-12">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-end">
+        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-start">
           <div className="order-1 lg:order-1">
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
             <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
@@ -103,13 +103,21 @@ export default function ReadySupplyPage() {
                 ))}
               </dl>
             </aside>
-            <CompactSourcingIntake
-              requestType="quote"
-              sourcePage="/ready-supply"
-              title="Send the current supply need."
-              productFieldLabel="SKU, catalog number, supplier line, or product list"
-              submitLabel="Request availability"
-            />
+            <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+                <span>Open availability request</span>
+                <span className="text-xs font-semibold text-bioaxis-accent">Email only to start · +</span>
+              </summary>
+              <div className="border-t border-bioaxis-line p-4 sm:p-5">
+                <CompactSourcingIntake
+                  requestType="quote"
+                  sourcePage="/ready-supply"
+                  title="Send the current supply need."
+                  productFieldLabel="SKU, catalog number, supplier line, or product list"
+                  submitLabel="Request availability"
+                />
+              </div>
+            </details>
           </div>
         </div>
       </section>

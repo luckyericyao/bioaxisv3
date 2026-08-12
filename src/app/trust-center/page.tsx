@@ -3,6 +3,7 @@ import Image from "next/image";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
 import { pageVisuals } from "@/data/visualAssets";
 
 export const metadata: Metadata = {
@@ -132,6 +133,31 @@ export default function TrustCenterPage() {
               </div>
             </div>
           </div>
+        </div>
+        <div className="mt-4 border border-bioaxis-line bg-bioaxis-panel p-5">
+          <p className="text-xs font-bold uppercase text-bioaxis-accent">Request-level evidence record</p>
+          <p className="mt-3 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+            {selectedLineRegistry.length > 0
+              ? "Evidence-backed selected-line records are shown below with their supply mode, confirmation owner, date, documents, sample path, and buyer responsibility."
+              : selectedLineRegistryNote}
+          </p>
+          {selectedLineRegistry.length > 0 ? (
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
+              {selectedLineRegistry.map((record) => (
+                <article key={record.line} className="border border-bioaxis-line bg-bioaxis-black p-4">
+                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{record.line}</h3>
+                  <dl className="mt-3 grid gap-2 text-xs leading-5 text-bioaxis-steel sm:grid-cols-2">
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Supply mode</dt><dd>{record.supplyMode}</dd></div>
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Confirmed by</dt><dd>{record.confirmationOwner}</dd></div>
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Last confirmed</dt><dd>{record.lastConfirmed}</dd></div>
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Documents</dt><dd>{record.documents.join(", ")}</dd></div>
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Sample path</dt><dd>{record.samplePath}</dd></div>
+                    <div><dt className="font-bold uppercase text-bioaxis-dim">Buyer responsibility</dt><dd>{record.buyerResponsibility}</dd></div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 

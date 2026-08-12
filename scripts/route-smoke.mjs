@@ -74,8 +74,8 @@ const productSearchExpectations = {
   "/products?q=qPCR%20plates": ["qPCR", "PCR"],
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
-  "/products?q=zzzxqnotfound999": ["No direct catalog reference match", "Send this reference"],
-  "/products?q=430641": ["No direct catalog reference match", "Send this reference"]
+  "/products?q=zzzxqnotfound999": ["No direct product path match", "Send this reference"],
+  "/products?q=430641": ["Reference not found", "Send this reference"]
 };
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
@@ -357,7 +357,7 @@ for (const route of routes) {
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 
-  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match"));
+  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not found in the BioAxis product paths") || pageText.includes("No direct product path match"));
 
   if (shouldHaveCompactIntake && !isUnresolvedSearch) {
     ["data-sourcing-intake=\"compact\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
@@ -370,9 +370,9 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    const noDirectMatch = pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match");
+    const noDirectMatch = pageText.includes("Reference not found in the BioAxis product paths") || pageText.includes("No direct product path match");
 
-    ["Sourcing matches", "Results for", "Clear search", "Directory state"].forEach((label) => {
+    ["Product search", "Results for", "Clear search"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
@@ -381,9 +381,6 @@ for (const route of routes) {
     if (!noDirectMatch) {
       if (!pageText.includes("Send this search context")) {
         failures.push(`${route}: missing search UX label Send this search context`);
-      }
-      if (!pageText.includes("Send search to BioAxis")) {
-        failures.push(`${route}: missing search UX label Send search to BioAxis`);
       }
       [
         "Direct product, family, path, and specification matches appear first",
@@ -399,7 +396,7 @@ for (const route of routes) {
           failures.push(`${route}: missing search UX label ${label}`);
         }
       });
-      ["Search coverage", "Category", "Top matches"].forEach((label) => {
+      ["Search coverage", "Category", "Strongest matches"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing search UX label ${label}`);
         }
@@ -417,7 +414,7 @@ for (const route of routes) {
     }
 
     if (noDirectMatch) {
-      ["Unresolved reference", "Send this reference"].forEach((label) => {
+      ["Send this reference"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing no-result sourcing path ${label}`);
         }
@@ -432,7 +429,7 @@ for (const route of routes) {
   }
 
   if (route === "/products?q=cell") {
-    const rankedResultsStart = pageText.indexOf("Top matches");
+    const rankedResultsStart = pageText.indexOf("Strongest matches");
     const rankedResultsEnd = pageText.indexOf("Browse all product segments");
     const rankedResultsText = rankedResultsStart !== -1 && rankedResultsEnd !== -1
       ? pageText.slice(rankedResultsStart, rankedResultsEnd)
@@ -460,7 +457,7 @@ for (const route of routes) {
   }
 
   if (route === "/products?q=430641") {
-    if (!/No direct match in\s+\d+\s+indexed sourcing paths/.test(pageText)) {
+    if (!/No direct match in\s+\d+\s+searchable BioAxis sourcing paths/.test(pageText)) {
       failures.push(`${route}: missing honest indexed sourcing path count`);
     }
 

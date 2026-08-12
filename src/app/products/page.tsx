@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ProductCategoryGrid } from "@/components/products/ProductCategoryGrid";
 import { ProductSearch } from "@/components/products/ProductSearch";
+import { getProductSearchResults } from "@/data/productSearch";
 import { productTaxonomy } from "@/data/productTaxonomy";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ function normalizeQuery(value: string | string[] | undefined) {
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const query = normalizeQuery(params?.q).trim();
+  const hasSearchResults = query ? getProductSearchResults(query).length > 0 : false;
 
   return (
     <>
@@ -67,7 +69,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         )}
       </section>
 
-      <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
+      {(!query || hasSearchResults) ? <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <h2 className={query ? "text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl" : "text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl"}>
@@ -98,7 +100,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         ) : (
           <ProductCategoryGrid segments={productTaxonomy} />
         )}
-      </section>
+      </section> : null}
     </>
   );
 }
