@@ -40,8 +40,6 @@ BIOAXIS_RFQ_REPLY_TO_EMAIL=crazyowenyao@gmail.com
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
-TELEGRAM_BOT_TOKEN=your_server_only_telegram_bot_token
-TELEGRAM_CHAT_ID=your_telegram_chat_id
 POSTHOG_API_KEY=your_server_only_posthog_project_api_key
 POSTHOG_HOST=https://us.i.posthog.com
 BIOAXIS_ALERT_WEBHOOK_URL=your_server_only_alert_webhook_url
@@ -63,9 +61,7 @@ Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. 
 8. Check the destination inbox and spam folder.
 9. If email is not received, check Vercel function logs and Resend delivery logs.
 
-Telegram is optional. If `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are configured, the RFQ route sends a short server-side notification after the email path. Telegram failures are logged and do not block the request response or email delivery.
-
-Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are always visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them in PostHog. The same intake-generated `requestId` is carried through RFQ, Turnstile, Resend, and Telegram status records. Set `BIOAXIS_ALERT_WEBHOOK_URL` to receive a server-side alert when delivery or analytics persistence fails; alert delivery is time-limited and never blocks the sourcing response.
+Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are always visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them in PostHog. The same intake-generated `requestId` is carried through RFQ, Turnstile, and Resend status records. Set `BIOAXIS_ALERT_WEBHOOK_URL` to receive a server-side alert when delivery or analytics persistence fails; alert delivery is time-limited and never blocks the sourcing response.
 
 To test email delivery:
 

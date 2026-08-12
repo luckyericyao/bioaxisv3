@@ -1807,8 +1807,8 @@ if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.in
   failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or Resend delivery call");
 }
 
-if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("TELEGRAM_BOT_TOKEN") || !rfqRouteSource.includes("sendTelegramNotification") || !rfqRouteSource.includes("alertBioAxisFailure")) {
-  failures.push("src/app/api/rfq/route.ts: missing traceable request ID or optional Telegram notification path");
+if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("https://api.resend.com/emails") || !rfqRouteSource.includes("alertBioAxisFailure")) {
+  failures.push("src/app/api/rfq/route.ts: missing traceable request ID, Resend delivery, or failure alert path");
 }
 
 if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes("rfq_delivery") || !analyticsRouteSource.includes("recordBioAxisEvent")) {
@@ -2053,8 +2053,6 @@ const envMap = new Map(envLines.map((line) => {
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   "TURNSTILE_SITE_KEY",
   "TURNSTILE_SECRET_KEY",
-  "TELEGRAM_BOT_TOKEN",
-  "TELEGRAM_CHAT_ID",
   "POSTHOG_API_KEY",
   "POSTHOG_HOST",
   "BIOAXIS_ALERT_WEBHOOK_URL"

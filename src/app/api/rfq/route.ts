@@ -574,36 +574,6 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   return { mode: "email" as const };
 }
 
-async function sendTelegramNotification(referenceId: string, request: NormalizedRfq) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-
-  if (!token || !chatId) {
-    return { mode: "not-configured" as const };
-  }
-
-  const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
-  const text = [
-    `BioAxis request ${referenceId}`,
-    `Type: ${requestLabel}`,
-    `Email: ${request.email}`,
-    `Organization: ${request.organization || "Not provided"}`,
-    `Product: ${request.productName || request.productFamily || "Not provided"}`,
-    `Catalog number: ${request.catalogNumber || "Not provided"}`,
-    `Source: ${request.sourcePageUrl || "Not provided"}`
-  ]
-    .join("\n")
-    .slice(0, 3800);
-
-  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true })
-  });
-
-  return { mode: response.ok ? ("sent" as const) : ("error" as const) };
-}
-
 export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") ?? "0");
 
@@ -663,7 +633,7 @@ export async function POST(request: Request) {
     const delivery = await sendResendEmail(referenceId, normalized);
 
     if (delivery.mode === "error") {
-      void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode: "not-attempted" }, "/api/rfq");
+      void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode }, "/api/rfq");
       void alertBioAxisFailure({ requestId: referenceId, stage: "resend", detail: "Resend rejected or failed to deliver the RFQ email." });
       return NextResponse.json(
         {
@@ -675,29 +645,17 @@ export async function POST(request: Request) {
       );
     }
 
-    let telegramMode: "sent" | "not-configured" | "error" = "not-configured";
-    try {
-      telegramMode = (await sendTelegramNotification(referenceId, normalized)).mode;
-    } catch {
-      telegramMode = "error";
-    }
-
-    if (telegramMode === "error") {
-      void alertBioAxisFailure({ requestId: referenceId, stage: "telegram", detail: "Telegram notification failed after the email path completed." });
-    }
-
-    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode, telegramMode }, "/api/rfq");
+    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode }, "/api/rfq");
 
     return NextResponse.json({
       ok: true,
       mode: delivery.mode,
       referenceId,
       requestId: referenceId,
-      telegramMode,
       message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
     });
   } catch {
-    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: "error", telegramMode: "not-attempted" }, "/api/rfq");
+    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: "error" }, "/api/rfq");
     void alertBioAxisFailure({ requestId: referenceId, stage: "rfq_delivery", detail: "Unexpected delivery failure in the RFQ route." });
     return NextResponse.json(
       {
