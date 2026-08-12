@@ -2252,6 +2252,22 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
   }
 }
 
+for (const [pathname, expectedContentType] of [
+  ["/favicon.ico", "image/x-icon"],
+  ["/icon.png", "image/png"],
+  ["/apple-icon.png", "image/png"],
+  ["/manifest.webmanifest", "application/manifest+json"]
+]) {
+  const response = await fetch(new URL(pathname, baseUrl));
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!response.ok) {
+    failures.push(`${pathname}: HTTP ${response.status}`);
+  } else if (!contentType.includes(expectedContentType)) {
+    failures.push(`${pathname}: expected ${expectedContentType}, got ${contentType || "no content type"}`);
+  }
+}
+
 if (failures.length > 0) {
   console.error("\nSmoke test failed:");
   failures.forEach((failure) => console.error(`- ${failure}`));
