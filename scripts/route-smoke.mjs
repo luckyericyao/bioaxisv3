@@ -1142,8 +1142,8 @@ for (const route of routes) {
       "Ready Supply is not a real-time inventory feed.",
       "A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available.",
       "What is confirmed per request",
-      "Illustrative review record",
-      "not a live inventory record",
+      "Line-level status is returned per request",
+      "No public record is treated as current availability",
       "Need stable consumables with faster delivery?",
       "Request ready-stock availability"
     ].forEach((label) => {
@@ -2087,7 +2087,7 @@ if ([...envMap.keys()].some((name) => name.startsWith("NEXT_PUBLIC_RESEND"))) {
   failures.push(".env.example: must not expose a NEXT_PUBLIC_RESEND key");
 }
 
-["readySupplyEvidenceRows", "redactedEvidenceExample", "No public timestamp"].forEach((label) => {
+["readySupplyEvidenceRows", "SelectedLineRegistryRecord", "selectedLineRegistry", "No public timestamp"].forEach((label) => {
   if (!readySupplyEvidenceSource.includes(label)) {
     failures.push(`Ready Supply evidence source: missing ${label}`);
   }

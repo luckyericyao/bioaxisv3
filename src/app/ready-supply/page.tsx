@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { readySupplyEvidenceRows, redactedEvidenceExample, selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
+import { readySupplyEvidenceRows, selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
 
 export const metadata: Metadata = {
   title: "Ready Supply | BioAxis",
@@ -205,18 +205,6 @@ export default function ReadySupplyPage() {
                 <p className="text-sm leading-6 text-bioaxis-muted">{row.boundary}</p>
               </article>
             ))}
-          </div>
-          <div className="mt-5 border border-bioaxis-line bg-bioaxis-black p-5">
-            <p className="text-xs font-bold uppercase text-bioaxis-accent">Illustrative review record</p>
-            <p className="mt-2 text-sm leading-6 text-bioaxis-muted">Example format only. This is not a live inventory record, supplier certificate, or batch release.</p>
-            <dl className="mt-4 grid gap-2 sm:grid-cols-2">
-              {redactedEvidenceExample.map(([label, value]) => (
-                <div key={label} className="border border-white/[0.1] bg-bioaxis-panel px-3 py-2">
-                  <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{label}</dt>
-                  <dd className="mt-1 text-sm leading-5 text-bioaxis-steel">{value}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
         </div>
       </section>

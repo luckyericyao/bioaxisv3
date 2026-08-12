@@ -66,11 +66,3 @@ export const readySupplyEvidenceRows: ReadySupplyEvidenceRow[] = [
     boundary: "Past confirmation is not treated as current availability"
   }
 ];
-
-export const redactedEvidenceExample = [
-  ["Record type", "Illustrative selected-line review record"],
-  ["Availability", "Confirm per request"],
-  ["Document status", "Supplier evidence requested; status depends on line and lot"],
-  ["Sample status", "Confirm if the selected line supports a sample path"],
-  ["Owner boundary", "BioAxis organizes the request; supplier and buyer own evidence and acceptance"]
-] as const;

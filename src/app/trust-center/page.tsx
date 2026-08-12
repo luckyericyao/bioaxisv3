@@ -4,7 +4,6 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { pageVisuals } from "@/data/visualAssets";
-import { redactedEvidenceExample } from "@/data/readySupplyEvidence";
 
 export const metadata: Metadata = {
   title: "Trust Center | BioAxis",
@@ -126,16 +125,10 @@ export default function TrustCenterPage() {
                 ))}
               </ul>
               <div className="mt-5 border border-white/[0.12] bg-bioaxis-panel p-4">
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Illustrative redacted review record</p>
-                <p className="mt-2 text-xs leading-5 text-bioaxis-muted">Format example only. It is not a supplier certificate, live inventory record, or final suitability decision.</p>
-                <dl className="mt-4 grid gap-2 sm:grid-cols-2">
-                  {redactedEvidenceExample.map(([label, value]) => (
-                    <div key={label} className="border border-white/[0.1] bg-bioaxis-black px-3 py-2">
-                      <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{label}</dt>
-                      <dd className="mt-1 text-xs leading-5 text-bioaxis-steel">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <p className="text-xs font-bold uppercase text-bioaxis-accent">Evidence status</p>
+                <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
+                  No public line-level certificate or inventory record is published here. Supplier evidence is requested and reviewed for the specific sourcing request; buyer-side acceptance remains separate.
+                </p>
               </div>
             </div>
           </div>
