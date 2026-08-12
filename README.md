@@ -69,7 +69,7 @@ To test email delivery:
 2. Submit `/request-quote` with a valid email. Product context, sourcing list items, and optional notes are included when available.
 3. Confirm the destination inbox receives the BioAxis request email and the UI shows a request received state.
 
-When `RESEND_API_KEY` or `BIOAXIS_RFQ_TO_EMAIL` is not configured, the API still validates the request and returns a captured success response so local builds, smoke tests, and demos remain functional without crashing. The API never exposes `RESEND_API_KEY` to browser code.
+When `RESEND_API_KEY` or `BIOAXIS_RFQ_TO_EMAIL` is missing in local development, the API can return a captured development response so builds and local smoke tests remain usable. In a Vercel deployment, missing delivery configuration returns an explicit `503` response and the form shows its delivery error state; it does not report a successful request. The API never exposes `RESEND_API_KEY` to browser code.
 
 ## Smoke Test
 

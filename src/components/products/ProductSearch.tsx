@@ -431,13 +431,23 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
             <p className="mt-3 text-xs font-bold uppercase tracking-wide text-bioaxis-accent">{searchState}</p>
-            <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
-              Showing {visibleMatchCount} strongest match{visibleMatchCount === 1 ? "" : "es"} from {results.length} matching path{results.length === 1 ? "" : "s"}. Search covers {indexedPathCount} BioAxis sourcing path{indexedPathCount === 1 ? "" : "s"}.
-            </p>
-            <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">The indexed total counts BioAxis sourcing paths, not verified supplier catalog records.</p>
-            <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
-              Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
-            </p>
+            {results.length > 0 ? (
+              <>
+                <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
+                  Showing the {visibleMatchCount} most relevant product path{visibleMatchCount === 1 ? "" : "s"}. Broader matches stay collapsed.
+                </p>
+                <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">
+                  BioAxis searches {indexedPathCount} product and sourcing paths. This is not a live supplier catalog lookup.
+                </p>
+                <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
+                  Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
+                This reference is not in the current BioAxis product and sourcing paths. It has not been presented as a verified catalog match.
+              </p>
+            )}
           </div>
           <details className="mt-5 border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
@@ -568,13 +578,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
         </section>
       ) : (
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
-            {looksLikeCatalogReference(trimmedQuery) ? "Reference not found in the BioAxis product paths" : "No direct product path match"}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
-            No direct match in {indexedPathCount} searchable BioAxis sourcing paths.
-          </p>
-          <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">
+          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Manual sourcing review</p>
+          <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
             {looksLikeCatalogReference(trimmedQuery) ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">

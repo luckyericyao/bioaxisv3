@@ -569,27 +569,27 @@ export function SourcingIntakeForm({
           {compact ? <span className="sr-only">{productFieldHelper}</span> : null}
         </div>
         <div className="mt-4 grid gap-3">
-          <div className="order-2 sm:order-1">
-          <TurnstileWidget
-            compact={compact}
-            onAvailabilityChange={setTurnstileAvailable}
-            onFailure={handleTurnstileFailure}
-            onTokenChange={setTurnstileToken}
-          />
+          <div className="order-1">
+            <TurnstileWidget
+              compact={compact}
+              onAvailabilityChange={setTurnstileAvailable}
+              onFailure={handleTurnstileFailure}
+              onTokenChange={setTurnstileToken}
+            />
           </div>
           {error ? (
-            <p role="alert" className="order-3 text-sm font-semibold text-bioaxis-accent sm:order-2">
+            <p role="alert" className="order-2 text-sm font-semibold text-bioaxis-accent">
               {error}
             </p>
           ) : null}
           {waitingForVerification ? (
-            <p className={compact ? "order-3 sr-only sm:order-2" : "order-3 text-sm font-semibold leading-6 text-bioaxis-muted sm:order-2"}>
+            <p className={compact ? "order-2 sr-only" : "order-2 text-sm font-semibold leading-6 text-bioaxis-muted"}>
               {compact ? "Complete verification above to send." : "Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly."}
             </p>
           ) : null}
           <div
             data-submit-actions="true"
-            className="order-1 flex flex-col gap-3 border-t border-bioaxis-line pt-4 sm:order-3 sm:flex-row sm:items-center sm:justify-between"
+            className="order-3 flex flex-col gap-3 border-t border-bioaxis-line pt-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <button
               type="submit"

@@ -357,7 +357,7 @@ for (const route of routes) {
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 
-  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not found in the BioAxis product paths") || pageText.includes("No direct product path match"));
+  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not found") || pageText.includes("No direct product path match"));
 
   if (shouldHaveCompactIntake && !isUnresolvedSearch) {
     ["data-sourcing-intake=\"compact\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
@@ -370,7 +370,7 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    const noDirectMatch = pageText.includes("Reference not found in the BioAxis product paths") || pageText.includes("No direct product path match");
+    const noDirectMatch = pageText.includes("Reference not found") || pageText.includes("No direct product path match");
 
     ["Product search", "Results for", "Clear search"].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -457,8 +457,12 @@ for (const route of routes) {
   }
 
   if (route === "/products?q=430641") {
-    if (!/No direct match in\s+\d+\s+searchable BioAxis sourcing paths/.test(pageText)) {
-      failures.push(`${route}: missing honest indexed sourcing path count`);
+    if (!pageText.includes("This reference is not in the current BioAxis product and sourcing paths")) {
+      failures.push(`${route}: missing honest unresolved-reference boundary`);
+    }
+
+    if (pageText.includes("Showing 0 strongest matches")) {
+      failures.push(`${route}: unresolved reference still renders a misleading zero-result ranking summary`);
     }
 
     if (pageText.includes("Browse all product segments")) {
