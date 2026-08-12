@@ -47,7 +47,7 @@ type SourcingListInput = Omit<
 
 type SourcingListContextValue = {
   items: SourcingListItem[];
-  addItem: (item: SourcingListInput) => void;
+  addItem: (item: SourcingListInput, restoreFocusTo?: HTMLElement | null) => void;
   updateItem: (id: string, patch: Partial<SourcingListItem>) => void;
   removeItem: (id: string) => void;
   openDrawer: (restoreFocusTo?: HTMLElement | null) => void;
@@ -223,8 +223,8 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SourcingListContextValue>(
     () => ({
       items,
-      addItem: (input) => {
-        openDrawer();
+      addItem: (input, restoreFocusTo) => {
+        openDrawer(restoreFocusTo);
         setItems((current) => {
           const id = itemKey(input);
           if (current.some((item) => item.id === id)) {

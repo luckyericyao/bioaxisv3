@@ -429,8 +429,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
               Showing {visibleMatchCount} top match{visibleMatchCount === 1 ? "" : "es"} from {results.length} matching path{results.length === 1 ? "" : "s"}; the index contains {indexedPathCount} sourcing path{indexedPathCount === 1 ? "" : "s"}.
             </p>
-            <p className="mt-2 text-xs leading-5 text-bioaxis-dim">The indexed total counts BioAxis sourcing paths, not verified supplier catalog records.</p>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-dim">
+            <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">The indexed total counts BioAxis sourcing paths, not verified supplier catalog records.</p>
+            <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
               Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
             </p>
           </div>
@@ -463,7 +463,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
       {results.length > 0 ? (
         <section className="mt-6">
-          <div className="mt-8 min-w-0">
+          <div className="mt-4 min-w-0 sm:mt-8">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top matches</p>

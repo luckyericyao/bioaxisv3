@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { type SourcingListItem, useSourcingList } from "./SourcingListProvider";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
@@ -31,6 +32,7 @@ export function AddToSourcingListButton({
   ...item
 }: AddToSourcingListButtonProps) {
   const { addItem, items } = useSourcingList();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const alreadyAdded = items.some((existingItem) => existingItem.href === item.href);
 
   return (
@@ -41,8 +43,9 @@ export function AddToSourcingListButton({
         if (!alreadyAdded) {
           trackBioAxisEvent("sourcing_list_add", { itemType: item.productSlug ? "product" : "family" });
         }
-        addItem({ ...item, requestedAction });
+        addItem({ ...item, requestedAction }, buttonRef.current);
       }}
+      ref={buttonRef}
       className={[
         "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black",
         className
