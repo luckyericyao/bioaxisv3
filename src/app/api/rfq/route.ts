@@ -324,6 +324,19 @@ function turnstileSiteKey() {
   );
 }
 
+function rfqDeliveryReadiness() {
+  const emailDelivery = Boolean(process.env.RESEND_API_KEY && process.env.BIOAXIS_RFQ_TO_EMAIL);
+  const antiSpam = Boolean(process.env.TURNSTILE_SECRET_KEY && turnstileSiteKey());
+
+  return {
+    ready: emailDelivery && antiSpam,
+    services: {
+      emailDelivery: emailDelivery ? "configured" : "missing",
+      antiSpam: antiSpam ? "configured" : "missing"
+    }
+  };
+}
+
 function remoteIpFromRequest(request: Request) {
   return (
     request.headers.get("cf-connecting-ip") ||
@@ -590,6 +603,24 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   }
 
   return { mode: "email" as const };
+}
+
+export async function GET() {
+  const readiness = rfqDeliveryReadiness();
+
+  return NextResponse.json(
+    {
+      ok: readiness.ready,
+      ready: readiness.ready,
+      services: readiness.services
+    },
+    {
+      status: readiness.ready ? 200 : 503,
+      headers: {
+        "Cache-Control": "no-store, max-age=0"
+      }
+    }
+  );
 }
 
 export async function POST(request: Request) {

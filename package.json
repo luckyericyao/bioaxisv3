@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "smoke": "node scripts/route-smoke.mjs"
+    "smoke": "node scripts/route-smoke.mjs",
+    "readiness": "node scripts/deployment-readiness.mjs"
   },
   "dependencies": {
     "next": "15.5.21",

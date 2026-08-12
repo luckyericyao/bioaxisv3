@@ -14,7 +14,11 @@ npm run dev
 ```bash
 npm run lint
 npm run build
+npm run smoke
+npm run readiness
 ```
+
+`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile configuration, and RFQ email-delivery configuration. Override the target with `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports only configured/missing states and never returns environment-variable values.
 
 ## RFQ Email Delivery
 

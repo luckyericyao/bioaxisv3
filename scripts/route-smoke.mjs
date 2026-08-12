@@ -1835,6 +1835,18 @@ if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("https://a
   failures.push("src/app/api/rfq/route.ts: missing traceable request ID, Resend delivery, or failure alert path");
 }
 
+[
+  "export async function GET()",
+  "rfqDeliveryReadiness",
+  'emailDelivery: emailDelivery ? "configured" : "missing"',
+  'antiSpam: antiSpam ? "configured" : "missing"',
+  '"Cache-Control": "no-store, max-age=0"'
+].forEach((marker) => {
+  if (!rfqRouteSource.includes(marker)) {
+    failures.push(`src/app/api/rfq/route.ts: missing deployment-readiness marker ${marker}`);
+  }
+});
+
 if (!rfqRouteSource.includes('"not-configured"') || !rfqRouteSource.includes('status: delivery.mode === "not-configured" ? 503 : 502')) {
   failures.push("src/app/api/rfq/route.ts: missing explicit production delivery configuration failure");
 }
