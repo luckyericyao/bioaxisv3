@@ -1,4 +1,4 @@
-const baseUrl = process.env.READINESS_BASE_URL ?? "https://bioaxisv3.vercel.app";
+const baseUrl = process.argv[2] ?? process.env.READINESS_BASE_URL ?? "https://bioaxisv3.vercel.app";
 const targetUrl = new URL(baseUrl);
 const failures = [];
 

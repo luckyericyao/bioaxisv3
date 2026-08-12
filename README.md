@@ -18,7 +18,7 @@ npm run smoke
 npm run readiness
 ```
 
-`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile configuration, and RFQ email-delivery configuration. Override the target with `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports only configured/missing states and never returns environment-variable values.
+`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile configuration, and RFQ email-delivery configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports only configured/missing states and never returns environment-variable values.
 
 ## RFQ Email Delivery
 
