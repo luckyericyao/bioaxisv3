@@ -352,7 +352,11 @@ for (const route of routes) {
       'property="og:title"',
       'property="og:image"',
       'name="twitter:card" content="summary_large_image"',
-      'name="robots" content="index, follow"'
+      'name="robots" content="index, follow"',
+      'type="application/ld+json"',
+      '"@type":"Organization"',
+      '"@type":"SearchAction"',
+      'products?q={search_term_string}'
     ].forEach((marker) => {
       if (!html.includes(marker)) {
         failures.push(`${route}: missing launch metadata ${marker}`);

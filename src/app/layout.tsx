@@ -4,6 +4,44 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SourcingListProvider } from "@/components/sourcing/SourcingListProvider";
 
+const siteUrl = "https://bioaxisv3.vercel.app";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "BioAxis",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/icon.png`,
+        width: 512,
+        height: 512
+      },
+      description:
+        "Life science consumables sourcing support for product requests, equivalent review, samples, documentation, RFQ preparation, and recurring supply planning."
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "BioAxis",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: "en-US",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/products?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+};
+
 export const metadata: Metadata = {
   title: "BioAxis | One-Stop Life Science Consumables Sourcing",
   description:
@@ -49,6 +87,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+        />
         <SourcingListProvider>
           <Header />
           <main>{children}</main>
