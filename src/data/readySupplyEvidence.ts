@@ -5,6 +5,23 @@ export type ReadySupplyEvidenceRow = {
   boundary: string;
 };
 
+export type SelectedLineRegistryRecord = {
+  line: string;
+  supplyMode: string;
+  confirmationOwner: string;
+  lastConfirmed: string;
+  documents: string[];
+  samplePath: string;
+  buyerResponsibility: string;
+};
+
+// No line-level record is published until it has an evidence-backed confirmation.
+// This keeps selected-line status separate from generic coverage language.
+export const selectedLineRegistry: SelectedLineRegistryRecord[] = [];
+
+export const selectedLineRegistryNote =
+  "Line-level status is returned per request after the relevant warehouse or supplier evidence is checked. No public record is treated as current availability.";
+
 export const readySupplyEvidenceRows: ReadySupplyEvidenceRow[] = [
   {
     label: "Availability",

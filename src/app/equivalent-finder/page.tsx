@@ -147,7 +147,6 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
         compact
         tight
-        mobileContentFirst
       >
         <div className="grid gap-3">
           <CompactSourcingIntake

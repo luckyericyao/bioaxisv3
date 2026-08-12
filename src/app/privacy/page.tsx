@@ -18,6 +18,9 @@ export default function PrivacyPage() {
         {[
           ["What may be submitted", "Email, organization, product context, supplier references, quantities, documents, notes, and sourcing-list details that you choose to provide."],
           ["How it is used", "Request information is used for sourcing review, communication, document coordination, sample discussion, quote preparation, and recurring-supply planning."],
+          ["Browser storage", "The sourcing list and an in-progress product-list handoff may use localStorage or sessionStorage in your browser. Remove items from the list or clear site storage to remove that local copy; server-submitted data is handled separately."],
+          ["Analytics and service providers", "BioAxis may send limited funnel events such as search, CTA, RFQ start, success, or error to PostHog when configured. Email delivery uses Resend, and Turnstile may process a verification token for anti-spam protection. API keys are kept server-side; customer-entered product text is not used as a public catalog."],
+          ["Retention and rights", "BioAxis keeps submitted request information only as long as needed for sourcing follow-up, operational records, security, or legal obligations. You may ask what request information is held, request correction or deletion where applicable, or withdraw a future follow-up by contacting the address below."],
           ["What we avoid", "BioAxis does not sell submitted sourcing requests as a public catalog, expose server credentials, or use customer content to claim product suitability without buyer-side review."],
           ["Contact", "For a privacy question or removal request, contact crazyowenyao@gmail.com and include enough context for BioAxis to locate the request."]
         ].map(([title, body]) => (

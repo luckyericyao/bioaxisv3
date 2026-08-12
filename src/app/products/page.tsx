@@ -81,14 +81,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </div>
         </div>
         {query ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {productTaxonomy.map((segment) => (
-              <Link key={segment.slug} href={`/products/${segment.slug}`} className="border border-bioaxis-line bg-bioaxis-panel p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
-                <h3 className="text-sm font-bold uppercase text-bioaxis-text">{segment.name}</h3>
-                <p className="mt-3 line-clamp-2 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</p>
-              </Link>
-            ))}
-          </div>
+          <details className="border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent [&::-webkit-details-marker]:hidden">
+              <span>Browse all product lines</span>
+              <span className="text-bioaxis-dim">Optional directory</span>
+            </summary>
+            <div className="grid gap-3 border-t border-bioaxis-line p-4 sm:grid-cols-2 lg:grid-cols-4">
+              {productTaxonomy.map((segment) => (
+                <Link key={segment.slug} href={`/products/${segment.slug}`} className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
+                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{segment.name}</h3>
+                  <p className="mt-3 line-clamp-2 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</p>
+                </Link>
+              ))}
+            </div>
+          </details>
         ) : (
           <ProductCategoryGrid segments={productTaxonomy} />
         )}

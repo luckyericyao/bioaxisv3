@@ -417,28 +417,36 @@ export function CatalogProductPage({
           { label: product.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact tight mobileContentFirst>
+      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact tight>
         <div className="grid gap-3">
-          <CompactSourcingIntake
-            requestType="quote"
-            sourcePage={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
-            segment={segment.name}
-            category={category.name}
-            family={family.name}
-            product={product.name}
-            title="Send this product context."
-            productFieldLabel="SKU, catalog number, supplier line, or product list"
-            submitLabel="Send sourcing request"
-          />
-          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
-          </p>
           <div className="flex flex-wrap gap-2">
             {product.tags.slice(0, 6).map((tag) => (
               <SpecTag key={tag}>{tag}</SpecTag>
             ))}
           </div>
           <ContextActions segment={segment} category={category} family={family} product={product} />
+          <details className="group border border-bioaxis-line bg-bioaxis-black">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+              <span>Send product context</span>
+              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t border-bioaxis-line p-3">
+              <CompactSourcingIntake
+                requestType="quote"
+                sourcePage={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
+                segment={segment.name}
+                category={category.name}
+                family={family.name}
+                product={product.name}
+                title="Send this product context."
+                productFieldLabel="SKU, catalog number, supplier line, or product list"
+                submitLabel="Send sourcing request"
+              />
+            </div>
+          </details>
+          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
+            Sourcing configuration profile. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+          </p>
           <Link href={productCatalogHref(segment.slug, category.slug, family.slug)} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {family.name}
           </Link>
@@ -538,7 +546,7 @@ export function CatalogProductPage({
           </Link>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related sourcing configurations</p>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related configured paths</p>
           <div className="mt-5 grid gap-3">
             {relatedProducts.map((related) => (
               <Link

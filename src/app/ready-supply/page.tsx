@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { readySupplyEvidenceRows, redactedEvidenceExample } from "@/data/readySupplyEvidence";
+import { readySupplyEvidenceRows, redactedEvidenceExample, selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
 
 export const metadata: Metadata = {
   title: "Ready Supply | BioAxis",
@@ -56,7 +56,7 @@ export default function ReadySupplyPage() {
     <>
       <section className="border-b border-bioaxis-line px-5 py-12 sm:px-8 sm:py-14 lg:px-10 lg:py-12">
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-end">
-          <div className="order-2 lg:order-1">
+          <div className="order-1 lg:order-1">
             <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">READY SUPPLY</p>
             <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
               Warehouse-backed consumables for faster lab procurement.
@@ -83,7 +83,26 @@ export default function ReadySupplyPage() {
             </div>
           </div>
 
-          <div className="order-1 grid gap-3 lg:order-2">
+          <div className="order-2 grid gap-3 lg:order-2">
+            <aside className="border border-bioaxis-line bg-bioaxis-black p-4">
+              <p className="text-xs font-bold uppercase text-bioaxis-accent">BIOAXIS READY SUPPLY</p>
+              <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
+                Selected-line status is confirmed per request, not shown as public live inventory.
+              </p>
+              <dl className="mt-4 grid gap-2">
+                {[
+                  ["Supply mode", "Warehouse-backed or supplier-coordinated"],
+                  ["Availability", "Selected lines; confirm per request"],
+                  ["Documents", "CoA / sterility / compliance check where available"],
+                  ["Replenishment", "Usage, packaging, and backup source reviewed per request"]
+                ].map(([label, value]) => (
+                  <div key={label} className="grid gap-1 border-t border-white/[0.12] pt-2 sm:grid-cols-[0.38fr_0.62fr] sm:gap-3">
+                    <dt className="text-[0.68rem] font-bold uppercase text-bioaxis-dim">{label}</dt>
+                    <dd className="text-xs leading-5 text-bioaxis-steel">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </aside>
             <CompactSourcingIntake
               requestType="quote"
               sourcePage="/ready-supply"
@@ -91,12 +110,6 @@ export default function ReadySupplyPage() {
               productFieldLabel="SKU, catalog number, supplier line, or product list"
               submitLabel="Request availability"
             />
-            <aside className="border border-bioaxis-line bg-bioaxis-black p-4">
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">BIOAXIS READY SUPPLY</p>
-              <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
-                Selected-line status is confirmed per request, not shown as public live inventory.
-              </p>
-            </aside>
           </div>
         </div>
       </section>
@@ -156,6 +169,33 @@ export default function ReadySupplyPage() {
             title="What is confirmed per request"
             subtitle="Ready Supply is a selected-line pathway, not a public inventory promise. The status, evidence, sample path, and supply owner are clarified for each request."
           />
+          <p className="mt-5 border border-bioaxis-line bg-bioaxis-black p-4 text-sm leading-6 text-bioaxis-muted">
+            {selectedLineRegistry.length > 0 ? "Selected-line registry records are shown below." : selectedLineRegistryNote}
+          </p>
+          {selectedLineRegistry.length > 0 ? (
+            <div className="mt-5 grid gap-3">
+              {selectedLineRegistry.map((record) => (
+                <article key={record.line} className="border border-bioaxis-line bg-bioaxis-black p-5">
+                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{record.line}</h3>
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {[
+                      ["Supply mode", record.supplyMode],
+                      ["Confirmation owner", record.confirmationOwner],
+                      ["Last confirmed", record.lastConfirmed],
+                      ["Documents", record.documents.join(", ")],
+                      ["Sample path", record.samplePath],
+                      ["Buyer responsibility", record.buyerResponsibility]
+                    ].map(([label, value]) => (
+                      <div key={label} className="border border-white/[0.1] bg-bioaxis-panel px-3 py-2">
+                        <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{label}</dt>
+                        <dd className="mt-1 text-sm leading-5 text-bioaxis-steel">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </article>
+              ))}
+            </div>
+          ) : null}
           <div className="mt-8 grid gap-3">
             {readySupplyEvidenceRows.map((row) => (
               <article key={row.label} className="grid gap-3 border border-bioaxis-line bg-bioaxis-black p-4 sm:grid-cols-[0.7fr_1fr_1fr_1fr] sm:items-start">

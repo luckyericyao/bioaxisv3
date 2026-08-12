@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 
+export const dynamic = "force-dynamic";
+
 type RfqPayload = {
   name?: unknown;
   email?: unknown;
@@ -107,6 +109,9 @@ const maxMessageLength = 8_000;
 const maxFieldLength = 800;
 const maxSourcingListItems = 30;
 const minimumSubmitDelayMs = 700;
+const rfqRateWindowMs = 60_000;
+const rfqRateLimit = 20;
+const rfqRateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
 const fallbackToEmail = "crazyowenyao@gmail.com";
 const verificationErrorMessage = "Please complete the verification and try again.";
@@ -364,6 +369,20 @@ async function validateTurnstileToken(token: string, request: Request) {
   }
 }
 
+function isRfqRateLimited(request: Request) {
+  const key = remoteIpFromRequest(request) || "anonymous";
+  const now = Date.now();
+  const current = rfqRateLimitStore.get(key);
+
+  if (!current || current.resetAt <= now) {
+    rfqRateLimitStore.set(key, { count: 1, resetAt: now + rfqRateWindowMs });
+    return false;
+  }
+
+  current.count += 1;
+  return current.count > rfqRateLimit;
+}
+
 function fieldLine(label: string, value: string) {
   return `${label}: ${value || "Not provided"}`;
 }
@@ -541,8 +560,7 @@ async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
   const fallbackReplyTo = process.env.BIOAXIS_RFQ_REPLY_TO_EMAIL || toEmail || fallbackToEmail;
 
   if (!apiKey || !toEmail) {
-    // TODO: Configure Resend env vars in production so captured requests are delivered by email.
-    return { mode: "captured" as const };
+    return { mode: process.env.VERCEL || process.env.VERCEL_ENV ? ("not-configured" as const) : ("captured" as const) };
   }
 
   const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
@@ -579,6 +597,10 @@ export async function POST(request: Request) {
 
   if (contentLength > maxPayloadBytes) {
     return NextResponse.json({ error: "Request payload is too large." }, { status: 413 });
+  }
+
+  if (isRfqRateLimited(request)) {
+    return NextResponse.json({ error: "Too many requests. Please wait a moment and try again." }, { status: 429 });
   }
 
   let payload: RfqPayload;
@@ -632,16 +654,23 @@ export async function POST(request: Request) {
   try {
     const delivery = await sendResendEmail(referenceId, normalized);
 
-    if (delivery.mode === "error") {
+    if (delivery.mode === "error" || delivery.mode === "not-configured") {
       void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode }, "/api/rfq");
-      void alertBioAxisFailure({ requestId: referenceId, stage: "resend", detail: "Resend rejected or failed to deliver the RFQ email." });
+      void alertBioAxisFailure({
+        requestId: referenceId,
+        stage: "resend",
+        detail: delivery.mode === "not-configured" ? "Resend is not configured in the deployment environment." : "Resend rejected or failed to deliver the RFQ email."
+      });
       return NextResponse.json(
         {
-          error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
+          error:
+            delivery.mode === "not-configured"
+              ? "BioAxis email delivery is not configured yet. Please email crazyowenyao@gmail.com directly."
+              : "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
           referenceId,
           requestId: referenceId
         },
-        { status: 502 }
+        { status: delivery.mode === "not-configured" ? 503 : 502 }
       );
     }
 

@@ -58,7 +58,7 @@ const productItemDetailSections = [
   "Equivalent matching",
   "Sample request notes",
   "Quote-ready details",
-  "Related sourcing templates"
+  "Related product paths"
 ];
 
 const requiredHomeCtas = ["Structure my sourcing request", "Find equivalent", "Browse product lines", "Request quote"];
@@ -357,8 +357,10 @@ for (const route of routes) {
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 
-  if (shouldHaveCompactIntake) {
-    ["data-sourcing-intake=\"compact\"", "data-product-context-summary=\"true\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
+  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match"));
+
+  if (shouldHaveCompactIntake && !isUnresolvedSearch) {
+    ["data-sourcing-intake=\"compact\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
       if (!html.includes(marker)) {
         failures.push(`${route}: shared compact intake is missing ${marker}`);
       }
@@ -370,13 +372,16 @@ for (const route of routes) {
 
     const noDirectMatch = pageText.includes("No direct catalog reference match") || pageText.includes("No direct sourcing path match");
 
-    ["Sourcing matches", "Results for", "Clear search", "Directory state", "Send the search context."].forEach((label) => {
+    ["Sourcing matches", "Results for", "Clear search", "Directory state"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing search UX label ${label}`);
       }
     });
 
     if (!noDirectMatch) {
+      if (!pageText.includes("Send this search context")) {
+        failures.push(`${route}: missing search UX label Send this search context`);
+      }
       if (!pageText.includes("Send search to BioAxis")) {
         failures.push(`${route}: missing search UX label Send search to BioAxis`);
       }
@@ -412,7 +417,7 @@ for (const route of routes) {
     }
 
     if (noDirectMatch) {
-      ["Unresolved reference", "Send this reference", "Browse product lines", "Request context"].forEach((label) => {
+      ["Unresolved reference", "Send this reference"].forEach((label) => {
         if (!pageText.includes(label)) {
           failures.push(`${route}: missing no-result sourcing path ${label}`);
         }
@@ -552,7 +557,7 @@ for (const route of routes) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
-    ['data-sourcing-intake="compact"', 'data-api-endpoint="/api/rfq"', 'data-rfq-mode="email-plus-context"', 'type="email"', 'data-product-context-summary="true"'].forEach((marker) => {
+    ['data-sourcing-intake="compact"', 'data-api-endpoint="/api/rfq"', 'data-rfq-mode="email-plus-context"', 'type="email"'].forEach((marker) => {
       if (!html.includes(marker)) {
         failures.push(`${route}: homepage compact sourcing intake is missing ${marker}`);
       }
@@ -1677,7 +1682,7 @@ for (const route of routes) {
       "Documentation to request",
       "Typical RFQ fields",
       "Equivalent review notes",
-      "Related sourcing configurations",
+      "Related configured paths",
       "Request documents",
       "Start equivalent review",
       "Add to sourcing list"
@@ -1811,6 +1816,10 @@ if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("https://a
   failures.push("src/app/api/rfq/route.ts: missing traceable request ID, Resend delivery, or failure alert path");
 }
 
+if (!rfqRouteSource.includes('"not-configured"') || !rfqRouteSource.includes('status: delivery.mode === "not-configured" ? 503 : 502')) {
+  failures.push("src/app/api/rfq/route.ts: missing explicit production delivery configuration failure");
+}
+
 if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes("rfq_delivery") || !analyticsRouteSource.includes("recordBioAxisEvent")) {
   failures.push("src/app/api/analytics/route.ts: missing funnel event allowlist");
 }
@@ -1939,6 +1948,10 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
 
 if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFormSource.includes("data-rfq-mode=\"email-plus-context\"")) {
   failures.push("SourcingIntakeForm: expected email-plus-context validation mode");
+}
+
+if (!sourcingIntakeFormSource.includes("onFocusCapture={trackIntakeStart}") || sourcingIntakeFormSource.includes('trackBioAxisEvent("rfq_start", { requestId: requestIdRef.current, requestType: normalizedRequestType, hasContext: hasPageContext });')) {
+  failures.push("SourcingIntakeForm: rfq_start should begin on first form focus, not mount");
 }
 
 ["Add details — optional", "Request type optional", "<details", "RequestTypeSelector"].forEach((label) => {

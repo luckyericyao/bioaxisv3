@@ -1,4 +1,5 @@
 import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
+import { findVerifiedCatalogReferences, verifiedCatalogReferences } from "@/data/catalogReferences";
 import { productTaxonomy, type ProductSearchResult } from "@/data/productTaxonomy";
 import { resourceArticles } from "@/data/resourceArticles";
 import { resourceGuides } from "@/data/resources";
@@ -370,6 +371,27 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     });
   });
 
+  findVerifiedCatalogReferences(query).forEach((reference) => {
+    addResult(
+      {
+        type: "product",
+        matchKind: "catalog-reference",
+        title: reference.title,
+        description: reference.description,
+        href: reference.href,
+        segmentTitle: reference.segmentTitle,
+        segmentSlug: reference.segmentSlug,
+        categoryTitle: reference.categoryTitle,
+        categorySlug: reference.categorySlug,
+        familyTitle: reference.familyTitle,
+        familySlug: reference.familySlug,
+        productTitle: reference.productTitle,
+        productSlug: reference.productSlug
+      },
+      [{ label: "catalog reference", text: reference.reference, weight: 220, phraseBonus: 280, direct: true }]
+    );
+  });
+
   workflows.forEach((workflow) => {
     addResult(
       {
@@ -425,7 +447,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
 }
 
 export function getProductSearchIndexSize() {
-  let count = workflows.length + resourceGuides.length;
+  let count = workflows.length + resourceGuides.length + verifiedCatalogReferences.length;
 
   productTaxonomy.forEach((segment) => {
     count += 1;

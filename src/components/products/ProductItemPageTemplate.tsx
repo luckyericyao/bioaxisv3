@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
-import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
+import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
@@ -17,7 +17,7 @@ type ProductItemPageTemplateProps = {
 };
 
 export function ProductItemPageTemplate({ segment, category, family, productItem }: ProductItemPageTemplateProps) {
-  const relatedConfigurations = getProductItemsForFamily(segment.slug, category.slug, family.slug)
+  const relatedConfigurations = getIndexableProductItemsForFamily(segment.slug, category.slug, family.slug)
     .filter((item) => item.slug !== productItem.slug)
     .slice(0, 6);
   const quoteReadyDetails = [
@@ -65,29 +65,56 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         subtitle={productItem.shortDescription}
         compact
         tight
-        mobileContentFirst
         align="start"
       >
         <div className="grid gap-3">
-          <CompactSourcingIntake
-            requestType="quote"
-            sourcePage={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
-            segment={segment.title}
-            category={category.title}
-            family={family.title}
-            product={productItem.name}
-            title="Send this product context."
-            productFieldLabel="SKU, catalog number, supplier line, or product list"
-            submitLabel="Send sourcing request"
-          />
-          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
-          </p>
           <div className="flex flex-wrap gap-2">
             {productItem.commonSpecifications.slice(0, 5).map((specification) => (
               <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
             ))}
           </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Link
+              href={requestLinks[0].href}
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            >
+              Request quote
+            </Link>
+            <Link
+              href={requestLinks[2].href}
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              Request sample
+            </Link>
+            <Link
+              href={requestLinks[1].href}
+              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            >
+              Find equivalent
+            </Link>
+          </div>
+          <details className="group border border-bioaxis-line bg-bioaxis-black">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+              <span>Send product context</span>
+              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t border-bioaxis-line p-3">
+              <CompactSourcingIntake
+                requestType="quote"
+                sourcePage={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
+                segment={segment.title}
+                category={category.title}
+                family={family.title}
+                product={productItem.name}
+                title="Send this product context."
+                productFieldLabel="SKU, catalog number, supplier line, or product list"
+                submitLabel="Send sourcing request"
+              />
+            </div>
+          </details>
+          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
+            Sourcing configuration template. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+          </p>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
@@ -152,8 +179,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related sourcing templates</p>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other request templates in this family</h2>
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related product paths</p>
+          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other configured items in this family</h2>
           {relatedConfigurations.length > 0 ? (
             <div className="mt-5 grid gap-3">
               {relatedConfigurations.map((item) => (
@@ -169,7 +196,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           ) : (
             <p className="mt-5 text-sm leading-6 text-bioaxis-muted">
-              This family currently has one sourcing template path. BioAxis can still review alternate formats through the request form.
+              This family currently has no additional configured item paths. BioAxis can still review alternate formats through the request form.
             </p>
           )}
         </section>

@@ -20,7 +20,7 @@ export function HeroSearchSection() {
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(248,250,252,0.98)_0%,rgba(248,250,252,0.92)_58%,rgba(238,243,248,0.76)_100%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-7xl min-w-0 flex-col justify-center px-5 py-8 sm:px-8 sm:py-12 lg:min-h-[630px] lg:px-10 lg:py-10">
-        <div className="order-2 max-w-6xl min-w-0 lg:order-1">
+        <div className="order-1 max-w-6xl min-w-0 lg:order-1">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-bioaxis-accent sm:text-sm">
             {brand.positioning}
           </p>
@@ -35,13 +35,12 @@ export function HeroSearchSection() {
           </div>
         </div>
 
-        <div className="order-1 mt-0 max-w-5xl lg:order-2 lg:mt-7">
+        <div className="order-2 mt-0 max-w-5xl lg:order-2 lg:mt-7">
           <CompactSourcingIntake
             sourcePage="/"
             title="Send the sourcing context."
             productFieldLabel="SKU, catalog number, supplier line, or product list"
             submitLabel="Structure my sourcing request"
-            handoffNotice="Only your email is required. Add a reference, product list, or rough need if useful."
           />
         </div>
 

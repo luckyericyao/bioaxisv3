@@ -228,9 +228,17 @@ function initialProductContext(props: SourcingIntakeFormProps, requestType: stri
 function displaySourcePage(value: string) {
   try {
     const parsed = new URL(value, "https://bioaxis.local");
-    return decodeURIComponent(`${parsed.pathname}${parsed.search}`)
-      .replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
-      .replace(/\bu[lL]\b/g, "µL");
+    const formatVisibleUnits = (text: string) =>
+      text
+        .replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
+        .replace(/\bu[lL]\b/g, "µL")
+        .replace(/(\d+(?:\.\d+)?)\s*u[mM]\b/g, "$1 µm")
+        .replace(/\bu[mM]\b/g, "µm");
+    const search = [...parsed.searchParams.entries()]
+      .map(([key, item]) => `${decodeURIComponent(key)}=${formatVisibleUnits(item)}`)
+      .join("&");
+
+    return `${formatVisibleUnits(decodeURIComponent(parsed.pathname))}${search ? `?${search}` : ""}`;
   } catch {
     return value;
   }
@@ -270,6 +278,7 @@ export function SourcingIntakeForm({
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
   const requestIdRef = useRef(getBioAxisRequestId());
+  const intakeStartedRef = useRef(false);
   const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage));
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [error, setError] = useState("");
@@ -289,7 +298,6 @@ export function SourcingIntakeForm({
   );
   const hasPageContext = Boolean(
     contextLocked ||
-      sourcePage ||
       segment ||
       category ||
       family ||
@@ -297,9 +305,7 @@ export function SourcingIntakeForm({
       resolvedProductContext.productName ||
       resolvedProductContext.productFamily ||
       resolvedProductContext.productCategory ||
-      resolvedProductContext.productSegment ||
-      resolvedProductContext.productUrl ||
-      resolvedProductContext.sourcePageUrl
+      resolvedProductContext.productSegment
   );
   const capturedInput = Boolean(defaultMessage.trim());
   const chips = optionalChips ?? (state.requestType === "equivalent" ? defaultEquivalentChips : []);
@@ -327,8 +333,17 @@ export function SourcingIntakeForm({
     }
   }, []);
 
-  useEffect(() => {
-    trackBioAxisEvent("rfq_start", { requestId: requestIdRef.current, requestType: normalizedRequestType, hasContext: hasPageContext });
+  const trackIntakeStart = useCallback(() => {
+    if (intakeStartedRef.current) {
+      return;
+    }
+
+    intakeStartedRef.current = true;
+    trackBioAxisEvent("rfq_start", {
+      requestId: requestIdRef.current,
+      requestType: normalizedRequestType,
+      hasContext: hasPageContext
+    });
   }, [hasPageContext, normalizedRequestType]);
 
   const handleTurnstileFailure = useCallback((reason: string) => {
@@ -494,6 +509,7 @@ export function SourcingIntakeForm({
   return (
     <form
       onSubmit={handleSubmit}
+      onFocusCapture={trackIntakeStart}
       noValidate
       data-api-endpoint="/api/rfq"
       data-rfq-mode="email-plus-context"

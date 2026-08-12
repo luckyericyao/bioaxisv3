@@ -49,7 +49,7 @@ export type BioAxisRequestPayload = {
 
 export type BioAxisRequestResponse = {
   ok: boolean;
-  mode?: "email" | "captured" | "honeypot";
+  mode?: "email" | "captured" | "honeypot" | "not-configured";
   message?: string;
   referenceId?: string;
   requestId?: string;
