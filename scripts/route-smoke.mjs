@@ -346,6 +346,20 @@ for (const route of routes) {
     failures.push(`${route}: visible Coming soon copy`);
   }
 
+  if (route === "/") {
+    [
+      'rel="canonical" href="https://bioaxisv3.vercel.app"',
+      'property="og:title"',
+      'property="og:image"',
+      'name="twitter:card" content="summary_large_image"',
+      'name="robots" content="index, follow"'
+    ].forEach((marker) => {
+      if (!html.includes(marker)) {
+        failures.push(`${route}: missing launch metadata ${marker}`);
+      }
+    });
+  }
+
   if (route === "/" || route === "/products" || route.startsWith("/products?") || route === "/resources" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote") || route.startsWith("/resources/")) {
     checkForbiddenVisibleStrings(route, pageText);
   }
