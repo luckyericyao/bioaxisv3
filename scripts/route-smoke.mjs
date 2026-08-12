@@ -2260,6 +2260,7 @@ for (const [pathname, expectedContentType] of [
   ["/favicon.ico", "image/x-icon"],
   ["/icon.png", "image/png"],
   ["/apple-icon.png", "image/png"],
+  ["/images/bioaxis-social-preview.jpg", "image/jpeg"],
   ["/manifest.webmanifest", "application/manifest+json"]
 ]) {
   const response = await fetch(new URL(pathname, baseUrl));

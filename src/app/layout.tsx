@@ -59,7 +59,7 @@ export const metadata: Metadata = {
       "Structure consumables requests, equivalent reviews, sample paths, documentation needs, and quote-ready sourcing briefs.",
     images: [
       {
-        url: "/images/hero-lab-procurement.png",
+        url: "/images/bioaxis-social-preview.jpg",
         width: 1672,
         height: 941,
         alt: "Life science consumables sourcing workspace"
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     title: "BioAxis | Life Science Consumables Sourcing",
     description:
       "Structure consumables requests, equivalent reviews, sample paths, documentation needs, and quote-ready sourcing briefs.",
-    images: ["/images/hero-lab-procurement.png"]
+    images: ["/images/bioaxis-social-preview.jpg"]
   },
   robots: {
     index: true,
