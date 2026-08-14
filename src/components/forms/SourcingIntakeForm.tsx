@@ -238,7 +238,17 @@ function displaySourcePage(value: string) {
       .map(([key, item]) => `${decodeURIComponent(key)}=${formatVisibleUnits(item)}`)
       .join("&");
 
-    return `${formatVisibleUnits(decodeURIComponent(parsed.pathname))}${search ? `?${search}` : ""}`;
+    const pathSegments = parsed.pathname
+      .split("/")
+      .filter(Boolean)
+    const lastPathIndex = pathSegments.length - 1;
+    const displayPath = pathSegments
+      .map((segment, index) =>
+        index === lastPathIndex ? formatVisibleUnits(decodeURIComponent(segment).replace(/-/g, " ")) : segment
+      )
+      .join("/");
+
+    return `${displayPath ? `/${displayPath}` : "/"}${search ? `?${search}` : ""}`;
   } catch {
     return value;
   }
@@ -538,8 +548,6 @@ export function SourcingIntakeForm({
             {handoffNotice ? <p className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-bioaxis-steel">{handoffNotice}</p> : null}
           </div>
         </div>
-        {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} compact={compact} /> : null}
-        {!hasPageContext && sourcingListItems.length > 0 ? <SourcingListNotice count={sourcingListItems.length} /> : null}
         <div className={compact ? "grid gap-3" : "grid gap-5"}>
           <Field
             id="sourcing-email"
@@ -568,6 +576,8 @@ export function SourcingIntakeForm({
           />
           {compact ? <span className="sr-only">{productFieldHelper}</span> : null}
         </div>
+        {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={capturedInput} compact={compact} /> : null}
+        {!hasPageContext && sourcingListItems.length > 0 ? <SourcingListNotice count={sourcingListItems.length} /> : null}
         <div className="mt-4 grid gap-3">
           <div className="order-1">
             <TurnstileWidget
@@ -779,7 +789,7 @@ function RequestContextCard({
               {pair.map(([label, value]) => (
                 <div key={label} className="flex min-w-0 items-baseline gap-1">
                   <dt className="shrink-0 truncate text-[9px] font-bold uppercase text-bioaxis-dim">{label}:</dt>
-                  <dd className="min-w-0 truncate text-[10px] font-semibold leading-4 text-bioaxis-text" title={value}>{value}</dd>
+                  <dd className="min-w-0 break-words text-[10px] font-semibold leading-4 text-bioaxis-text" title={value}>{value}</dd>
                 </div>
               ))}
             </div>

@@ -6,7 +6,6 @@ import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingList
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { RFQCTA } from "./RFQCTA";
 import { SupplierComparisonModule } from "./SupplierComparisonModule";
 
 type ProductItemPageTemplateProps = {
@@ -30,7 +29,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
   ];
   const requestLinks = [
     {
-      label: "Request quote",
+      label: "Request quote for this product",
       href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "quote" })
     },
     {
@@ -216,14 +215,6 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         </section>
       </section>
 
-      <RFQCTA
-        title="Ready to review this product item?"
-        body="Send BioAxis this product context with one click. Only your email is required, and BioAxis can follow up for supplier, catalog number, quantity, sample, documentation, or timeline details."
-        segment={segment.slug}
-        category={category.slug}
-        family={family.slug}
-        product={productItem.slug}
-      />
     </>
   );
 }

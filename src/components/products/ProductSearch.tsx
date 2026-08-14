@@ -216,25 +216,25 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
     <article
       data-search-result-card="true"
       data-search-result-type={result.type}
-      className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft"
+      className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-5"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="border border-bioaxis-line bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-dim">
           {resultTypeLabel(result.type)}
         </span>
-        <span className="border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-accent">
+        <span className="hidden border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-accent sm:inline-flex">
           {relevanceLabel(result)}
         </span>
-        <span className="border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
+        <span className="hidden border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel sm:inline-flex">
           {matchKindLabel(result)}
         </span>
       </div>
       <p className="mt-4 text-xs font-semibold uppercase leading-5 text-bioaxis-accent">{highlightText(resultPath(result), query)}</p>
-      <h3 className="mt-3 text-lg font-bold uppercase leading-snug text-bioaxis-text">{highlightText(result.title, query)}</h3>
+      <h3 className="mt-2 text-base font-bold uppercase leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
       <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
-      <p className="mt-3 border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim">{matchedReason(result)}</p>
+      <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 hidden flex-wrap gap-2 sm:flex">
           {result.matchedFields.slice(0, 5).map((field) => (
             <span key={field} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[0.68rem] font-semibold uppercase text-bioaxis-steel">
               {matchedFieldLabel(field)}
@@ -242,7 +242,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           ))}
         </div>
       ) : null}
-      <div className="mt-auto flex flex-col gap-2 pt-5 sm:flex-row sm:flex-wrap">
+      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-4 sm:gap-2 sm:pt-5">
         <Link
           href={detailHref(result, query)}
           onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_details", resultType: result.type })}
@@ -253,14 +253,14 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <Link
           href={requestHref(result, "quote", query)}
           onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_quote", resultType: result.type })}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          className="inline-flex min-h-8 items-center text-[0.68rem] font-semibold uppercase text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:min-h-10 sm:border sm:px-4 sm:no-underline"
         >
           Send as quote request
         </Link>
         <Link
           href={requestHref(result, "equivalent", query)}
           onClick={() => trackBioAxisEvent("cta_click", { cta: "search_result_equivalent", resultType: result.type })}
-          className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          className="inline-flex min-h-8 items-center text-[0.68rem] font-semibold uppercase text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:min-h-10 sm:border sm:px-4 sm:no-underline"
         >
           Find equivalent
         </Link>
@@ -434,7 +434,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             {results.length > 0 ? (
               <>
                 <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
-                  Showing the {visibleMatchCount} most relevant product path{visibleMatchCount === 1 ? "" : "s"}. Broader matches stay collapsed.
+                  Showing {visibleMatchCount} strongest path{visibleMatchCount === 1 ? "" : "s"}; broader matches stay collapsed.
+                </p>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-bioaxis-dim">
+                  {results.length} match{results.length === 1 ? "" : "es"} · {indexedPathCount} indexed sourcing paths
                 </p>
                 <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">
                   BioAxis searches {indexedPathCount} product and sourcing paths. This is not a live supplier catalog lookup.
@@ -444,9 +447,14 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 </p>
               </>
             ) : (
-              <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
-                This reference is not in the current BioAxis product and sourcing paths. It has not been presented as a verified catalog match.
-              </p>
+              <>
+                <p className="mt-3 text-sm leading-6 text-bioaxis-muted sm:mt-4 sm:text-base sm:leading-7">
+                  This reference is not in the current BioAxis product and sourcing paths. It has not been presented as a verified catalog match.
+                </p>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-bioaxis-dim">
+                  0 matches · {indexedPathCount} indexed sourcing paths
+                </p>
+              </>
             )}
           </div>
           <details className="mt-5 border border-bioaxis-line bg-bioaxis-black">
