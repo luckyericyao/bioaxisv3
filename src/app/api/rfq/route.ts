@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
+import { checkRfqQueueConnection, enqueueRfq, rfqQueueConfigured } from "@/lib/server/rfqQueue";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,6 @@ const rfqRateWindowMs = 60_000;
 const rfqRateLimit = 20;
 const rfqRateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
-const fallbackToEmail = "crazyowenyao@gmail.com";
 const verificationErrorMessage = "Please complete the verification and try again.";
 const requestTypeAliases: Record<string, string> = {
   rfq: "quote",
@@ -171,15 +171,6 @@ function cleanBoolean(value: unknown) {
   }
 
   return clean(value, 20);
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 function normalizeRequestType(value: unknown) {
@@ -324,15 +315,18 @@ function turnstileSiteKey() {
   );
 }
 
-function rfqDeliveryReadiness() {
-  const emailDelivery = Boolean(process.env.RESEND_API_KEY && process.env.BIOAXIS_RFQ_TO_EMAIL);
+async function rfqDeliveryReadiness() {
+  const queueConfigured = rfqQueueConfigured();
+  const queueReachable = queueConfigured ? await checkRfqQueueConnection() : false;
   const antiSpam = Boolean(process.env.TURNSTILE_SECRET_KEY && turnstileSiteKey());
+  const internalLookup = Boolean(process.env.BIOAXIS_INTERNAL_API_KEY);
 
   return {
-    ready: emailDelivery && antiSpam,
+    ready: queueReachable && antiSpam && internalLookup,
     services: {
-      emailDelivery: emailDelivery ? "configured" : "missing",
-      antiSpam: antiSpam ? "configured" : "missing"
+      durableQueue: queueReachable ? "reachable" : queueConfigured ? "unreachable" : "missing",
+      antiSpam: antiSpam ? "configured" : "missing",
+      internalLookup: internalLookup ? "configured" : "missing"
     }
   };
 }
@@ -396,217 +390,8 @@ function isRfqRateLimited(request: Request) {
   return current.count > rfqRateLimit;
 }
 
-function fieldLine(label: string, value: string) {
-  return `${label}: ${value || "Not provided"}`;
-}
-
-function htmlRow(label: string, value: string) {
-  return `<tr><th style="width:210px;text-align:left;padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#0f172a;background:#f8fafc;">${escapeHtml(label)}</th><td style="padding:8px 10px;border-bottom:1px solid #dbe3ea;color:#1f2937;">${escapeHtml(value || "Not provided")}</td></tr>`;
-}
-
-function htmlSection(title: string, rows: Array<[string, string]>) {
-  return `
-    <section style="margin-top:22px;">
-      <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">${escapeHtml(title)}</h2>
-      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border:1px solid #dbe3ea;">
-        ${rows.map(([label, value]) => htmlRow(label, value)).join("")}
-      </table>
-    </section>
-  `;
-}
-
-function plainSection(title: string, lines: string[]) {
-  return [title, "-".repeat(title.length), ...lines, ""].join("\n");
-}
-
-function formatSourcingListText(items: SourcingListEmailItem[]) {
-  if (items.length === 0) {
-    return "Not provided";
-  }
-
-  return items
-    .map((item, index) =>
-      [
-        `Item ${index + 1}: ${item.title || "Not provided"}`,
-        fieldLine("Path", item.path),
-        fieldLine("Quantity", item.quantity),
-        fieldLine("Current supplier", item.currentSupplier),
-        fieldLine("Catalog number", item.catalogNumber),
-        fieldLine("Equivalent needed", item.equivalentNeeded),
-        fieldLine("Sample needed", item.sampleNeeded),
-        fieldLine("Documentation needed", item.documentationNeeded),
-        fieldLine("Notes", item.notes),
-        fieldLine("Source page", item.sourcePageUrl),
-        fieldLine("Added", item.addedAt)
-      ].join("\n")
-    )
-    .join("\n\n");
-}
-
-function formatSourcingListHtml(items: SourcingListEmailItem[]) {
-  if (items.length === 0) {
-    return "<p style=\"margin:0;color:#475569;\">Not provided</p>";
-  }
-
-  return items
-    .map(
-      (item, index) => `
-        <div style="margin:0 0 14px;border:1px solid #dbe3ea;padding:12px;background:#ffffff;">
-          <p style="margin:0 0 8px;font-weight:700;color:#0f172a;">Item ${index + 1}: ${escapeHtml(item.title || "Not provided")}</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-            ${[
-              ["Path", item.path],
-              ["Quantity", item.quantity],
-              ["Current supplier", item.currentSupplier],
-              ["Catalog number", item.catalogNumber],
-              ["Equivalent needed", item.equivalentNeeded],
-              ["Sample needed", item.sampleNeeded],
-              ["Documentation needed", item.documentationNeeded],
-              ["Notes", item.notes],
-              ["Source page", item.sourcePageUrl],
-              ["Added", item.addedAt]
-            ]
-              .map(([label, value]) => htmlRow(label, value))
-              .join("")}
-          </table>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function buildEmail(referenceId: string, request: NormalizedRfq) {
-  const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
-  const summaryRows: Array<[string, string]> = [
-    ["Reference", referenceId],
-    ["Request type", requestLabel],
-    ["Submitted", new Date().toISOString()]
-  ];
-  const contactRows: Array<[string, string]> = [
-    ["Name", request.name],
-    ["Email", request.email],
-    ["Organization / company", request.organization],
-    ["Phone", request.phone],
-    ["Role / title", request.roleTitle],
-    ["Shipping region", request.shippingRegion]
-  ];
-  const detailRows: Array<[string, string]> = [
-    ["Product segment / category", request.productCategory],
-    ["Product family", request.productFamily],
-    ["Product name", request.productName],
-    ["Current supplier", request.currentSupplier],
-    ["Catalog number", request.catalogNumber],
-    ["Quantity", request.quantity],
-    ["Timeline", request.timeline],
-    ["Required documents", request.documentationNeeds],
-    ["Sterile / non-sterile preference", request.sterileStatus],
-    ["Equivalent needed", request.equivalentNeeded],
-    ["Sample needed", request.sampleNeeded],
-    ["Recurring supply needed", request.recurringSupplyNeeded]
-  ];
-  const productContextRows: Array<[string, string]> = [
-    ["Request type", requestTypeLabels[request.productContext.requestType] ?? request.productContext.requestType],
-    ["Product", request.productContext.productName],
-    ["Family", request.productContext.productFamily],
-    ["Category", request.productContext.productCategory],
-    ["Segment", request.productContext.productSegment],
-    ["Product URL", request.productContext.productUrl],
-    ["Source page", request.productContext.sourcePageUrl],
-    ["Auto-captured specs", request.productContext.relevantSpecs.join("; ")],
-    ["Documentation notes", request.productContext.documentationNotes.join("; ")],
-    ["Captured at", request.productContext.timestamp]
-  ];
-  const sourceRows: Array<[string, string]> = [
-    ["Source page URL", request.sourcePageUrl],
-    ["Referrer", request.referrer],
-    ["UTM params", Object.entries(request.utm).map(([key, value]) => `${key}=${value}`).join(", ")]
-  ];
-
-  const text = [
-    `New BioAxis request`,
-    "",
-    plainSection("Request summary", summaryRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Contact information", contactRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Auto-captured product context", productContextRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Optional customer notes", [request.message || "Not provided"]),
-    plainSection("Optional supplier/catalog/quantity/docs/timeline fields", detailRows.map(([label, value]) => fieldLine(label, value))),
-    plainSection("Pasted product list", [request.productList || "Not provided"]),
-    plainSection("Sourcing list items", [formatSourcingListText(request.sourcingListItems)]),
-    plainSection("Source page / timestamp", sourceRows.map(([label, value]) => fieldLine(label, value))),
-    "Reply instruction: Reply directly to the submitter if reply-to is valid."
-  ].join("\n");
-
-  const html = `
-    <div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;color:#0f172a;">
-      <div style="max-width:760px;margin:0 auto;background:#ffffff;border:1px solid #dbe3ea;padding:24px;">
-        <p style="margin:0 0 6px;color:#0f766e;font-size:12px;font-weight:700;text-transform:uppercase;">BioAxis RFQ</p>
-        <h1 style="margin:0;font-size:24px;line-height:1.25;color:#0f172a;">New BioAxis request</h1>
-        ${htmlSection("Request summary", summaryRows)}
-        ${htmlSection("Contact information", contactRows)}
-        ${htmlSection("Auto-captured product context", productContextRows)}
-        ${htmlSection("Optional supplier/catalog/quantity/docs/timeline fields", detailRows)}
-        <section style="margin-top:22px;">
-          <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Pasted product list</h2>
-          <pre style="white-space:pre-wrap;margin:0;border:1px solid #dbe3ea;background:#f8fafc;padding:12px;color:#1f2937;font-family:Menlo,Consolas,monospace;font-size:13px;">${escapeHtml(request.productList || "Not provided")}</pre>
-        </section>
-        <section style="margin-top:22px;">
-          <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Optional customer notes</h2>
-          <pre style="white-space:pre-wrap;margin:0;border:1px solid #dbe3ea;background:#f8fafc;padding:12px;color:#1f2937;font-family:Menlo,Consolas,monospace;font-size:13px;">${escapeHtml(request.message || "Not provided")}</pre>
-        </section>
-        <section style="margin-top:22px;">
-          <h2 style="margin:0 0 10px;font-size:16px;line-height:1.4;color:#0f172a;">Sourcing list items</h2>
-          ${formatSourcingListHtml(request.sourcingListItems)}
-        </section>
-        ${htmlSection("Source page / timestamp", sourceRows)}
-        <p style="margin:22px 0 0;color:#475569;font-size:13px;">Reply instruction: Reply directly to the submitter if reply-to is valid.</p>
-      </div>
-    </div>
-  `;
-
-  return { text, html };
-}
-
-async function sendResendEmail(referenceId: string, request: NormalizedRfq) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const toEmail = process.env.BIOAXIS_RFQ_TO_EMAIL;
-  const fromEmail = process.env.BIOAXIS_RFQ_FROM_EMAIL || "onboarding@resend.dev";
-  const fallbackReplyTo = process.env.BIOAXIS_RFQ_REPLY_TO_EMAIL || toEmail || fallbackToEmail;
-
-  if (!apiKey || !toEmail) {
-    return { mode: process.env.VERCEL || process.env.VERCEL_ENV ? ("not-configured" as const) : ("captured" as const) };
-  }
-
-  const requestLabel = requestTypeLabels[request.requestType] ?? request.requestType;
-  const senderName = request.organization || request.name || request.email;
-  const subject = `[BioAxis RFQ] ${requestLabel} — ${senderName}`;
-  const { text, html } = buildEmail(referenceId, request);
-  const replyTo = isValidEmail(request.email) ? request.email : fallbackReplyTo;
-
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      from: `BioAxis RFQ <${fromEmail}>`,
-      to: [toEmail],
-      reply_to: replyTo,
-      subject,
-      text,
-      html
-    })
-  });
-
-  if (!response.ok) {
-    return { mode: "error" as const };
-  }
-
-  return { mode: "email" as const };
-}
-
 export async function GET() {
-  const readiness = rfqDeliveryReadiness();
+  const readiness = await rfqDeliveryReadiness();
 
   return NextResponse.json(
     {
@@ -683,47 +468,39 @@ export async function POST(request: Request) {
   const referenceId = normalized.requestId || `BIOAXIS-${Date.now().toString(36).toUpperCase()}`;
 
   try {
-    const delivery = await sendResendEmail(referenceId, normalized);
-
-    if (delivery.mode === "error" || delivery.mode === "not-configured") {
-      void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode }, "/api/rfq");
-      void alertBioAxisFailure({
+    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, deliveryMode: "durable-queue", stage: "queue_write_start" }, "/api/rfq");
+    const delivery = await enqueueRfq(referenceId, normalized);
+    void recordBioAxisEvent(
+      "rfq_queue_write_succeeded",
+      {
         requestId: referenceId,
-        stage: "resend",
-        detail: delivery.mode === "not-configured" ? "Resend is not configured in the deployment environment." : "Resend rejected or failed to deliver the RFQ email."
-      });
-      return NextResponse.json(
-        {
-          error:
-            delivery.mode === "not-configured"
-              ? "BioAxis email delivery is not configured yet. Please email crazyowenyao@gmail.com directly."
-              : "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
-          referenceId,
-          requestId: referenceId
-        },
-        { status: delivery.mode === "not-configured" ? 503 : 502 }
-      );
-    }
-
-    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: delivery.mode }, "/api/rfq");
+        deliveryMode: "durable-queue",
+        queuePath: delivery.pathname,
+        queueEtag: delivery.etag,
+        replayed: delivery.replayed
+      },
+      "/api/rfq"
+    );
 
     return NextResponse.json({
       ok: true,
-      mode: delivery.mode,
+      mode: "durable-queue",
+      replayed: delivery.replayed,
       referenceId,
       requestId: referenceId,
-      message: "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification."
+      message: "Request received and stored for BioAxis review. We will follow up by email if specs, documents, samples, or quantity need clarification."
     });
-  } catch {
-    void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, resendMode: "error" }, "/api/rfq");
-    void alertBioAxisFailure({ requestId: referenceId, stage: "rfq_delivery", detail: "Unexpected delivery failure in the RFQ route." });
+  } catch (error) {
+    console.error("[BioAxis RFQ queue] submission failed", { requestId: referenceId, error });
+    void recordBioAxisEvent("rfq_queue_write_failed", { requestId: referenceId, deliveryMode: "durable-queue", stage: "queue_write", outcome: "error" }, "/api/rfq");
+    void alertBioAxisFailure({ requestId: referenceId, stage: "queue_write", detail: "The durable RFQ queue rejected or failed to store the request." });
     return NextResponse.json(
       {
-        error: "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.",
+        error: "Your request was not stored. Your form is still intact—please retry using this reference or email crazyowenyao@gmail.com.",
         referenceId,
         requestId: referenceId
       },
-      { status: 502 }
+      { status: 503 }
     );
   }
 }

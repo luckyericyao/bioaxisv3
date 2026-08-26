@@ -4,7 +4,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 const buyerTriggers = [
   {
     title: "Out of stock",
-    body: "Check Ready Supply paths when lead time, allocation, or availability blocks purchasing.",
+    body: "Request an availability check when lead time, allocation, or supply uncertainty blocks purchasing.",
     href: "/ready-supply",
     cta: "Check ready supply"
   },
@@ -12,7 +12,7 @@ const buyerTriggers = [
     title: "Need an equivalent",
     body: "Compare format, material, sterility, packaging, workflow fit, and automation constraints before switching.",
     href: "/equivalent-finder?need=compatible-equivalent",
-    cta: "Find equivalent"
+    cta: "Review equivalent"
   },
   {
     title: "Documents required",

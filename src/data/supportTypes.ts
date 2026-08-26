@@ -21,7 +21,7 @@ export const supportTypes: SupportType[] = [
     title: "Equivalent review",
     description: "Compare a current product against candidate alternatives using fit criteria, documents, and sample needs.",
     whatToSend: ["current supplier or brand", "catalog reference if known", "critical fit requirements"],
-    ctaLabel: "Find equivalent",
+    ctaLabel: "Review equivalent",
     requestHref: "/equivalent-finder?sourcePage=support&supportPath=equivalent-review"
   },
   {

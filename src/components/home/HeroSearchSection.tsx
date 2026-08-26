@@ -41,7 +41,7 @@ export function HeroSearchSection() {
           </CTAButton>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
             <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
-              Find equivalent
+              Review equivalent
             </CTAButton>
             <CTAButton href="/products" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
               Browse product lines

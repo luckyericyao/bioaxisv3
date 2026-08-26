@@ -309,7 +309,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                   <article key={item.id} className="border border-bioaxis-line bg-bioaxis-panel p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <h3 className="text-base font-bold uppercase text-bioaxis-text">{item.title}</h3>
+                        <h3 className="text-base font-bold text-bioaxis-text">{item.title}</h3>
                         <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                           {[item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ")}
                         </p>

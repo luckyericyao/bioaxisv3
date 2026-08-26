@@ -37,7 +37,7 @@ export function SourcingRequestButtonGroup({
 }: SourcingRequestButtonGroupProps) {
   const requests = [
     { label: product ? "Request quote for this product" : "Request quote", requestType: "quote", primary: true },
-    { label: "Find equivalent", requestType: "equivalent", primary: false },
+    { label: "Review equivalent", requestType: "equivalent", primary: false },
     { label: "Request sample", requestType: "sample", primary: false },
     { label: "Ask for documents", requestType: "documentation", primary: false },
     ...(includeSupport ? [{ label: "Recurring supply", requestType: "recurring-supply", primary: false }] : [])

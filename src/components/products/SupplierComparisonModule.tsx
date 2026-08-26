@@ -81,7 +81,7 @@ export function SupplierComparisonModule({
               <p className="text-xs font-bold uppercase text-bioaxis-dim">Buyer inputs</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {buyerInputs.map((input) => (
-                  <div key={input} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                  <div key={input} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold text-bioaxis-steel">
                     {input}
                   </div>
                 ))}
@@ -91,7 +91,7 @@ export function SupplierComparisonModule({
               <p className="text-xs font-bold uppercase text-bioaxis-dim">Typical buyer cases</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {buyerCases.map((item) => (
-                  <span key={item} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                  <span key={item} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold text-bioaxis-steel">
                     {item}
                   </span>
                 ))}

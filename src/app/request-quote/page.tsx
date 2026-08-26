@@ -7,15 +7,14 @@ import { getProductItemBySlug } from "@/data/productItems";
 import { getFamilyBySlug as getCatalogFamilyBySlug, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
 import { workflows } from "@/data/workflows";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Request Quote | BioAxis Consumables Sourcing",
   description:
     "Submit quote, equivalent, sample, documentation, recurring supply, contact, or product-list review requests through BioAxis.",
-  alternates: {
-    canonical: "/request-quote"
-  }
-};
+  path: "/request-quote"
+});
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +66,7 @@ function defaultProductListFromContext({
   if (normalizedSource.includes("ready-supply")) {
     if (normalizedIntent.includes("current-sku")) {
       return [
-        "Ready Supply current SKU review",
+        "Availability Check current SKU review",
         "Current SKU or brand:",
         "Consumable type or specification:",
         "Quantity and timing:",
@@ -76,7 +75,7 @@ function defaultProductListFromContext({
     }
 
     return [
-      "Ready Supply availability check",
+      "Availability Check request",
       "Current SKU or brand:",
       "Key specification:",
       "Quantity and timing:",
@@ -147,14 +146,14 @@ function readySupplyRequestContext({
   }
 
   const productName = intent?.toLowerCase().includes("current-sku")
-    ? "Ready Supply current SKU review"
-    : "Ready Supply availability check";
+    ? "Availability Check current SKU review"
+    : "Availability Check request";
 
   return {
     productName,
-    productFamily: "Fast dispatch and replenishment",
-    productCategory: "Warehouse-backed consumables",
-    productSegment: "Ready Supply"
+    productFamily: "Availability and replenishment review",
+    productCategory: "Supplier-confirmed consumables availability",
+    productSegment: "Availability Check"
   };
 }
 

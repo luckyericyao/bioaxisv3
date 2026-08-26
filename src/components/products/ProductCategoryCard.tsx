@@ -63,7 +63,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       ) : null}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{segment.title}</h2>
+          <h2 className="text-lg font-bold leading-tight text-bioaxis-text">{segment.title}</h2>
           <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
         </div>
         <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
@@ -75,7 +75,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
               <li
                 key={request}
                 data-common-sourcing-request="true"
-                className="flex items-start gap-2 border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-[11px] font-semibold uppercase leading-5 text-bioaxis-steel"
+                className="flex items-start gap-2 border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-[11px] font-semibold leading-5 text-bioaxis-steel"
               >
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-bioaxis-accent/70" aria-hidden="true" />
                 {request}
@@ -102,7 +102,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
             href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
             className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
-            Find equivalent
+            Review equivalent
           </Link>
         </div>
       </div>

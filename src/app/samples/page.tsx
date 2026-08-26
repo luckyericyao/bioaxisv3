@@ -42,7 +42,7 @@ export default function SamplesPage() {
             ))}
           </div>
           <Link href="/equivalent-finder?requestType=equivalent" className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-            Find equivalent first
+            Review equivalent first
           </Link>
         </div>
         <SimpleRequestForm
@@ -79,7 +79,7 @@ export default function SamplesPage() {
         body="BioAxis supports sample-first evaluation where available for critical consumables, equivalents, automation formats, and recurring sourcing needs."
         primaryLabel="Request sample"
         primaryHref="/request-quote?requestType=sample"
-        secondaryLabel="Find equivalent first"
+        secondaryLabel="Review equivalent first"
         secondaryHref="/equivalent-finder?requestType=equivalent"
       />
     </>

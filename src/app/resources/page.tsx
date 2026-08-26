@@ -3,15 +3,14 @@ import { ResourceCard } from "@/components/cards/ResourceCard";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { resourceGuides } from "@/data/resources";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Resources | BioAxis",
   description:
     "Guides for smarter life science consumables sourcing, equivalents, RFQs, sterile formats, cell culture, PCR, and automation consumables.",
-  alternates: {
-    canonical: "/resources"
-  }
-};
+  path: "/resources"
+});
 
 export default function ResourcesPage() {
   return (

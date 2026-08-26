@@ -49,15 +49,15 @@ export type BioAxisRequestPayload = {
 
 export type BioAxisRequestResponse = {
   ok: boolean;
-  mode?: "email" | "captured" | "honeypot" | "not-configured";
+  mode?: "durable-queue" | "honeypot";
   message?: string;
   referenceId?: string;
   requestId?: string;
   error?: string;
 };
 
-export const requestSuccessMessage = "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.";
-export const requestErrorMessage = "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly.";
+export const requestSuccessMessage = "Request received and stored for BioAxis review.";
+export const requestErrorMessage = "Your request was not stored. Your form is still intact—please retry or email crazyowenyao@gmail.com.";
 
 function utmFromLocation() {
   if (typeof window === "undefined") {

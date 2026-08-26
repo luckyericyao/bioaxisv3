@@ -119,7 +119,7 @@ function DocsSummary({ product }: { product: ProductCatalogItem }) {
         if (!status) return null;
 
         return (
-          <span key={key} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold uppercase text-bioaxis-steel">
+          <span key={key} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold text-bioaxis-steel">
             {label}: <span className="text-bioaxis-accent">{statusLabels[status]}</span>
           </span>
         );
@@ -168,7 +168,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="lg:border-r lg:border-bioaxis-line lg:pr-5">
           <p className="text-xs font-bold uppercase text-bioaxis-accent">Filter templates</p>
-          <h2 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{heading}</h2>
+          <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">{heading}</h2>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
             Review template-level RFQ fields, documentation needs, equivalent notes, and next actions before sending a sourcing request.
           </p>
@@ -216,7 +216,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
                 {visibleRows.map((row) => (
                   <tr key={row.product.id} className="align-top">
                     <td className="border-b border-l border-bioaxis-line px-3 py-4">
-                      <Link href={row.href} className="text-sm font-bold uppercase text-bioaxis-text transition hover:text-bioaxis-accent">
+                      <Link href={row.href} className="text-sm font-bold text-bioaxis-text transition hover:text-bioaxis-accent">
                         {row.product.name}
                       </Link>
                       <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.familyTitle}</p>
@@ -224,7 +224,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
                     <td className="border-b border-bioaxis-line px-3 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {row.product.tags.slice(0, 4).map((tag) => (
-                          <span key={tag} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold uppercase text-bioaxis-steel">
+                          <span key={tag} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold text-bioaxis-steel">
                             {tag}
                           </span>
                         ))}
@@ -249,7 +249,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
             {visibleRows.map((row) => (
               <article key={row.product.id} className="border border-bioaxis-line bg-bioaxis-black p-4">
                 <div>
-                  <Link href={row.href} className="text-base font-bold uppercase text-bioaxis-text">
+                  <Link href={row.href} className="text-base font-bold text-bioaxis-text">
                     {row.product.name}
                   </Link>
                   <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.segmentTitle} / {row.categoryTitle} / {row.familyTitle}</p>

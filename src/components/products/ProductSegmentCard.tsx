@@ -16,7 +16,7 @@ export function ProductSegmentCard({ segment, index, mode = "preview" }: Product
   return (
     <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-6">
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-xl font-bold uppercase leading-tight text-bioaxis-text">{segment.title}</h3>
+        <h3 className="text-xl font-bold leading-tight text-bioaxis-text">{segment.title}</h3>
         <span className="shrink-0 text-sm font-bold text-bioaxis-dim">{String(segment.index || index + 1).padStart(2, "0")}</span>
       </div>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{segment.description}</p>

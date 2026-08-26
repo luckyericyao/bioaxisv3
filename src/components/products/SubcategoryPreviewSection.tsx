@@ -13,7 +13,7 @@ export function SubcategoryPreviewSection({ segmentSlug, subcategory }: Subcateg
     <section id={subcategory.slug} className="scroll-mt-24 border border-bioaxis-line bg-bioaxis-panel p-6">
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{subcategory.title}</h2>
+          <h2 className="text-2xl font-bold text-bioaxis-text">{subcategory.title}</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{subcategory.description}</p>
           <div className="mt-6 flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
             <Link href={`/products/${segmentSlug}/${subcategory.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">

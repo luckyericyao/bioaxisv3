@@ -4,9 +4,9 @@ export type NavigationItem = {
 };
 
 export const navigationItems: NavigationItem[] = [
-  { label: "Ready Supply", href: "/ready-supply" },
+  { label: "Availability Check", href: "/ready-supply" },
   { label: "Products", href: "/products" },
-  { label: "Equivalent Finder", href: "/equivalent-finder" },
+  { label: "Equivalent Review", href: "/equivalent-finder" },
   { label: "Private Label / OEM", href: "/private-label-oem" },
   { label: "Trust Center", href: "/trust-center" },
   { label: "Resources", href: "/resources" },
@@ -16,11 +16,11 @@ export const navigationItems: NavigationItem[] = [
 export const footerNavigationItems: NavigationItem[] = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
-  { label: "Ready Supply", href: "/ready-supply" },
+  { label: "Availability Check", href: "/ready-supply" },
   { label: "Private Label / OEM", href: "/private-label-oem" },
   { label: "Products", href: "/products" },
   { label: "Request Quote", href: "/request-quote" },
-  { label: "Equivalent Finder", href: "/equivalent-finder" },
+  { label: "Equivalent Review", href: "/equivalent-finder" },
   { label: "Workflows", href: "/workflows" },
   { label: "Samples", href: "/samples" },
   { label: "Quality", href: "/quality" },

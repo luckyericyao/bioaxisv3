@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { brand } from "@/data/brand";
 import { navigationItems } from "@/data/navigation";
@@ -11,9 +12,16 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const pathname = usePathname();
   const productsMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const { items: sourcingListItems, openDrawer } = useSourcingList();
+
+  useEffect(() => {
+    setMenuOpen(false);
+    setProductsOpen(false);
+    setMobileProductsOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -70,7 +78,7 @@ export function Header() {
           <button
             ref={mobileMenuButtonRef}
             type="button"
-            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
             aria-expanded={menuOpen}
             aria-controls="mobile-primary-navigation"
             onClick={() => setMenuOpen((current) => !current)}
@@ -98,6 +106,7 @@ export function Header() {
               >
                 <Link
                   href={item.href}
+                  onClick={() => setProductsOpen(false)}
                   aria-haspopup="true"
                   aria-expanded={productsOpen}
                   aria-controls="products-segment-dropdown"
@@ -115,6 +124,7 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={() => setProductsOpen(false)}
                 className={
                   item.label === "Request Quote"
                     ? "ml-1 inline-flex min-h-10 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
@@ -194,6 +204,14 @@ function ProductSegmentDropdown({
     >
       <div className="max-h-[70vh] overflow-y-auto p-2">
         <p className="px-3 pb-2 pt-2 text-[11px] font-bold uppercase text-bioaxis-accent">Product segments</p>
+        <Link
+          href="/products"
+          onClick={onNavigate}
+          className="mb-2 flex min-h-11 items-center justify-between border border-bioaxis-accent bg-bioaxis-accent/10 px-3 text-sm font-bold uppercase text-bioaxis-accent"
+        >
+          <span>Search all products</span>
+          <span aria-hidden="true">→</span>
+        </Link>
         {productNavigationSegments.map((segment) => (
           <Link
             key={segment.slug}
@@ -221,6 +239,14 @@ function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div id="mobile-products-navigation" className="border-t border-bioaxis-line bg-bioaxis-panelSoft p-3">
       <div className="grid gap-2">
+        <Link
+          href="/products"
+          onClick={onNavigate}
+          className="flex min-h-12 items-center justify-between gap-3 border border-bioaxis-accent bg-bioaxis-accent/10 px-3 py-3 text-sm font-bold uppercase text-bioaxis-accent"
+        >
+          <span>Search all products</span>
+          <span aria-hidden="true">→</span>
+        </Link>
         {productNavigationSegments.map((segment) => (
           <Link
             key={segment.slug}

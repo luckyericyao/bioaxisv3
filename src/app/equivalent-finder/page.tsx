@@ -5,15 +5,14 @@ import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake"
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
 import { pageVisuals } from "@/data/visualAssets";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
-  title: "Find Compatible Alternatives | BioAxis",
+export const metadata: Metadata = createRouteMetadata({
+  title: "Equivalent Review | BioAxis",
   description:
     "Send BioAxis a catalog number, supplier, product description, or specification sheet for equivalent consumables review.",
-  alternates: {
-    canonical: "/equivalent-finder"
-  }
-};
+  path: "/equivalent-finder"
+});
 
 const intakePriorities = [
   "Format match",
@@ -142,9 +141,9 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
   return (
     <>
       <PageHero
-        eyebrow="Equivalent finder"
-        title="Find compatible alternatives for your current consumables"
-        subtitle="Equivalent review is not a name match. BioAxis compares practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
+        eyebrow="Equivalent review"
+        title="Structure an alternatives review for current consumables"
+        subtitle="This service structures comparison criteria and a sourcing request; it does not automatically return verified candidate products. BioAxis reviews practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
         compact
         tight
         align="start"
@@ -163,7 +162,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
                 title="Send the current product."
                 defaultMessage={defaultMessage}
                 productFieldLabel="Current product, catalog number, or supplier line"
-                submitLabel="Send equivalent request"
+                submitLabel="Send review request"
                 optionalChips={intakePriorities}
               />
             </div>
@@ -256,7 +255,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
             href={requestHref()}
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
-            Request equivalent
+            Request review
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -267,7 +266,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
               className="group border border-bioaxis-line bg-bioaxis-panel p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
               <h3 className="text-sm font-bold uppercase leading-6 text-bioaxis-text transition group-hover:text-bioaxis-accent">{request}</h3>
-              <span className="mt-4 block text-xs font-bold uppercase text-bioaxis-accent">Request equivalent</span>
+              <span className="mt-4 block text-xs font-bold uppercase text-bioaxis-accent">Request review</span>
             </Link>
           ))}
         </div>

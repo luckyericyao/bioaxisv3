@@ -12,7 +12,7 @@ type ProductFamilyCardProps = {
 export function ProductFamilyCard({ family, segmentSlug, categorySlug }: ProductFamilyCardProps) {
   return (
     <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-6 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft">
-      <h3 className="text-xl font-bold uppercase text-bioaxis-text">{family.title}</h3>
+      <h3 className="text-xl font-bold text-bioaxis-text">{family.title}</h3>
       <p className="mt-4 flex-1 text-sm leading-6 text-bioaxis-muted">{family.shortDescription}</p>
       <div className="mt-5">
         <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Common formats</p>

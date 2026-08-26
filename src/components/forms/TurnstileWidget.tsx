@@ -45,6 +45,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
   const [configLoaded, setConfigLoaded] = useState(Boolean(buildTimeSiteKey));
   const [scriptReady, setScriptReady] = useState(false);
   const [widgetIssue, setWidgetIssue] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState("");
 
   useEffect(() => {
     if (buildTimeSiteKey) {
@@ -91,14 +92,20 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
       sitekey: siteKey,
       theme: "light",
       size: compact ? "compact" : "normal",
-      callback: (token) => onTokenChange(token),
+      callback: (token) => {
+        onTokenChange(token);
+        setWidgetIssue("");
+        setVerificationStatus("Verification complete. The request can now be submitted.");
+      },
       "expired-callback": () => {
         onTokenChange("");
+        setVerificationStatus("");
         onFailure?.("expired");
         setWidgetIssue("Verification expired. Please complete the check again before submitting.");
       },
       "error-callback": () => {
         onTokenChange("");
+        setVerificationStatus("");
         onFailure?.("widget_error");
         setWidgetIssue(`Verification could not complete. Try again, or email ${fallbackEmail} directly.`);
       }
@@ -142,6 +149,11 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
       {widgetIssue ? (
         <p role="alert" className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent">
           {widgetIssue}
+        </p>
+      ) : null}
+      {verificationStatus ? (
+        <p role="status" aria-live="polite" className="mt-3 text-xs font-semibold leading-5 text-emerald-700">
+          {verificationStatus}
         </p>
       ) : null}
     </div>

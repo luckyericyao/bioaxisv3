@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Contact BioAxis | Consumables Sourcing Requests",
   description:
     "Contact BioAxis for quotes, equivalent product matching, sample evaluation, documentation requests, and recurring life science consumables supply support.",
-  alternates: {
-    canonical: "/contact"
-  }
-};
+  path: "/contact"
+});
 
 const contactPaths = [
   { title: "Current product or supplier line", body: "A name, catalog reference, supplier line, or rough description is enough to begin." },

@@ -69,7 +69,7 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
             href={article.equivalentHref}
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
-            Find equivalent
+            Review equivalent
           </Link>
           <Link
             href={article.sampleHref}

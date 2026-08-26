@@ -44,9 +44,10 @@ try {
 }
 
 if (!rfqHealth?.ready) {
-  const emailDelivery = rfqHealth?.services?.emailDelivery ?? "unknown";
+  const durableQueue = rfqHealth?.services?.durableQueue ?? "unknown";
   const antiSpam = rfqHealth?.services?.antiSpam ?? "unknown";
-  failures.push(`/api/rfq: not ready (email delivery: ${emailDelivery}; anti-spam: ${antiSpam})`);
+  const internalLookup = rfqHealth?.services?.internalLookup ?? "unknown";
+  failures.push(`/api/rfq: not ready (durable queue: ${durableQueue}; anti-spam: ${antiSpam}; internal lookup: ${internalLookup})`);
 }
 
 if (failures.length > 0) {
@@ -58,5 +59,6 @@ if (failures.length > 0) {
 console.log(`Deployment readiness passed for ${baseUrl}`);
 console.log("- core routes: ready");
 console.log("- security headers: ready");
-console.log("- RFQ email delivery: configured");
+console.log("- RFQ durable queue: reachable");
 console.log("- RFQ anti-spam: configured");
+console.log("- RFQ internal lookup: configured");

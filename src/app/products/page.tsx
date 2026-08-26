@@ -4,15 +4,14 @@ import { ProductCategoryGrid } from "@/components/products/ProductCategoryGrid";
 import { ProductSearch } from "@/components/products/ProductSearch";
 import { getProductSearchResults } from "@/data/productSearch";
 import { productTaxonomy } from "@/data/productTaxonomy";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Products | BioAxis",
   description:
     "Browse BioAxis life science consumables segments for equivalent review, product list intake, documentation support, samples, and RFQ paths.",
-  alternates: {
-    canonical: "/products"
-  }
-};
+  path: "/products"
+});
 
 type ProductsPageProps = {
   searchParams?: Promise<{
@@ -35,12 +34,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <>
-      <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-5 pt-4 sm:pb-6 sm:pt-6" : "pb-12 pt-16"}`}>
+      <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-4 pt-3 sm:pb-6 sm:pt-5" : "pb-12 pt-16"}`}>
         {query ? (
-          <div className="border-b border-bioaxis-line pb-6 pt-3 sm:pb-7 sm:pt-4">
-            <p className="mb-2 text-xs font-semibold uppercase text-bioaxis-accent">Sourcing search</p>
-            <h1 className="max-w-5xl text-3xl font-bold uppercase leading-none text-bioaxis-text sm:text-5xl">Products</h1>
-            <div className="mt-3">
+          <div>
+            <h1 className="sr-only">BioAxis product search</h1>
+            <div>
               <ProductSearch initialQuery={query} />
             </div>
           </div>
@@ -57,7 +55,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                   Browse product lines
                 </Link>
                 <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                  Find equivalent
+                  Review equivalent
                 </Link>
                 <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                   Request quote

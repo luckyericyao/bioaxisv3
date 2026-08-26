@@ -13,7 +13,7 @@ export function SpecificationTable({ title = "Selection criteria", specification
   return (
     <section className="overflow-hidden border border-bioaxis-line bg-bioaxis-panel">
       <div className="border-b border-bioaxis-line p-5">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
+        <h2 className="text-2xl font-bold text-bioaxis-text">{title}</h2>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-[720px] w-full border-collapse text-left">

@@ -92,8 +92,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
         <SourcingListProvider>
+          <a href="#main-content" className="skip-link">Skip to main content</a>
           <Header />
-          <main>{children}</main>
+          <main id="main-content" tabIndex={-1}>{children}</main>
           <Footer />
         </SourcingListProvider>
       </body>

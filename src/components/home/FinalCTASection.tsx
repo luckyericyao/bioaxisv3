@@ -24,7 +24,7 @@ export function FinalCTASection() {
             href="/equivalent-finder"
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line bg-white/[0.72] px-6 text-sm font-bold uppercase text-bioaxis-steel shadow-sm transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
-            Find equivalent
+            Review equivalent
           </Link>
         </div>
       </div>

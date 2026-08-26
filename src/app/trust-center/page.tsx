@@ -4,16 +4,16 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
+import { publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
 import { pageVisuals } from "@/data/visualAssets";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Trust Center | BioAxis",
   description:
     "BioAxis trust center for documentation review, supplier screening, sample-first evaluation, equivalent review, and conservative sourcing claims.",
-  alternates: {
-    canonical: "/trust-center"
-  }
-};
+  path: "/trust-center"
+});
 
 const trustAreas = [
   {
@@ -86,6 +86,31 @@ export default function TrustCenterPage() {
         title="Clear sourcing evidence before procurement decisions."
         subtitle="BioAxis helps structure documentation review, supplier screening, sample-first evaluation, and equivalent review while avoiding unsupported claims about live inventory, automatic interchangeability, or final quality release decisions."
       />
+      <section className="mx-auto w-full max-w-7xl px-5 pt-10 sm:px-8 lg:px-10">
+        <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase text-bioaxis-accent">Public trust evidence</p>
+              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Who, where, how, when, and on what evidence.</h2>
+            </div>
+            <p className="text-xs font-semibold text-bioaxis-dim">Evidence reviewed: {trustEvidenceAsOf}</p>
+          </div>
+          <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {publicTrustFacts.map((fact) => (
+              <div key={fact.label} className="border border-bioaxis-line bg-bioaxis-panel p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-xs font-bold uppercase text-bioaxis-accent">{fact.question} · {fact.label}</dt>
+                  <span className={fact.status === "verified" ? "text-[10px] font-bold uppercase text-emerald-700" : "text-[10px] font-bold uppercase text-amber-700"}>
+                    {fact.status === "verified" ? "Verified" : "Not published"}
+                  </span>
+                </div>
+                <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
+                <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Basis: {fact.source}</p>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <SectionHeader
           title="How BioAxis supports sourcing confidence"
@@ -202,7 +227,7 @@ export default function TrustCenterPage() {
         body="Send the product, current supplier line, catalog reference, or product list. BioAxis can help organize documentation, sample, equivalent, and RFQ next steps."
         primaryLabel="Start RFQ"
         primaryHref="/request-quote?requestType=documentation&sourcePage=trust-center"
-        secondaryLabel="Find equivalent"
+        secondaryLabel="Review equivalent"
         secondaryHref="/equivalent-finder?sourcePage=trust-center"
       />
     </>

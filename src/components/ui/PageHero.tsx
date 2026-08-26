@@ -20,14 +20,14 @@ export function PageHero({ eyebrow, title, subtitle, children, compact = false, 
         }`}
       >
         <div className={mobileContentFirst ? "order-2 lg:order-1" : undefined}>
-          {eyebrow ? <p className={`${compact ? "mb-3" : "mb-5"} text-sm font-semibold uppercase text-bioaxis-accent`}>{eyebrow}</p> : null}
+          {eyebrow ? <p className={`${compact ? "mb-3" : "mb-5"} text-sm font-semibold text-bioaxis-accent`}>{eyebrow}</p> : null}
           <h1
             className={`max-w-5xl font-bold text-bioaxis-text ${
               compact
                 ? tight
                   ? "text-3xl leading-tight sm:text-4xl"
                   : "text-4xl leading-[1.02] sm:text-5xl"
-                : "text-4xl uppercase leading-[0.95] sm:text-6xl lg:text-7xl"
+                : "text-4xl leading-[0.95] sm:text-6xl lg:text-7xl"
             }`}
           >
             {title}

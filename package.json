@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "smoke": "node scripts/route-smoke.mjs",
-    "readiness": "node scripts/deployment-readiness.mjs"
+    "readiness": "node scripts/deployment-readiness.mjs",
+    "test:units-visual": "node scripts/scientific-units-regression.mjs",
+    "test:a11y-checklist": "node scripts/accessibility-regression.mjs"
   },
   "dependencies": {
+    "@vercel/blob": "2.8.0",
     "next": "15.5.21",
     "react": "19.0.0",
     "react-dom": "19.0.0"
@@ -19,7 +22,7 @@
     "brace-expansion@<2.0.0": "1.1.18",
     "brace-expansion@>=2.0.0": "5.0.9",
     "js-yaml": "4.3.1",
-    "nanoid": "3.3.17",
+    "nanoid": "3.3.18",
     "postcss": "8.5.26",
     "sharp": "0.35.3"
   },
@@ -32,6 +35,7 @@
     "eslint": "^9.29.0",
     "eslint-config-next": "15.5.21",
     "postcss": "8.5.26",
+    "playwright": "1.62.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3"
   }

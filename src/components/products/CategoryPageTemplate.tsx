@@ -67,7 +67,7 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
 function DecisionPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
+      <h2 className="text-2xl font-bold text-bioaxis-text">{title}</h2>
       <div className="mt-5 flex flex-wrap gap-2">
         {items.map((item) => (
           <SpecTag key={item}>{item}</SpecTag>

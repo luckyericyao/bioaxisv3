@@ -87,7 +87,7 @@ export default function PrivateLabelPage() {
               Back to Products
             </Link>
             <Link href="/equivalent-finder" className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-              Equivalent Finder
+              Equivalent Review
             </Link>
           </div>
         </div>

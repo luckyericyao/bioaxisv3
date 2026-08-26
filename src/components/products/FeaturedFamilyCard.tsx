@@ -12,7 +12,7 @@ type FeaturedFamilyCardProps = {
 export function FeaturedFamilyCard({ family, segmentSlug, subcategorySlug }: FeaturedFamilyCardProps) {
   return (
     <article id={family.slug} className="scroll-mt-24 border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h3 className="text-xl font-bold uppercase text-bioaxis-text">{family.title}</h3>
+      <h3 className="text-xl font-bold text-bioaxis-text">{family.title}</h3>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{family.description}</p>
       <div className="mt-5 grid gap-5">
         <TagBlock title="Typical products" tags={family.typicalProducts} />

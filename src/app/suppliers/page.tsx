@@ -101,7 +101,7 @@ export default function SuppliersPage() {
         body="Share supplier names, catalog references, product descriptions, quantities, required documents, or equivalent targets. BioAxis will organize the sourcing context for the next quote, sample, document, or comparison step."
         primaryLabel="Send supplier list"
         primaryHref="/request-quote?requestType=product-list-review&sourcePage=%2Fsuppliers&supportPath=product-matching"
-        secondaryLabel="Find equivalents across suppliers"
+        secondaryLabel="Review equivalents across suppliers"
         secondaryHref="/equivalent-finder?sourcePage=%2Fsuppliers&supportPath=equivalent-review"
       />
     </>

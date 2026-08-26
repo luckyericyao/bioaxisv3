@@ -61,7 +61,7 @@ const productItemDetailSections = [
   "Related product paths"
 ];
 
-const requiredHomeCtas = ["Structure my sourcing request", "Find equivalent", "Browse product lines", "Request quote"];
+const requiredHomeCtas = ["Structure my sourcing request", "Review equivalent", "Browse product lines", "Request quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -99,17 +99,18 @@ const requiredWorkflowCtaLabels = [
 ];
 const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "Private label / OEM", "General sourcing question"];
 const equivalentFinderContent = [
-  "Find compatible alternatives for your current consumables",
+  "Structure an alternatives review for current consumables",
+  "does not automatically return verified candidate products",
   "Send the current product.",
-  "Send equivalent request",
+  "Send review request",
   "Fit assessment, not a name match.",
   "A cleaner way to compare alternatives.",
   "Common equivalent requests",
   "BioAxis supports equivalent review and sourcing comparison",
   "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
 ];
-const requiredPrimaryNavigation = ["Ready Supply", "Products", "Equivalent Finder", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
-const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Ready Supply", "Products", "Request Quote", "Equivalent Finder", "Workflows", "Samples", "Quality", "Trust Center", "Resources"];
+const requiredPrimaryNavigation = ["Availability Check", "Products", "Equivalent Review", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
+const requiredFooterNavigation = ["About", "Contact", "Supplier Qualification", "Availability Check", "Products", "Request Quote", "Equivalent Review", "Workflows", "Samples", "Quality", "Trust Center", "Resources"];
 const requiredProductSegments = [
   "Liquid Handling",
   "Lab Plasticware",
@@ -139,7 +140,6 @@ const forbiddenVisiblePatterns = [
   { label: "fake pricing", pattern: /fake pricing/i },
   { label: "fake downloads", pattern: /fake downloads/i },
   { label: "live-stock SKU", pattern: /live-stock SKU/i },
-  { label: "supplier SKU", pattern: /supplier SKU/i },
   { label: "* -", pattern: /\*\s*-/ },
   { label: "• -", pattern: /•\s*-/ },
   { label: "  * -", pattern: /\s{2,}\*\s*-/ },
@@ -502,7 +502,7 @@ for (const route of routes) {
       forbidden: ["Clarify these fields before RFQ"]
     },
     "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips": {
-      required: ["Product item details", "Already using another supplier?", "Request quote for this product"],
+      required: ["Sourcing template details", "Already using another supplier?", "Request quote from this template"],
       forbidden: ["Product fit note"]
     }
   };
@@ -546,7 +546,7 @@ for (const route of routes) {
       "One-stop life science consumables sourcing",
       "The structured sourcing layer for life science consumables.",
       "BioAxis turns SKUs, catalog references, supplier lines, and product lists into comparable options, required documents, sample paths, and RFQ-ready sourcing briefs.",
-      "Only your email is required.",
+      "Email is the only required field.",
       "Priority sourcing lines",
       "Liquid Handling",
       "Cell Culture",
@@ -576,7 +576,7 @@ for (const route of routes) {
       failures.push(`${route}: missing hero search placeholder`);
     }
 
-    ['data-sourcing-intake="compact"', 'data-api-endpoint="/api/rfq"', 'data-rfq-mode="email-plus-context"', 'type="email"'].forEach((marker) => {
+    ['data-sourcing-intake="compact"', 'data-api-endpoint="/api/rfq"', 'data-rfq-mode="durable-queue-plus-context"', 'type="email"'].forEach((marker) => {
       if (!html.includes(marker)) {
         failures.push(`${route}: homepage compact sourcing intake is missing ${marker}`);
       }
@@ -587,7 +587,7 @@ for (const route of routes) {
     }
 
     if (!html.includes('href="/ready-supply"')) {
-      failures.push(`${route}: out-of-stock buyer path should link to Ready Supply`);
+      failures.push(`${route}: out-of-stock buyer path should link to Availability Check`);
     }
 
     ["Matched product family", "Equivalent criteria", "RFQ-ready brief", "Samples and documents"].forEach((label) => {
@@ -628,7 +628,7 @@ for (const route of routes) {
       failures.push(`${route}: missing closed Products aria-expanded state`);
     }
 
-    ["Example product types", "Find equivalent", "Request quote", "Browse families"].forEach((label) => {
+    ["Example product types", "Review equivalent", "Request quote", "Browse families"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product navigation/discovery content ${label}`);
       }
@@ -939,12 +939,12 @@ for (const route of routes) {
 
   if (route.includes("sourcePage=ready-supply")) {
     const readySupplyLabels = route.includes("intent=current-sku")
-      ? ["Request context", "Request draft ready", "Ready Supply current SKU review", "Current SKU or brand", "Quantity and timing"]
-      : ["Request context", "Request draft ready", "Ready Supply availability check", "Current SKU or brand", "Quantity and timing"];
+      ? ["Request context", "Request draft ready", "Availability Check current SKU review", "Current SKU or brand", "Quantity and timing"]
+      : ["Request context", "Request draft ready", "Availability Check request", "Current SKU or brand", "Quantity and timing"];
 
-    [...readySupplyLabels, "Warehouse-backed consumables", "Fast dispatch and replenishment"].forEach((label) => {
+    [...readySupplyLabels, "Supplier-confirmed consumables availability", "Availability and replenishment review"].forEach((label) => {
       if (!pageText.includes(label)) {
-        failures.push(`${route}: missing Ready Supply RFQ handoff ${label}`);
+        failures.push(`${route}: missing Availability Check RFQ handoff ${label}`);
       }
     });
   }
@@ -1028,8 +1028,6 @@ for (const route of routes) {
       "Family",
       "Category",
       "Segment",
-      "Source page",
-      "/products/liquid-handling/pipette-tips/filtered-pipette-tips",
       "BioAxis will include this product context with your request. You can add more details below, but it is not required."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -1067,7 +1065,7 @@ for (const route of routes) {
       "Discuss private-label sourcing",
       "Submit a product list",
       "Back to Products",
-      "Equivalent Finder"
+      "Equivalent Review"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing private-label page content ${label}`);
@@ -1124,18 +1122,16 @@ for (const route of routes) {
 
   if (route === "/ready-supply") {
     [
-      "Ready Supply",
-      "Warehouse-backed lab consumables with faster dispatch, stable quality, and reliable replenishment.",
-      "Warehouse-backed consumables for faster lab procurement.",
-      "Selected lab consumables with warehouse-backed or supplier-coordinated supply paths, documentation review, and faster dispatch coordination.",
-      "Built for labs, distributors, and procurement teams that need reliable supply without repeated sourcing delays.",
-      "BIOAXIS READY SUPPLY",
+      "Availability check",
+      "Check current supply evidence before procurement.",
+      "Send a current SKU, supplier line, specification, quantity, and timing requirement for a request-level availability review.",
+      "BioAxis availability check",
       "Availability",
       "Selected lines only",
       "Confirm per request",
       "Supply mode",
-      "Warehouse-backed or supplier-coordinated",
-      "Supply path identified per request",
+      "Supplier-coordinated",
+      "Supply source and owner identified per request",
       "Dispatch coordination",
       "Timing assessed per request",
       "Documents",
@@ -1145,26 +1141,24 @@ for (const route of routes) {
       "No public timestamp",
       "Replenishment",
       "Repeat supply planning",
-      "Fast dispatch",
-      "BioAxis warehouse",
-      "Stable quality",
-      "Reliable replenishment",
-      "batch traceability",
-      "How Ready Supply Works",
-      "practical replenishment planning rather than public marketplace claims",
-      "Stocked / controlled supply",
-      "Fast availability check",
+      "Current status",
+      "Supplier confirmation",
+      "Evidence requested",
+      "Recurring planning",
+      "How the availability check works",
+      "Submit the current requirement",
+      "Check current evidence",
       "Quality and documentation review",
-      "Dispatch and replenishment",
-      "Typical ready-supply coverage",
-      "Typical ready-supply coverage includes pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and selected private-label lines.",
-      "Ready Supply is not a real-time inventory feed.",
+      "Return a sourcing response",
+      "Typical request coverage",
+      "Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.",
+      "This page is not a real-time inventory feed.",
       "A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available.",
       "What is confirmed per request",
       "Line-level status is returned per request",
       "No public record is treated as current availability",
-      "Need stable consumables with faster delivery?",
-      "Request ready-stock availability"
+      "Need a current answer on availability and dispatch?",
+      "Request availability check"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing ready-supply content ${label}`);
@@ -1184,9 +1178,9 @@ for (const route of routes) {
       }
     });
 
-    [/real-time inventory available/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
+    [/warehouse-backed/i, /BioAxis warehouse/i, /real-time inventory available/i, /guaranteed stock/i, /lowest price/i, /everything available/i].forEach((pattern) => {
       if (pattern.test(pageText)) {
-        failures.push(`${route}: Ready Supply page overclaims ${pattern}`);
+        failures.push(`${route}: Availability Check page overclaims ${pattern}`);
       }
     });
   }
@@ -1204,7 +1198,7 @@ for (const route of routes) {
       "Product List Review",
       "Automation Compatibility Review",
       "Send product context",
-      "Find equivalent",
+      "Review equivalent",
       "Request sample",
       "Request documents",
       "Prepare RFQ",
@@ -1237,7 +1231,7 @@ for (const route of routes) {
       "Recurring supply planning",
       "Automation compatibility review",
       "Send product context",
-      "Find equivalent",
+      "Review equivalent",
       "Request sample",
       "Request documents",
       "Prepare RFQ",
@@ -1565,8 +1559,8 @@ for (const route of routes) {
     if (hrefs.includes("/equivalents")) {
       failures.push(`${route}: legacy /equivalents nav link`);
     }
-    if (!labels.includes("Equivalent Finder")) {
-      failures.push(`${route}: missing Equivalent Finder nav label`);
+    if (!labels.includes("Equivalent Review")) {
+      failures.push(`${route}: missing Equivalent Review nav label`);
     }
 
     hrefs.filter((href) => href.startsWith("/")).forEach((href) => discoveredNavLinks.add(href));
@@ -1577,8 +1571,8 @@ for (const route of routes) {
   if (route === "/" && primaryLabels.length !== 7) {
     failures.push(`${route}: expected exactly 7 primary nav labels, found ${primaryLabels.length}`);
   }
-  if (primaryLabels.includes("Ready Supply") && primaryLabels.includes("Products") && primaryLabels.indexOf("Ready Supply") > primaryLabels.indexOf("Products")) {
-    failures.push(`${route}: Ready Supply should appear before Products in primary navigation`);
+  if (primaryLabels.includes("Availability Check") && primaryLabels.includes("Products") && primaryLabels.indexOf("Availability Check") > primaryLabels.indexOf("Products")) {
+    failures.push(`${route}: Availability Check should appear before Products in primary navigation`);
   }
   requiredPrimaryNavigation.forEach((label) => {
     if (!primaryLabels.includes(label)) {
@@ -1641,7 +1635,7 @@ for (const route of routes) {
       }
     });
 
-    if (!pageText.includes("Request quote for this product")) {
+    if (!pageText.includes("Request quote from this template")) {
       failures.push(`${route}: missing low-friction product quote CTA label`);
     }
 
@@ -1662,7 +1656,7 @@ for (const route of routes) {
     }
     [
       { label: "Request quote", pathname: "/request-quote", params: { requestType: "quote" } },
-      { label: "Find equivalent", pathname: "/request-quote", params: { requestType: "equivalent" } },
+      { label: "Review equivalent", pathname: "/request-quote", params: { requestType: "equivalent" } },
       { label: "Request sample", pathname: "/request-quote", params: { requestType: "sample" } },
       { label: "Ask for documentation", pathname: "/request-quote", params: { requestType: "documentation" } }
     ].forEach((cta) => {
@@ -1753,7 +1747,7 @@ for (const href of resourceGuideLinks) {
   const html = await response.text();
   const pageText = textOnly(html);
   checkForbiddenVisibleStrings(href, pageText);
-  ["Related products", "Find equivalent", "Request sample", "Prepare RFQ"].forEach((label) => {
+  ["Related products", "Review equivalent", "Request sample", "Prepare RFQ"].forEach((label) => {
     if (!pageText.includes(label)) {
       failures.push(`/resources guide link ${href}: missing guide CTA ${label}`);
     }
@@ -1825,21 +1819,24 @@ const segmentTemplateSource = await readRequiredProjectFile("src/components/prod
 const categoryTemplateSource = await readRequiredProjectFile("src/components/products/CategoryPageTemplate.tsx");
 const familyTemplateSource = await readRequiredProjectFile("src/components/products/FamilyPageTemplate.tsx");
 const productItemTemplateSource = await readRequiredProjectFile("src/components/products/ProductItemPageTemplate.tsx");
+const rfqQueueSource = await readRequiredProjectFile("src/lib/server/rfqQueue.ts");
+const rfqInternalRouteSource = await readRequiredProjectFile("src/app/api/rfq/internal/route.ts");
 const envExampleSource = await readRequiredProjectFile(".env.example");
 
-if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("https://api.resend.com/emails")) {
-  failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or Resend delivery call");
+if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("enqueueRfq")) {
+  failures.push("src/app/api/rfq/route.ts: missing RFQ POST route or durable queue write");
 }
 
-if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("https://api.resend.com/emails") || !rfqRouteSource.includes("alertBioAxisFailure")) {
-  failures.push("src/app/api/rfq/route.ts: missing traceable request ID, Resend delivery, or failure alert path");
+if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("enqueueRfq") || !rfqRouteSource.includes("alertBioAxisFailure")) {
+  failures.push("src/app/api/rfq/route.ts: missing traceable request ID, durable queue, or failure alert path");
 }
 
 [
   "export async function GET()",
   "rfqDeliveryReadiness",
-  'emailDelivery: emailDelivery ? "configured" : "missing"',
+  'durableQueue: queueReachable ? "reachable"',
   'antiSpam: antiSpam ? "configured" : "missing"',
+  'internalLookup: internalLookup ? "configured" : "missing"',
   '"Cache-Control": "no-store, max-age=0"'
 ].forEach((marker) => {
   if (!rfqRouteSource.includes(marker)) {
@@ -1847,8 +1844,16 @@ if (!rfqRouteSource.includes("requestId") || !rfqRouteSource.includes("https://a
   }
 });
 
-if (!rfqRouteSource.includes('"not-configured"') || !rfqRouteSource.includes('status: delivery.mode === "not-configured" ? 503 : 502')) {
-  failures.push("src/app/api/rfq/route.ts: missing explicit production delivery configuration failure");
+if (!rfqRouteSource.includes('mode: "durable-queue"') || !rfqRouteSource.includes('{ status: 503 }')) {
+  failures.push("src/app/api/rfq/route.ts: missing durable success mode or explicit queue-write failure");
+}
+
+if (!["put", 'access: "private"', "allowOverwrite: false", "readQueuedRfq", "BLOB_READ_WRITE_TOKEN"].every((marker) => rfqQueueSource.includes(marker))) {
+  failures.push("src/lib/server/rfqQueue.ts: missing private durable queue markers");
+}
+
+if (!["BIOAXIS_INTERNAL_API_KEY", "timingSafeEqual", "readQueuedRfq", "authorization"].every((marker) => rfqInternalRouteSource.includes(marker))) {
+  failures.push("src/app/api/rfq/internal/route.ts: missing authenticated internal lookup markers");
 }
 
 if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes("rfq_delivery") || !analyticsRouteSource.includes("recordBioAxisEvent")) {
@@ -1859,12 +1864,12 @@ if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
   failures.push("src/app/api/request-quote/route.ts: legacy route is not aliased to /api/rfq");
 }
 
-if (rfqRouteSource.includes("NEXT_PUBLIC_RESEND_API_KEY") || submitHelperSource.includes("RESEND_API_KEY")) {
-  failures.push("RFQ implementation: Resend API key appears in browser-facing code or NEXT_PUBLIC key is referenced");
+if (rfqRouteSource.includes("RESEND_API_KEY") || submitHelperSource.includes("RESEND_API_KEY")) {
+  failures.push("RFQ implementation: legacy Resend delivery remains in the active path");
 }
 
 [
-  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify", "request.organization || request.name || request.email", "[BioAxis RFQ]"]],
+  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify", "enqueueRfq", "queue_write"]],
   ["Turnstile config route", turnstileConfigRouteSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "no-store"]],
   ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "This check protects the request form from spam", "crazyowenyao@gmail.com"]],
   ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable", "waitingForVerification", "Complete verification to send"]]
@@ -1967,7 +1972,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
-  ["Product item template", productItemTemplateSource, ["Product item details", "Specifications", "AddToSourcingListButton"]],
+  ["Product item template", productItemTemplateSource, ["Sourcing template details", "Specifications", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
@@ -1977,8 +1982,8 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   }
 });
 
-if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFormSource.includes("data-rfq-mode=\"email-plus-context\"")) {
-  failures.push("SourcingIntakeForm: expected email-plus-context validation mode");
+if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFormSource.includes("data-rfq-mode=\"durable-queue-plus-context\"")) {
+  failures.push("SourcingIntakeForm: expected durable-queue-plus-context validation mode");
 }
 
 if (!sourcingIntakeFormSource.includes("onFocusCapture={trackIntakeStart}") || sourcingIntakeFormSource.includes('trackBioAxisEvent("rfq_start", { requestId: requestIdRef.current, requestType: normalizedRequestType, hasContext: hasPageContext });')) {
@@ -2041,10 +2046,8 @@ if (rfqRouteSource.includes("request.name") && rfqRouteSource.includes("Name is 
   }
 });
 
-["Auto-captured product context", "Optional customer notes", "Optional supplier/catalog/quantity/docs/timeline fields", "Sourcing list items"].forEach((label) => {
-  if (!rfqRouteSource.includes(label)) {
-    failures.push(`src/app/api/rfq/route.ts: missing email section ${label}`);
-  }
+["productContext", "sourcingListItems", "message", "sourcePageUrl"].forEach((label) => {
+  if (!rfqRouteSource.includes(label)) failures.push(`src/app/api/rfq/route.ts: missing normalized queue field ${label}`);
 });
 
 if (!sourcingIntakeFormSource.includes("submitBioAxisRequest") || !sourcingIntakeFormSource.includes('data-api-endpoint="/api/rfq"')) {
@@ -2072,8 +2075,8 @@ for (const [label, source] of [
 }
 
 [
-  "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
-  "Something went wrong while submitting your request. Please email crazyowenyao@gmail.com directly."
+  "Request received and stored for BioAxis review.",
+  "Your request was not stored. Your form is still intact—please retry or email crazyowenyao@gmail.com."
 ].forEach((message) => {
   if (!submitHelperSource.includes(message)) {
     failures.push(`src/lib/submitBioAxisRequest.ts: missing UI state message "${message}"`);
@@ -2090,37 +2093,32 @@ const envMap = new Map(envLines.map((line) => {
 }));
 
 [
-  "RESEND_API_KEY",
-  "BIOAXIS_RFQ_TO_EMAIL",
-  "BIOAXIS_RFQ_FROM_EMAIL",
-  "BIOAXIS_RFQ_REPLY_TO_EMAIL",
+  "BLOB_READ_WRITE_TOKEN",
+  "BIOAXIS_INTERNAL_API_KEY",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   "TURNSTILE_SITE_KEY",
   "TURNSTILE_SECRET_KEY",
   "POSTHOG_API_KEY",
   "POSTHOG_HOST",
-  "BIOAXIS_ALERT_WEBHOOK_URL"
+  "BIOAXIS_ALERT_WEBHOOK_URL",
+  "NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF"
 ].forEach((name) => {
   if (!envMap.has(name)) {
     failures.push(`.env.example: missing ${name}`);
   }
 });
 
-if (envMap.get("RESEND_API_KEY")) {
-  failures.push(".env.example: RESEND_API_KEY should be blank");
-}
-
 if (envMap.get("TURNSTILE_SECRET_KEY")) {
   failures.push(".env.example: TURNSTILE_SECRET_KEY should be blank");
 }
 
-if ([...envMap.keys()].some((name) => name.startsWith("NEXT_PUBLIC_RESEND"))) {
-  failures.push(".env.example: must not expose a NEXT_PUBLIC_RESEND key");
+if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
+  failures.push(".env.example: must not include legacy Resend variables");
 }
 
 ["readySupplyEvidenceRows", "SelectedLineRegistryRecord", "selectedLineRegistry", "No public timestamp"].forEach((label) => {
   if (!readySupplyEvidenceSource.includes(label)) {
-    failures.push(`Ready Supply evidence source: missing ${label}`);
+    failures.push(`Availability Check evidence source: missing ${label}`);
   }
 });
 
@@ -2171,6 +2169,22 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
     failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
   } else {
     console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+
+    const replayResponse = await fetch(new URL("/api/rfq", baseUrl), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requestId: payload.referenceId,
+        email: "must-not-overwrite@example.com",
+        requestType: "quote",
+        message: "Idempotency replay: the original durable record must remain immutable."
+      })
+    });
+    const replayPayload = await replayResponse.json();
+
+    if (!replayResponse.ok || replayPayload?.ok !== true || replayPayload?.replayed !== true) {
+      failures.push(`/api/rfq replay: expected immutable idempotent success, got ${replayResponse.status}`);
+    }
   }
 
   const emailOnlyResponse = await fetch(new URL("/api/rfq", baseUrl), {

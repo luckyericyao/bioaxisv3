@@ -22,7 +22,7 @@ const services = [
     title: "Equivalent Review",
     description: "Compare current consumables against format, material, sterility, packaging, workflow fit, and sample needs.",
     href: "/equivalent-finder",
-    cta: "Find equivalent"
+    cta: "Review equivalent"
   },
   {
     title: "Sample Coordination",

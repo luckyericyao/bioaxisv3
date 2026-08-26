@@ -23,7 +23,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
           <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a sourcing template.</h2>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
-          Product item pages contain the detailed RFQ fields, documentation requests, equivalent review inputs, and sample-first notes.
+          These are configurable sourcing templates, not verified supplier SKUs. Each page collects RFQ fields, documentation needs, equivalent-review inputs, and sample notes.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -46,7 +46,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
 
           return (
             <article key={productItem.slug} className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5">
-              <h3 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{productItem.name}</h3>
+              <h3 className="text-lg font-bold leading-tight text-bioaxis-text">{productItem.name}</h3>
               <p className="mt-3 flex-1 text-sm leading-6 text-bioaxis-muted">{productItem.shortDescription}</p>
               <div className="mt-5 grid gap-2">
                 {productItem.commonSpecifications.slice(0, 3).map((specification) => (
@@ -60,7 +60,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
                   href={productHref}
                   className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
                 >
-                  View product
+                  View template
                 </Link>
                 <Link
                   href={quoteHref}
@@ -72,7 +72,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
                   href={equivalentHref}
                   className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                 >
-                  Find equivalent
+                  Review equivalent
                 </Link>
               </div>
             </article>

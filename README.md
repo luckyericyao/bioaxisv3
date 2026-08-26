@@ -18,9 +18,9 @@ npm run smoke
 npm run readiness
 ```
 
-`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile configuration, and RFQ email-delivery configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports only configured/missing states and never returns environment-variable values.
+`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile, the private durable RFQ queue, and internal lookup configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports status labels only and never returns secret values.
 
-## RFQ Email Delivery
+## Durable RFQ Delivery
 
 The request quote, contact, sample, equivalent, and product-list review flows post to the server-side `POST /api/rfq` endpoint. The legacy `POST /api/request-quote` endpoint is kept as a compatibility alias.
 
@@ -34,13 +34,13 @@ Supported `requestType` values:
 - `contact`
 - `product-list-review`
 
-Set these environment variables in Vercel Project Settings -> Environment Variables to send RFQ emails through Resend:
+RFQ success means the validated request was written to a private Vercel Blob store. Email is not the system of record and is not required for acceptance.
+
+Set these environment variables in Vercel:
 
 ```bash
-RESEND_API_KEY=your_resend_api_key
-BIOAXIS_RFQ_TO_EMAIL=crazyowenyao@gmail.com
-BIOAXIS_RFQ_FROM_EMAIL=rfq@your-verified-domain.example
-BIOAXIS_RFQ_REPLY_TO_EMAIL=crazyowenyao@gmail.com
+BLOB_READ_WRITE_TOKEN=provided_when_the_private_blob_store_is_connected
+BIOAXIS_INTERNAL_API_KEY=generate_a_long_random_server_only_value
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
@@ -49,31 +49,27 @@ POSTHOG_HOST=https://us.i.posthog.com
 BIOAXIS_ALERT_WEBHOOK_URL=your_server_only_alert_webhook_url
 ```
 
-Use a verified Resend sender/domain for `BIOAXIS_RFQ_FROM_EMAIL` in production. During development, if no verified sender is available, leave it blank and the API route uses Resend's safe test sender.
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is the public Cloudflare Turnstile widget key. `TURNSTILE_SITE_KEY` is an optional server-served alias. `TURNSTILE_SECRET_KEY`, `BLOB_READ_WRITE_TOKEN`, and `BIOAXIS_INTERNAL_API_KEY` are server-only. `POST /api/rfq` validates the Turnstile token before writing the request.
 
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is the public Cloudflare Turnstile widget key. `TURNSTILE_SITE_KEY` is an optional server-served alias for the same public site key, useful when you want the browser to fetch the key from `/api/turnstile/config` at runtime. `TURNSTILE_SECRET_KEY` is server-only and must never be exposed with a `NEXT_PUBLIC_` prefix. When both a site key and `TURNSTILE_SECRET_KEY` are configured, `POST /api/rfq` validates the Turnstile token before sending email.
+### Vercel Blob and Turnstile setup
 
-### Vercel, Resend, and Turnstile setup
+1. Create a private Vercel Blob store and connect it to production, preview, and development.
+2. Generate a long random `BIOAXIS_INTERNAL_API_KEY` and store it as a sensitive server-only variable.
+3. Create a Cloudflare Turnstile widget for the production domain.
+4. Configure the Turnstile site and secret keys.
+5. Redeploy, then require `GET /api/rfq` to return HTTP 200 with `durableQueue: reachable`, `antiSpam: configured`, and `internalLookup: configured`.
+6. Submit a test RFQ, retain its reference ID, and retrieve it internally with `GET /api/rfq/internal?requestId=...` plus `Authorization: Bearer <BIOAXIS_INTERNAL_API_KEY>`.
+7. Confirm the stored record contains the same request ID and expected test context. Never paste the internal key into tickets, screenshots, logs, or client code.
 
-1. Create a Resend account.
-2. Create a Resend API key.
-3. Verify the production sender domain in Resend before using a branded sender address.
-4. Create a Cloudflare Turnstile widget for the production domain.
-5. Add `RESEND_API_KEY`, `BIOAXIS_RFQ_TO_EMAIL`, `BIOAXIS_RFQ_FROM_EMAIL`, `BIOAXIS_RFQ_REPLY_TO_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` or `TURNSTILE_SITE_KEY`, and `TURNSTILE_SECRET_KEY` in Vercel Project Settings -> Environment Variables.
-6. Redeploy the Vercel project so the API route can read the variables.
-7. Submit a test RFQ from `/request-quote`.
-8. Check the destination inbox and spam folder.
-9. If email is not received, check Vercel function logs and Resend delivery logs.
+Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them. The same request ID is carried through validation, queue-write, success, and failure events. Set `BIOAXIS_ALERT_WEBHOOK_URL` for server-side failure alerts; alert delivery never changes whether the durable write succeeded.
 
-Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are always visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them in PostHog. The same intake-generated `requestId` is carried through RFQ, Turnstile, and Resend status records. Set `BIOAXIS_ALERT_WEBHOOK_URL` to receive a server-side alert when delivery or analytics persistence fails; alert delivery is time-limited and never blocks the sourcing response.
+To test durable delivery:
 
-To test email delivery:
-
-1. Deploy with all RFQ email environment variables configured.
+1. Deploy with Blob, internal lookup, and Turnstile variables configured.
 2. Submit `/request-quote` with a valid email. Product context, sourcing list items, and optional notes are included when available.
-3. Confirm the destination inbox receives the BioAxis request email and the UI shows a request received state.
+3. Confirm the UI shows the reference ID, then retrieve the same record through the authenticated internal endpoint.
 
-When `RESEND_API_KEY` or `BIOAXIS_RFQ_TO_EMAIL` is missing in local development, the API can return a captured development response so builds and local smoke tests remain usable. In a Vercel deployment, missing delivery configuration returns an explicit `503` response and the form shows its delivery error state; it does not report a successful request. The API never exposes `RESEND_API_KEY` to browser code.
+If the queue write fails, the API returns HTTP 503 with the same request ID, the browser preserves all form data, and no success state is shown. Queue and internal lookup credentials are never exposed to browser code.
 
 ## Smoke Test
 
@@ -94,9 +90,9 @@ SMOKE_BASE_URL=https://bioaxisv3.vercel.app npm run smoke
 - `/` - premium dark landing page with search-led sourcing flow
 - `/products` - data-driven product universe search and directory
 - `/about` - BioAxis positioning and sourcing-platform boundaries
-- `/contact` - backend-backed contact and sourcing request form
+- `/contact` - durable-queue-backed contact and sourcing request form
 - `/supplier-qualification` - supplier qualification, documentation, lot traceability, sample-first evaluation, and equivalent review approach
-- `/request-quote` - email-first RFQ form backed by `POST /api/rfq`
-- `/equivalent-finder` - equivalent consumables request entry point
+- `/request-quote` - low-friction RFQ form backed by a private durable queue
+- `/equivalent-finder` - equivalent-review intake (not an automatic candidate finder)
 - `/samples` - sample evaluation request flow
 - `/quality` - documentation, qualification, and switching support

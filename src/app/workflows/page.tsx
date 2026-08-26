@@ -26,7 +26,7 @@ export default function WorkflowsPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <CTAButton href="/request-quote?requestType=product-list-review">Map my workflow</CTAButton>
           <CTAButton href="/equivalent-finder?requestType=equivalent" variant="secondary">
-            Request equivalent options
+            Request equivalent review
           </CTAButton>
           <CTAButton href="/request-quote?requestType=product-list-review" variant="secondary">
             Send product list
@@ -168,7 +168,7 @@ export default function WorkflowsPage() {
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
             <CTAButton href="/request-quote?requestType=product-list-review">Request workflow mapping</CTAButton>
             <CTAButton href="/equivalent-finder?requestType=equivalent" variant="secondary">
-              Find equivalent products
+              Review equivalent criteria
             </CTAButton>
             <CTAButton href="/request-quote?requestType=product-list-review" variant="secondary">
               Send product list

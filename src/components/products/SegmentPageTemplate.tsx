@@ -26,7 +26,7 @@ export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.7fr] lg:items-end">
           <div>
             <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Next step</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a {segment.shortTitle} category.</h2>
+            <h2 className="text-3xl font-bold text-bioaxis-text sm:text-4xl">Choose a {segment.shortTitle} category.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Category pages reveal product families, buyer filters, and request context. Item-level details stay deeper in the flow.

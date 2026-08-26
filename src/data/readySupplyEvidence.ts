@@ -31,9 +31,9 @@ export const readySupplyEvidenceRows: ReadySupplyEvidenceRow[] = [
   },
   {
     label: "Supply mode",
-    status: "Warehouse-backed or supplier-coordinated",
-    confirmation: "Supply path identified per request",
-    boundary: "Warehouse and supplier evidence remain the source"
+    status: "Supplier-coordinated",
+    confirmation: "Supply source and owner identified per request",
+    boundary: "No warehouse ownership or stocked status is published without line-level evidence"
   },
   {
     label: "Documents",

@@ -29,11 +29,11 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
   ];
   const requestLinks = [
     {
-      label: "Request quote for this product",
+      label: "Request quote from this template",
       href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "quote" })
     },
     {
-      label: "Find equivalent",
+      label: "Review equivalent",
       href: buildRequestHref({ segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug, requestType: "equivalent" })
     },
     {
@@ -67,6 +67,9 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         align="start"
       >
         <div className="grid gap-3">
+          <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
+            Sourcing template · not a verified supplier SKU
+          </p>
           <div className="flex flex-wrap gap-2">
             {productItem.commonSpecifications.slice(0, 5).map((specification) => (
               <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
@@ -89,7 +92,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
               href={requestLinks[1].href}
               className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
-              Find equivalent
+              Review equivalent
             </Link>
           </div>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
@@ -112,7 +115,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           </details>
           <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Request context: supplier, catalog reference, documentation, and final fit are confirmed per request.
+            This page describes a configurable sourcing target. Supplier, catalog reference, exact specifications, availability, documentation, and final fit are confirmed per request.
           </p>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
@@ -162,7 +165,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Product item details</p>
+          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Sourcing template details</p>
           <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
         </div>
         <div className="grid gap-3">
@@ -188,7 +191,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                   href={getProductItemHref(segment.slug, category.slug, family.slug, item.slug)}
                   className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent"
                 >
-                  <span className="text-sm font-bold uppercase text-bioaxis-text">{item.name}</span>
+                  <span className="text-sm font-bold text-bioaxis-text">{item.name}</span>
                   <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">{item.shortDescription}</span>
                 </Link>
               ))}

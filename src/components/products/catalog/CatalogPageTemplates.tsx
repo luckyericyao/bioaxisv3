@@ -121,7 +121,7 @@ function ContextActions({
         href={catalogEquivalentHref(segment, category, family, product)}
         className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
-        Find equivalent
+        Review equivalent
       </Link>
       <Link
         href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
@@ -164,7 +164,7 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
             <p className="text-sm font-semibold uppercase text-bioaxis-accent">Next layer</p>
-            <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">Choose a {segment.name} category.</h2>
+            <h2 className="mt-3 text-3xl font-bold text-bioaxis-text sm:text-5xl">Choose a {segment.name} category.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Category pages expose product families, buyer filters, product-list previews, and RFQ context without dumping item-level detail here.
@@ -178,7 +178,7 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
               <p className="text-xs font-bold uppercase text-bioaxis-dim">{segment.index} / Category</p>
-              <h3 className="mt-3 text-xl font-bold uppercase text-bioaxis-text transition group-hover:text-bioaxis-accent">{category.name}</h3>
+              <h3 className="mt-3 text-xl font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{category.name}</h3>
               <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{category.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {category.tags.slice(0, 4).map((tag) => (
@@ -278,7 +278,7 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
               href={productCatalogHref(segment.slug, category.slug, family.slug)}
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
-              <h3 className="text-lg font-bold uppercase text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
+              <h3 className="text-lg font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
               <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{family.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {family.typicalSpecs.slice(0, 4).map((spec) => (
@@ -419,6 +419,9 @@ export function CatalogProductPage({
       />
       <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact tight>
         <div className="grid gap-3">
+          <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
+            Sourcing template · not a verified supplier SKU
+          </p>
           <div className="flex flex-wrap gap-2">
             {product.tags.slice(0, 6).map((tag) => (
               <SpecTag key={tag}>{tag}</SpecTag>
@@ -445,7 +448,7 @@ export function CatalogProductPage({
             </div>
           </details>
           <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Sourcing configuration profile. Supplier, catalog reference, documentation, and final fit are confirmed per request.
+            Sourcing configuration template. Supplier, catalog reference, exact specifications, availability, documentation, and final fit are confirmed per request.
           </p>
           <Link href={productCatalogHref(segment.slug, category.slug, family.slug)} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {family.name}
@@ -554,7 +557,7 @@ export function CatalogProductPage({
                 href={productCatalogHref(segment.slug, category.slug, family.slug, related.slug)}
                 className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
               >
-                <span className="text-sm font-bold uppercase text-bioaxis-text">{related.name}</span>
+                <span className="text-sm font-bold text-bioaxis-text">{related.name}</span>
                 <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
               </Link>
             ))}
@@ -594,7 +597,7 @@ function CatalogCTA({
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10">
         <div>
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">RFQ sourcing workflow</p>
-          <h2 className="mt-3 max-w-3xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">{title}</h2>
+          <h2 className="mt-3 max-w-3xl text-3xl font-bold text-bioaxis-text sm:text-5xl">{title}</h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis will include this catalog context automatically. Add supplier, catalog number, quantity, samples, or documentation requirements only if useful.
           </p>

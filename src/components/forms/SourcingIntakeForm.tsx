@@ -412,7 +412,7 @@ export function SourcingIntakeForm({
     const validationError = validate();
 
     if (validationError) {
-      trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "validation", requestType: state.requestType });
+      trackBioAxisEvent("rfq_validation_failed", { requestId: requestIdRef.current, reason: "validation", requestType: state.requestType });
       if (turnstileAvailable && !turnstileToken) {
         trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current, reason: "missing_token" });
       }
@@ -423,6 +423,7 @@ export function SourcingIntakeForm({
 
     setError("");
     setSubmitting(true);
+    trackBioAxisEvent("rfq_submit", { requestId: requestIdRef.current, requestType: state.requestType, stage: "client_submit" });
 
     try {
       const detailChipText = state.detailChips.length ? `Selected review details: ${state.detailChips.join(", ")}` : "";
@@ -488,11 +489,11 @@ export function SourcingIntakeForm({
 
   if (submitted) {
     return (
-      <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 sm:p-8">
+      <div role="status" aria-live="polite" tabIndex={-1} className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 outline-none sm:p-8">
         <p className="text-sm font-semibold uppercase text-bioaxis-accent">{successTitle}</p>
         <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">BioAxis has the sourcing context.</h2>
         <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.
+          {submitted.message}
         </p>
         <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">BioAxis will review</p>
@@ -522,9 +523,12 @@ export function SourcingIntakeForm({
       onFocusCapture={trackIntakeStart}
       noValidate
       data-api-endpoint="/api/rfq"
-      data-rfq-mode="email-plus-context"
+      data-rfq-mode="durable-queue-plus-context"
       className={["grid gap-5", compact ? "text-sm" : ""].filter(Boolean).join(" ")}
     >
+      <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {submitting ? "Submitting request." : waitingForVerification ? "Verification is required before submission." : "Request form ready."}
+      </p>
       <div className="hidden" aria-hidden="true">
         <label htmlFor="sourcing-intake-website">Website</label>
         <input
@@ -542,7 +546,7 @@ export function SourcingIntakeForm({
           <p className={compact ? "sr-only" : "text-sm font-semibold uppercase text-bioaxis-accent"}>Sourcing intake</p>
           <h2 className={compact ? "text-lg font-bold text-bioaxis-text sm:text-2xl" : "mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl"}>{title}</h2>
           <div className={compact ? "mt-1 grid gap-1 text-xs leading-5 text-bioaxis-muted" : "mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted"}>
-            <p>{compact ? "Only your email is required." : primaryHelperText}</p>
+            <p>{compact ? "Email is the only required field." : primaryHelperText}</p>
             {compact ? <span className="sr-only">{primaryHelperText}</span> : null}
             {hasPageContext ? <p className="hidden sm:block">{contextualHelperText}</p> : null}
             {handoffNotice ? <p className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-bioaxis-steel">{handoffNotice}</p> : null}
@@ -593,7 +597,7 @@ export function SourcingIntakeForm({
             </p>
           ) : null}
           {waitingForVerification ? (
-            <p className={compact ? "order-2 sr-only" : "order-2 text-sm font-semibold leading-6 text-bioaxis-muted"}>
+            <p aria-live="polite" className={compact ? "order-2 sr-only" : "order-2 text-sm font-semibold leading-6 text-bioaxis-muted"}>
               {compact ? "Complete verification above to send." : "Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly."}
             </p>
           ) : null}
@@ -603,12 +607,12 @@ export function SourcingIntakeForm({
           >
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || waitingForVerification}
               className="order-1 inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-7 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-wait disabled:opacity-70 sm:order-2"
             >
               {submitButtonLabel}
             </button>
-            <p className="order-2 max-w-xl text-sm leading-6 text-bioaxis-muted sm:order-1">{optionalHelperText}</p>
+            {compact ? null : <p className="order-2 max-w-xl text-sm leading-6 text-bioaxis-muted sm:order-1">{optionalHelperText}</p>}
           </div>
         </div>
         <details data-request-starters="true" className="group mt-4 border border-bioaxis-line bg-bioaxis-black/70">
@@ -624,7 +628,7 @@ export function SourcingIntakeForm({
                   key={starter.label}
                   type="button"
                   onClick={() => applyStarterTemplate(starter.value)}
-                  className="min-h-10 border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-left text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+                  className="min-h-11 border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-left text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
                   aria-label={`Use ${starter.label} request starter`}
                 >
                   {starter.label}
@@ -758,7 +762,7 @@ function RequestContextCard({
   compact?: boolean;
 }) {
   const rows = contextRows(productContext);
-  const compactPairs = [rows.slice(0, 2), rows.slice(2, 4), rows.slice(4, 6)].filter((pair) => pair.length > 0);
+  const compactRows = rows.filter(([label]) => label !== "Source page");
 
   return (
     <section data-product-context-summary="true" className={compact ? "mb-3 border border-bioaxis-accent/60 bg-bioaxis-panel p-2 sm:p-4" : "border border-bioaxis-accent/60 bg-bioaxis-panel p-4 sm:p-5"}>
@@ -783,15 +787,11 @@ function RequestContextCard({
         )}
       </p>
       {compact ? (
-        <dl className="mt-1 grid gap-0 border-t border-bioaxis-line pt-1">
-          {compactPairs.map((pair, index) => (
-            <div key={`${pair[0]?.[0] ?? "context"}-${index}`} className="grid min-w-0 grid-cols-2 gap-3">
-              {pair.map(([label, value]) => (
-                <div key={label} className="flex min-w-0 items-baseline gap-1">
-                  <dt className="shrink-0 truncate text-[9px] font-bold uppercase text-bioaxis-dim">{label}:</dt>
-                  <dd className="min-w-0 break-words text-[10px] font-semibold leading-4 text-bioaxis-text" title={value}>{value}</dd>
-                </div>
-              ))}
+        <dl className="mt-2 grid gap-1 border-t border-bioaxis-line pt-2 sm:grid-cols-2 sm:gap-x-4">
+          {compactRows.map(([label, value]) => (
+            <div key={label} className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-1.5">
+              <dt className="text-[10px] font-bold uppercase text-bioaxis-dim">{label}:</dt>
+              <dd className="min-w-0 text-xs font-semibold leading-5 text-bioaxis-text" title={value}>{value}</dd>
             </div>
           ))}
         </dl>
@@ -820,7 +820,7 @@ function SourcingListSummary({ items }: { items: SourcingListSummaryItem[] }) {
       <div className="mt-6 grid gap-3">
         {items.slice(0, 6).map((item, index) => (
           <article key={item.id ?? `${item.title}-${index}`} className="border border-bioaxis-line bg-bioaxis-black p-4">
-            <h3 className="text-sm font-bold uppercase text-bioaxis-text">{item.title ?? item.productTitle ?? `Sourcing item ${index + 1}`}</h3>
+            <h3 className="text-sm font-bold text-bioaxis-text">{item.title ?? item.productTitle ?? `Sourcing item ${index + 1}`}</h3>
             <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{sourcingItemPath(item) || item.href || "Product context captured"}</p>
           </article>
         ))}

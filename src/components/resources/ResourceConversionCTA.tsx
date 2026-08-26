@@ -7,7 +7,7 @@ const actions = [
     primary: true
   },
   {
-    label: "Find equivalent",
+    label: "Review equivalent",
     href: "/equivalent-finder?sourcePage=resource-guide",
     primary: false
   },

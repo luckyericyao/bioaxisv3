@@ -4,6 +4,7 @@ import { ProductItemPageTemplate } from "@/components/products/ProductItemPageTe
 import { getAllProductItemPaths, getProductItemBySlug } from "@/data/productItems";
 import { CatalogProductPage } from "@/components/products/catalog/CatalogPageTemplates";
 import { getAllCatalogProductPaths, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
 type ProductItemPageProps = {
   params: Promise<{
@@ -45,11 +46,11 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
 
   if (match) {
     return {
-      title: `${match.productItem.name} | ${match.family.name} | BioAxis`,
-      description: match.productItem.shortDescription,
-      alternates: {
-        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}/${match.productItem.slug}`
-      },
+      ...createRouteMetadata({
+      title: `${match.productItem.name} sourcing template | BioAxis`,
+      description: `${match.productItem.shortDescription} This is a configurable sourcing template, not a verified supplier SKU.`,
+      path: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}/${match.productItem.slug}`
+      }),
       ...(match.productItem.indexable ? {} : { robots: { index: false, follow: true } })
     };
   }
@@ -58,11 +59,11 @@ export async function generateMetadata({ params }: ProductItemPageProps): Promis
 
   if (catalogMatch) {
     return {
-      title: `${catalogMatch.product.name} | ${catalogMatch.family.name} | BioAxis`,
-      description: catalogMatch.product.description,
-      alternates: {
-        canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}/${catalogMatch.product.slug}`
-      },
+      ...createRouteMetadata({
+      title: `${catalogMatch.product.name} sourcing template | BioAxis`,
+      description: `${catalogMatch.product.description} This is a sourcing template; supplier SKU and specifications require confirmation.`,
+      path: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}/${catalogMatch.product.slug}`
+      }),
       robots: { index: false, follow: true }
     };
   }

@@ -4,15 +4,14 @@ import { ComparisonTable } from "@/components/ui/ComparisonTable";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Quality & Documentation | BioAxis",
   description:
     "BioAxis helps request and organize supplier documentation, specification review, and sample-first evaluation where available.",
-  alternates: {
-    canonical: "/quality"
-  }
-};
+  path: "/quality"
+});
 
 const documentationExamples = [
   "CoA",

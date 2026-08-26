@@ -4,15 +4,14 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "About BioAxis | Life Science Consumables Sourcing",
   description:
     "BioAxis turns life science consumables requests into structured sourcing paths for equivalents, samples, documentation, RFQs, and recurring supply review.",
-  alternates: {
-    canonical: "/about"
-  }
-};
+  path: "/about"
+});
 
 const serve = [
   "Biotech research and platform teams",
