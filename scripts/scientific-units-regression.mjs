@@ -21,7 +21,8 @@ const failures = [];
 try {
   for (const testCase of cases) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
-    await page.goto(new URL(testCase.path, baseUrl).toString(), { waitUntil: "networkidle" });
+    await page.goto(new URL(testCase.path, baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await page.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
 
     const match = await page.evaluate((unit) => {
       const elements = [...document.querySelectorAll("body *")].filter((element) => {

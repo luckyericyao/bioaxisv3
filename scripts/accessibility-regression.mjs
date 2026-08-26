@@ -11,7 +11,8 @@ function check(condition, message) {
 
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
-  await page.goto(new URL("/request-quote?requestType=quote", baseUrl).toString(), { waitUntil: "networkidle" });
+  await page.goto(new URL("/request-quote?requestType=quote", baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 45_000 });
+  await page.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
 
   await page.keyboard.press("Tab");
   const firstFocus = await page.evaluate(() => ({
@@ -48,7 +49,8 @@ try {
   check(undersized.length === 0, `mobile targets below 44px: ${undersized.join(", ")}`);
 
   await page.setViewportSize({ width: 320, height: 640 });
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
+  await page.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
   const narrowLayout = await page.evaluate(() => ({
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     characterWrap: [...document.querySelectorAll('[data-product-context-summary="true"] dd')].some((node) => {
@@ -62,10 +64,14 @@ try {
   check(!narrowLayout.characterWrap, "320px context value wraps approximately one character per line");
 
   const desktop = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-  await desktop.goto(new URL("/products", baseUrl).toString(), { waitUntil: "networkidle" });
+  await desktop.goto(new URL("/products", baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 45_000 });
+  await desktop.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
+  await desktop.waitForTimeout(750);
   const primaryNavigation = desktop.getByRole("navigation", { name: "Primary navigation" });
   await primaryNavigation.getByRole("link", { name: "Products", exact: true }).focus();
-  check(await primaryNavigation.getByRole("link", { name: "Search all products" }).isVisible(), "desktop Products menu does not open from keyboard focus");
+  const desktopSearchLink = primaryNavigation.getByRole("link", { name: "Search all products" });
+  await desktopSearchLink.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
+  check(await desktopSearchLink.isVisible(), "desktop Products menu does not open from keyboard focus");
   await desktop.keyboard.press("Escape");
   check(!(await primaryNavigation.getByRole("link", { name: "Search all products" }).isVisible().catch(() => false)), "Escape does not close the Products menu");
   await desktop.close();
