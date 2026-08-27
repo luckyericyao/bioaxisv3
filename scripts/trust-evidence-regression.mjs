@@ -107,6 +107,11 @@ for (const testCase of cases) {
     failures.push(`${testCase.name}: completion flag does not match verified count`);
   }
 
+  const expectedEvidenceDate = testCase.expectedVerified > 0 ? testCase.env.NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF : "Not supplied";
+  if (profile.trustEvidenceAsOf !== expectedEvidenceDate) {
+    failures.push(`${testCase.name}: expected public evidence date ${expectedEvidenceDate}, got ${profile.trustEvidenceAsOf}`);
+  }
+
   if (testCase.forbiddenValue && publicTrustFacts.some((fact) => fact.value.includes(testCase.forbiddenValue))) {
     failures.push(`${testCase.name}: incomplete value leaked into public facts`);
   }

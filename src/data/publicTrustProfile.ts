@@ -7,6 +7,7 @@ export type PublicTrustFact = {
 };
 
 const configuredTrustEvidenceAsOf = process.env.NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF?.trim() || "";
+export const implementationEvidenceAsOf = "2026-08-28";
 const consumerEmailDomains = new Set([
   "126.com",
   "163.com",
@@ -65,10 +66,6 @@ function configuredFact(
   };
 }
 
-export const trustEvidenceAsOf = isPublishableEvidenceDate(configuredTrustEvidenceAsOf)
-  ? configuredTrustEvidenceAsOf
-  : "2026-08-26";
-
 export const publicTrustFacts: PublicTrustFact[] = [
   configuredFact(
     "Who",
@@ -108,14 +105,14 @@ export const publicTrustFacts: PublicTrustFact[] = [
     label: "Request handling",
     value: "Validated requests receive a reference ID and are stored in a private durable queue for internal lookup before success is shown.",
     status: "verified",
-    source: `Production intake implementation and storage configuration reviewed ${trustEvidenceAsOf}.`
+    source: `Production intake implementation and storage configuration reviewed ${implementationEvidenceAsOf}.`
   },
   {
     question: "Evidence",
     label: "Data use",
     value: "Submitted contact and product context is used for sourcing review, follow-up, operational traceability, and request security. It is not published as a customer catalog.",
     status: "verified",
-    source: `Privacy notice and intake payload reviewed ${trustEvidenceAsOf}.`
+    source: `Privacy notice and intake payload reviewed ${implementationEvidenceAsOf}.`
   }
 ];
 
@@ -128,6 +125,10 @@ const requiredPublicTrustLabels = new Set([
   "Response target"
 ]);
 const requiredPublicTrustFacts = publicTrustFacts.filter((fact) => requiredPublicTrustLabels.has(fact.label));
+
+export const trustEvidenceAsOf = requiredPublicTrustFacts.some((fact) => fact.status === "verified")
+  ? configuredTrustEvidenceAsOf
+  : "Not supplied";
 
 export const publicTrustEvidenceSummary = {
   verified: requiredPublicTrustFacts.filter((fact) => fact.status === "verified").length,

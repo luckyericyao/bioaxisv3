@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             <h2 className="text-base font-bold uppercase text-bioaxis-text">{title}</h2>
             <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{body}</p>
             {title === "Contact" ? (
-              <Link href="/contact" className="mt-4 inline-flex min-h-11 items-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+              <Link href="/contact#contact-form" className="mt-4 inline-flex min-h-11 items-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
                 Open Contact form
               </Link>
             ) : null}

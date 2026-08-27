@@ -27,7 +27,7 @@ export default function ContactPage() {
         subtitle="Only your email is required. BioAxis can route a rough product note, supplier line, catalog reference, product list, or workflow question into the right sourcing next step."
       />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
-        <div>
+        <div className="order-2 lg:order-1">
           <SectionHeader
             title="Useful context, not required fields."
             subtitle="Send the question as-is. These details simply help BioAxis reduce back-and-forth around product fit, documentation, samples, and recurring supply context."
@@ -41,7 +41,9 @@ export default function ContactPage() {
             ))}
           </div>
         </div>
-        <ContactForm />
+        <div id="contact-form" className="order-1 scroll-mt-24 lg:order-2">
+          <ContactForm />
+        </div>
       </section>
     </>
   );

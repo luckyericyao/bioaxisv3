@@ -698,7 +698,7 @@ for (const route of routes) {
       }
     });
 
-    if (!html.includes('href="/contact"')) {
+    if (!html.includes('href="/contact#contact-form"')) {
       failures.push(`${route}: missing direct Contact form link`);
     }
   }
@@ -1824,6 +1824,7 @@ const analyticsRouteSource = await readRequiredProjectFile("src/app/api/analytic
 const turnstileConfigRouteSource = await readRequiredProjectFile("src/app/api/turnstile/config/route.ts");
 const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
 const requestQuotePageSource = await readRequiredProjectFile("src/app/request-quote/page.tsx");
+const contactPageSource = await readRequiredProjectFile("src/app/contact/page.tsx");
 const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisRequest.ts");
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
@@ -1900,6 +1901,16 @@ if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.
 if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
   failures.push("src/app/api/request-quote/route.ts: legacy route is not aliased to /api/rfq");
 }
+
+[
+  'id="contact-form"',
+  "order-2 lg:order-1",
+  "order-1 scroll-mt-24 lg:order-2"
+].forEach((marker) => {
+  if (!contactPageSource.includes(marker)) {
+    failures.push(`Contact page: missing mobile form-first marker ${marker}`);
+  }
+});
 
 if (rfqRouteSource.includes("RESEND_API_KEY") || submitHelperSource.includes("RESEND_API_KEY")) {
   failures.push("RFQ implementation: legacy Resend delivery remains in the active path");
@@ -2163,6 +2174,7 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
 
 [
   "isPublishableEvidenceDate",
+  "implementationEvidenceAsOf",
   "isEnterpriseDomainEmail",
   "consumerEmailDomains",
   "NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE",
@@ -2177,7 +2189,7 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   }
 });
 
-if (!trustCenterSource.includes("Identity and service commitments:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
+if (!trustCenterSource.includes("Owner profile evidence reviewed:") || !trustCenterSource.includes("Implementation evidence reviewed:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
   failures.push("Trust Center: missing visible verified-evidence summary");
 }
 
