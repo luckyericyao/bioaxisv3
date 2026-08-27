@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Services | BioAxis",
   description:
     "BioAxis sourcing workflows for product matching, equivalent review, sample coordination, documentation checks, RFQ preparation, and recurring supply planning.",
-  alternates: {
-    canonical: "/services"
-  }
-};
+  path: "/services"
+});
 
 const services = [
   {

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Terms | BioAxis",
   description: "Terms for using the BioAxis sourcing support platform.",
-  alternates: { canonical: "/terms" }
-};
+  path: "/terms"
+});
 
 export default function TermsPage() {
   return (

@@ -335,6 +335,28 @@ for (const route of routes) {
   const pageText = textOnly(html);
   const mainText = textOnly(mainBlock(html));
   const rawPageText = textContentLike(html);
+  const canonicalPath = new URL(route, baseUrl).pathname;
+  const canonicalUrl = new URL(canonicalPath, "https://bioaxisv3.vercel.app").toString().replace(/\/$/, canonicalPath === "/" ? "" : "/");
+
+  [
+    `rel="canonical" href="${canonicalUrl}"`,
+    'property="og:title"',
+    'property="og:description"',
+    `property="og:url" content="${canonicalUrl}"`,
+    'property="og:image"',
+    'name="twitter:card" content="summary_large_image"',
+    'name="twitter:title"',
+    'name="twitter:description"',
+    'name="twitter:image"'
+  ].forEach((marker) => {
+    if (!html.includes(marker)) {
+      failures.push(`${route}: missing route-level metadata ${marker}`);
+    }
+  });
+
+  if ((canonicalPath.startsWith("/products/") || canonicalPath.startsWith("/resources/")) && !html.includes('"@type":"BreadcrumbList"')) {
+    failures.push(`${route}: missing BreadcrumbList structured data`);
+  }
   if (route === "/products") {
     productsHtml = html;
   }

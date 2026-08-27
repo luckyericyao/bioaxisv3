@@ -5,15 +5,14 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Samples | BioAxis",
   description:
     "Request samples before switching suppliers, evaluating equivalents, testing sterile or low-retention formats, or qualifying automation-compatible consumables.",
-  alternates: {
-    canonical: "/samples"
-  }
-};
+  path: "/samples"
+});
 
 export default function SamplesPage() {
   return (

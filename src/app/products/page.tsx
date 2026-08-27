@@ -90,7 +90,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               {productTaxonomy.map((segment) => (
                 <Link key={segment.slug} href={`/products/${segment.slug}`} className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
                   <h3 className="text-sm font-bold uppercase text-bioaxis-text">{segment.name}</h3>
-                  <p className="mt-3 line-clamp-2 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</p>
+                  <p className="mt-3 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</p>
                 </Link>
               ))}
             </div>

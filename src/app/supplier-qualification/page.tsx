@@ -3,15 +3,14 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Supplier Qualification | BioAxis",
   description:
     "Review BioAxis supplier qualification approach for documentation review, lot traceability, sample-first evaluation, equivalent product validation, and recurring supply support.",
-  alternates: {
-    canonical: "/supplier-qualification"
-  }
-};
+  path: "/supplier-qualification"
+});
 
 const documents = [
   "CoA",

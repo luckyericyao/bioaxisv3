@@ -42,7 +42,7 @@ export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
               <h3 className="text-lg font-bold uppercase text-bioaxis-text transition group-hover:text-bioaxis-accent">
                 {category.title}
               </h3>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{category.shortDescription}</p>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{category.shortDescription}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {category.commonFormats.slice(0, 3).map((format) => (
                   <span key={format} className="border border-white/[0.12] bg-bioaxis-black px-2 py-1 text-[11px] text-bioaxis-steel">

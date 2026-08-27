@@ -66,7 +66,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           <h2 className="text-lg font-bold leading-tight text-bioaxis-text">{segment.title}</h2>
           <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
         </div>
-        <p className="mt-4 line-clamp-2 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
+        <p className="mt-4 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
 
         <div className="mt-5">
           <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Example product types</p>

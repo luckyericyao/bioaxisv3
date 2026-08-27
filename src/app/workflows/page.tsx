@@ -5,15 +5,14 @@ import { CTAButton } from "@/components/ui/CTAButton";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { workflowProductFamilyMap, workflows, workflowUseCases } from "@/data/workflows";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Drug R&D Workflows | BioAxis",
   description:
     "Map drug discovery and development workflows to consumables, reagents, formats, equivalents, samples, documentation, and quote support.",
-  alternates: {
-    canonical: "/workflows"
-  }
-};
+  path: "/workflows"
+});
 
 export default function WorkflowsPage() {
   return (

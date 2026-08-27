@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getResourceArticleBySlug, resourceArticles } from "@/data/resourceArticles";
 import { PageHero } from "@/components/ui/PageHero";
 import { ResourceConversionCTA } from "@/components/resources/ResourceConversionCTA";
+import { createRouteMetadata } from "@/lib/siteMetadata";
+import { Breadcrumbs } from "@/components/products/Breadcrumbs";
 
 type ResourceArticlePageProps = {
   params: Promise<{
@@ -25,13 +27,11 @@ export async function generateMetadata({ params }: ResourceArticlePageProps): Pr
     };
   }
 
-  return {
+  return createRouteMetadata({
     title: `${article.title} | BioAxis Resources`,
     description: article.description,
-    alternates: {
-      canonical: `/resources/${article.slug}`
-    }
-  };
+    path: `/resources/${article.slug}`
+  });
 }
 
 export default async function ResourceArticlePage({ params }: ResourceArticlePageProps) {
@@ -44,6 +44,7 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Resources", href: "/resources" }, { label: article.title }]} />
       <PageHero eyebrow="Resource guide" title={article.title} subtitle={article.description} />
       <article className="mx-auto w-full max-w-4xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="grid gap-10">

@@ -5,6 +5,7 @@ import { getAllSubcategoryPaths, getSubcategoryBySlug } from "@/data/productTaxo
 import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { CatalogCategoryPage } from "@/components/products/catalog/CatalogPageTemplates";
 import { getAllCatalogCategoryPaths, getCategoryBySlug as getCatalogCategoryBySlug } from "@/data/productCatalog";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
 type SubcategoryPageProps = {
   params: Promise<{
@@ -32,13 +33,11 @@ export async function generateMetadata({ params }: SubcategoryPageProps): Promis
   if (match) {
     const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug);
 
-    return {
+    return createRouteMetadata({
       title: priorityContent?.metaTitle ?? match.subcategory.seoTitle,
       description: priorityContent?.metaDescription ?? match.subcategory.metaDescription,
-      alternates: {
-        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}`
-      }
-    };
+      path: `/products/${match.segment.slug}/${match.subcategory.slug}`
+    });
   }
 
   const catalogMatch = getCatalogCategoryBySlug(segmentSlug, subcategorySlug);
@@ -49,13 +48,11 @@ export async function generateMetadata({ params }: SubcategoryPageProps): Promis
     };
   }
 
-  return {
+  return createRouteMetadata({
     title: `${catalogMatch.category.name} | ${catalogMatch.segment.name} | BioAxis`,
     description: catalogMatch.category.description,
-    alternates: {
-      canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}`
-    }
-  };
+    path: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}`
+  });
 }
 
 export default async function ProductSubcategoryPage({ params }: SubcategoryPageProps) {

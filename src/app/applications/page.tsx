@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Applications | BioAxis",
   description:
     "Map BioAxis application contexts into product lines, equivalent review, sample needs, documentation checks, and quote-ready sourcing briefs.",
-  alternates: {
-    canonical: "/applications"
-  }
-};
+  path: "/applications"
+});
 
 const applications = [
   {

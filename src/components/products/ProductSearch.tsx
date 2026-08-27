@@ -231,7 +231,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       </div>
       <p className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent sm:mt-4">{highlightText(resultPath(result), query)}</p>
       <h3 className="mt-2 text-base font-bold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
-      <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
+      <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
       <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
         <div className="mt-4 hidden flex-wrap gap-2 sm:flex">

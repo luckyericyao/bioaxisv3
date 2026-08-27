@@ -179,7 +179,7 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
             >
               <p className="text-xs font-bold uppercase text-bioaxis-dim">{segment.index} / Category</p>
               <h3 className="mt-3 text-xl font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{category.name}</h3>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{category.description}</p>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{category.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {category.tags.slice(0, 4).map((tag) => (
                   <SpecTag key={tag}>{tag}</SpecTag>
@@ -279,7 +279,7 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
               <h3 className="text-lg font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-bioaxis-muted">{family.description}</p>
+              <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{family.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {family.typicalSpecs.slice(0, 4).map((spec) => (
                   <SpecTag key={spec}>{spec}</SpecTag>

@@ -4,15 +4,14 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Suppliers & Coverage | BioAxis",
   description:
     "BioAxis helps labs turn supplier lists, catalog references, equivalent needs, quote requests, and documentation constraints into structured consumables sourcing review.",
-  alternates: {
-    canonical: "/suppliers"
-  }
-};
+  path: "/suppliers"
+});
 
 const supplierReviewPaths = [
   {

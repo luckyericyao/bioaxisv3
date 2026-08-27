@@ -6,15 +6,22 @@ Run the automated check against a local or deployed build:
 npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
 ```
 
-The script verifies the skip link, landmark/label semantics, keyboard-open and Escape-close behavior, live RFQ status, approximately 44 px mobile controls, and 320 px overflow/context wrapping.
+The script is a release gate for `/`, a populated product search, one product sourcing template, and `/request-quote`. It verifies:
 
-Complete these human checks on `/`, `/products?q=filtered%20200%20%C2%B5L%20tips`, one product template, and `/request-quote` before each production release:
+- skip link, landmarks, labels, persistent RFQ live status, keyboard-open and Escape-close behavior;
+- a simulated durable-write failure that preserves the email and announces an alert, followed by a simulated success that announces its reference in a polite status region;
+- approximately 44 px mobile controls, hidden RFQ source paths, and 320 px overflow/context wrapping;
+- axe-core WCAG 2 A/AA, WCAG 2.1 A/AA, and WCAG 2.2 AA rules, including visible text color contrast;
+- reflow at 640 px and 320 px CSS viewports, equivalent to 200% and 400% zoom from 1280 px, including focused controls beneath the sticky header;
+- WCAG text-spacing overrides without horizontal overflow or clipped text.
+
+Complete these assistive-technology and visual spot checks on the same four routes before each production release. They complement rather than replace the automated gate:
 
 - Keyboard: use Tab, Shift+Tab, Enter, Space, and Escape without a pointer. Focus must remain visible, follow reading order, reach every action, and never become trapped.
 - Screen reader: with VoiceOver on macOS/iOS, navigate by landmarks and headings; confirm form labels, required state, verification completion, errors, success, and the request reference are announced once and in context.
-- Zoom/reflow: at 200% and 400% browser zoom, confirm no two-dimensional scrolling is needed at a 1280 px viewport, content is not clipped, and sticky navigation does not cover focused controls.
-- Text spacing: apply WCAG text-spacing overrides (line height 1.5, paragraph spacing 2, letter spacing 0.12em, word spacing 0.16em); confirm no content or controls overlap.
-- Contrast: check normal text at 4.5:1, large text at 3:1, controls/focus indicators at 3:1, including hover, focus, disabled, success, warning, and error states.
+- Zoom/reflow: spot-check actual browser zoom at 200% and 400% and compare with the automated reflow result.
+- Text spacing: spot-check the automated WCAG text-spacing result in one desktop and one mobile browser.
+- Contrast: visually confirm focus, hover, disabled, success, warning, and error states; axe-core automatically gates visible default-state text contrast.
 - Mobile: at 320 px and 375 px, confirm tap targets are approximately 44 by 44 px, the RFQ context is one column, no long source path is shown, and no value wraps one character per line.
 - Scientific units: run `npm run test:units-visual`; visually inspect µL, µm, mL, and °C screenshots and confirm the rendered glyphs match the DOM and announced text.
 

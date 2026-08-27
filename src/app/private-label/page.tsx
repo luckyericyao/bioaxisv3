@@ -3,15 +3,14 @@ import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SpecTag } from "@/components/ui/SpecTag";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Private Label / OEM Consumables | BioAxis",
   description:
     "Evaluate private-label, neutral-label, and OEM-style sourcing options for selected life science consumables with BioAxis support for specifications, samples, documentation, RFQs, and recurring supply planning.",
-  alternates: {
-    canonical: "/private-label"
-  }
-};
+  path: "/private-label"
+});
 
 const audienceNeeds = [
   "Buyers who want alternative branding or neutral-label consumables.",

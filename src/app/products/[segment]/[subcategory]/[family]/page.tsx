@@ -5,6 +5,7 @@ import { getAllFamilyPaths, getFamilyBySlug } from "@/data/productTaxonomy";
 import { getPriorityProductContent } from "@/data/priorityProductContent";
 import { CatalogFamilyPage } from "@/components/products/catalog/CatalogPageTemplates";
 import { getAllCatalogFamilyPaths, getFamilyBySlug as getCatalogFamilyBySlug } from "@/data/productCatalog";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
 type FamilyPageProps = {
   params: Promise<{
@@ -33,13 +34,11 @@ export async function generateMetadata({ params }: FamilyPageProps): Promise<Met
   if (match) {
     const priorityContent = getPriorityProductContent(match.segment.slug, match.subcategory.slug, match.family.slug);
 
-    return {
+    return createRouteMetadata({
       title: priorityContent?.metaTitle ?? match.family.seoTitle,
       description: priorityContent?.metaDescription ?? match.family.metaDescription,
-      alternates: {
-        canonical: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}`
-      }
-    };
+      path: `/products/${match.segment.slug}/${match.subcategory.slug}/${match.family.slug}`
+    });
   }
 
   const catalogMatch = getCatalogFamilyBySlug(segmentSlug, subcategorySlug, familySlug);
@@ -50,13 +49,11 @@ export async function generateMetadata({ params }: FamilyPageProps): Promise<Met
     };
   }
 
-  return {
+  return createRouteMetadata({
     title: `${catalogMatch.family.name} | ${catalogMatch.category.name} | BioAxis`,
     description: catalogMatch.family.description,
-    alternates: {
-      canonical: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}`
-    }
-  };
+    path: `/products/${catalogMatch.segment.slug}/${catalogMatch.category.slug}/${catalogMatch.family.slug}`
+  });
 }
 
 export default async function ProductFamilyPage({ params }: FamilyPageProps) {

@@ -5,15 +5,14 @@ import { PageHero } from "@/components/ui/PageHero";
 import { ProcessSteps } from "@/components/ui/ProcessSteps";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { supportTypes } from "@/data/supportTypes";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Support | BioAxis",
   description:
     "Dedicated BioAxis sourcing support for product matching, equivalents, samples, documentation, quote preparation, recurring supply, and automation review.",
-  alternates: {
-    canonical: "/support"
-  }
-};
+  path: "/support"
+});
 
 export default function SupportPage() {
   return (

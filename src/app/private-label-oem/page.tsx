@@ -6,15 +6,14 @@ import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { pageVisuals } from "@/data/visualAssets";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createRouteMetadata({
   title: "Private-Label & OEM-Style Consumables Sourcing | BioAxis",
   description:
     "Evaluate neutral-label, private-label, and OEM-style life science consumables sourcing paths with BioAxis support for documentation, samples, packaging, and recurring supply review.",
-  alternates: {
-    canonical: "/private-label-oem"
-  }
-};
+  path: "/private-label-oem"
+});
 
 const priorityCategories = [
   "Pipette tips",

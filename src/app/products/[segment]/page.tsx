@@ -4,6 +4,7 @@ import { getTaxonomySegmentBySlug, productTaxonomy } from "@/data/productTaxonom
 import { SegmentPageTemplate } from "@/components/products/SegmentPageTemplate";
 import { CatalogSegmentPage } from "@/components/products/catalog/CatalogPageTemplates";
 import { getSegmentBySlug as getCatalogSegmentBySlug, productCatalogMenuSegments } from "@/data/productCatalog";
+import { createRouteMetadata } from "@/lib/siteMetadata";
 
 type SegmentPageProps = {
   params: Promise<{
@@ -21,13 +22,11 @@ export async function generateMetadata({ params }: SegmentPageProps): Promise<Me
   const segment = getTaxonomySegmentBySlug(segmentSlug);
 
   if (segment) {
-    return {
+    return createRouteMetadata({
       title: segment.seoTitle,
       description: segment.metaDescription,
-      alternates: {
-        canonical: `/products/${segment.slug}`
-      }
-    };
+      path: `/products/${segment.slug}`
+    });
   }
 
   const catalogSegment = getCatalogSegmentBySlug(segmentSlug);
@@ -38,13 +37,11 @@ export async function generateMetadata({ params }: SegmentPageProps): Promise<Me
     };
   }
 
-  return {
+  return createRouteMetadata({
     title: `${catalogSegment.name} | BioAxis Products`,
     description: catalogSegment.shortDescription,
-    alternates: {
-      canonical: `/products/${catalogSegment.slug}`
-    }
-  };
+    path: `/products/${catalogSegment.slug}`
+  });
 }
 
 export default async function ProductSegmentPage({ params }: SegmentPageProps) {
