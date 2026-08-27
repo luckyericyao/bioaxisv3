@@ -36,7 +36,6 @@ type TurnstileConfigResponse = {
 };
 
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
-const fallbackEmail = "crazyowenyao@gmail.com";
 
 export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -107,7 +106,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
         onTokenChange("");
         setVerificationStatus("");
         onFailure?.("widget_error");
-        setWidgetIssue(`Verification could not complete. Try again, or email ${fallbackEmail} directly.`);
+        setWidgetIssue("Verification could not complete. Your entries remain in the form; try the check again.");
       }
     });
 
@@ -138,7 +137,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
         }}
         onError={() => {
           onFailure?.("script_error");
-          setWidgetIssue(`Verification could not load. Email ${fallbackEmail} directly if the form is blocked.`);
+          setWidgetIssue("Verification could not load. Your entries remain in the form; keep this page open and retry when the check is available.");
         }}
       />
       <div className="mb-2">

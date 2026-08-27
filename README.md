@@ -84,7 +84,7 @@ Evidence variables are public website content. Use a publishable registration, a
 
 `npm run readiness` reports the published evidence count without taking the RFQ service offline when owner evidence is incomplete. Use `REQUIRE_TRUST_EVIDENCE=1 npm run readiness` as the strict publication gate after all four records have been approved.
 
-Run `npm run test:trust-evidence` to verify fail-closed behavior for missing sources, invalid or future dates, consumer email domains, and complete four-record publication.
+Run `npm run test:trust-evidence` to verify fail-closed behavior for missing sources, invalid or future dates, consumer email domains, complete four-record publication, and the absence of hard-coded personal email addresses in production source.
 
 ## Smoke Test
 

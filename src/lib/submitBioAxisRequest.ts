@@ -57,7 +57,7 @@ export type BioAxisRequestResponse = {
 };
 
 export const requestSuccessMessage = "Request received and stored for BioAxis review.";
-export const requestErrorMessage = "Your request was not stored. Your form is still intact—please retry or email crazyowenyao@gmail.com.";
+export const requestErrorMessage = "Your request was not stored. Your form is still intact—keep this page open and retry.";
 
 function utmFromLocation() {
   if (typeof window === "undefined") {

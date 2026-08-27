@@ -82,6 +82,15 @@ const cases = [
 
 const failures = [];
 
+async function sourceFiles(directory) {
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    return entry.isDirectory() ? sourceFiles(entryPath) : [entryPath];
+  }));
+  return files.flat();
+}
+
 for (const testCase of cases) {
   const profile = evaluateProfile(testCase.env);
   const { publicTrustEvidenceSummary, publicTrustFacts } = profile;
@@ -104,6 +113,16 @@ for (const testCase of cases) {
 
   console.log(`${testCase.name}: ${publicTrustEvidenceSummary.verified}/4 verified`);
 }
+
+const consumerEmailPattern = /[A-Z0-9._%+-]+@(126\.com|163\.com|gmail\.com|hotmail\.com|icloud\.com|outlook\.com|qq\.com|yahoo\.com)/i;
+for (const file of await sourceFiles(path.join(process.cwd(), "src"))) {
+  const contents = await fs.readFile(file, "utf8");
+  if (consumerEmailPattern.test(contents)) {
+    failures.push(`${path.relative(process.cwd(), file)}: production source exposes a consumer-domain email address`);
+  }
+}
+
+console.log("production source consumer-email scan: no public personal address");
 
 if (failures.length > 0) {
   console.error("Trust evidence regression failed:");

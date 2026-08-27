@@ -496,7 +496,7 @@ export async function POST(request: Request) {
     void alertBioAxisFailure({ requestId: referenceId, stage: "queue_write", detail: "The durable RFQ queue rejected or failed to store the request." });
     return NextResponse.json(
       {
-        error: "Your request was not stored. Your form is still intact—please retry using this reference or email crazyowenyao@gmail.com.",
+        error: "Your request was not stored. Your form is still intact—keep this page open and retry using this reference.",
         referenceId,
         requestId: referenceId
       },

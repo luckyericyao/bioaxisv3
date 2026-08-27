@@ -598,7 +598,7 @@ export function SourcingIntakeForm({
           ) : null}
           {waitingForVerification ? (
             <p aria-live="polite" className={compact ? "order-2 sr-only" : "order-2 text-sm font-semibold leading-6 text-bioaxis-muted"}>
-              {compact ? "Complete verification above to send." : "Complete the verification above to send the request. If verification will not load, email crazyowenyao@gmail.com directly."}
+              {compact ? "Complete verification above to send." : "Complete the verification above to send the request. If it will not load, keep this page open so your entries remain available, then retry."}
             </p>
           ) : null}
           <div

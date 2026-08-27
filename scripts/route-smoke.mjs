@@ -691,6 +691,18 @@ for (const route of routes) {
     });
   }
 
+  if (route === "/privacy") {
+    ["For a privacy question or removal request", "Open Contact form", "reference ID after durable storage succeeds"].forEach((label) => {
+      if (!pageText.includes(label)) {
+        failures.push(`${route}: missing durable privacy-contact path ${label}`);
+      }
+    });
+
+    if (!html.includes('href="/contact"')) {
+      failures.push(`${route}: missing direct Contact form link`);
+    }
+  }
+
   if (route === "/resources") {
     [
       "Filtered vs non-filtered pipette tips",
@@ -1896,7 +1908,7 @@ if (rfqRouteSource.includes("RESEND_API_KEY") || submitHelperSource.includes("RE
 [
   ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify", "enqueueRfq", "queue_write"]],
   ["Turnstile config route", turnstileConfigRouteSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "no-store"]],
-  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "This check protects the request form from spam", "crazyowenyao@gmail.com"]],
+  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "Your entries remain in the form", "This check protects the request form from spam"]],
   ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable", "waitingForVerification", "Complete verification to send"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
@@ -2101,7 +2113,7 @@ for (const [label, source] of [
 
 [
   "Request received and stored for BioAxis review.",
-  "Your request was not stored. Your form is still intact—please retry or email crazyowenyao@gmail.com."
+  "Your request was not stored. Your form is still intact—keep this page open and retry."
 ].forEach((message) => {
   if (!submitHelperSource.includes(message)) {
     failures.push(`src/lib/submitBioAxisRequest.ts: missing UI state message "${message}"`);
