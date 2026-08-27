@@ -192,6 +192,38 @@ async function checkRfqStateAnnouncements() {
   await page.close();
 }
 
+async function checkPrivacyContactHandoff() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await openRoute(page, "/privacy");
+  const contactLink = page.getByRole("link", { name: "Open Contact form", exact: true });
+  check(
+    (await contactLink.getAttribute("href")) === "/contact#contact-form",
+    "privacy contact path does not target the form anchor"
+  );
+  await contactLink.click();
+  await page.waitForURL(/\/contact#contact-form$/, { timeout: 15_000 }).catch(() => undefined);
+  await page.locator("#contact-form").waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+
+  const handoff = await page.evaluate(() => {
+    const form = document.querySelector("#contact-form");
+    const context = form?.previousElementSibling;
+    const formRect = form?.getBoundingClientRect();
+    const contextRect = context?.getBoundingClientRect();
+    return {
+      hash: location.hash,
+      formBeforeContext: Boolean(formRect && contextRect && formRect.top + scrollY < contextRect.top + scrollY),
+      formFitsViewport: Boolean(formRect && formRect.width <= document.documentElement.clientWidth + 1),
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+    };
+  });
+
+  check(handoff.hash === "#contact-form", "privacy contact path loses the form anchor after navigation");
+  check(handoff.formBeforeContext, "390px Contact page places optional context before the form");
+  check(handoff.formFitsViewport, "390px Contact form is wider than the viewport");
+  check(!handoff.horizontalOverflow, "390px privacy-to-contact handoff has horizontal overflow");
+  await page.close();
+}
+
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   await openRoute(page, "/request-quote?requestType=quote");
@@ -263,6 +295,8 @@ try {
     await checkRfqStateAnnouncements();
   }
 
+  await checkPrivacyContactHandoff();
+
   for (const route of criticalRoutes) {
     const auditPage = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
     await openRoute(auditPage, route.path);
@@ -291,6 +325,7 @@ console.log("- skip link, landmarks, labels, and live RFQ status");
 console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
 console.log("- preserved form failure alert and polite success/reference announcement");
+console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- axe-core WCAG A/AA semantics and color contrast on four critical routes");
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
 console.log("- WCAG text-spacing overrides without overflow or clipped text");

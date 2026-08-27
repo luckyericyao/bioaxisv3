@@ -107,7 +107,7 @@ npm run test:units-visual -- https://bioaxisv3.vercel.app
 npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
 ```
 
-The accessibility gate covers the four critical routes documented in `docs/accessibility-acceptance.md`, including axe-core WCAG A/AA contrast and semantics, 200%/400% zoom-equivalent reflow, WCAG text spacing, keyboard behavior, mobile target size, and locally simulated RFQ failure/success announcements. The route smoke test also requires route-specific canonical, Open Graph, Twitter, and hierarchical BreadcrumbList metadata.
+The accessibility gate covers the four critical routes documented in `docs/accessibility-acceptance.md`, including axe-core WCAG A/AA contrast and semantics, 200%/400% zoom-equivalent reflow, WCAG text spacing, keyboard behavior, mobile target size, the privacy-to-contact anchored mobile handoff, and locally simulated RFQ failure/success announcements. The route smoke test also requires route-specific canonical, Open Graph, Twitter, and hierarchical BreadcrumbList metadata.
 
 ## Routes
 
