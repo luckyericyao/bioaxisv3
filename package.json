@@ -10,7 +10,8 @@
     "smoke": "node scripts/route-smoke.mjs",
     "readiness": "node scripts/deployment-readiness.mjs",
     "test:units-visual": "node scripts/scientific-units-regression.mjs",
-    "test:a11y-checklist": "node scripts/accessibility-regression.mjs"
+    "test:a11y-checklist": "node scripts/accessibility-regression.mjs",
+    "test:trust-evidence": "node scripts/trust-evidence-regression.mjs"
   },
   "dependencies": {
     "@vercel/blob": "2.8.0",

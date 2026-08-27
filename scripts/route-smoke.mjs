@@ -1843,6 +1843,9 @@ const familyTemplateSource = await readRequiredProjectFile("src/components/produ
 const productItemTemplateSource = await readRequiredProjectFile("src/components/products/ProductItemPageTemplate.tsx");
 const rfqQueueSource = await readRequiredProjectFile("src/lib/server/rfqQueue.ts");
 const rfqInternalRouteSource = await readRequiredProjectFile("src/app/api/rfq/internal/route.ts");
+const publicTrustProfileSource = await readRequiredProjectFile("src/data/publicTrustProfile.ts");
+const trustCenterSource = await readRequiredProjectFile("src/app/trust-center/page.tsx");
+const trustEvidenceRegressionSource = await readRequiredProjectFile("scripts/trust-evidence-regression.mjs");
 const envExampleSource = await readRequiredProjectFile(".env.example");
 
 if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("enqueueRfq")) {
@@ -2123,6 +2126,14 @@ const envMap = new Map(envLines.map((line) => {
   "POSTHOG_API_KEY",
   "POSTHOG_HOST",
   "BIOAXIS_ALERT_WEBHOOK_URL",
+  "NEXT_PUBLIC_BIOAXIS_LEGAL_NAME",
+  "NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_OPERATING_REGION",
+  "NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_BUSINESS_EMAIL",
+  "NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET",
+  "NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE",
   "NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF"
 ].forEach((name) => {
   if (!envMap.has(name)) {
@@ -2137,6 +2148,39 @@ if (envMap.get("TURNSTILE_SECRET_KEY")) {
 if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   failures.push(".env.example: must not include legacy Resend variables");
 }
+
+[
+  "isPublishableEvidenceDate",
+  "isEnterpriseDomainEmail",
+  "consumerEmailDomains",
+  "NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE",
+  "NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE",
+  "publicTrustEvidenceSummary",
+  "Incomplete verification record"
+].forEach((marker) => {
+  if (!publicTrustProfileSource.includes(marker)) {
+    failures.push(`Public trust evidence: missing verification gate ${marker}`);
+  }
+});
+
+if (!trustCenterSource.includes("Identity and service commitments:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
+  failures.push("Trust Center: missing visible verified-evidence summary");
+}
+
+[
+  "empty configuration fails closed",
+  "facts without evidence remain unpublished",
+  "consumer email is not an enterprise contact",
+  "invalid calendar date fails closed",
+  "future evidence date fails closed",
+  "complete evidence publishes all required facts"
+].forEach((marker) => {
+  if (!trustEvidenceRegressionSource.includes(marker)) {
+    failures.push(`Trust evidence regression: missing case ${marker}`);
+  }
+});
 
 ["readySupplyEvidenceRows", "SelectedLineRegistryRecord", "selectedLineRegistry", "No public timestamp"].forEach((label) => {
   if (!readySupplyEvidenceSource.includes(label)) {

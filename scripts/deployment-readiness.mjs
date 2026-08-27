@@ -8,11 +8,33 @@ async function get(pathname) {
   });
 }
 
-for (const pathname of ["/", "/products", "/request-quote", "/equivalent-finder", "/ready-supply"]) {
+for (const pathname of ["/", "/products", "/request-quote", "/equivalent-finder", "/ready-supply", "/trust-center"]) {
   const response = await get(pathname);
 
   if (!response.ok) {
     failures.push(`${pathname}: HTTP ${response.status}`);
+  }
+}
+
+const trustCenterResponse = await get("/trust-center");
+let trustEvidenceStatus = "unknown";
+
+if (trustCenterResponse.ok) {
+  const trustCenterText = (await trustCenterResponse.text())
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ");
+  const trustEvidenceMatch = trustCenterText.match(/Identity and service commitments:\s*(\d+)\s*of\s*(\d+)\s*verified/i);
+
+  if (!trustEvidenceMatch) {
+    failures.push("/trust-center: missing identity and service evidence summary");
+  } else {
+    const verified = Number(trustEvidenceMatch[1]);
+    const required = Number(trustEvidenceMatch[2]);
+    trustEvidenceStatus = `${verified}/${required} verified`;
+
+    if (process.env.REQUIRE_TRUST_EVIDENCE === "1" && verified !== required) {
+      failures.push(`/trust-center: public trust evidence incomplete (${trustEvidenceStatus})`);
+    }
   }
 }
 
@@ -62,3 +84,4 @@ console.log("- security headers: ready");
 console.log("- RFQ durable queue: reachable");
 console.log("- RFQ anti-spam: configured");
 console.log("- RFQ internal lookup: configured");
+console.log(`- public trust evidence: ${trustEvidenceStatus}`);

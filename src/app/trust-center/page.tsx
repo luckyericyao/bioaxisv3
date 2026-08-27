@@ -4,7 +4,7 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
-import { publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
+import { publicTrustEvidenceSummary, publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
 import { pageVisuals } from "@/data/visualAssets";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
@@ -93,7 +93,12 @@ export default function TrustCenterPage() {
               <p className="text-xs font-bold uppercase text-bioaxis-accent">Public trust evidence</p>
               <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Who, where, how, when, and on what evidence.</h2>
             </div>
-            <p className="text-xs font-semibold text-bioaxis-dim">Evidence reviewed: {trustEvidenceAsOf}</p>
+            <div className="text-xs font-semibold leading-5 text-bioaxis-dim sm:text-right">
+              <p>Evidence reviewed: {trustEvidenceAsOf}</p>
+              <p>
+                Identity and service commitments: {publicTrustEvidenceSummary.verified} of {publicTrustEvidenceSummary.required} verified
+              </p>
+            </div>
           </div>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (

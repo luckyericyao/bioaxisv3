@@ -71,6 +71,21 @@ To test durable delivery:
 
 If the queue write fails, the API returns HTTP 503 with the same request ID, the browser preserves all form data, and no success state is shown. Queue and internal lookup credentials are never exposed to browser code.
 
+## Public Trust Evidence
+
+Trust Center identity and service commitments are fail-closed. A fact is shown as `Verified` only when its publishable value, its evidence source, and a valid non-future `NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF` date are all configured. Incomplete records remain hidden behind the explicit `Not published` state.
+
+- Legal identity: `NEXT_PUBLIC_BIOAXIS_LEGAL_NAME` + `NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE`
+- Operating region/address: `NEXT_PUBLIC_BIOAXIS_OPERATING_REGION` + `NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE`
+- Enterprise-domain email: `NEXT_PUBLIC_BIOAXIS_BUSINESS_EMAIL` + `NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE`
+- Response target: `NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET` + `NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE`
+
+Evidence variables are public website content. Use a publishable registration, address/domain-ownership record, or response-policy reference; never place private credentials or internal-only documents in them.
+
+`npm run readiness` reports the published evidence count without taking the RFQ service offline when owner evidence is incomplete. Use `REQUIRE_TRUST_EVIDENCE=1 npm run readiness` as the strict publication gate after all four records have been approved.
+
+Run `npm run test:trust-evidence` to verify fail-closed behavior for missing sources, invalid or future dates, consumer email domains, and complete four-record publication.
+
 ## Smoke Test
 
 Build and start the app, then run:
