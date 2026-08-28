@@ -1859,6 +1859,8 @@ const rfqInternalRouteSource = await readRequiredProjectFile("src/app/api/rfq/in
 const publicTrustProfileSource = await readRequiredProjectFile("src/data/publicTrustProfile.ts");
 const trustCenterSource = await readRequiredProjectFile("src/app/trust-center/page.tsx");
 const trustEvidenceRegressionSource = await readRequiredProjectFile("scripts/trust-evidence-regression.mjs");
+const accessibilityRegressionSource = await readRequiredProjectFile("scripts/accessibility-regression.mjs");
+const scientificUnitsRegressionSource = await readRequiredProjectFile("scripts/scientific-units-regression.mjs");
 const envExampleSource = await readRequiredProjectFile(".env.example");
 
 if (!rfqRouteSource.includes("export async function POST") || !rfqRouteSource.includes("enqueueRfq")) {
@@ -2205,6 +2207,27 @@ if (!trustCenterSource.includes("Owner profile evidence reviewed:") || !trustCen
 ].forEach((marker) => {
   if (!trustEvidenceRegressionSource.includes(marker)) {
     failures.push(`Trust evidence regression: missing case ${marker}`);
+  }
+});
+
+[
+  "checkMobileSearchFunnel",
+  "mobile search does not retain the submitted query",
+  "390px search does not expose a first-result action in the initial viewport",
+  "mobile menu remains expanded after search navigation"
+].forEach((marker) => {
+  if (!accessibilityRegressionSource.includes(marker)) {
+    failures.push(`Accessibility regression: missing mobile search gate ${marker}`);
+  }
+});
+
+[
+  "ariaSnapshot",
+  "hiddenFromAccessibility",
+  "screen-reader text does not preserve the exact scientific unit"
+].forEach((marker) => {
+  if (!scientificUnitsRegressionSource.includes(marker)) {
+    failures.push(`Scientific-unit regression: missing accessibility-tree gate ${marker}`);
   }
 });
 

@@ -34,13 +34,18 @@ try {
 
       if (!deepest) return null;
 
+      deepest.setAttribute("data-scientific-unit-probe", "true");
       const style = window.getComputedStyle(deepest);
       return {
         text: deepest.textContent?.trim() ?? "",
         textTransform: style.textTransform,
-        ariaLabel: deepest.getAttribute("aria-label")
+        hiddenFromAccessibility: Boolean(deepest.closest('[aria-hidden="true"]'))
       };
     }, testCase.unit);
+
+    const accessibilitySnapshot = match
+      ? await page.locator('[data-scientific-unit-probe="true"]').ariaSnapshot().catch(() => "")
+      : "";
 
     if (!match) {
       failures.push(`${testCase.unit}: exact DOM text was not visible`);
@@ -48,6 +53,10 @@ try {
       failures.push(`${testCase.unit}: visible text is transformed to uppercase`);
     } else if (!match.text.includes(testCase.unit)) {
       failures.push(`${testCase.unit}: visible and DOM text diverged`);
+    } else if (match.hiddenFromAccessibility) {
+      failures.push(`${testCase.unit}: visible unit is hidden from the accessibility tree`);
+    } else if (!accessibilitySnapshot.includes(testCase.unit)) {
+      failures.push(`${testCase.unit}: screen-reader text does not preserve the exact scientific unit`);
     }
 
     await page.screenshot({ path: resolve(artifactDirectory, `${testCase.slug}-390x844.png`), fullPage: false });
@@ -65,5 +74,6 @@ if (failures.length > 0) {
 
 console.log(`Scientific unit regression passed for ${baseUrl}`);
 console.log("- exact DOM and visible text: µL, µm, mL, °C");
+console.log("- accessibility-tree text: exact units preserved and exposed");
 console.log("- computed text-transform: not uppercase");
 console.log(`- screenshots: ${artifactDirectory}`);

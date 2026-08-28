@@ -224,6 +224,49 @@ async function checkPrivacyContactHandoff() {
   await page.close();
 }
 
+async function checkMobileSearchFunnel() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const query = "filtered 200 µL tips";
+  await openRoute(page, `/products?q=${encodeURIComponent(query)}`);
+
+  const searchInput = page.getByLabel("Search BioAxis products", { exact: true });
+  const firstResult = page.locator('[data-search-result-card="true"]').first();
+  const firstAction = firstResult.getByRole("link", { name: "View details", exact: true });
+  await firstResult.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+  await firstAction.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+
+  check((await searchInput.inputValue()) === query, "mobile search does not retain the submitted query");
+  const firstViewport = await page.evaluate(() => {
+    const result = document.querySelector('[data-search-result-card="true"]');
+    const action = result?.querySelector("a");
+    const resultRect = result?.getBoundingClientRect();
+    const actionRect = action?.getBoundingClientRect();
+    return {
+      resultStartsInViewport: Boolean(resultRect && resultRect.top >= 0 && resultRect.top < innerHeight),
+      actionFitsInViewport: Boolean(actionRect && actionRect.top >= 0 && actionRect.bottom <= innerHeight)
+    };
+  });
+  check(firstViewport.resultStartsInViewport, "390px search does not place the first result in the initial viewport");
+  check(firstViewport.actionFitsInViewport, "390px search does not expose a first-result action in the initial viewport");
+
+  await openRoute(page, "/");
+  const menuButton = page.getByRole("button", { name: "Menu", exact: true });
+  await menuButton.click();
+  check((await menuButton.getAttribute("aria-expanded")) === "true", "mobile menu does not expose its open state");
+
+  const productsButton = page.getByRole("button", { name: /Products/i });
+  await productsButton.click();
+  const searchAllProducts = page.getByRole("link", { name: "Search all products", exact: true });
+  await searchAllProducts.click();
+  await page.waitForURL((url) => url.pathname === "/products", { timeout: 15_000 }).catch(() => undefined);
+  await page.getByLabel("Search BioAxis products", { exact: true }).waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+
+  check(new URL(page.url()).pathname === "/products", "mobile Products menu does not reach search within two choices");
+  check((await menuButton.getAttribute("aria-expanded")) === "false", "mobile menu remains expanded after search navigation");
+  check((await page.locator("#mobile-primary-navigation").count()) === 0, "mobile navigation remains rendered after route change");
+  await page.close();
+}
+
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   await openRoute(page, "/request-quote?requestType=quote");
@@ -296,6 +339,7 @@ try {
   }
 
   await checkPrivacyContactHandoff();
+  await checkMobileSearchFunnel();
 
   for (const route of criticalRoutes) {
     const auditPage = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
@@ -326,6 +370,7 @@ console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
 console.log("- preserved form failure alert and polite success/reference announcement");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
+console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- axe-core WCAG A/AA semantics and color contrast on four critical routes");
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
 console.log("- WCAG text-spacing overrides without overflow or clipped text");

@@ -61,7 +61,7 @@ BIOAXIS_ALERT_WEBHOOK_URL=your_server_only_alert_webhook_url
 6. Submit a test RFQ, retain its reference ID, and retrieve it internally with `GET /api/rfq/internal?requestId=...` plus `Authorization: Bearer <BIOAXIS_INTERNAL_API_KEY>`.
 7. Confirm the stored record contains the same request ID and expected test context. Never paste the internal key into tickets, screenshots, logs, or client code.
 
-Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them. The same request ID is carried through validation, queue-write, success, and failure events. Set `BIOAXIS_ALERT_WEBHOOK_URL` for server-side failure alerts; alert delivery never changes whether the durable write succeeded.
+Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them. The same request ID is carried through validation, queue-write, success, and failure events. Set `BIOAXIS_ALERT_WEBHOOK_URL` for optional immediate server-side failure alerts; alert delivery never changes whether the durable write succeeded.
 
 To test durable delivery:
 
