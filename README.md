@@ -86,6 +86,8 @@ Evidence variables are public website content. Use a publishable registration, a
 
 Run `npm run test:trust-evidence` to verify fail-closed behavior for missing sources, invalid or future dates, consumer email domains, complete four-record publication, and the absence of hard-coded personal email addresses in production source.
 
+Use `docs/public-trust-owner-intake.md` for the owner handoff. A filled JSON intake can be checked with `npm run validate:trust-intake -- /absolute/path/to/intake.json`; `npm run test:trust-intake` covers approval, source, date, enterprise-email, and response-window rejection cases.
+
 ## Smoke Test
 
 Build and start the app, then run:
