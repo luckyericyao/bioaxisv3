@@ -2176,6 +2176,7 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   "isPublishableEvidenceDate",
   "implementationEvidenceAsOf",
   "isEnterpriseDomainEmail",
+  "isMeasurableResponseTarget",
   "consumerEmailDomains",
   "NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE",
   "NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE",
@@ -2197,6 +2198,7 @@ if (!trustCenterSource.includes("Owner profile evidence reviewed:") || !trustCen
   "empty configuration fails closed",
   "facts without evidence remain unpublished",
   "consumer email is not an enterprise contact",
+  "non-measurable response target remains unpublished",
   "invalid calendar date fails closed",
   "future evidence date fails closed",
   "complete evidence publishes all required facts"

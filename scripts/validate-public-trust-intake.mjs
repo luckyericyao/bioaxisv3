@@ -25,7 +25,7 @@ function cleanPublicText(value) {
 }
 
 function hasMeasurableTimeWindow(value) {
-  return /\b(?:\d+|one|two|three|four|five|six|seven)\s+(?:business\s+)?(?:hour|hours|day|days)\b/i.test(value);
+  return /\b(?:[1-9]\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?:business\s+)?(?:hours?|days?)\b/i.test(value);
 }
 
 export function validateTrustIntake(intake) {

@@ -35,6 +35,10 @@ function isEnterpriseDomainEmail(value: string) {
   return Boolean(match && !consumerEmailDomains.has(match[1].toLowerCase()));
 }
 
+function isMeasurableResponseTarget(value: string) {
+  return /\b(?:[1-9]\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?:business\s+)?(?:hours?|days?)\b/i.test(value);
+}
+
 function configuredFact(
   question: PublicTrustFact["question"],
   label: string,
@@ -98,7 +102,8 @@ export const publicTrustFacts: PublicTrustFact[] = [
     process.env.NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET,
     process.env.NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE,
     "No public response-time commitment has been verified.",
-    "Operating response policy"
+    "Operating response policy",
+    isMeasurableResponseTarget
   ),
   {
     question: "How",

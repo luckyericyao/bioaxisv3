@@ -73,7 +73,7 @@ If the queue write fails, the API returns HTTP 503 with the same request ID, the
 
 ## Public Trust Evidence
 
-Trust Center identity and service commitments are fail-closed. A fact is shown as `Verified` only when its publishable value, its evidence source, and a valid non-future `NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF` date are all configured. Leave the owner evidence date blank until a source is actually reviewed. Incomplete records remain hidden behind the explicit `Not published` state, and the separate implementation-review date does not imply owner-profile verification.
+Trust Center identity and service commitments are fail-closed. A fact is shown as `Verified` only when its publishable value, its evidence source, and a valid non-future `NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF` date are all configured. Enterprise contact values must use a non-consumer domain, and response targets must contain a measurable number of hours or days. Leave the owner evidence date blank until a source is actually reviewed. Incomplete records remain hidden behind the explicit `Not published` state, and the separate implementation-review date does not imply owner-profile verification.
 
 - Legal identity: `NEXT_PUBLIC_BIOAXIS_LEGAL_NAME` + `NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE`
 - Operating region/address: `NEXT_PUBLIC_BIOAXIS_OPERATING_REGION` + `NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE`

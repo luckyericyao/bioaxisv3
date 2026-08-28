@@ -28,7 +28,7 @@ const completeEvidence = {
   NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE: "QA address record",
   NEXT_PUBLIC_BIOAXIS_BUSINESS_EMAIL: "sourcing@qa-enterprise.example",
   NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE: "QA domain ownership record",
-  NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET: "Within two QA business days",
+  NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET: "Within two business days",
   NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE: "QA response policy",
   NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF: "2020-01-02"
 };
@@ -61,6 +61,15 @@ const cases = [
     },
     expectedVerified: 3,
     forbiddenValue: "must-not-publish@gmail.com"
+  },
+  {
+    name: "non-measurable response target remains unpublished",
+    env: {
+      ...completeEvidence,
+      NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET: "We reply promptly"
+    },
+    expectedVerified: 3,
+    forbiddenValue: "We reply promptly"
   },
   {
     name: "invalid calendar date fails closed",
