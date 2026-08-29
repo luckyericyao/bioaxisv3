@@ -296,7 +296,11 @@ export function SourcingIntakeForm({
   const [submitting, setSubmitting] = useState(false);
   const [restoredSessionInput, setRestoredSessionInput] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileAvailable, setTurnstileAvailable] = useState(Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY));
+  // Fail closed during SSR and hydration. Runtime Turnstile configuration is
+  // fetched after hydration, so treating the initial state as unavailable
+  // briefly exposes an enabled native form that can navigate before React has
+  // attached handleSubmit and discard the in-memory request.
+  const [turnstileAvailable, setTurnstileAvailable] = useState(true);
 
   const resolvedProductContext = useMemo(
     () =>

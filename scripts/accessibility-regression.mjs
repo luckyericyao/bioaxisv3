@@ -192,6 +192,33 @@ async function checkRfqStateAnnouncements() {
   await page.close();
 }
 
+async function checkTurnstileFailClosed() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await page.route("**/api/turnstile/config", async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ enabled: false })
+    });
+  });
+
+  await openRoute(page, "/request-quote?requestType=quote");
+  const email = page.getByLabel("Email *", { exact: true });
+  const submit = page.getByRole("button", { name: "Complete verification to send", exact: true });
+  const configAlert = page.getByRole("alert").filter({ hasText: "Verification could not load" });
+
+  await email.fill("turnstile-fail-closed@example.com");
+  await configAlert.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
+  check(await configAlert.isVisible().catch(() => false), "Turnstile configuration failure is not announced as an alert");
+  check(!(await submit.isEnabled().catch(() => true)), "Turnstile configuration failure enables an unverified RFQ submit");
+  check(
+    (await email.inputValue()) === "turnstile-fail-closed@example.com",
+    "Turnstile configuration failure clears the customer email"
+  );
+
+  await page.close();
+}
+
 async function checkPrivacyContactHandoff() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   await openRoute(page, "/privacy");
@@ -335,6 +362,7 @@ try {
   await desktop.close();
 
   if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
+    await checkTurnstileFailClosed();
     await checkRfqStateAnnouncements();
   }
 
@@ -369,6 +397,7 @@ console.log("- skip link, landmarks, labels, and live RFQ status");
 console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
 console.log("- preserved form failure alert and polite success/reference announcement");
+console.log("- fail-closed Turnstile loading/configuration state with preserved input");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- axe-core WCAG A/AA semantics and color contrast on four critical routes");

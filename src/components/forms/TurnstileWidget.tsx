@@ -35,13 +35,15 @@ type TurnstileConfigResponse = {
   siteKey?: string;
 };
 
+type TurnstileConfigState = "loading" | "ready" | "disabled" | "error";
+
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
-  const [configLoaded, setConfigLoaded] = useState(Boolean(buildTimeSiteKey));
+  const [configState, setConfigState] = useState<TurnstileConfigState>(buildTimeSiteKey ? "ready" : "loading");
   const [scriptReady, setScriptReady] = useState(false);
   const [widgetIssue, setWidgetIssue] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
@@ -57,20 +59,30 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
     async function loadRuntimeConfig() {
       try {
         const response = await fetch("/api/turnstile/config", { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error("Turnstile configuration unavailable");
+        }
+
         const config = (await response.json()) as TurnstileConfigResponse;
 
         if (!ignore) {
-          setSiteKey(config.enabled && config.siteKey ? config.siteKey : "");
-          onAvailabilityChange?.(Boolean(config.enabled && config.siteKey));
+          if (config.enabled && config.siteKey) {
+            setSiteKey(config.siteKey);
+            setConfigState("ready");
+            onAvailabilityChange?.(true);
+          } else {
+            setSiteKey("");
+            setConfigState("disabled");
+            onAvailabilityChange?.(false);
+          }
         }
       } catch {
         if (!ignore) {
           setSiteKey("");
-          onAvailabilityChange?.(false);
-        }
-      } finally {
-        if (!ignore) {
-          setConfigLoaded(true);
+          setConfigState("error");
+          onAvailabilityChange?.(true);
+          onFailure?.("config_error");
         }
       }
     }
@@ -80,7 +92,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
     return () => {
       ignore = true;
     };
-  }, [onAvailabilityChange]);
+  }, [onAvailabilityChange, onFailure]);
 
   useEffect(() => {
     if (!siteKey || !scriptReady || !containerRef.current || !window.turnstile || widgetIdRef.current) {
@@ -119,9 +131,25 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
   }, [compact, onFailure, onTokenChange, scriptReady, siteKey]);
 
   if (!siteKey) {
-    return configLoaded ? null : (
-      <div className="border border-bioaxis-line bg-bioaxis-black p-4" data-turnstile-widget="loading">
-        <p className="text-xs font-bold uppercase text-bioaxis-dim">Loading verification</p>
+    if (configState === "disabled") {
+      return null;
+    }
+
+    const configFailed = configState === "error";
+
+    return (
+      <div
+        className="border border-bioaxis-line bg-bioaxis-black p-4"
+        data-turnstile-widget={configFailed ? "unavailable" : "loading"}
+      >
+        <p className="text-xs font-bold uppercase text-bioaxis-dim">
+          {configFailed ? "Verification unavailable" : "Loading verification"}
+        </p>
+        {configFailed ? (
+          <p role="alert" className="mt-2 text-xs font-semibold leading-5 text-bioaxis-accent">
+            Verification could not load. Your entries remain in the form; keep this page open and retry when the check is available.
+          </p>
+        ) : null}
       </div>
     );
   }

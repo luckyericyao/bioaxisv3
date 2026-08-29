@@ -102,7 +102,7 @@ const equivalentFinderContent = [
   "Structure an alternatives review for current consumables",
   "does not automatically return verified candidate products",
   "Send the current product.",
-  "Send review request",
+  "Complete verification to send",
   "Fit assessment, not a name match.",
   "A cleaner way to compare alternatives.",
   "Common equivalent requests",
@@ -831,7 +831,7 @@ for (const route of routes) {
       "Current supplier or brand optional",
       "Catalog number or SKU optional",
       "Missing optional procurement details will not block submission.",
-      "Send sourcing request"
+      "Complete verification to send"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing low-friction RFQ copy ${label}`);
@@ -2238,85 +2238,91 @@ if (!trustCenterSource.includes("Owner profile evidence reviewed:") || !trustCen
 });
 
 if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
-  const rfqResponse = await fetch(new URL("/api/rfq", baseUrl), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: "smoke@example.com",
-      requestType: "quote",
-      productContext: {
-        requestType: "quote",
-        productName: "Filtered 200 µL Pipette Tips",
-        productFamily: "Filtered Pipette Tips",
-        productCategory: "Pipette Tips",
-        productSegment: "Liquid Handling",
-        productUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
-        sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
-        relevantSpecs: ["nominal volume: 200 µL"],
-        documentationNotes: ["DNase/RNase-free statement"],
-        timestamp: "smoke-test"
-      },
-      sourcingListItems: [
-        {
-          title: "Filtered 200 µL Pipette Tips",
-          href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
-          segmentTitle: "Liquid Handling",
-          categoryTitle: "Pipette Tips",
-          familyTitle: "Filtered Pipette Tips",
-          productTitle: "Filtered 200 µL Pipette Tips",
-          quantity: "1 case",
-          currentSupplier: "Current supplier",
-          catalogNumber: "ABC-200",
-          equivalentNeeded: true,
-          sampleNeeded: false,
-          documentationNeeded: true,
-          sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
-          addedAt: "smoke-test"
-        }
-      ]
-    })
-  });
-  const payload = await rfqResponse.json();
+  const durableWriteEnabled = process.env.SMOKE_DURABLE_WRITE === "1";
 
-  if (!rfqResponse.ok || payload?.ok !== true) {
-    failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
-  } else {
-    console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
-
-    const replayResponse = await fetch(new URL("/api/rfq", baseUrl), {
+  if (durableWriteEnabled) {
+    const rfqResponse = await fetch(new URL("/api/rfq", baseUrl), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
-        requestId: payload.referenceId,
-        email: "must-not-overwrite@example.com",
+        email: "smoke@example.com",
         requestType: "quote",
-        message: "Idempotency replay: the original durable record must remain immutable."
+        productContext: {
+          requestType: "quote",
+          productName: "Filtered 200 µL Pipette Tips",
+          productFamily: "Filtered Pipette Tips",
+          productCategory: "Pipette Tips",
+          productSegment: "Liquid Handling",
+          productUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+          sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+          relevantSpecs: ["nominal volume: 200 µL"],
+          documentationNotes: ["DNase/RNase-free statement"],
+          timestamp: "smoke-test"
+        },
+        sourcingListItems: [
+          {
+            title: "Filtered 200 µL Pipette Tips",
+            href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+            segmentTitle: "Liquid Handling",
+            categoryTitle: "Pipette Tips",
+            familyTitle: "Filtered Pipette Tips",
+            productTitle: "Filtered 200 µL Pipette Tips",
+            quantity: "1 case",
+            currentSupplier: "Current supplier",
+            catalogNumber: "ABC-200",
+            equivalentNeeded: true,
+            sampleNeeded: false,
+            documentationNeeded: true,
+            sourcePageUrl: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+            addedAt: "smoke-test"
+          }
+        ]
       })
     });
-    const replayPayload = await replayResponse.json();
+    const payload = await rfqResponse.json();
 
-    if (!replayResponse.ok || replayPayload?.ok !== true || replayPayload?.replayed !== true) {
-      failures.push(`/api/rfq replay: expected immutable idempotent success, got ${replayResponse.status}`);
+    if (!rfqResponse.ok || payload?.ok !== true) {
+      failures.push(`/api/rfq: expected success, got ${rfqResponse.status}`);
+    } else {
+      console.log(`/api/rfq: ${payload.mode ?? "ok"} ${payload.referenceId ?? ""}`.trim());
+
+      const replayResponse = await fetch(new URL("/api/rfq", baseUrl), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestId: payload.referenceId,
+          email: "must-not-overwrite@example.com",
+          requestType: "quote",
+          message: "Idempotency replay: the original durable record must remain immutable."
+        })
+      });
+      const replayPayload = await replayResponse.json();
+
+      if (!replayResponse.ok || replayPayload?.ok !== true || replayPayload?.replayed !== true) {
+        failures.push(`/api/rfq replay: expected immutable idempotent success, got ${replayResponse.status}`);
+      }
     }
-  }
 
-  const emailOnlyResponse = await fetch(new URL("/api/rfq", baseUrl), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: "email-only@example.com"
-    })
-  });
-  const emailOnlyPayload = await emailOnlyResponse.json();
+    const emailOnlyResponse = await fetch(new URL("/api/rfq", baseUrl), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: "email-only@example.com"
+      })
+    });
+    const emailOnlyPayload = await emailOnlyResponse.json();
 
-  if (!emailOnlyResponse.ok || emailOnlyPayload?.ok !== true) {
-    failures.push(`/api/rfq email-only: expected success, got ${emailOnlyResponse.status}`);
-  } else if (typeof emailOnlyPayload.requestId !== "string" || !emailOnlyPayload.requestId) {
-    failures.push("/api/rfq email-only: missing traceable requestId");
+    if (!emailOnlyResponse.ok || emailOnlyPayload?.ok !== true) {
+      failures.push(`/api/rfq email-only: expected success, got ${emailOnlyResponse.status}`);
+    } else if (typeof emailOnlyPayload.requestId !== "string" || !emailOnlyPayload.requestId) {
+      failures.push("/api/rfq email-only: missing traceable requestId");
+    }
+  } else {
+    console.log("/api/rfq durable writes: skipped (set SMOKE_DURABLE_WRITE=1 for explicit queue-write coverage)");
   }
 
   const missingEmailResponse = await fetch(new URL("/api/rfq", baseUrl), {
@@ -2385,12 +2391,14 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
       email: "smoke@example.com",
       company: "BioAxis QA",
       requestType: "contact",
-      message: "Local smoke test for legacy RFQ compatibility."
+      message: "Local smoke test for legacy RFQ compatibility.",
+      website: durableWriteEnabled ? "" : "filled"
     })
   });
   const legacyPayload = await legacyResponse.json();
 
-  if (!legacyResponse.ok || legacyPayload?.ok !== true) {
+  const legacyModeMatches = durableWriteEnabled ? legacyPayload?.mode === "durable-queue" : legacyPayload?.mode === "honeypot";
+  if (!legacyResponse.ok || legacyPayload?.ok !== true || !legacyModeMatches) {
     failures.push(`/api/request-quote: expected compatibility success, got ${legacyResponse.status}`);
   } else {
     console.log(`/api/request-quote: ${legacyPayload.mode ?? "ok"} ${legacyPayload.referenceId ?? ""}`.trim());

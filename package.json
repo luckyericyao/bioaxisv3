@@ -13,6 +13,7 @@
     "test:a11y-checklist": "node scripts/accessibility-regression.mjs",
     "test:trust-evidence": "node scripts/trust-evidence-regression.mjs",
     "test:trust-intake": "node scripts/public-trust-intake-regression.mjs",
+    "test:rfq-roundtrip": "node scripts/rfq-durable-roundtrip.mjs",
     "validate:trust-intake": "node scripts/validate-public-trust-intake.mjs"
   },
   "dependencies": {

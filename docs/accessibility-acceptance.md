@@ -10,6 +10,7 @@ The script is a release gate for `/`, a populated product search, one product so
 
 - skip link, landmarks, labels, persistent RFQ live status, keyboard-open and Escape-close behavior;
 - a simulated durable-write failure that preserves the email and announces an alert, followed by a simulated success that announces its reference in a polite status region;
+- a fail-closed server-rendered submit state and a simulated Turnstile configuration failure that keeps the request disabled while preserving entered data;
 - approximately 44 px mobile controls, hidden RFQ source paths, and 320 px overflow/context wrapping;
 - retained mobile search input, the first result and its first action inside the 390 px initial viewport, and a Products-menu search handoff that closes navigation after two choices;
 - axe-core WCAG 2 A/AA, WCAG 2.1 A/AA, and WCAG 2.2 AA rules, including visible text color contrast;

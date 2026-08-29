@@ -71,6 +71,17 @@ To test durable delivery:
 
 If the queue write fails, the API returns HTTP 503 with the same request ID, the browser preserves all form data, and no success state is shown. Queue and internal lookup credentials are never exposed to browser code.
 
+For a repeatable queue-write plus internal-lookup proof, start a local production preview that is connected to the private Blob store, load the server-only key into the shell without printing it, and explicitly authorize one QA record:
+
+```bash
+set -a
+. ./.env.local
+set +a
+RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- http://localhost:3000 https://bioaxisv3.vercel.app
+```
+
+The round-trip script uses a reserved example address, verifies the immutable stored record by the same request ID, and prints status fields only. Routine `npm run smoke` runs without durable writes; set `SMOKE_DURABLE_WRITE=1` only when explicit queue-write coverage is intended.
+
 ## Public Trust Evidence
 
 Trust Center identity and service commitments are fail-closed. A fact is shown as `Verified` only when its publishable value, its evidence source, and a valid non-future `NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF` date are all configured. Enterprise contact values must use a non-consumer domain, and response targets must contain a measurable number of hours or days. Leave the owner evidence date blank until a source is actually reviewed. Incomplete records remain hidden behind the explicit `Not published` state, and the separate implementation-review date does not imply owner-profile verification.
