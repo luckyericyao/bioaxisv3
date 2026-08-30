@@ -5,6 +5,9 @@ const baseUrl = process.argv[2] ?? process.env.A11Y_TEST_BASE_URL ?? "http://loc
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined;
 const browser = await chromium.launch({ headless: true, executablePath });
 const failures = [];
+const navigationAttempts = ["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)
+  ? 1
+  : Math.max(1, Number.parseInt(process.env.A11Y_NAV_RETRIES ?? "3", 10) || 3);
 
 const criticalRoutes = [
   { label: "home", path: "/" },
@@ -24,9 +27,25 @@ function check(condition, message) {
 }
 
 async function openRoute(page, path) {
-  await page.goto(new URL(path, baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 45_000 });
-  await page.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
-  await page.waitForTimeout(500);
+  const url = new URL(path, baseUrl).toString();
+  let lastError;
+
+  for (let attempt = 1; attempt <= navigationAttempts; attempt += 1) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+      await page.locator("main#main-content").waitFor({ state: "visible", timeout: 15_000 });
+      await page.waitForTimeout(500);
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < navigationAttempts) {
+        await page.waitForTimeout(750 * attempt);
+      }
+    }
+  }
+
+  const reason = lastError instanceof Error ? `${lastError.name}: ${lastError.message}` : "unknown navigation error";
+  throw new Error(`Navigation failed after ${navigationAttempts} attempts: ${url} (${reason})`, { cause: lastError });
 }
 
 async function auditWithAxe(page, label) {

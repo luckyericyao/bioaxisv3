@@ -122,6 +122,8 @@ npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
 
 The accessibility gate covers the four critical routes documented in `docs/accessibility-acceptance.md`, including axe-core WCAG A/AA contrast and semantics, 200%/400% zoom-equivalent reflow, WCAG text spacing, keyboard behavior, mobile target size, the privacy-to-contact anchored mobile handoff, and locally simulated RFQ failure/success announcements. The route smoke test also requires route-specific canonical, Open Graph, Twitter, and hierarchical BreadcrumbList metadata.
 
+Deployed read-only checks retry transient connection failures up to three times before failing and include the final URL in the error. Override this only for diagnostics with `SMOKE_READ_RETRIES`, `A11Y_NAV_RETRIES`, or `UNIT_NAV_RETRIES`. Submission checks are never retried implicitly; durable queue writes remain explicitly opt-in and request-ID idempotent.
+
 ## Routes
 
 - `/` - premium dark landing page with search-led sourcing flow

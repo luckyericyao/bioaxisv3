@@ -4,6 +4,39 @@ import { fileURLToPath } from "node:url";
 
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const baseHostname = new URL(baseUrl).hostname;
+const readOnlyFetchAttempts = ["localhost", "127.0.0.1"].includes(baseHostname)
+  ? 1
+  : Math.max(1, Number.parseInt(process.env.SMOKE_READ_RETRIES ?? "3", 10) || 3);
+
+async function fetchReadOnly(url, init = {}) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= readOnlyFetchAttempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...init,
+        signal: init.signal ?? AbortSignal.timeout(45_000)
+      });
+
+      if (response.status !== 429 && response.status < 500) {
+        return response;
+      }
+
+      if (attempt === readOnlyFetchAttempts) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === readOnlyFetchAttempts) break;
+    }
+
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 750 * attempt));
+  }
+
+  const reason = lastError instanceof Error ? `${lastError.name}: ${lastError.message}` : "unknown network error";
+  throw new Error(`Read-only fetch failed after ${readOnlyFetchAttempts} attempts: ${url} (${reason})`, { cause: lastError });
+}
 
 const quickProductItemRoutes = [
   "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
@@ -325,7 +358,7 @@ async function readRequiredProjectFile(pathname) {
 }
 
 for (const route of routes) {
-  const response = await fetch(new URL(route, baseUrl), { redirect: "manual" });
+  const response = await fetchReadOnly(new URL(route, baseUrl), { redirect: "manual" });
   if (!response.ok) {
     failures.push(`${route}: HTTP ${response.status}`);
     continue;
@@ -1772,7 +1805,7 @@ if (resourceGuideLinks.length !== 12) {
 }
 
 for (const href of resourceGuideLinks) {
-  const response = await fetch(new URL(href, baseUrl), { redirect: "manual" });
+  const response = await fetchReadOnly(new URL(href, baseUrl), { redirect: "manual" });
   if (!response.ok) {
     failures.push(`/resources guide link ${href}: HTTP ${response.status}`);
     continue;
@@ -1805,13 +1838,13 @@ for (const href of resourceGuideLinks) {
 }
 
 for (const href of discoveredNavLinks) {
-  const response = await fetch(new URL(href, baseUrl), { redirect: "manual" });
+  const response = await fetchReadOnly(new URL(href, baseUrl), { redirect: "manual" });
   if (response.status >= 400) {
     failures.push(`nav link ${href}: HTTP ${response.status}`);
   }
 }
 
-const equivalentsResponse = await fetch(new URL("/equivalents", baseUrl), { redirect: "manual" });
+const equivalentsResponse = await fetchReadOnly(new URL("/equivalents", baseUrl), { redirect: "manual" });
 const equivalentsLocation = equivalentsResponse.headers.get("location") ?? "";
 if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.includes("/equivalent-finder")) {
   failures.push(`/equivalents: expected redirect to /equivalent-finder, got ${equivalentsResponse.status} ${equivalentsLocation}`);
@@ -1833,7 +1866,7 @@ const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/f
 const compactSourcingIntakeSource = await readRequiredProjectFile("src/components/forms/CompactSourcingIntake.tsx");
 const sourcingListProviderSource = await readRequiredProjectFile("src/components/sourcing/SourcingListProvider.tsx");
 const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
-const sitemapResponse = await fetch(new URL("/sitemap.xml", baseUrl));
+const sitemapResponse = await fetchReadOnly(new URL("/sitemap.xml", baseUrl));
 if (!sitemapResponse.ok) {
   failures.push(`/sitemap.xml: expected HTTP 200, got ${sitemapResponse.status}`);
 } else if ((await sitemapResponse.text()).includes("-general")) {
@@ -2412,7 +2445,7 @@ for (const [pathname, expectedContentType] of [
   ["/images/bioaxis-social-preview.jpg", "image/jpeg"],
   ["/manifest.webmanifest", "application/manifest+json"]
 ]) {
-  const response = await fetch(new URL(pathname, baseUrl));
+  const response = await fetchReadOnly(new URL(pathname, baseUrl));
   const contentType = response.headers.get("content-type") ?? "";
 
   if (!response.ok) {

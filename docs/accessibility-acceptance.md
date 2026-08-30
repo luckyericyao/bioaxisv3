@@ -17,6 +17,8 @@ The script is a release gate for `/`, a populated product search, one product so
 - reflow at 640 px and 320 px CSS viewports, equivalent to 200% and 400% zoom from 1280 px, including focused controls beneath the sticky header;
 - WCAG text-spacing overrides without horizontal overflow or clipped text.
 
+For deployed URLs, navigation is retried up to three times when the browser cannot connect; a persistent failure reports the exact URL after the final attempt. Set `A11Y_NAV_RETRIES` only when diagnosing network behavior. Local checks remain single-attempt so application failures are not hidden.
+
 Complete these assistive-technology and visual spot checks on the same four routes before each production release. They complement rather than replace the automated gate:
 
 - Keyboard: use Tab, Shift+Tab, Enter, Space, and Escape without a pointer. Focus must remain visible, follow reading order, reach every action, and never become trapped.
