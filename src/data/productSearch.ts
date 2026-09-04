@@ -15,6 +15,7 @@ type SearchField = {
 
 type ScoredResult = ProductSearchResult & {
   score: number;
+  completeTitleMatch: boolean;
   exactPhraseMatch: boolean;
   directMatch: boolean;
   segmentScopeRank: number;
@@ -252,6 +253,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
       matchKind: result.matchKind ?? (result.type === "workflow" || result.type === "resource" ? "content" : "taxonomy"),
       matchedFields: scored.matchedFields,
       score: scored.score,
+      completeTitleMatch: titleContainsQueryTokens(result.title, query),
       exactPhraseMatch: scored.exactPhraseMatch,
       directMatch: scored.directMatch,
       segmentScopeRank: result.segmentSlug && segmentIntentSlugs.has(result.segmentSlug)
@@ -437,6 +439,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
         productUniverseRank(b.type) - productUniverseRank(a.type) ||
         b.segmentScopeRank - a.segmentScopeRank ||
         (b.segmentScopeRank === 2 && a.segmentScopeRank === 2 ? a.order - b.order : 0) ||
+        Number(b.completeTitleMatch) - Number(a.completeTitleMatch) ||
         Number(b.exactPhraseMatch) - Number(a.exactPhraseMatch) ||
         Number(b.directMatch) - Number(a.directMatch) ||
         b.score - a.score ||

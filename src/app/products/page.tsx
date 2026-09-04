@@ -39,7 +39,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <div>
             <h1 className="sr-only">BioAxis product search</h1>
             <div>
-              <ProductSearch initialQuery={query} />
+              <ProductSearch key={query} initialQuery={query} />
             </div>
           </div>
         ) : (
@@ -62,7 +62,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </Link>
               </div>
             </div>
-            <ProductSearch initialQuery={query} />
+            <ProductSearch key="product-search" initialQuery={query} />
           </div>
         )}
       </section>

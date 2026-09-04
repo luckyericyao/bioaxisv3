@@ -529,6 +529,18 @@ for (const route of routes) {
     }
   }
 
+  if (route === "/products?q=filtered%20200%20ul%20tips") {
+    const firstSearchCard = html.match(/<article[^>]*data-search-result-card="true"[^>]*>/)?.[0] ?? "";
+
+    if (!firstSearchCard.includes('data-search-result-type="product"')) {
+      failures.push(`${route}: exact product is not the first ranked result`);
+    }
+
+    if (!firstSearchCard.includes('data-search-result-title="Filtered 200 µL Pipette Tips"')) {
+      failures.push(`${route}: first ranked result does not match the complete product title`);
+    }
+  }
+
   if (route === "/products?q=430641") {
     if (!pageText.includes("This reference is not in the current BioAxis product and sourcing paths")) {
       failures.push(`${route}: missing honest unresolved-reference boundary`);

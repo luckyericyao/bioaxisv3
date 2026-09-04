@@ -273,15 +273,23 @@ async function checkPrivacyContactHandoff() {
 async function checkMobileSearchFunnel() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const query = "filtered 200 µL tips";
-  await openRoute(page, `/products?q=${encodeURIComponent(query)}`);
+  await openRoute(page, "/products");
 
   const searchInput = page.getByLabel("Search BioAxis products", { exact: true });
+  await searchInput.fill(query);
+  check(new URL(page.url()).searchParams.get("q") === null, "mobile search writes a query URL before submission");
+  check((await page.locator('[data-search-result-card="true"]').count()) === 0, "mobile search renders results inside the unsubmitted hero layout");
+  await searchInput.press("Enter");
+  await page.waitForURL((url) => url.pathname === "/products" && url.searchParams.get("q") === query, { timeout: 15_000 }).catch(() => undefined);
+
   const firstResult = page.locator('[data-search-result-card="true"]').first();
   const firstAction = firstResult.getByRole("link", { name: "View details", exact: true });
   await firstResult.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
   await firstAction.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
 
   check((await searchInput.inputValue()) === query, "mobile search does not retain the submitted query");
+  check((await firstResult.getAttribute("data-search-result-type")) === "product", "specific mobile search does not rank a product first");
+  check((await firstResult.getAttribute("data-search-result-title")) === "Filtered 200 µL Pipette Tips", "specific mobile search does not rank the exact product title first");
   const firstViewport = await page.evaluate(() => {
     const result = document.querySelector('[data-search-result-card="true"]');
     const action = result?.querySelector("a");

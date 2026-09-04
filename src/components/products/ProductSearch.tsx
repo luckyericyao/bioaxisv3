@@ -216,6 +216,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
     <article
       data-search-result-card="true"
       data-search-result-type={result.type}
+      data-search-result-title={result.title}
       className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-5"
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -337,20 +338,21 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
 export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
-  const trimmedQuery = query.trim();
-  const displayedQuery = displayQueryLabel(trimmedQuery);
-  const results = useMemo(() => getProductSearchResults(trimmedQuery), [trimmedQuery]);
+  const draftQuery = query.trim();
+  const activeQuery = initialQuery.trim();
+  const displayedQuery = displayQueryLabel(activeQuery);
+  const results = useMemo(() => getProductSearchResults(activeQuery), [activeQuery]);
   const indexedPathCount = useMemo(() => getProductSearchIndexSize(), []);
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, 18);
   const visibleMatchCount = topMatches.length;
-  const searchState = queryStateLabel(trimmedQuery, results);
+  const searchState = queryStateLabel(activeQuery, results);
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
-  const intakeRequestType = /\n|,|\t|\|/.test(trimmedQuery) ? "product-list-review" : "quote";
-  const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
-  const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(trimmedQuery)}&q=${encodeURIComponent(trimmedQuery)}`;
+  const intakeRequestType = /\n|,|\t|\|/.test(activeQuery) ? "product-list-review" : "quote";
+  const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(activeQuery)}&q=${encodeURIComponent(activeQuery)}`;
+  const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(activeQuery)}&q=${encodeURIComponent(activeQuery)}`;
 
   useEffect(() => {
     if (!initialQuery.trim()) {
@@ -366,8 +368,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    trackBioAxisEvent("search_submit", { queryLength: trimmedQuery.length, source: "products-directory" });
-    router.push(trimmedQuery ? `/products?q=${encodeURIComponent(trimmedQuery)}` : "/products");
+    trackBioAxisEvent("search_submit", { queryLength: draftQuery.length, source: "products-directory" });
+    router.push(draftQuery ? `/products?q=${encodeURIComponent(draftQuery)}` : "/products");
   }
 
   function searchForm(compact = false) {
@@ -414,7 +416,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     );
   }
 
-  if (!trimmedQuery) {
+  if (!activeQuery) {
     return (
       <div className="w-full">
         {searchForm()}
@@ -494,7 +496,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
               {topMatches.map((result) => (
-                <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={trimmedQuery} />
+                <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={activeQuery} />
               ))}
             </div>
 
@@ -510,7 +512,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                   </p>
                   <div className="grid gap-4 xl:grid-cols-2">
                     {relatedMatches.map((result) => (
-                      <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={trimmedQuery} />
+                      <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={activeQuery} />
                     ))}
                   </div>
                 </div>
@@ -526,7 +528,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             <div className="border-t border-bioaxis-line p-4 sm:p-5">
               <CompactSourcingIntake
                 requestType={intakeRequestType}
-                sourcePage={`/products?q=${encodeURIComponent(trimmedQuery)}`}
+                sourcePage={`/products?q=${encodeURIComponent(activeQuery)}`}
                 product={displayedQuery}
                 defaultMessage={displayedQuery}
                 title="Send the search context."
@@ -577,14 +579,14 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </details>
 
           <div className="mt-8">
-            <SearchSourcingActions query={trimmedQuery} productListHref={productListSearchHref} />
+            <SearchSourcingActions query={activeQuery} productListHref={productListSearchHref} />
           </div>
         </section>
       ) : (
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Manual sourcing review</p>
           <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
-            {looksLikeCatalogReference(trimmedQuery) ? "Send this reference." : "Send the sourcing input."}
+            {looksLikeCatalogReference(activeQuery) ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.
