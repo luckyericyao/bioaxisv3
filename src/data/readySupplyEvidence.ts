@@ -58,11 +58,5 @@ export const readySupplyEvidenceRows: ReadySupplyEvidenceRow[] = [
     status: "Repeat supply planning",
     confirmation: "Usage, packaging, and backup source reviewed per request",
     boundary: "Continuity depends on supplier and buyer-side planning"
-  },
-  {
-    label: "Last confirmed",
-    status: "No public timestamp",
-    confirmation: "Fresh status returned with the request response",
-    boundary: "Past confirmation is not treated as current availability"
   }
 ];

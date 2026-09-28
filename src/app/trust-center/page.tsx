@@ -4,7 +4,7 @@ import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
-import { implementationEvidenceAsOf, publicTrustEvidenceSummary, publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
+import { publicTrustEvidenceSummary, publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
 import { pageVisuals } from "@/data/visualAssets";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
@@ -78,6 +78,10 @@ const documentPackage = [
   "Compatibility notes when supplier-provided"
 ];
 
+const unpublishedBusinessFacts = publicTrustFacts
+  .filter((fact) => fact.status === "not-published")
+  .map((fact) => fact.label);
+
 export default function TrustCenterPage() {
   return (
     <>
@@ -87,20 +91,18 @@ export default function TrustCenterPage() {
         subtitle="BioAxis helps structure documentation review, supplier screening, sample-first evaluation, and equivalent review while avoiding unsupported claims about live inventory, automatic interchangeability, or final quality release decisions."
       />
       <section className="mx-auto w-full max-w-7xl px-5 pt-10 sm:px-8 lg:px-10">
-        <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6">
+        <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6" data-business-facts-status={publicTrustEvidenceSummary.complete ? "complete" : "incomplete"}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">Public trust evidence</p>
-              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Verified operating information.</h2>
-            </div>
-            <div className="text-xs font-semibold leading-5 text-bioaxis-dim sm:text-right">
-              <p>Public owner evidence reviewed: {trustEvidenceAsOf}</p>
-              <p>Implementation review date: {implementationEvidenceAsOf}</p>
-              <p>
-                Identity and service commitments: {publicTrustEvidenceSummary.verified} of {publicTrustEvidenceSummary.required} verified
-              </p>
+              <p className="text-xs font-bold uppercase text-bioaxis-accent">Operating transparency</p>
+              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Business and service information</h2>
             </div>
           </div>
+          <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
+            {publicTrustEvidenceSummary.complete
+              ? `Operating identity, location, enterprise contact, and response target have owner-approved public evidence, reviewed ${trustEvidenceAsOf}.`
+              : `These details are not published without owner-approved evidence. BioAxis is not making claims about an operating identity, location, enterprise contact, or response-time commitment beyond what is shown here. Not published: ${unpublishedBusinessFacts.join(", ")}.`}
+          </p>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (
               <div key={fact.label} className="border border-bioaxis-line bg-bioaxis-panel p-4">
@@ -111,7 +113,9 @@ export default function TrustCenterPage() {
                   </span>
                 </div>
                 <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
-                <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</p>
+                {fact.status === "verified" ? (
+                  <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</p>
+                ) : null}
               </div>
             ))}
           </dl>

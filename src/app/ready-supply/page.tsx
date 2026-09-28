@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { readySupplyEvidenceRows, selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
+import { readySupplyEvidenceRows, selectedLineRegistry } from "@/data/readySupplyEvidence";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = createRouteMetadata({
@@ -136,7 +136,7 @@ export default function ReadySupplyPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:px-10">
           <SectionHeader
             title="How the availability check works"
-            subtitle="The service structures a current supplier check and evidence trail; it does not imply warehouse ownership, live inventory, guaranteed lead time, or product suitability."
+            subtitle="Each step separates supplier-confirmed facts from open questions for the buyer."
           />
           <div className="grid gap-3">
             {readySupplySteps.map((step, index) => (
@@ -161,24 +161,15 @@ export default function ReadySupplyPage() {
           <p className="mt-4 max-w-4xl text-base leading-7 text-bioaxis-muted">
             Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.
           </p>
-          <p className="mt-6 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-            This page is not a real-time inventory feed. Availability, batch information, documents, dispatch timing, and replenishment options are supplier-coordinated and confirmed per request. BioAxis organizes the review but does not certify final suitability.
-          </p>
-          <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
-            A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available. BioAxis can request and organize these records; the buyer remains responsible for technical and compliance review.
-          </p>
         </div>
       </section>
 
       <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
         <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
           <SectionHeader
-            title="What is confirmed per request"
-            subtitle="The status, evidence date, sample path, supply owner, and buyer responsibility are clarified for each request; no line is presented as currently available without a published record."
+            title="What each response confirms"
+            subtitle="The reply separates supplier-confirmed details, the check date, and items that remain buyer-side for review."
           />
-          <p className="mt-5 border border-bioaxis-line bg-bioaxis-black p-4 text-sm leading-6 text-bioaxis-muted">
-            {selectedLineRegistry.length > 0 ? "Selected-line registry records are shown below." : selectedLineRegistryNote}
-          </p>
           {selectedLineRegistry.length > 0 ? (
             <div className="mt-5 grid gap-3">
               {selectedLineRegistry.map((record) => (

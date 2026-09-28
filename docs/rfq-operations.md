@@ -16,6 +16,16 @@ Every update requires an `assignedOwner`. `needs-info` requires `needsInfo`; `re
 
 Use `BIOAXIS_INTERNAL_API_KEY` only in a trusted operator environment. Never place it in a URL, browser code, or a customer message.
 
+List submissions (20 by default, at most 50 per page). The result includes only a triage summary; use the request ID lookup below for full submitted context. Pass the returned cursor to retrieve the next page:
+
+```sh
+curl --fail-with-body \
+  -H "Authorization: Bearer $BIOAXIS_INTERNAL_API_KEY" \
+  "https://bioaxisv3.vercel.app/api/rfq/internal?limit=20"
+```
+
+The list is private and uncached. It does not contact customers or change workflow state.
+
 Read one request and its current workflow:
 
 ```sh

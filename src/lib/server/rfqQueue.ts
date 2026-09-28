@@ -99,3 +99,23 @@ export async function readQueuedRfq(referenceId: string) {
 
   return (await new Response(result.stream).json()) as QueuedRfqRecord;
 }
+
+export async function listQueuedRfqs(options: { limit?: number; cursor?: string } = {}) {
+  const limit = Math.max(1, Math.min(50, Math.floor(options.limit ?? 20)));
+  const page = await list({
+    prefix: `${queuePrefix}/`,
+    limit,
+    ...(options.cursor ? { cursor: options.cursor } : {})
+  });
+  const records = await Promise.all(page.blobs.map(async ({ pathname }) => {
+    const referenceId = pathname.slice(`${queuePrefix}/`.length).replace(/\.json$/, "");
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(referenceId)) return null;
+    return readQueuedRfq(referenceId);
+  }));
+
+  return {
+    records: records.filter((record): record is QueuedRfqRecord => record !== null),
+    cursor: page.hasMore ? page.cursor : undefined,
+    hasMore: page.hasMore
+  };
+}

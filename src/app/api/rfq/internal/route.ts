@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { readQueuedRfq } from "@/lib/server/rfqQueue";
+import { listQueuedRfqs, readQueuedRfq } from "@/lib/server/rfqQueue";
 import { appendRfqWorkflowEvent, canTransitionRfqWorkflow, getRfqWorkflow, type RfqActionStatus, type RfqWorkflowStatus } from "@/lib/server/rfqWorkflow";
 import { PayloadTooLargeError, readLimitedJsonBody } from "@/lib/server/readLimitedJsonBody";
 
@@ -23,6 +23,56 @@ function authorized(request: NextRequest) {
 export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+
+  if (!request.nextUrl.searchParams.has("requestId")) {
+    const rawLimit = request.nextUrl.searchParams.get("limit");
+    const rawCursor = request.nextUrl.searchParams.get("cursor") || "";
+    if (rawLimit && !/^[1-9]\d{0,2}$/.test(rawLimit)) {
+      return NextResponse.json({ error: "limit must be an integer from 1 to 50." }, { status: 400 });
+    }
+    const limit = rawLimit ? Number(rawLimit) : 20;
+    if (limit > 50 || rawCursor.length > 2048) {
+      return NextResponse.json({ error: "Invalid queue page parameters." }, { status: 400 });
+    }
+
+    try {
+      const page = await listQueuedRfqs({ limit, cursor: rawCursor || undefined });
+      const requests = await Promise.all(page.records.map(async (record) => {
+        const payload = record.request && typeof record.request === "object" && !Array.isArray(record.request)
+          ? record.request as Record<string, unknown>
+          : {};
+        const context = payload.productContext && typeof payload.productContext === "object" && !Array.isArray(payload.productContext)
+          ? payload.productContext as Record<string, unknown>
+          : {};
+        const workflow = await getRfqWorkflow(record.referenceId);
+        const sourcingListItems = Array.isArray(payload.sourcingListItems) ? payload.sourcingListItems : [];
+
+        return {
+          requestId: record.referenceId,
+          receivedAt: record.receivedAt,
+          status: workflow.status,
+          assignedOwner: workflow.assignedOwner,
+          email: cleanText(payload.email, 240),
+          organization: cleanText(payload.organization || payload.company, 180),
+          requestType: cleanText(payload.requestType, 80),
+          productName: cleanText(context.productName || payload.productName, 240),
+          productSegment: cleanText(context.productSegment || payload.productSegment, 160),
+          hasProductList: Boolean(cleanText(payload.productList, 1)),
+          sourcingListItemCount: sourcingListItems.length
+        };
+      }));
+
+      return NextResponse.json({
+        ok: true,
+        requests,
+        nextCursor: page.cursor ?? null,
+        hasMore: page.hasMore
+      }, { headers: { "Cache-Control": "private, no-store, max-age=0" } });
+    } catch (error) {
+      console.error("[BioAxis RFQ internal queue] failed", error);
+      return NextResponse.json({ error: "Queue lookup failed." }, { status: 503 });
+    }
   }
 
   const requestId = (request.nextUrl.searchParams.get("requestId") || "").replace(/[^a-zA-Z0-9_-]/g, "");

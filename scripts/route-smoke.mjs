@@ -94,7 +94,7 @@ const productItemDetailSections = [
   "Quote-ready details"
 ];
 
-const requiredHomeCtas = ["Structure my sourcing request", "Review equivalent", "Browse product lines", "Request quote"];
+const requiredHomeCtas = ["Send sourcing request", "Review equivalent", "Browse product lines"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -737,7 +737,7 @@ for (const route of routes) {
   }
 
   if (route === "/privacy") {
-    ["For a privacy question or removal request", "Open Contact form", "reference ID after durable storage succeeds"].forEach((label) => {
+    ["no automatic deletion schedule", "request access, correction, or deletion", "Open Contact form", "not published a verified privacy contact or response-time commitment"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing durable privacy-contact path ${label}`);
       }
@@ -1216,8 +1216,6 @@ for (const route of routes) {
       "Documents",
       "CoA, SDS, sterility, and specification records where available",
       "Sample path",
-      "Last confirmed",
-      "No public timestamp",
       "Replenishment",
       "Repeat supply planning",
       "Current status",
@@ -1231,11 +1229,8 @@ for (const route of routes) {
       "Return a sourcing response",
       "Typical request coverage",
       "Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.",
-      "This page is not a real-time inventory feed.",
-      "A document package may include CoA, SDS, sterility certificate, material statement, lot-level documentation, and a supplier specification sheet where available.",
-      "What is confirmed per request",
-      "Line-level status is returned per request",
-      "No public record is treated as current availability",
+      "What each response confirms",
+      "Each step separates supplier-confirmed facts from open questions for the buyer.",
       "Need a current answer on availability and dispatch?",
       "Request availability check"
     ].forEach((label) => {
@@ -1243,6 +1238,10 @@ for (const route of routes) {
         failures.push(`${route}: missing ready-supply content ${label}`);
       }
     });
+
+    if (pageText.includes("This page is not a real-time inventory feed.") || pageText.includes("A document package may include CoA")) {
+      failures.push(`${route}: repeated stock/document disclaimers returned to the coverage section`);
+    }
 
     [
       "Pipette Tips & Robotic Tips",
@@ -1937,7 +1936,7 @@ if (!["put", 'access: "private"', "allowOverwrite: false", "readQueuedRfq", "BLO
   failures.push("src/lib/server/rfqQueue.ts: missing private durable queue markers");
 }
 
-if (!["BIOAXIS_INTERNAL_API_KEY", "timingSafeEqual", "readQueuedRfq", "authorization"].every((marker) => rfqInternalRouteSource.includes(marker))) {
+if (!["BIOAXIS_INTERNAL_API_KEY", "timingSafeEqual", "readQueuedRfq", "listQueuedRfqs", "nextCursor", "authorization"].every((marker) => rfqInternalRouteSource.includes(marker))) {
   failures.push("src/app/api/rfq/internal/route.ts: missing authenticated internal lookup markers");
 }
 
@@ -2237,8 +2236,8 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   }
 });
 
-if (!trustCenterSource.includes("Public owner evidence reviewed:") || !trustCenterSource.includes("Implementation review date:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
-  failures.push("Trust Center: missing visible verified-evidence summary");
+if (!trustCenterSource.includes("Business and service information") || !trustCenterSource.includes("Not published") || trustCenterSource.includes("Identity and service commitments:") || trustCenterSource.includes("Implementation review date:")) {
+  failures.push("Trust Center: missing buyer-facing business information or exposing internal verification diagnostics");
 }
 
 [
@@ -2276,7 +2275,7 @@ if (!trustCenterSource.includes("Public owner evidence reviewed:") || !trustCent
   }
 });
 
-["readySupplyEvidenceRows", "SelectedLineRegistryRecord", "selectedLineRegistry", "No public timestamp"].forEach((label) => {
+["readySupplyEvidenceRows", "SelectedLineRegistryRecord", "selectedLineRegistry", "No public real-time inventory feed", "No guaranteed lead time or shipment promise"].forEach((label) => {
   if (!readySupplyEvidenceSource.includes(label)) {
     failures.push(`Availability Check evidence source: missing ${label}`);
   }

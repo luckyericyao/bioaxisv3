@@ -20,20 +20,16 @@ const trustCenterResponse = await get("/trust-center");
 let trustEvidenceStatus = "unknown";
 
 if (trustCenterResponse.ok) {
-  const trustCenterText = (await trustCenterResponse.text())
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ");
-  const trustEvidenceMatch = trustCenterText.match(/Identity and service commitments:\s*(\d+)\s*of\s*(\d+)\s*verified/i);
+  const trustCenterHtml = await trustCenterResponse.text();
+  const trustEvidenceMatch = trustCenterHtml.match(/data-business-facts-status="(complete|incomplete)"/i);
 
   if (!trustEvidenceMatch) {
-    failures.push("/trust-center: missing identity and service evidence summary");
+    failures.push("/trust-center: missing business-information publication status");
   } else {
-    const verified = Number(trustEvidenceMatch[1]);
-    const required = Number(trustEvidenceMatch[2]);
-    trustEvidenceStatus = `${verified}/${required} verified`;
+    trustEvidenceStatus = trustEvidenceMatch[1].toLowerCase();
 
-    if (process.env.REQUIRE_TRUST_EVIDENCE === "1" && verified !== required) {
-      failures.push(`/trust-center: public trust evidence incomplete (${trustEvidenceStatus})`);
+    if (process.env.REQUIRE_TRUST_EVIDENCE === "1" && trustEvidenceStatus !== "complete") {
+      failures.push("/trust-center: owner-approved public business information is incomplete");
     }
   }
 }
@@ -84,4 +80,4 @@ console.log("- security headers: ready");
 console.log("- RFQ durable queue: reachable");
 console.log("- RFQ anti-spam: configured");
 console.log("- RFQ internal lookup: configured");
-console.log(`- public trust evidence: ${trustEvidenceStatus}`);
+console.log(`- public business information: ${trustEvidenceStatus}`);

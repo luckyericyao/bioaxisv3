@@ -37,7 +37,7 @@ export function HeroSearchSection() {
 
         <div className="order-2 mt-8 flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-3 sm:gap-x-6">
           <CTAButton href="/request-quote?requestType=quote">
-            Structure my sourcing request
+            Send sourcing request
           </CTAButton>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
             <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
@@ -45,9 +45,6 @@ export function HeroSearchSection() {
             </CTAButton>
             <CTAButton href="/products" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
               Browse product lines
-            </CTAButton>
-            <CTAButton href="/request-quote?requestType=quote" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
-              Request quote
             </CTAButton>
           </div>
         </div>
@@ -62,7 +59,7 @@ export function HeroSearchSection() {
               sourcePage="/"
               title="Send the sourcing context."
               productFieldLabel="SKU, catalog number, supplier line, or product list"
-              submitLabel="Structure my sourcing request"
+              submitLabel="Send sourcing request"
             />
           </div>
         </details>

@@ -18,11 +18,19 @@ Module._load = function load(request, parent, isMain) {
           ? null
           : { statusCode: 200, stream: new Blob([stored]).stream() };
       },
-      list: async ({ prefix = "" } = {}) => ({
-        blobs: [...blobs.keys()].filter((pathname) => pathname.startsWith(prefix)).map((pathname) => ({ pathname })),
-        cursor: undefined,
-        hasMore: false
-      }),
+      list: async ({ prefix = "", limit = 1000, cursor } = {}) => {
+        const all = [...blobs.keys()]
+          .filter((pathname) => pathname.startsWith(prefix))
+          .map((pathname) => ({ pathname }));
+        const start = cursor ? Number(cursor) : 0;
+        const end = start + limit;
+        const hasMore = end < all.length;
+        return {
+          blobs: all.slice(start, end),
+          cursor: hasMore ? String(end) : undefined,
+          hasMore
+        };
+      },
       put: async (pathname, body, options) => {
         writeOptions = options;
         if (blobs.has(pathname)) throw new Error("Blob already exists");
@@ -49,7 +57,7 @@ require.extensions[".ts"] = (module, filename) => {
 };
 
 process.env.BLOB_READ_WRITE_TOKEN = "test-only";
-const { enqueueRfq, readQueuedRfq, RfqIdempotencyConflictError } = require(path.resolve("src/lib/server/rfqQueue.ts"));
+const { enqueueRfq, listQueuedRfqs, readQueuedRfq, RfqIdempotencyConflictError } = require(path.resolve("src/lib/server/rfqQueue.ts"));
 const { appendRfqWorkflowEvent, canTransitionRfqWorkflow, getRfqWorkflow } = require(path.resolve("src/lib/server/rfqWorkflow.ts"));
 const referenceId = "BIOAXIS-QA-IDEMPOTENCY";
 const originalRequest = { email: "first@example.test", productList: "First immutable request" };
@@ -68,6 +76,20 @@ assert.deepEqual(stored?.request, originalRequest);
 assert.equal(writeOptions?.access, "private");
 assert.equal(writeOptions?.allowOverwrite, false);
 assert.equal(writeOptions?.addRandomSuffix, false);
+
+await enqueueRfq("BIOAXIS-QUEUE-PAGE-002", { email: "second@example.test" });
+await enqueueRfq("BIOAXIS-QUEUE-PAGE-003", { email: "third@example.test" });
+const firstQueuePage = await listQueuedRfqs({ limit: 2 });
+const secondQueuePage = await listQueuedRfqs({ limit: 2, cursor: firstQueuePage.cursor });
+const listedRequestIds = [...firstQueuePage.records, ...secondQueuePage.records].map((record) => record.referenceId);
+assert.equal(firstQueuePage.records.length, 2);
+assert.equal(firstQueuePage.hasMore, true);
+assert.equal(Boolean(firstQueuePage.cursor), true);
+assert.equal(secondQueuePage.hasMore, false);
+assert.equal(new Set(listedRequestIds).size, 3);
+assert.ok(listedRequestIds.includes(referenceId));
+assert.ok(listedRequestIds.includes("BIOAXIS-QUEUE-PAGE-002"));
+assert.ok(listedRequestIds.includes("BIOAXIS-QUEUE-PAGE-003"));
 
 const startingWorkflow = await getRfqWorkflow(referenceId);
 assert.equal(startingWorkflow.status, "queued");
