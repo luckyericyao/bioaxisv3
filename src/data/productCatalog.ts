@@ -112,9 +112,9 @@ const actions = {
 };
 
 const defaultDocuments: ProductDocuments = {
-  sds: "available",
+  sds: "supplier_dependent",
   coa: "request_required",
-  specificationSheet: "available",
+  specificationSheet: "supplier_dependent",
   sterilityStatement: "supplier_dependent",
   animalOriginStatement: "supplier_dependent",
   lotLevelDocumentation: "request_required"

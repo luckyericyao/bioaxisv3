@@ -67,10 +67,10 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       >
         <div className="grid gap-3">
           <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
-            Sourcing target template · supplier specifications confirmed per request
+            Sourcing template · supplier specifications, availability, and fit require confirmation
           </p>
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Typical target specifications · confirm before purchase</p>
+            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Key fields and options to confirm</p>
             <div className="flex flex-wrap gap-2">
               {productItem.commonSpecifications.slice(0, 5).map((specification) => (
                 <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
@@ -116,9 +116,6 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
               />
             </div>
           </details>
-          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            This page describes a configurable sourcing target. Supplier, catalog reference, exact specifications, availability, documentation, and final fit are confirmed per request.
-          </p>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
@@ -171,12 +168,12 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
         </div>
         <div className="grid gap-3">
-          <InfoPanel title="Specification context" items={productItem.details} />
-          <InfoPanel title="Typical target parameters" items={productItem.commonSpecifications} />
+          <InfoPanel title="Sourcing context" items={productItem.details} />
+          <InfoPanel title="Configuration fields to confirm" items={productItem.commonSpecifications} />
           <InfoPanel title="Applications" items={productItem.applications} />
-          <InfoPanel title="Compatibility" items={productItem.compatibilityConsiderations} />
-          <InfoPanel title="Documentation" items={productItem.documentationNeeds} />
-          <InfoPanel title="Equivalent matching" items={productItem.equivalentMatchingInputs} />
+          <InfoPanel title="Compatibility checks" items={productItem.compatibilityConsiderations} />
+          <InfoPanel title="Documents to request" items={productItem.documentationNeeds} />
+          <InfoPanel title="Equivalent review inputs" items={productItem.equivalentMatchingInputs} />
           <InfoPanel title="Sample request notes" items={productItem.sampleEvaluationNotes} />
           <InfoPanel title="Quote-ready details" items={quoteReadyDetails} links={requestLinks} />
         </div>

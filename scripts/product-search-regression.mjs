@@ -63,8 +63,8 @@ const cellResults = getProductSearchResults("cell");
 if (cellResults[0]?.title !== "Cell Culture") {
   failures.push(`cell: expected Cell Culture first, got ${cellResults[0]?.title ?? "no results"}`);
 }
-if (cellResults.length > 120) {
-  failures.push(`cell: direct-match results remain too broad (${cellResults.length})`);
+if (cellResults.length > 60) {
+  failures.push(`cell: focused short-query results remain too broad (${cellResults.length})`);
 }
 if (cellResults.slice(0, 6).some((result) => result.segmentSlug === "liquid-handling")) {
   failures.push("cell: Liquid Handling appears in the top six ahead of direct cell-culture matches");

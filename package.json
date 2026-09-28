@@ -11,6 +11,7 @@
     "readiness": "node scripts/deployment-readiness.mjs",
     "test:units-visual": "node scripts/scientific-units-regression.mjs",
     "test:search-ranking": "node scripts/product-search-regression.mjs",
+    "test:product-profiles": "node scripts/product-profile-regression.mjs",
     "test:rfq-queue": "node scripts/rfq-queue-regression.mjs",
     "test:rfq-payload": "node scripts/rfq-payload-limit-regression.mjs",
     "test:a11y-checklist": "node scripts/accessibility-regression.mjs",

@@ -108,22 +108,6 @@ function productProfileFor(context: ProductItemContext): ProductProfile {
     };
   }
 
-  if (searchText.includes("lab-plasticware") || searchText.includes("tube") || searchText.includes("plate") || searchText.includes("bottle") || searchText.includes("rack") || searchText.includes("seal")) {
-    return {
-      details: [
-        "Used for sample handling, assay setup, storage, sealing, or routine bench workflows.",
-        "Often specified by material, capacity, footprint, sterility, centrifuge rating, surface treatment, and packaging format.",
-        "Equivalent review should include workflow fit, instrument or storage compatibility, and documentation needs."
-      ],
-      commonSpecifications: ["material such as polypropylene, polystyrene, or polycarbonate", "capacity, well count, or tube format", "sterile or non-sterile format", "centrifuge rating, SBS footprint, or storage fit where relevant", "surface treatment or low-bind option where relevant", "packaging format"],
-      applications: ["sample handling", "assay preparation", "reagent storage", "freezer organization", "routine bench workflows"],
-      compatibilityConsiderations: ["centrifuge, freezer, plate reader, or automation fit", "cap, seal, rack, or holder compatibility", "sample volume and material requirements", "sterility and packaging constraints", "workflow validation before switching"],
-      documentationNeeds: ["material declaration", "sterility statement where applicable", "lot traceability", "CoA where available", "SDS where applicable"],
-      equivalentMatchingInputs: ["current supplier and catalog number", "material", "capacity or footprint", "sterility", "cap, rack, or seal fit", "documentation requirements"],
-      sampleEvaluationNotes: ["check physical fit in current workflow", "confirm cap, seal, rack, or instrument compatibility", "compare handling and storage behavior", "review documentation before recurring use"]
-    };
-  }
-
   if (searchText.includes("pcr") || searchText.includes("qpcr")) {
     return {
       details: [
@@ -249,6 +233,28 @@ function productProfileFor(context: ProductItemContext): ProductProfile {
       documentationNeeds: ["CoA where available", "SDS", "grade and purity information", "storage condition", "lot traceability"],
       equivalentMatchingInputs: ["current supplier and catalog number", "grade", "concentration or pH", "pack size", "application", "CoA/SDS requirement"],
       sampleEvaluationNotes: ["confirm formulation or grade", "check storage and handling fit", "review CoA/SDS details", "test in the intended workflow if switching affects results"]
+    };
+  }
+
+  const isPlasticwarePath = searchText.includes("lab-plasticware") || (
+    !searchText.includes("equipment") &&
+    !searchText.includes("centrifuge") &&
+    ["tube", "plate", "bottle", "rack", "seal"].some((term) => searchText.includes(term))
+  );
+
+  if (isPlasticwarePath) {
+    return {
+      details: [
+        "Used for sample handling, assay setup, storage, sealing, or routine bench workflows.",
+        "Often specified by material, capacity, footprint, sterility, centrifuge rating, surface treatment, and packaging format.",
+        "Equivalent review should include workflow fit, instrument or storage compatibility, and documentation needs."
+      ],
+      commonSpecifications: ["material such as polypropylene, polystyrene, or polycarbonate", "capacity, well count, or tube format", "sterile or non-sterile format", "centrifuge rating, SBS footprint, or storage fit where relevant", "surface treatment or low-bind option where relevant", "packaging format"],
+      applications: ["sample handling", "assay preparation", "reagent storage", "freezer organization", "routine bench workflows"],
+      compatibilityConsiderations: ["centrifuge, freezer, plate reader, or automation fit", "cap, seal, rack, or holder compatibility", "sample volume and material requirements", "sterility and packaging constraints", "workflow validation before switching"],
+      documentationNeeds: ["material declaration", "sterility statement where applicable", "lot traceability", "CoA where available", "SDS where applicable"],
+      equivalentMatchingInputs: ["current supplier and catalog number", "material", "capacity or footprint", "sterility", "cap, rack, or seal fit", "documentation requirements"],
+      sampleEvaluationNotes: ["check physical fit in current workflow", "confirm cap, seal, rack, or instrument compatibility", "compare handling and storage behavior", "review documentation before recurring use"]
     };
   }
 

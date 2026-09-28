@@ -548,21 +548,23 @@ export function CatalogProductPage({
             Review recurring supply
           </Link>
         </section>
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related configured paths</p>
-          <div className="mt-5 grid gap-3">
-            {relatedProducts.map((related) => (
-              <Link
-                key={related.slug}
-                href={productCatalogHref(segment.slug, category.slug, family.slug, related.slug)}
-                className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
-              >
-                <span className="text-sm font-bold text-bioaxis-text">{related.name}</span>
-                <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {relatedProducts.length > 0 ? (
+          <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related configured paths</p>
+            <div className="mt-5 grid gap-3">
+              {relatedProducts.map((related) => (
+                <Link
+                  key={related.slug}
+                  href={productCatalogHref(segment.slug, category.slug, family.slug, related.slug)}
+                  className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
+                >
+                  <span className="text-sm font-bold text-bioaxis-text">{related.name}</span>
+                  <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </section>
 
       <CatalogCTA segment={segment} category={category} family={family} product={product} title={`Send ${product.name} to BioAxis.`} />

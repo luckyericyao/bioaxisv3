@@ -84,12 +84,12 @@ const catalogAcceptanceRoutes = [
 ];
 
 const productItemDetailSections = [
-  "Specification context",
-  "Typical target parameters",
+  "Sourcing context",
+  "Configuration fields to confirm",
   "Applications",
-  "Compatibility",
-  "Documentation",
-  "Equivalent matching",
+  "Compatibility checks",
+  "Documents to request",
+  "Equivalent review inputs",
   "Sample request notes",
   "Quote-ready details"
 ];
@@ -2066,7 +2066,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
-  ["Product item template", productItemTemplateSource, ["Sourcing template details", "Typical target parameters", "AddToSourcingListButton"]],
+  ["Product item template", productItemTemplateSource, ["Sourcing template details", "Configuration fields to confirm", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {

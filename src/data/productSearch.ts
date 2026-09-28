@@ -465,8 +465,16 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
   const relevantResults = hasCompleteDirectPhrase
     ? results.filter((result) => tokens.every((token) => tokenVariants(token).some((variant) => result.directTokens.includes(variant))))
     : results;
+  const focusedShortQueryResults = preferDirectMatches
+    ? relevantResults.filter((result) =>
+      titleContainsQueryTokens(result.title, query) ||
+      (result.type === "segment" && result.matchedFields?.includes("aliases")) ||
+      (result.type === "family" && result.matchedFields?.includes("aliases")) ||
+      result.matchKind === "catalog-reference"
+    )
+    : relevantResults;
 
-  return relevantResults
+  return focusedShortQueryResults
     .sort(
       (a, b) =>
         productUniverseRank(b.type) - productUniverseRank(a.type) ||
