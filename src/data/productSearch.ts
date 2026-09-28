@@ -18,6 +18,7 @@ type ScoredResult = ProductSearchResult & {
   completeTitleMatch: boolean;
   exactPhraseMatch: boolean;
   directMatch: boolean;
+  directTokens: string[];
   segmentScopeRank: number;
   order: number;
 };
@@ -81,10 +82,11 @@ function scoreField(field: SearchField, normalizedPhrase: string, tokens: string
   const normalizedField = normalizeSource(field.text);
 
   if (!normalizedField) {
-    return { score: 0, matched: false, exactPhraseMatch: false };
+    return { score: 0, matched: false, exactPhraseMatch: false, matchedTokens: [] };
   }
 
   const fieldTokens = normalizedField.split(" ");
+  const matchedTokens = tokens.filter((token) => countTokenOccurrences(fieldTokens, token) > 0);
   const tokenScore = tokens.reduce((score, token) => {
     const count = Math.min(countTokenOccurrences(fieldTokens, token), maxCountPerField);
     return score + count * field.weight;
@@ -96,7 +98,8 @@ function scoreField(field: SearchField, normalizedPhrase: string, tokens: string
   return {
     score,
     matched: score > 0,
-    exactPhraseMatch
+    exactPhraseMatch,
+    matchedTokens
   };
 }
 
@@ -107,6 +110,7 @@ function scoreResult(fields: SearchField[], query: string) {
   let score = 0;
   let exactPhraseMatch = false;
   let directMatch = false;
+  const directTokens = new Set<string>();
 
   fields.forEach((field) => {
     const fieldScore = scoreField(field, normalizedPhrase, tokens);
@@ -118,6 +122,10 @@ function scoreResult(fields: SearchField[], query: string) {
       directMatch = directMatch || Boolean(field.direct);
     }
 
+    if (field.direct) {
+      fieldScore.matchedTokens.forEach((token) => directTokens.add(token));
+    }
+
     exactPhraseMatch = exactPhraseMatch || fieldScore.exactPhraseMatch;
   });
 
@@ -125,6 +133,7 @@ function scoreResult(fields: SearchField[], query: string) {
     score,
     exactPhraseMatch,
     directMatch,
+    directTokens: [...directTokens],
     matchedFields: [...new Set(matchedFields)]
   };
 }
@@ -170,6 +179,7 @@ function segmentAliases(segmentSlug: string) {
     "cell-culture": [
       "cell",
       "cells",
+      "cell culture consumables",
       "cell models",
       "cell line",
       "transfection",
@@ -191,8 +201,20 @@ function segmentAliases(segmentSlug: string) {
   return aliases[segmentSlug] ?? [];
 }
 
-function familyAliases(segmentSlug: string, familySlug: string) {
+function familyAliases(familySlug: string) {
   const aliases: Record<string, string[]> = {
+    "tissue-culture-flasks": ["cell culture flasks"],
+    "cell-culture-dishes": ["cell culture dishes"],
+    "multiwell-cell-culture-plates": ["cell culture plates"],
+    "roller-bottles": ["cell culture roller bottles"],
+    "cell-factory-style-vessels": ["cell culture expansion vessels"],
+    "basal-media": ["cell culture basal media"],
+    "serum-free-media": ["serum free cell culture media"],
+    "classical-media": ["classical cell culture media"],
+    "cell-culture-supplements": ["cell culture supplements"],
+    "fetal-bovine-serum": ["cell culture serum"],
+    "qualified-fbs": ["qualified cell culture serum"],
+    "cell-freezing-media": ["cell cryopreservation media"],
     "dna-extraction-kits": ["gene extraction", "genomic DNA", "nucleic acid extraction"],
     "rna-extraction-kits": ["gene expression", "RNA isolation", "nucleic acid extraction"],
     "plasmid-prep-kits": ["cloning", "gene cloning", "plasmid"],
@@ -207,7 +229,7 @@ function familyAliases(segmentSlug: string, familySlug: string) {
     "sterile-cryovials": ["cryogenic vials", "cryovials", "cell banking", "cryopreservation"]
   };
 
-  return [...(aliases[familySlug] ?? []), ...segmentAliases(segmentSlug)];
+  return aliases[familySlug] ?? [];
 }
 
 function stripScore(result: ScoredResult): ProductSearchResult {
@@ -231,10 +253,13 @@ function stripScore(result: ScoredResult): ProductSearchResult {
 }
 
 export function getProductSearchResults(query: string): ProductSearchResult[] {
-  if (queryTokens(query).length === 0) {
+  const tokens = queryTokens(query);
+
+  if (tokens.length === 0) {
     return [];
   }
 
+  const preferDirectMatches = tokens.length === 1 && tokens[0].length <= 4;
   const results: ScoredResult[] = [];
   let order = 0;
   const segmentIntentSlugs = new Set(
@@ -244,7 +269,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
   function addResult(result: ProductSearchResult, fields: SearchField[]) {
     const scored = scoreResult(fields, query);
 
-    if (scored.score <= 0) {
+    if (scored.score <= 0 || (preferDirectMatches && !scored.directMatch)) {
       return;
     }
 
@@ -256,6 +281,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
       completeTitleMatch: titleContainsQueryTokens(result.title, query),
       exactPhraseMatch: scored.exactPhraseMatch,
       directMatch: scored.directMatch,
+      directTokens: scored.directTokens,
       segmentScopeRank: result.segmentSlug && segmentIntentSlugs.has(result.segmentSlug)
         ? result.type === "segment"
           ? 3
@@ -333,7 +359,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
             { label: "title", text: family.name, weight: 100, phraseBonus: 150, direct: true },
             { label: "path", text: [segment.name, segment.slug, subcategory.name, subcategory.slug, family.name, family.slug], weight: 70, phraseBonus: 120, direct: true },
             { label: "representative families", text: [...family.typicalProducts, ...family.representativeFormats, ...family.relatedFamilies], weight: 60, phraseBonus: 80, direct: true },
-            { label: "aliases", text: familyAliases(segment.slug, family.slug), weight: 68, phraseBonus: 104, direct: true },
+            { label: "aliases", text: familyAliases(family.slug), weight: 68, phraseBonus: 104, direct: true },
             { label: "specifications", text: [...family.buyerSpecs, ...family.commonFormats, ...family.keySpecifications, ...family.selectionCriteria], weight: 35, phraseBonus: 60 },
             { label: "description", text: [family.shortDescription, family.longDescription, family.description], weight: 25, phraseBonus: 50 },
             { label: "applications", text: [...family.applications, ...family.commonUseCases], weight: 15, phraseBonus: 35 },
@@ -361,7 +387,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
             [
               { label: "title", text: productItem.name, weight: 100, phraseBonus: 150, direct: true },
               { label: "path", text: [segment.name, segment.slug, subcategory.name, subcategory.slug, family.name, family.slug, productItem.name, productItem.slug], weight: 70, phraseBonus: 120, direct: true },
-              { label: "aliases", text: familyAliases(segment.slug, family.slug), weight: 52, phraseBonus: 86, direct: true },
+              { label: "aliases", text: familyAliases(family.slug), weight: 52, phraseBonus: 86, direct: true },
               { label: "specifications", text: productItem.commonSpecifications, weight: 35, phraseBonus: 60 },
               { label: "description", text: [productItem.shortDescription, productItem.introduction, ...productItem.details], weight: 25, phraseBonus: 50 },
               { label: "applications", text: [...productItem.applications, ...productItem.compatibilityConsiderations], weight: 15, phraseBonus: 35 },
@@ -433,7 +459,14 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     );
   });
 
-  return results
+  const hasCompleteDirectPhrase = tokens.length > 1 && results.some((result) =>
+    tokens.every((token) => tokenVariants(token).some((variant) => result.directTokens.includes(variant)))
+  );
+  const relevantResults = hasCompleteDirectPhrase
+    ? results.filter((result) => tokens.every((token) => tokenVariants(token).some((variant) => result.directTokens.includes(variant))))
+    : results;
+
+  return relevantResults
     .sort(
       (a, b) =>
         productUniverseRank(b.type) - productUniverseRank(a.type) ||

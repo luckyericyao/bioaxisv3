@@ -53,12 +53,6 @@ function configuredFact(
   const evidenceDateReady = isPublishableEvidenceDate(configuredTrustEvidenceAsOf);
   const valueReady = Boolean(cleanValue && validateValue(cleanValue));
   const verified = Boolean(valueReady && cleanEvidence && evidenceDateReady);
-  const missingEvidence = [
-    !valueReady ? "valid publishable fact" : "",
-    !cleanEvidence ? "evidence source" : "",
-    !evidenceDateReady ? "valid evidence date" : ""
-  ].filter(Boolean);
-
   return {
     question,
     label,
@@ -66,7 +60,7 @@ function configuredFact(
     status: verified ? "verified" : "not-published",
     source: verified
       ? `${sourceLabel}: ${cleanEvidence}. Reviewed ${configuredTrustEvidenceAsOf}.`
-      : `Incomplete verification record: missing ${missingEvidence.join(", ")}.`
+      : "Not published."
   };
 }
 

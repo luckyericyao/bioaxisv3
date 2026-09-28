@@ -91,11 +91,11 @@ export default function TrustCenterPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase text-bioaxis-accent">Public trust evidence</p>
-              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Who, where, how, when, and on what evidence.</h2>
+              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Verified operating information.</h2>
             </div>
             <div className="text-xs font-semibold leading-5 text-bioaxis-dim sm:text-right">
-              <p>Owner profile evidence reviewed: {trustEvidenceAsOf}</p>
-              <p>Implementation evidence reviewed: {implementationEvidenceAsOf}</p>
+              <p>Public owner evidence reviewed: {trustEvidenceAsOf}</p>
+              <p>Implementation review date: {implementationEvidenceAsOf}</p>
               <p>
                 Identity and service commitments: {publicTrustEvidenceSummary.verified} of {publicTrustEvidenceSummary.required} verified
               </p>
@@ -111,7 +111,7 @@ export default function TrustCenterPage() {
                   </span>
                 </div>
                 <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
-                <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Basis: {fact.source}</p>
+                <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</p>
               </div>
             ))}
           </dl>

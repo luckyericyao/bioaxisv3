@@ -84,14 +84,14 @@ const catalogAcceptanceRoutes = [
 ];
 
 const productItemDetailSections = [
-  "Specifications",
+  "Specification context",
+  "Typical target parameters",
   "Applications",
   "Compatibility",
   "Documentation",
   "Equivalent matching",
   "Sample request notes",
-  "Quote-ready details",
-  "Related product paths"
+  "Quote-ready details"
 ];
 
 const requiredHomeCtas = ["Structure my sourcing request", "Review equivalent", "Browse product lines", "Request quote"];
@@ -565,11 +565,11 @@ for (const route of routes) {
       forbidden: ["Sourcing template preview"]
     },
     "/products/liquid-handling/pipette-tips/filtered-pipette-tips": {
-      required: ["Family overview", "Sourcing configuration templates", "Already using another supplier?"],
+      required: ["Family overview", "Sourcing configuration templates", "Compare this target with a current supplier"],
       forbidden: ["Clarify these fields before RFQ"]
     },
     "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips": {
-      required: ["Sourcing template details", "Already using another supplier?", "Request quote from this template"],
+      required: ["Sourcing template details", "Compare this target with a current supplier", "Request quote from this template"],
       forbidden: ["Product fit note"]
     }
   };
@@ -1708,7 +1708,7 @@ for (const route of routes) {
   }
 
   if (segmentProductItemRoutes.includes(route)) {
-    ["Already using another supplier?", "Add to sourcing list", "Buyer inputs", "Typical buyer cases"].forEach((label) => {
+    ["Compare this target with a current supplier", "Add to sourcing list", "Buyer inputs", "Typical buyer cases"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product item sourcing module ${label}`);
       }
@@ -2067,7 +2067,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
-  ["Product item template", productItemTemplateSource, ["Sourcing template details", "Specifications", "AddToSourcingListButton"]],
+  ["Product item template", productItemTemplateSource, ["Sourcing template details", "Typical target parameters", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
@@ -2230,14 +2230,14 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   "NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE",
   "NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE",
   "publicTrustEvidenceSummary",
-  "Incomplete verification record"
+  "Not published."
 ].forEach((marker) => {
   if (!publicTrustProfileSource.includes(marker)) {
     failures.push(`Public trust evidence: missing verification gate ${marker}`);
   }
 });
 
-if (!trustCenterSource.includes("Owner profile evidence reviewed:") || !trustCenterSource.includes("Implementation evidence reviewed:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
+if (!trustCenterSource.includes("Public owner evidence reviewed:") || !trustCenterSource.includes("Implementation review date:") || !trustCenterSource.includes("publicTrustEvidenceSummary")) {
   failures.push("Trust Center: missing visible verified-evidence summary");
 }
 

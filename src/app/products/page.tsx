@@ -34,7 +34,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <>
-      <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-4 pt-3 sm:pb-6 sm:pt-5" : "pb-12 pt-16"}`}>
+      <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-4 pt-3 sm:pb-6 sm:pt-5" : "pb-8 pt-8 sm:pb-12 sm:pt-12"}`}>
         {query ? (
           <div>
             <h1 className="sr-only">BioAxis product search</h1>
@@ -43,26 +43,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </div>
           </div>
         ) : (
-          <div className="grid gap-8 border-b border-bioaxis-line pb-12 pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-end">
+          <div className="grid gap-5 border-b border-bioaxis-line pb-8 pt-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-end lg:gap-8 lg:pb-12 lg:pt-10">
             <div>
-              <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">One stop for life science consumables</p>
-              <h1 className="max-w-5xl text-5xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
-              <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-                Browse 12 BioAxis product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields.
+              <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-accent sm:mb-5 sm:text-sm">One stop for life science consumables</p>
+              <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
+              <p className="mt-3 max-w-3xl text-xs leading-5 text-bioaxis-muted sm:mt-6 sm:text-lg sm:leading-7">
+                <span className="sm:hidden">Search or browse 12 product segments.</span>
+                <span className="hidden sm:inline">Explore 12 product segments. Search a reference or browse the product families buyers source most.</span>
               </p>
-              <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
-                <Link href="#product-categories" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent">
-                  Browse product lines
-                </Link>
-                <Link href="/equivalent-finder?requestType=equivalent" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                  Review equivalent
-                </Link>
-                <Link href="/request-quote?requestType=quote" className="inline-flex min-h-11 items-center justify-center whitespace-nowrap border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
-                  Request quote
-                </Link>
-              </div>
             </div>
-            <ProductSearch key="product-search" initialQuery={query} />
+            <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+              <ProductSearch key="product-search" initialQuery={query} />
+            </div>
           </div>
         )}
       </section>
@@ -73,7 +65,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <h2 className={query ? "text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl" : "text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl"}>
               {query ? "Browse all product lines" : "Browse BioAxis product lines"}
             </h2>
-            <p className="mt-5 max-w-3xl text-sm leading-6 text-bioaxis-muted">
+            <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-muted sm:block">
               {query
                 ? "Search results are ranked above. Use this compact directory when you want to browse across BioAxis product lines."
                 : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields."}

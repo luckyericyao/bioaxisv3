@@ -14,7 +14,9 @@ export function Header() {
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const pathname = usePathname();
   const productsMenuRef = useRef<HTMLDivElement>(null);
+  const productsTriggerRef = useRef<HTMLAnchorElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const suppressProductsFocusOpenRef = useRef(false);
   const { items: sourcingListItems, openDrawer } = useSourcingList();
 
   useEffect(() => {
@@ -26,6 +28,22 @@ export function Header() {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        const focusIsInDesktopProducts =
+          productsOpen && !menuOpen && productsMenuRef.current?.contains(document.activeElement);
+
+        if (focusIsInDesktopProducts) {
+          event.preventDefault();
+          suppressProductsFocusOpenRef.current = true;
+          setProductsOpen(false);
+          requestAnimationFrame(() => {
+            productsTriggerRef.current?.focus();
+            requestAnimationFrame(() => {
+              suppressProductsFocusOpenRef.current = false;
+            });
+          });
+          return;
+        }
+
         setProductsOpen(false);
         setMobileProductsOpen(false);
         if (menuOpen) {
@@ -37,7 +55,7 @@ export function Header() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [menuOpen]);
+  }, [menuOpen, productsOpen]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -96,7 +114,11 @@ export function Header() {
                 className="relative flex min-h-16 items-center"
                 onMouseEnter={() => setProductsOpen(true)}
                 onMouseLeave={() => setProductsOpen(false)}
-                onFocus={() => setProductsOpen(true)}
+                onFocus={() => {
+                  if (!suppressProductsFocusOpenRef.current) {
+                    setProductsOpen(true);
+                  }
+                }}
                 onBlur={(event) => {
                   const nextTarget = event.relatedTarget;
                   if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
@@ -105,6 +127,7 @@ export function Header() {
                 }}
               >
                 <Link
+                  ref={productsTriggerRef}
                   href={item.href}
                   onClick={() => setProductsOpen(false)}
                   aria-haspopup="true"

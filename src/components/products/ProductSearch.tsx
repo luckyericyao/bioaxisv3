@@ -135,6 +135,10 @@ function relevanceLabel(result: ProductSearchResult) {
     return "Direct title/path match";
   }
 
+  if (fields.includes("representative families") || fields.includes("aliases")) {
+    return "Product-family match";
+  }
+
   if (fields.includes("specifications") || fields.includes("applications")) {
     return "Spec/application match";
   }
@@ -212,6 +216,8 @@ function topCounts(values: string[], limit: number) {
 }
 
 function ProductResultCard({ result, query }: { result: ProductSearchResult; query: string }) {
+  const path = resultPath(result);
+
   return (
     <article
       data-search-result-card="true"
@@ -230,7 +236,9 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
           {matchKindLabel(result)}
         </span>
       </div>
-      <p className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent sm:mt-4">{highlightText(resultPath(result), query)}</p>
+      {path !== result.title ? (
+        <p className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent sm:mt-4">{highlightText(path, query)}</p>
+      ) : null}
       <h3 className="mt-2 text-base font-bold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
       <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result)}</p>
@@ -338,20 +346,20 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
 export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
+  const [visibleResultLimit, setVisibleResultLimit] = useState(18);
   const draftQuery = query.trim();
   const activeQuery = initialQuery.trim();
   const displayedQuery = displayQueryLabel(activeQuery);
   const results = useMemo(() => getProductSearchResults(activeQuery), [activeQuery]);
   const indexedPathCount = useMemo(() => getProductSearchIndexSize(), []);
   const topMatches = results.slice(0, 6);
-  const relatedMatches = results.slice(6, 18);
+  const relatedMatches = results.slice(6, visibleResultLimit);
   const visibleMatchCount = topMatches.length;
   const searchState = queryStateLabel(activeQuery, results);
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
   const intakeRequestType = /\n|,|\t|\|/.test(activeQuery) ? "product-list-review" : "quote";
-  const quoteSearchHref = `/request-quote?type=rfq&requestType=quote&query=${encodeURIComponent(activeQuery)}&q=${encodeURIComponent(activeQuery)}`;
   const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(activeQuery)}&q=${encodeURIComponent(activeQuery)}`;
 
   useEffect(() => {
@@ -383,7 +391,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           id="product-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search product name, catalog reference, supplier line, or consumable type"
+          placeholder={compact ? "Refine results" : "Search product name, catalog reference, supplier line, or consumable type"}
           className={["field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim", compact ? "min-h-10 text-sm sm:min-h-12 sm:text-base" : "min-h-12 text-base sm:text-lg"].join(" ")}
         />
         <button
@@ -420,7 +428,17 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     return (
       <div className="w-full">
         {searchForm()}
-        <QuickSearchLinks />
+        <div className="hidden sm:block">
+          <QuickSearchLinks />
+        </div>
+        <details className="mt-3 border border-bioaxis-line bg-bioaxis-panel sm:hidden">
+          <summary className="cursor-pointer list-none px-4 py-3 text-xs font-semibold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            Quick searches
+          </summary>
+          <div className="border-t border-bioaxis-line p-3">
+            <QuickSearchLinks className="mt-0" />
+          </div>
+        </details>
       </div>
     );
   }
@@ -469,15 +487,6 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             >
               Clear search
             </Link>
-            {results.length > 0 ? (
-              <Link
-                href={quoteSearchHref}
-                onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_quote" })}
-                className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-2 text-[0.68rem] font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black sm:px-4 sm:text-xs"
-              >
-                Send this search context
-              </Link>
-            ) : null}
           </div>
         </div>
       </section>
@@ -503,18 +512,27 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             {relatedMatches.length > 0 ? (
               <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-                  <span>Show more matches ({relatedMatches.length})</span>
-                  <span className="text-bioaxis-dim">Optional detail</span>
+                  <span>Explore related matches ({Math.max(0, results.length - 6)})</span>
+                  <span className="text-bioaxis-dim">{relatedMatches.length} loaded</span>
                 </summary>
                 <div className="border-t border-bioaxis-line p-5">
                   <p className="mb-4 max-w-2xl text-sm leading-6 text-bioaxis-dim">
-                    These are broader matches. Refine the query or send a product list when you need a wider sourcing review.
+                    Additional matches are ranked by relevance. Refine the search to narrow the list.
                   </p>
                   <div className="grid gap-4 xl:grid-cols-2">
                     {relatedMatches.map((result) => (
                       <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={activeQuery} />
                     ))}
                   </div>
+                  {visibleResultLimit < results.length ? (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleResultLimit((current) => Math.min(current + 12, results.length))}
+                      className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+                    >
+                      Show next 12 ({results.length - visibleResultLimit} remaining)
+                    </button>
+                  ) : null}
                 </div>
               </details>
             ) : null}

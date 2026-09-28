@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
-import { checkRfqQueueConnection, enqueueRfq, rfqQueueConfigured } from "@/lib/server/rfqQueue";
+import { checkRfqQueueConnection, enqueueRfq, RfqIdempotencyConflictError, rfqQueueConfigured } from "@/lib/server/rfqQueue";
+import { PayloadTooLargeError, readLimitedJsonBody } from "@/lib/server/readLimitedJsonBody";
 
 export const dynamic = "force-dynamic";
 
@@ -422,8 +424,12 @@ export async function POST(request: Request) {
   let payload: RfqPayload;
 
   try {
-    payload = await request.json();
-  } catch {
+    payload = await readLimitedJsonBody(request, maxPayloadBytes) as RfqPayload;
+  } catch (error) {
+    if (error instanceof PayloadTooLargeError) {
+      return NextResponse.json({ error: "Request payload is too large." }, { status: 413 });
+    }
+
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
 
@@ -465,7 +471,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
-  const referenceId = normalized.requestId || `BIOAXIS-${Date.now().toString(36).toUpperCase()}`;
+  const referenceId = normalized.requestId || `BIOAXIS-${randomUUID()}`;
 
   try {
     void recordBioAxisEvent("rfq_delivery", { requestId: referenceId, deliveryMode: "durable-queue", stage: "queue_write_start" }, "/api/rfq");
@@ -491,6 +497,17 @@ export async function POST(request: Request) {
       message: "Request received and stored for BioAxis review. We will follow up by email if specs, documents, samples, or quantity need clarification."
     });
   } catch (error) {
+    if (error instanceof RfqIdempotencyConflictError) {
+      return NextResponse.json(
+        {
+          error: "This request reference was already used for different details. Refresh the form to create a new request reference.",
+          referenceId,
+          requestId: referenceId
+        },
+        { status: 409 }
+      );
+    }
+
     console.error("[BioAxis RFQ queue] submission failed", { requestId: referenceId, error });
     void recordBioAxisEvent("rfq_queue_write_failed", { requestId: referenceId, deliveryMode: "durable-queue", stage: "queue_write", outcome: "error" }, "/api/rfq");
     void alertBioAxisFailure({ requestId: referenceId, stage: "queue_write", detail: "The durable RFQ queue rejected or failed to store the request." });

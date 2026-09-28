@@ -303,6 +303,55 @@ async function checkMobileSearchFunnel() {
   check(firstViewport.resultStartsInViewport, "390px search does not place the first result in the initial viewport");
   check(firstViewport.actionFitsInViewport, "390px search does not expose a first-result action in the initial viewport");
 
+  await openRoute(page, "/products");
+  const mobileDiscovery = await page.evaluate(() => {
+    const search = document.querySelector("#product-search");
+    const firstCard = document.querySelector('[data-product-segment-card="compact"]');
+    const firstTitle = firstCard?.querySelector("h2");
+    const searchRect = search?.getBoundingClientRect();
+    const titleRect = firstTitle?.getBoundingClientRect();
+    return {
+      searchVisible: Boolean(searchRect && searchRect.top >= 0 && searchRect.bottom <= innerHeight),
+      firstSegmentTitleVisible: Boolean(titleRect && titleRect.top >= 0 && titleRect.top < innerHeight),
+      quickSearchesCollapsed: document.querySelector("details > summary")?.textContent?.includes("Quick searches") ?? false
+    };
+  });
+  check(mobileDiscovery.searchVisible, "390px Products page does not show the search field within the first viewport");
+  check(mobileDiscovery.firstSegmentTitleVisible, "390px Products page does not show the first segment title within the first viewport");
+  check(mobileDiscovery.quickSearchesCollapsed, "mobile quick searches are not collapsed behind a disclosure");
+
+  await openRoute(page, "/products?q=cell");
+  const cellSearch = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('[data-search-result-card="true"]')].filter((card) => {
+      const style = getComputedStyle(card);
+      return !card.closest("details:not([open])") && card.getClientRects().length > 0 && style.visibility !== "hidden" && style.display !== "none";
+    });
+    const counts = document.body.innerText.match(/(\d+) matches? · (\d+) indexed sourcing paths/);
+    return {
+      count: cards.length,
+      first: cards[0]?.getAttribute("data-search-result-title"),
+      titles: cards.map((card) => card.getAttribute("data-search-result-title")),
+      counts: counts ? [Number(counts[1]), Number(counts[2])] : null,
+      relatedCollapsed: [...document.querySelectorAll("details > summary")].some((summary) => summary.textContent?.includes("Explore related matches") && !summary.parentElement?.hasAttribute("open"))
+    };
+  });
+  check(cellSearch.count === 6, `390px cell search shows ${cellSearch.count} top matches instead of six`);
+  check(cellSearch.first === "Cell Culture", `390px cell search ranks ${cellSearch.first ?? "no result"} first`);
+  check(!cellSearch.titles.some((title) => title?.includes("Liquid Handling")), "390px cell search ranks Liquid Handling among the first six results");
+  check(Boolean(cellSearch.counts && cellSearch.counts[0] >= 6 && cellSearch.counts[1] > cellSearch.counts[0]), "cell search does not disclose truthful match and index counts");
+  check(cellSearch.relatedCollapsed, "cell search expands related matches by default");
+
+  const relatedDetails = page.locator("details").filter({ hasText: "Explore related matches" });
+  await relatedDetails.locator("summary").click();
+  check((await page.locator('[data-search-result-card="true"]:visible').count()) === 18, "opening related matches does not reveal the first 12 related paths");
+  const moreResultsButton = page.getByRole("button", { name: /Show next 12/ });
+  await moreResultsButton.click();
+  check((await page.locator('[data-search-result-card="true"]:visible').count()) === 30, "cell search did not load exactly the next 12 related matches");
+
+  await openRoute(page, "/products?q=430641");
+  check((await page.getByRole("link", { name: "Send this reference", exact: true }).count()) === 1, "unknown catalog reference does not offer one clear send-reference action");
+  check((await page.locator('[data-search-result-card="true"]').count()) === 0, "unknown catalog reference produced a fabricated search result");
+
   await openRoute(page, "/");
   const menuButton = page.getByRole("button", { name: "Menu", exact: true });
   await menuButton.click();
@@ -380,12 +429,14 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await openRoute(desktop, "/products");
   const primaryNavigation = desktop.getByRole("navigation", { name: "Primary navigation" });
-  await primaryNavigation.getByRole("link", { name: "Products", exact: true }).focus();
+  const productsTrigger = primaryNavigation.getByRole("link", { name: "Products", exact: true });
+  await productsTrigger.focus();
   const desktopSearchLink = primaryNavigation.getByRole("link", { name: "Search all products" });
   await desktopSearchLink.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
   check(await desktopSearchLink.isVisible(), "desktop Products menu does not open from keyboard focus");
   await desktop.keyboard.press("Escape");
   check(!(await desktopSearchLink.isVisible().catch(() => false)), "Escape does not close the Products menu");
+  check(await productsTrigger.evaluate((element) => element === document.activeElement), "Escape does not return focus to the Products trigger");
   await desktop.close();
 
   if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {

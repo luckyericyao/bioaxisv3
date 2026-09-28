@@ -59,7 +59,6 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         ]}
       />
       <PageHero
-        eyebrow={`${segment.title} / ${category.title} / ${family.title}`}
         title={productItem.name}
         subtitle={productItem.shortDescription}
         compact
@@ -68,12 +67,15 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       >
         <div className="grid gap-3">
           <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
-            Sourcing template · not a verified supplier SKU
+            Sourcing target template · supplier specifications confirmed per request
           </p>
-          <div className="flex flex-wrap gap-2">
-            {productItem.commonSpecifications.slice(0, 5).map((specification) => (
-              <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
-            ))}
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Typical target specifications · confirm before purchase</p>
+            <div className="flex flex-wrap gap-2">
+              {productItem.commonSpecifications.slice(0, 5).map((specification) => (
+                <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
@@ -169,7 +171,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
         </div>
         <div className="grid gap-3">
-          <InfoPanel title="Specifications" items={[...productItem.details, ...productItem.commonSpecifications]} />
+          <InfoPanel title="Specification context" items={productItem.details} />
+          <InfoPanel title="Typical target parameters" items={productItem.commonSpecifications} />
           <InfoPanel title="Applications" items={productItem.applications} />
           <InfoPanel title="Compatibility" items={productItem.compatibilityConsiderations} />
           <InfoPanel title="Documentation" items={productItem.documentationNeeds} />
@@ -180,10 +183,10 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related product paths</p>
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other configured items in this family</h2>
-          {relatedConfigurations.length > 0 ? (
+        {relatedConfigurations.length > 0 ? (
+          <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
+            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related product paths</p>
+            <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other configured items in this family</h2>
             <div className="mt-5 grid gap-3">
               {relatedConfigurations.map((item) => (
                 <Link
@@ -196,12 +199,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                 </Link>
               ))}
             </div>
-          ) : (
-            <p className="mt-5 text-sm leading-6 text-bioaxis-muted">
-              This family currently has no additional configured item paths. BioAxis can still review alternate formats through the request form.
-            </p>
-          )}
-        </section>
+          </section>
+        ) : null}
         <section className="border border-bioaxis-line bg-bioaxis-black p-6">
           <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Back to catalog context</h2>
           <div className="mt-5 grid gap-3">
@@ -223,6 +222,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 }
 
 function InfoPanel({ title, items, links = [] }: { title: string; items: string[]; links?: { label: string; href: string }[] }) {
+  if (items.length === 0 && links.length === 0) return null;
+
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">

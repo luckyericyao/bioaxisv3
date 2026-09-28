@@ -1,4 +1,5 @@
 import { get, list, put } from "@vercel/blob";
+import { isDeepStrictEqual } from "node:util";
 
 const queuePrefix = "rfq/by-id";
 
@@ -14,6 +15,13 @@ export type QueuedRfqRecord = {
     environment: string;
   };
 };
+
+export class RfqIdempotencyConflictError extends Error {
+  constructor() {
+    super("Request reference already exists with different content.");
+    this.name = "RfqIdempotencyConflictError";
+  }
+}
 
 function queuePath(referenceId: string) {
   const safeReferenceId = referenceId.replace(/[^a-zA-Z0-9_-]/g, "");
@@ -71,6 +79,10 @@ export async function enqueueRfq(referenceId: string, request: unknown) {
     const existing = await readQueuedRfq(referenceId).catch(() => null);
 
     if (existing) {
+      if (!isDeepStrictEqual(existing.request, request)) {
+        throw new RfqIdempotencyConflictError();
+      }
+
       return { pathname, etag: "existing", record: existing, replayed: true };
     }
 
