@@ -70,7 +70,7 @@ export const publicTrustFacts: PublicTrustFact[] = [
     "Operating identity",
     process.env.NEXT_PUBLIC_BIOAXIS_LEGAL_NAME,
     process.env.NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE,
-    "Legal operating identity has not been publicly verified.",
+    "Legal operating identity is not yet listed publicly.",
     "Organization record"
   ),
   configuredFact(
@@ -78,7 +78,7 @@ export const publicTrustFacts: PublicTrustFact[] = [
     "Operating region",
     process.env.NEXT_PUBLIC_BIOAXIS_OPERATING_REGION,
     process.env.NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE,
-    "Operating region and business address have not been publicly verified.",
+    "Operating region and business address are not yet listed publicly.",
     "Address or registration record"
   ),
   configuredFact(
@@ -86,7 +86,7 @@ export const publicTrustFacts: PublicTrustFact[] = [
     "Enterprise contact",
     process.env.NEXT_PUBLIC_BIOAXIS_BUSINESS_EMAIL,
     process.env.NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE,
-    "No enterprise-domain contact has been publicly verified.",
+    "A dedicated business contact is not yet listed publicly.",
     "Enterprise-domain ownership record",
     isEnterpriseDomainEmail
   ),
@@ -95,7 +95,7 @@ export const publicTrustFacts: PublicTrustFact[] = [
     "Response target",
     process.env.NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET,
     process.env.NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE,
-    "No public response-time commitment has been verified.",
+    "No response-time commitment is currently listed publicly.",
     "Operating response policy",
     isMeasurableResponseTarget
   ),

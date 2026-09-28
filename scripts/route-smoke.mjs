@@ -2251,7 +2251,15 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
   }
 });
 
-if (!trustCenterSource.includes("Business and service information") || !trustCenterSource.includes("Not published") || trustCenterSource.includes("Identity and service commitments:") || trustCenterSource.includes("Implementation review date:")) {
+if (
+  !trustCenterSource.includes("Business and service information")
+  || !trustCenterSource.includes("not yet available for procurement review")
+  || !trustCenterSource.includes("Not listed publicly")
+  || trustCenterSource.includes("Not published:")
+  || trustCenterSource.includes("owner-approved evidence")
+  || trustCenterSource.includes("Identity and service commitments:")
+  || trustCenterSource.includes("Implementation review date:")
+) {
   failures.push("Trust Center: missing buyer-facing business information or exposing internal verification diagnostics");
 }
 

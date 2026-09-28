@@ -78,10 +78,6 @@ const documentPackage = [
   "Compatibility notes when supplier-provided"
 ];
 
-const unpublishedBusinessFacts = publicTrustFacts
-  .filter((fact) => fact.status === "not-published")
-  .map((fact) => fact.label);
-
 export default function TrustCenterPage() {
   return (
     <>
@@ -100,8 +96,8 @@ export default function TrustCenterPage() {
           </div>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {publicTrustEvidenceSummary.complete
-              ? `Operating identity, location, enterprise contact, and response target have owner-approved public evidence, reviewed ${trustEvidenceAsOf}.`
-              : `These details are not published without owner-approved evidence. BioAxis is not making claims about an operating identity, location, enterprise contact, or response-time commitment beyond what is shown here. Not published: ${unpublishedBusinessFacts.join(", ")}.`}
+              ? `Public business details and response information are listed with supporting evidence, reviewed ${trustEvidenceAsOf}.`
+              : "Some company and service details are not yet available for procurement review. The cards below show what is and is not currently listed publicly."}
           </p>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (
@@ -109,7 +105,7 @@ export default function TrustCenterPage() {
                 <div className="flex items-center justify-between gap-3">
                   <dt className="text-xs font-bold uppercase text-bioaxis-accent">{fact.question} · {fact.label}</dt>
                   <span className={fact.status === "verified" ? "text-[10px] font-bold uppercase text-emerald-700" : "text-[10px] font-bold uppercase text-amber-700"}>
-                    {fact.status === "verified" ? "Verified" : "Not published"}
+                    {fact.status === "verified" ? "Listed" : "Not listed publicly"}
                   </span>
                 </div>
                 <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
