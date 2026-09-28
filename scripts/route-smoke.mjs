@@ -1203,7 +1203,7 @@ for (const route of routes) {
     [
       "Availability check",
       "Check current supply evidence before procurement.",
-      "Send a current SKU, supplier line, specification, quantity, and timing requirement for a request-level availability review.",
+      "request-level check of current supplier status, documents, samples, dispatch, and replenishment",
       "BioAxis availability check",
       "Availability",
       "Selected lines only",
@@ -1218,10 +1218,6 @@ for (const route of routes) {
       "Sample path",
       "Replenishment",
       "Repeat supply planning",
-      "Current status",
-      "Supplier confirmation",
-      "Evidence requested",
-      "Recurring planning",
       "How the availability check works",
       "Submit the current requirement",
       "Check current evidence",
@@ -1231,7 +1227,6 @@ for (const route of routes) {
       "Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.",
       "What each response confirms",
       "Each step separates supplier-confirmed facts from open questions for the buyer.",
-      "Need a current answer on availability and dispatch?",
       "Request availability check"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -1261,6 +1256,13 @@ for (const route of routes) {
         failures.push(`${route}: Availability Check page overclaims ${pattern}`);
       }
     });
+
+    if ((pageText.match(/Request availability check/g) ?? []).length !== 1) {
+      failures.push(`${route}: expected one primary availability CTA`);
+    }
+    if (pageText.includes("Send current SKU") || pageText.includes("Current status Supplier confirmation")) {
+      failures.push(`${route}: duplicate ready-supply action or operation copy remains`);
+    }
   }
 
   if (route === "/services") {
@@ -1721,6 +1723,19 @@ for (const route of routes) {
       if (!pageText.includes(section)) {
         failures.push(`${route}: missing product detail section "${section}"`);
       }
+    }
+
+    if (route.endsWith("/filtered-200ul-pipette-tips")) {
+      if (!html.includes('data-product-specification-group="target"') || !pageText.includes("nominal volume: 200 µL")) {
+        failures.push(`${route}: exact buyer target specification is not separately identified`);
+      }
+      if (!html.includes('data-product-specification-group="options"') || !pageText.includes("Options and fit to confirm")) {
+        failures.push(`${route}: optional sourcing parameters are not separated from target specifications`);
+      }
+    }
+
+    if (route.endsWith("/microcentrifuge-tubes-general") && html.includes('data-product-specification-group="target"')) {
+      failures.push(`${route}: general template presents options as a known target specification`);
     }
 
     const productSlug = route.split("/").at(-1);

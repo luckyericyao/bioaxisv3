@@ -16,6 +16,11 @@ type ProductItemPageTemplateProps = {
 };
 
 export function ProductItemPageTemplate({ segment, category, family, productItem }: ProductItemPageTemplateProps) {
+  const specificationGroups = splitSpecificationGroups(productItem.commonSpecifications);
+  const highlightedSpecifications = [
+    ...specificationGroups.targets.slice(0, 3),
+    ...specificationGroups.toConfirm.slice(0, Math.max(0, 5 - Math.min(3, specificationGroups.targets.length)))
+  ];
   const relatedConfigurations = getIndexableProductItemsForFamily(segment.slug, category.slug, family.slug)
     .filter((item) => item.slug !== productItem.slug)
     .slice(0, 6);
@@ -69,10 +74,22 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
             Sourcing template · supplier specifications, availability, and fit require confirmation
           </p>
-          <div>
-            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Key fields and options to confirm</p>
+          {specificationGroups.targets.length > 0 ? (
+            <div data-product-specification-group="target">
+              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Target configuration · not supplier-verified</p>
+              <div className="flex flex-wrap gap-2">
+                {specificationGroups.targets.slice(0, 3).map((specification) => (
+                  <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <div data-product-specification-group="options">
+            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">
+              {specificationGroups.targets.length > 0 ? "Options and fit to confirm" : "Fields and options to confirm"}
+            </p>
             <div className="flex flex-wrap gap-2">
-              {productItem.commonSpecifications.slice(0, 5).map((specification) => (
+              {highlightedSpecifications.map((specification) => (
                 <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
               ))}
             </div>
@@ -253,4 +270,41 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
 
 function cleanListItem(item: string) {
   return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
+}
+
+function splitSpecificationGroups(specifications: string[]) {
+  const explicitTargetFields = new Set([
+    "nominal volume",
+    "format",
+    "profile",
+    "membrane",
+    "pore size",
+    "surface",
+    "filter barrier",
+    "sterility",
+    "serum status",
+    "base formulation",
+    "volume",
+    "diameter",
+    "mwco",
+    "barcode",
+    "barcode format",
+    "thread style"
+  ]);
+  const targets: string[] = [];
+  const toConfirm: string[] = [];
+
+  specifications.forEach((specification) => {
+    const separator = specification.indexOf(":");
+    const field = separator < 0 ? "" : specification.slice(0, separator).trim().toLowerCase();
+    const value = separator < 0 ? "" : specification.slice(separator + 1).trim();
+    const isSpecificTarget = explicitTargetFields.has(field)
+      && Boolean(value)
+      && !/\b(?:or|option|review|required|relevant|dependent|compatibility)\b/i.test(value)
+      && !/\b(?:review|option|fit|compatibility)\b/i.test(field);
+
+    (isSpecificTarget ? targets : toConfirm).push(specification);
+  });
+
+  return { targets, toConfirm };
 }

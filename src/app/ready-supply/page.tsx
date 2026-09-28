@@ -12,25 +12,6 @@ export const metadata: Metadata = createRouteMetadata({
   path: "/ready-supply"
 });
 
-const operationCards = [
-  {
-    title: "Current status",
-    body: "Availability and dispatch timing are checked against current supplier evidence for each request."
-  },
-  {
-    title: "Supplier confirmation",
-    body: "BioAxis coordinates the check; no public warehouse or live-inventory status is claimed."
-  },
-  {
-    title: "Evidence requested",
-    body: "Review can include specifications, batch evidence, documentation, sample options, and repeat-use requirements."
-  },
-  {
-    title: "Recurring planning",
-    body: "For recurring demand, BioAxis can organize usage, packaging, timing, and backup-source requirements for supplier review."
-  }
-];
-
 const readySupplySteps = [
   {
     title: "Submit the current requirement",
@@ -61,23 +42,11 @@ export default function ReadySupplyPage() {
               Check current supply evidence before procurement.
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-              Send a current SKU, supplier line, specification, quantity, and timing requirement for a request-level availability review.
+              Send a SKU, supplier line, or specification for a request-level check of current supplier status, documents, samples, dispatch, and replenishment. The response separates confirmed details from what remains supplier-dependent.
             </p>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-bioaxis-muted sm:text-base">
-              BioAxis coordinates supplier status, documentation, sample, dispatch, and recurring-supply questions without presenting an unverified inventory promise.
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
-              Built for labs, distributors, and procurement teams that need a traceable answer to what is confirmed now and what remains supplier-dependent.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8">
               <CTAButton href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=availability-check">
                 Request availability check
-              </CTAButton>
-              <CTAButton
-                href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=current-sku"
-                variant="secondary"
-              >
-                Send current SKU
               </CTAButton>
             </div>
           </div>
@@ -118,17 +87,6 @@ export default function ReadySupplyPage() {
               </div>
             </details>
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {operationCards.map((card) => (
-            <article key={card.title} className="border border-bioaxis-line bg-bioaxis-panel p-6">
-              <h2 className="text-base font-bold uppercase text-bioaxis-text">{card.title}</h2>
-              <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{card.body}</p>
-            </article>
-          ))}
         </div>
       </section>
 
@@ -207,22 +165,6 @@ export default function ReadySupplyPage() {
         </div>
       </section>
 
-      <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
-          <div>
-            <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">Availability request</p>
-            <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
-              Need a current answer on availability and dispatch?
-            </h2>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-              Send the current SKU, brand, specification, quantity, region, or estimated demand. BioAxis will coordinate a current availability, document, sample, dispatch, and replenishment check.
-            </p>
-          </div>
-          <CTAButton href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=availability-check">
-            Request availability check
-          </CTAButton>
-        </div>
-      </section>
     </>
   );
 }
