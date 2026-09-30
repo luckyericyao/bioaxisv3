@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
@@ -17,10 +16,8 @@ type ProductItemPageTemplateProps = {
 
 export function ProductItemPageTemplate({ segment, category, family, productItem }: ProductItemPageTemplateProps) {
   const specificationGroups = splitSpecificationGroups(productItem.commonSpecifications);
-  const highlightedSpecifications = [
-    ...specificationGroups.targets.slice(0, 3),
-    ...specificationGroups.toConfirm.slice(0, Math.max(0, 5 - Math.min(3, specificationGroups.targets.length)))
-  ];
+  const targetSpecifications = specificationGroups.targets.slice(0, 5);
+  const optionsToConfirm = specificationGroups.toConfirm.slice(0, 5 - targetSpecifications.length);
   const relatedConfigurations = getIndexableProductItemsForFamily(segment.slug, category.slug, family.slug)
     .filter((item) => item.slug !== productItem.slug)
     .slice(0, 6);
@@ -70,69 +67,52 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         tight
         align="start"
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3" data-product-decision-summary="true">
           <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
             Sourcing template · supplier specifications, availability, and fit require confirmation
           </p>
-          {specificationGroups.targets.length > 0 ? (
+          {targetSpecifications.length > 0 ? (
             <div data-product-specification-group="target">
               <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Target configuration · not supplier-verified</p>
-              <div className="flex flex-wrap gap-2">
-                {specificationGroups.targets.slice(0, 3).map((specification) => (
-                  <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
+              <ul className="flex flex-wrap gap-2">
+                {targetSpecifications.map((specification) => (
+                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification)}</SpecTag></li>
                 ))}
-              </div>
+              </ul>
             </div>
           ) : null}
-          <div data-product-specification-group="options">
-            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">
-              {specificationGroups.targets.length > 0 ? "Options and fit to confirm" : "Fields and options to confirm"}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {highlightedSpecifications.map((specification) => (
-                <SpecTag key={specification}>{cleanListItem(specification)}</SpecTag>
-              ))}
+          {optionsToConfirm.length > 0 ? (
+            <div data-product-specification-group="options">
+              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">
+                {specificationGroups.targets.length > 0 ? "Options and fit to confirm" : "Fields and options to confirm"}
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {optionsToConfirm.map((specification) => (
+                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification)}</SpecTag></li>
+                ))}
+              </ul>
             </div>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          ) : null}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" data-product-primary-actions="true">
             <Link
               href={requestLinks[0].href}
-              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+              className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
             >
               Request quote
             </Link>
             <Link
               href={requestLinks[2].href}
-              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Request sample
             </Link>
             <Link
               href={requestLinks[1].href}
-              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Review equivalent
             </Link>
           </div>
-          <details className="group border border-bioaxis-line bg-bioaxis-black">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
-              <span>Send product context</span>
-              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
-            </summary>
-            <div className="border-t border-bioaxis-line p-3">
-              <CompactSourcingIntake
-                requestType="quote"
-                sourcePage={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
-                segment={segment.title}
-                category={category.title}
-                family={family.title}
-                product={productItem.name}
-                title="Send this product context."
-                productFieldLabel="SKU, catalog number, supplier line, or product list"
-                submitLabel="Send sourcing request"
-              />
-            </div>
-          </details>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>

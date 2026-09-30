@@ -426,7 +426,6 @@ for (const route of routes) {
   const shouldHaveCompactIntake =
     route === "/" ||
     route.startsWith("/products?") ||
-    segmentProductItemRoutes.includes(route) ||
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 

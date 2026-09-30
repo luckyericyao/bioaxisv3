@@ -370,6 +370,87 @@ async function checkMobileSearchFunnel() {
   await page.close();
 }
 
+async function checkProductDecisionPages() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const routes = [
+    "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips",
+    "/products/sample-prep-filtration/syringe-filters/pes-syringe-filters/pes-022um-syringe-filters",
+    "/products/cell-culture/media-and-supplements/serum-free-media/serum-free-cell-culture-media",
+    "/products/lab-plasticware/tubes/microcentrifuge-tubes/microcentrifuge-tubes-general",
+    "/products/liquid-handling/pipette-tips/universal-pipette-tips/sterile-filtered-universal-pipette-tips",
+    "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose"
+  ];
+
+  for (const route of routes) {
+    await openRoute(page, route);
+    const productName = (await page.locator("main h1").first().innerText()).trim();
+    const decision = await page.evaluate(() => {
+      const summary = document.querySelector('[data-product-decision-summary="true"]');
+      const groups = [...(summary?.querySelectorAll("[data-product-specification-group]") ?? [])].map((group) => ({
+        name: group.getAttribute("data-product-specification-group"),
+        values: [...group.querySelectorAll("li")].map((item) => item.innerText.trim())
+      }));
+      const actions = [...(document.querySelector('[data-product-primary-actions="true"]')?.querySelectorAll("a") ?? [])].map((link) => {
+        const rect = link.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const topElement = document.elementFromPoint(x, y);
+        return {
+          text: link.innerText.trim(),
+          href: link.href,
+          top: rect.top,
+          bottom: rect.bottom,
+          covered: !topElement || (topElement !== link && !link.contains(topElement))
+        };
+      });
+
+      return { groups, actions };
+    });
+    const specificationValues = decision.groups.flatMap((group) => group.values);
+    const uniqueSpecifications = new Set(specificationValues.map((value) => value.toLocaleLowerCase()));
+    check(decision.groups.length > 0, `${route}: product decision summary is missing`);
+    check(specificationValues.length >= 3 && specificationValues.length <= 5, `${route}: shows ${specificationValues.length} key spec fields instead of 3–5`);
+    check(uniqueSpecifications.size === specificationValues.length, `${route}: repeats a specification in its decision summary`);
+    check(
+      decision.groups.every((group) => group.name !== "target" || !decision.groups.some((other) => other.name === "options" && other.values.some((value) => group.values.includes(value)))),
+      `${route}: known target specification is duplicated among options to confirm`
+    );
+    check(decision.actions.length === 3, `${route}: product decision area does not have exactly three primary actions`);
+
+    const routeParts = route.split("/").filter(Boolean);
+    for (const action of decision.actions) {
+      const href = new URL(action.href);
+      const productContextMatches =
+        href.searchParams.get("segment") === routeParts[1] &&
+        href.searchParams.get("category") === routeParts[2] &&
+        href.searchParams.get("family") === routeParts[3] &&
+        href.searchParams.get("product") === routeParts[4] &&
+        Boolean(href.searchParams.get("sourcePage"));
+      check(productContextMatches, `${route}: ${action.text} link loses product context`);
+      check(action.top >= 0 && action.bottom <= 844, `${route}: ${action.text} is outside the 390×844 first viewport`);
+      check(!action.covered, `${route}: ${action.text} is covered by another element`);
+    }
+
+    for (const [label, requestType] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]]) {
+      const action = decision.actions.find((entry) => entry.text.toLocaleLowerCase() === label.toLocaleLowerCase());
+      check(Boolean(action && new URL(action.href).searchParams.get("requestType") === requestType), `${route}: ${label} has the wrong request type`);
+    }
+
+    const quoteLink = page.locator('[data-product-primary-actions="true"] a').filter({ hasText: "Request quote" });
+    await quoteLink.click();
+    await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 }).catch(() => undefined);
+    const context = page.locator('[data-product-context-summary="true"]');
+    await context.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+    const contextText = (await context.innerText().catch(() => "")).toLocaleLowerCase();
+    check(contextText.includes(productName.toLocaleLowerCase()), `${route}: product name is missing from the RFQ context`);
+    for (const label of ["Product", "Family", "Category", "Segment"]) {
+      check(contextText.includes(label.toLocaleLowerCase()), `${route}: RFQ context is missing ${label}`);
+    }
+  }
+
+  await page.close();
+}
+
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   await openRoute(page, "/request-quote?requestType=quote");
@@ -446,6 +527,7 @@ try {
 
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
+  await checkProductDecisionPages();
 
   for (const route of criticalRoutes) {
     const auditPage = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
@@ -478,6 +560,7 @@ console.log("- preserved form failure alert and polite success/reference announc
 console.log("- fail-closed Turnstile loading/configuration state with preserved input");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
+console.log("- canonical and legacy product-detail specs, first-viewport actions, and RFQ context handoff");
 console.log("- axe-core WCAG A/AA semantics and color contrast on four critical routes");
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
 console.log("- WCAG text-spacing overrides without overflow or clipped text");

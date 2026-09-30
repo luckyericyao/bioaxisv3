@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
-import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import type { DocumentStatus, ProductCatalogCategory, ProductCatalogFamily, ProductCatalogItem, ProductCatalogSegment } from "@/data/productCatalog";
@@ -107,42 +106,32 @@ function ContextActions({
   family?: ProductCatalogFamily;
   product?: ProductCatalogItem;
 }) {
-  const href = productCatalogHref(segment.slug, category?.slug, family?.slug, product?.slug);
-
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+    <div className={product ? "grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" : "flex flex-col gap-3 sm:flex-row sm:flex-wrap"} data-product-primary-actions={product ? "true" : undefined}>
       <Link
         href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+        className={product
+          ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
       >
         Request quote
       </Link>
       <Link
         href={catalogEquivalentHref(segment, category, family, product)}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className={product
+          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Review equivalent
       </Link>
       <Link
         href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className={product
+          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Request sample
       </Link>
-      {product ? (
-        <AddToSourcingListButton
-          title={product.name}
-          href={href}
-          segmentSlug={segment.slug}
-          categorySlug={category?.slug}
-          familySlug={family?.slug}
-          productSlug={product.slug}
-          segmentTitle={segment.name}
-          categoryTitle={category?.name}
-          familyTitle={family?.name}
-          productTitle={product.name}
-        />
-      ) : null}
     </div>
   );
 }
@@ -417,42 +406,47 @@ export function CatalogProductPage({
           { label: product.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.name} / ${category.name} / ${family.name}`} title={product.name} subtitle={`Sourcing configuration for ${product.description}`} compact tight>
-        <div className="grid gap-3">
+      <PageHero title={product.name} subtitle={product.description} compact tight align="start">
+        <div className="grid gap-3" data-product-decision-summary="true">
           <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
             Sourcing template · not a verified supplier SKU
           </p>
-          <div className="flex flex-wrap gap-2">
-            {product.tags.slice(0, 6).map((tag) => (
-              <SpecTag key={tag}>{tag}</SpecTag>
-            ))}
+          <div data-product-specification-group="options">
+            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Fields and options to confirm</p>
+            <ul className="flex flex-wrap gap-2">
+              {[...new Set(product.tags)].slice(0, 5).map((tag) => (
+                <li key={tag} className="flex max-w-full"><SpecTag>{tag}</SpecTag></li>
+              ))}
+            </ul>
           </div>
           <ContextActions segment={segment} category={category} family={family} product={product} />
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
-              <span>Send product context</span>
+              <span>More sourcing actions</span>
               <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
-            <div className="border-t border-bioaxis-line p-3">
-              <CompactSourcingIntake
-                requestType="quote"
-                sourcePage={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
-                segment={segment.name}
-                category={category.name}
-                family={family.name}
-                product={product.name}
-                title="Send this product context."
-                productFieldLabel="SKU, catalog number, supplier line, or product list"
-                submitLabel="Send sourcing request"
+            <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
+              <Link href={catalogRequestHref({ requestType: "documentation", segment, category, family, product })} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
+                Ask for documents
+              </Link>
+              <AddToSourcingListButton
+                title={product.name}
+                href={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
+                segmentSlug={segment.slug}
+                categorySlug={category.slug}
+                familySlug={family.slug}
+                productSlug={product.slug}
+                segmentTitle={segment.name}
+                categoryTitle={category.name}
+                familyTitle={family.name}
+                productTitle={product.name}
+                className="min-h-11 px-3 text-xs"
               />
+              <Link href={productCatalogHref(segment.slug, category.slug, family.slug)} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
+                Back to family
+              </Link>
             </div>
           </details>
-          <p className="max-w-3xl border-l border-bioaxis-accent/60 pl-3 text-xs leading-5 text-bioaxis-dim">
-            Sourcing configuration template. Supplier, catalog reference, exact specifications, availability, documentation, and final fit are confirmed per request.
-          </p>
-          <Link href={productCatalogHref(segment.slug, category.slug, family.slug)} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
-            Back to {family.name}
-          </Link>
         </div>
       </PageHero>
 
