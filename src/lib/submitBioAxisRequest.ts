@@ -49,6 +49,7 @@ export type BioAxisRequestPayload = {
 
 export type BioAxisRequestResponse = {
   ok: boolean;
+  httpStatus?: number;
   mode?: "durable-queue" | "honeypot";
   message?: string;
   referenceId?: string;
@@ -96,6 +97,7 @@ export async function submitBioAxisRequest(payload: BioAxisRequestPayload): Prom
   if (!response.ok) {
     return {
       ok: false,
+      httpStatus: response.status,
       error: body?.error ?? requestErrorMessage,
       referenceId: body?.referenceId
     };

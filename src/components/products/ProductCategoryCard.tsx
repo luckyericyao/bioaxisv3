@@ -49,7 +49,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
       className="group flex h-full flex-col overflow-hidden border border-bioaxis-line bg-bioaxis-panel transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft focus-within:border-bioaxis-accent/70"
     >
       {image ? (
-        <div className="relative aspect-[16/7] border-b border-bioaxis-line bg-bioaxis-black">
+        <div className="relative hidden aspect-[16/7] border-b border-bioaxis-line bg-bioaxis-black sm:block">
           <Image
             src={image.src}
             alt={image.alt}
@@ -61,14 +61,14 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
           <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-bioaxis-panel to-transparent" aria-hidden="true" />
         </div>
       ) : null}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-lg font-bold leading-tight text-bioaxis-text">{segment.title}</h2>
+          <h2 className="text-base font-bold leading-tight text-bioaxis-text sm:text-lg">{segment.title}</h2>
           <span className="text-sm font-bold text-bioaxis-dim">{String(segment.index).padStart(2, "0")}</span>
         </div>
-        <p className="mt-4 flex-1 text-sm leading-6 text-bioaxis-muted">{description}</p>
+        <p className="mt-2 flex-1 text-xs leading-5 text-bioaxis-muted sm:mt-4 sm:text-sm sm:leading-6">{description}</p>
 
-        <div className="mt-5">
+        <div className="mt-3 sm:mt-5">
           <p className="text-[11px] font-bold uppercase text-bioaxis-dim">Example product types</p>
           <ul className="mt-3 grid gap-2" aria-label={`${segment.title} example product types`}>
             {commonRequests.slice(0, 3).map((request) => (

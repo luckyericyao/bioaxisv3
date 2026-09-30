@@ -156,18 +156,19 @@ async function checkTextSpacing(page, label) {
 
 async function checkRfqStateAnnouncements() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
-  let submissionCount = 0;
+  const submissions = [];
 
   await page.route("**/api/rfq", async (route) => {
-    submissionCount += 1;
+    const requestPayload = route.request().postDataJSON();
+    submissions.push(requestPayload);
 
-    if (submissionCount === 1) {
+    if (submissions.length === 1) {
       await route.fulfill({
-        status: 503,
+        status: 409,
         contentType: "application/json",
         body: JSON.stringify({
-          error: "Your request was not stored. Your form is still intact—please retry using this reference.",
-          requestId: "BIOAXIS-A11Y-FAIL"
+          error: "This request reference was already used for different details.",
+          requestId: requestPayload.requestId
         })
       });
       return;
@@ -179,8 +180,8 @@ async function checkRfqStateAnnouncements() {
       body: JSON.stringify({
         ok: true,
         mode: "durable-queue",
-        requestId: "BIOAXIS-A11Y-TEST",
-        referenceId: "BIOAXIS-A11Y-TEST",
+        requestId: requestPayload.requestId,
+        referenceId: requestPayload.requestId,
         message: "Request received and stored for BioAxis review."
       })
     });
@@ -188,26 +189,80 @@ async function checkRfqStateAnnouncements() {
 
   await openRoute(page, "/request-quote?requestType=quote");
   const email = page.getByLabel("Email *", { exact: true });
+  const productInput = page.getByLabel("Product, SKU, product list, or sourcing need", { exact: true });
   const submit = page.getByRole("button", { name: "Send sourcing request" });
   await email.fill("a11y-regression@example.com");
+  await productInput.fill("Filtered pipette tips · search: filtered 200 µL tips · sourcing list item included");
   check(await submit.isEnabled(), "RFQ state test cannot submit when Turnstile is unavailable in local regression mode");
 
   if (await submit.isEnabled()) {
     await submit.click();
     const error = page.getByRole("alert");
     await error.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
-    check(await error.isVisible().catch(() => false), "RFQ failure is not exposed as an alert");
-    check((await email.inputValue()) === "a11y-regression@example.com", "RFQ failure clears the customer email instead of preserving the form");
+    check(await error.isVisible().catch(() => false), "RFQ conflict is not exposed as an alert");
+    check((await email.inputValue()) === "a11y-regression@example.com", "RFQ conflict clears the customer email instead of preserving the form");
+    check((await productInput.inputValue()).includes("sourcing list item included"), "RFQ conflict clears the product/search/list context instead of preserving the form");
+
+    await page.getByRole("button", { name: "Use a new request reference", exact: true }).click();
+    await page.getByRole("status").filter({ hasText: "A new reference is ready." }).waitFor({ state: "visible", timeout: 5_000 });
+    check((await productInput.inputValue()).includes("sourcing list item included"), "rotating the RFQ reference clears the preserved context");
 
     await submit.click();
-    const reference = page.getByText("Reference: BIOAXIS-A11Y-TEST", { exact: true });
+    const reference = page.getByText(`Reference: ${submissions[1]?.requestId}`, { exact: true });
     await reference.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
     check(await reference.isVisible().catch(() => false), "RFQ success does not expose the durable request reference");
     check(
       await reference.evaluate((node) => node.closest('[role="status"]')?.getAttribute("aria-live") === "polite").catch(() => false),
       "RFQ success reference is not inside a polite status region"
     );
+    check(submissions.length === 2, `RFQ conflict recovery produced ${submissions.length} submission attempts instead of two`);
+    check(Boolean(submissions[0]?.requestId && submissions[1]?.requestId && submissions[0].requestId !== submissions[1].requestId), "explicit conflict recovery did not use a new request reference");
+    check(submissions[0]?.productList === submissions[1]?.productList, "explicit conflict recovery changed the submitted product/search/list context");
   }
+
+  await page.close();
+}
+
+async function checkSourcingListDrawerFocus() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await page.addInitScript(() => window.localStorage.removeItem("bioaxis:sourcing-list"));
+  await openRoute(page, "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips");
+
+  await page.locator("summary").filter({ hasText: "More sourcing actions" }).click();
+  const addButton = page.getByRole("button", { name: "Add to sourcing list", exact: true });
+  await addButton.click();
+  const dialog = page.getByRole("dialog", { name: "Review items before sending." });
+  await dialog.waitFor({ state: "visible", timeout: 5_000 });
+
+  const closeButton = dialog.getByRole("button", { name: "Close sourcing list", exact: true });
+  check(
+    await closeButton.evaluate((element) => element === document.activeElement),
+    "opening the sourcing list drawer does not focus its close control"
+  );
+
+  await page.keyboard.press("Shift+Tab");
+  check(
+    await dialog.getByRole("button", { name: "Send list for review", exact: true }).evaluate((element) => element === document.activeElement),
+    "Shift+Tab escapes the sourcing list drawer instead of wrapping to its last control"
+  );
+  await page.keyboard.press("Tab");
+  check(
+    await closeButton.evaluate((element) => element === document.activeElement),
+    "Tab escapes the sourcing list drawer instead of wrapping to its first control"
+  );
+
+  await page.keyboard.press("Escape");
+  await dialog.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => undefined);
+  const addedButton = page.getByRole("button", { name: "Added to sourcing list", exact: true });
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-pressed") === "true",
+    null,
+    { timeout: 5_000 }
+  ).catch(() => undefined);
+  check(
+    await addedButton.evaluate((element) => element === document.activeElement),
+    "closing the sourcing list drawer with Escape does not restore focus to its trigger"
+  );
 
   await page.close();
 }
@@ -535,6 +590,7 @@ try {
   if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
     await checkTurnstileFailClosed();
     await checkRfqStateAnnouncements();
+    await checkSourcingListDrawerFocus();
   }
 
   await checkPrivacyContactHandoff();
@@ -569,6 +625,7 @@ console.log("- skip link, landmarks, labels, and live RFQ status");
 console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
 console.log("- preserved form failure alert and polite success/reference announcement");
+console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape close, and focus restoration");
 console.log("- fail-closed Turnstile loading/configuration state with preserved input");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");

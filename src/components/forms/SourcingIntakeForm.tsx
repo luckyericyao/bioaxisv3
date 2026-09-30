@@ -294,6 +294,8 @@ export function SourcingIntakeForm({
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [requestReferenceConflict, setRequestReferenceConflict] = useState(false);
+  const [retryReferenceReady, setRetryReferenceReady] = useState(false);
   const [restoredSessionInput, setRestoredSessionInput] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   // Fail closed during SSR and hydration. Runtime Turnstile configuration is
@@ -400,6 +402,8 @@ export function SourcingIntakeForm({
   function startAnotherRequest() {
     setSubmitted(null);
     setError("");
+    setRequestReferenceConflict(false);
+    setRetryReferenceReady(false);
     setTurnstileToken("");
     setRestoredSessionInput(false);
     setSourcingListItems([]);
@@ -426,6 +430,7 @@ export function SourcingIntakeForm({
     }
 
     setError("");
+    setRetryReferenceReady(false);
     setSubmitting(true);
     trackBioAxisEvent("rfq_submit", { requestId: requestIdRef.current, requestType: state.requestType, stage: "client_submit" });
 
@@ -467,11 +472,17 @@ export function SourcingIntakeForm({
 
       if (!payload.ok) {
         trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "api", requestType: state.requestType });
-        setError(payload.error || requestErrorMessage);
+        const hasConflict = payload.httpStatus === 409;
+        setRequestReferenceConflict(hasConflict);
+        setError(hasConflict
+          ? "This reference is already linked to different saved details. Your current form is intact; choose a new reference to submit these details separately."
+          : payload.error || requestErrorMessage);
         setSubmitted(null);
         return;
       }
 
+      setRequestReferenceConflict(false);
+      setRetryReferenceReady(false);
       setSubmitted({
         message:
           payload.message ??
@@ -483,6 +494,7 @@ export function SourcingIntakeForm({
       setRestoredSessionInput(false);
       setSourcingListItems([]);
     } catch {
+      setRequestReferenceConflict(false);
       trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "network", requestType: state.requestType });
       setError(requestErrorMessage);
       setSubmitted(null);
@@ -595,7 +607,23 @@ export function SourcingIntakeForm({
               onTokenChange={setTurnstileToken}
             />
           </div>
-          {error ? (
+          {error && requestReferenceConflict ? (
+            <div className="order-2 border border-bioaxis-accent/50 bg-bioaxis-black p-3">
+              <p role="alert" className="text-sm font-semibold text-bioaxis-accent">{error}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  requestIdRef.current = rotateBioAxisRequestId();
+                  setRequestReferenceConflict(false);
+                  setRetryReferenceReady(true);
+                  setError("");
+                }}
+                className="mt-3 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+              >
+                Use a new request reference
+              </button>
+            </div>
+          ) : error ? (
             <p role="alert" className="order-2 text-sm font-semibold text-bioaxis-accent">
               {error}
             </p>
@@ -618,6 +646,11 @@ export function SourcingIntakeForm({
             </button>
             {compact ? null : <p className="order-2 max-w-xl text-sm leading-6 text-bioaxis-muted sm:order-1">{optionalHelperText}</p>}
           </div>
+          {retryReferenceReady ? (
+            <p role="status" aria-live="polite" className="order-4 text-sm leading-5 text-bioaxis-muted">
+              A new reference is ready. Your current form and sourcing-list details are unchanged; submit again to save them.
+            </p>
+          ) : null}
         </div>
         <details data-request-starters="true" className="group mt-4 border border-bioaxis-line bg-bioaxis-black/70">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
