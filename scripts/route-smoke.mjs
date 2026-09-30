@@ -1456,6 +1456,10 @@ for (const route of routes) {
       "Supplier specification sheet",
       "Packaging / format information",
       "Compatibility notes when supplier-provided",
+      "Contact BioAxis",
+      "successfully stored requests receive a reference ID",
+      "Supplier documents and availability",
+      "Selected-line evidence",
       "What BioAxis helps organize",
       "What remains buyer-side",
       "Recurring supply readiness",
@@ -1466,6 +1470,9 @@ for (const route of routes) {
         failures.push(`${route}: missing trust-center content ${label}`);
       }
     });
+    if (!html.includes('href="/contact#contact-form"')) {
+      failures.push(`${route}: Contact BioAxis does not link to the contact form`);
+    }
   }
 
   if (route === "/quality") {
@@ -2252,7 +2259,9 @@ if ([...envMap.keys()].some((name) => name.includes("RESEND"))) {
 
 if (
   !trustCenterSource.includes("Business and service information")
-  || !trustCenterSource.includes("not yet available for procurement review")
+  || !trustCenterSource.includes("not currently listed publicly")
+  || !trustCenterSource.includes("Contact BioAxis")
+  || !trustCenterSource.includes("successfully stored requests receive a reference ID")
   || !trustCenterSource.includes("Not listed publicly")
   || trustCenterSource.includes("Not published:")
   || trustCenterSource.includes("owner-approved evidence")

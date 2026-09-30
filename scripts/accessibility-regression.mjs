@@ -19,7 +19,8 @@ const criticalRoutes = [
   {
     label: "RFQ",
     path: "/request-quote?requestType=quote&segment=Liquid%20Handling&category=Pipette%20Tips&family=Filtered%20Pipette%20Tips&product=Filtered%20200%20%C2%B5L%20Pipette%20Tips"
-  }
+  },
+  { label: "Trust Center", path: "/trust-center" }
 ];
 
 function check(condition, message) {

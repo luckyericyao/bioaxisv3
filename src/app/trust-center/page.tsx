@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -93,24 +94,30 @@ export default function TrustCenterPage() {
               <p className="text-xs font-bold uppercase text-bioaxis-accent">Operating transparency</p>
               <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Business and service information</h2>
             </div>
+            <Link
+              href="/contact#contact-form"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            >
+              Contact BioAxis
+            </Link>
           </div>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {publicTrustEvidenceSummary.complete
               ? `Public business details and response information are listed with supporting evidence, reviewed ${trustEvidenceAsOf}.`
-              : "Some company and service details are not yet available for procurement review. The cards below show what is and is not currently listed publicly."}
+              : "Operating identity, region, dedicated business contact, and response target are not currently listed publicly. Use the Contact form to submit a question; successfully stored requests receive a reference ID."}
           </p>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (
               <div key={fact.label} className="border border-bioaxis-line bg-bioaxis-panel p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <dt className="text-xs font-bold uppercase text-bioaxis-accent">{fact.question} · {fact.label}</dt>
+                <dt className="flex items-center justify-between gap-3 text-xs font-bold uppercase text-bioaxis-accent">
+                  <span>{fact.question} · {fact.label}</span>
                   <span className={fact.status === "verified" ? "text-[10px] font-bold uppercase text-emerald-700" : "text-[10px] font-bold uppercase text-amber-700"}>
                     {fact.status === "verified" ? "Listed" : "Not listed publicly"}
                   </span>
-                </div>
+                </dt>
                 <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
                 {fact.status === "verified" ? (
-                  <p className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</p>
+                  <dd className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</dd>
                 ) : null}
               </div>
             ))}
@@ -157,16 +164,16 @@ export default function TrustCenterPage() {
                 ))}
               </ul>
               <div className="mt-5 border border-white/[0.12] bg-bioaxis-panel p-4">
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Evidence status</p>
+                <p className="text-xs font-bold uppercase text-bioaxis-accent">Supplier documents and availability</p>
                 <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
-                  No public line-level certificate or inventory record is published here. Supplier evidence is requested and reviewed for the specific sourcing request; buyer-side acceptance remains separate.
+                  Line-level stock and certificates are not published on this page. Supplier availability and documents must be confirmed for each request; buyers make the final acceptance decision.
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div className="mt-4 border border-bioaxis-line bg-bioaxis-panel p-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Request-level evidence record</p>
+          <p className="text-xs font-bold uppercase text-bioaxis-accent">Selected-line evidence</p>
           <p className="mt-3 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {selectedLineRegistry.length > 0
               ? "Evidence-backed selected-line records are shown below with their supply mode, confirmation owner, date, documents, sample path, and buyer responsibility."
@@ -193,7 +200,12 @@ export default function TrustCenterPage() {
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
+        <div
+          className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel"
+          tabIndex={0}
+          role="region"
+          aria-label="Trust Center sourcing responsibility matrix"
+        >
           <table className="min-w-full border-separate border-spacing-0 text-left">
             <thead>
               <tr className="text-xs font-bold uppercase text-bioaxis-dim">

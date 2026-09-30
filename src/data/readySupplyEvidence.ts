@@ -20,7 +20,7 @@ export type SelectedLineRegistryRecord = {
 export const selectedLineRegistry: SelectedLineRegistryRecord[] = [];
 
 export const selectedLineRegistryNote =
-  "Line-level status is returned per request after the relevant warehouse or supplier evidence is checked. No public record is treated as current availability.";
+  "Line-specific status is not shown as site-wide availability. A request can be checked against current supplier or warehouse evidence; the response should distinguish confirmed details from what remains unknown.";
 
 export const readySupplyEvidenceRows: ReadySupplyEvidenceRow[] = [
   {
