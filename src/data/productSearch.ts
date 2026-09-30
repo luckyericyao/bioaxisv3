@@ -1,6 +1,6 @@
 import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
 import { findVerifiedCatalogReferences, verifiedCatalogReferences } from "@/data/catalogReferences";
-import { productTaxonomy, type ProductSearchResult } from "@/data/productTaxonomy";
+import { productTaxonomy, type ProductSearchMatchTier, type ProductSearchResult } from "@/data/productTaxonomy";
 import { resourceArticles } from "@/data/resourceArticles";
 import { resourceGuides } from "@/data/resources";
 import { workflows } from "@/data/workflows";
@@ -19,6 +19,8 @@ type ScoredResult = ProductSearchResult & {
   exactPhraseMatch: boolean;
   directMatch: boolean;
   directTokens: string[];
+  matchTier: ProductSearchMatchTier;
+  queryCoverage: number;
   segmentScopeRank: number;
   order: number;
 };
@@ -33,10 +35,6 @@ function normalizeText(value: string) {
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function normalizeSource(text: string | string[]) {
-  return normalizeText(Array.isArray(text) ? text.join(" ") : text);
 }
 
 function tokenVariants(token: string) {
@@ -65,6 +63,13 @@ function queryTokens(query: string) {
     .filter(Boolean);
 }
 
+export function isCatalogReferenceQuery(value: string) {
+  const normalized = value.trim();
+  const digitCount = (normalized.match(/\d/g) ?? []).length;
+
+  return normalized.length >= 4 && digitCount >= 4 && /^[a-z0-9._/-]+$/i.test(normalized);
+}
+
 function titleContainsQueryTokens(title: string, query: string) {
   const queryParts = queryTokens(query);
   const titleParts = queryTokens(title);
@@ -79,10 +84,11 @@ function countTokenOccurrences(fieldTokens: string[], token: string) {
 }
 
 function scoreField(field: SearchField, normalizedPhrase: string, tokens: string[]) {
-  const normalizedField = normalizeSource(field.text);
+  const values = Array.isArray(field.text) ? field.text : [field.text];
+  const normalizedField = normalizeText(values.join(" "));
 
   if (!normalizedField) {
-    return { score: 0, matched: false, exactPhraseMatch: false, matchedTokens: [] };
+    return { score: 0, matched: false, exactPhraseMatch: false, matchedTokens: [], completeMatch: false };
   }
 
   const fieldTokens = normalizedField.split(" ");
@@ -91,7 +97,12 @@ function scoreField(field: SearchField, normalizedPhrase: string, tokens: string
     const count = Math.min(countTokenOccurrences(fieldTokens, token), maxCountPerField);
     return score + count * field.weight;
   }, 0);
-  const exactPhraseMatch = normalizedPhrase.length > 0 && normalizedField.includes(normalizedPhrase);
+  const phraseValues = field.label === "path" ? [values.join(" ")] : values;
+  const exactPhraseMatch = normalizedPhrase.length > 0 && phraseValues.some((value) => normalizeText(value).includes(normalizedPhrase));
+  const completeMatch = tokens.length > 0 && phraseValues.some((value) => {
+    const candidateTokens = normalizeText(value).split(" ");
+    return tokens.every((token) => countTokenOccurrences(candidateTokens, token) > 0);
+  });
   const phraseScore = exactPhraseMatch ? field.phraseBonus : 0;
   const score = tokenScore + phraseScore;
 
@@ -99,8 +110,37 @@ function scoreField(field: SearchField, normalizedPhrase: string, tokens: string
     score,
     matched: score > 0,
     exactPhraseMatch,
-    matchedTokens
+    matchedTokens,
+    completeMatch
   };
+}
+
+function matchTierForField(label: string): ProductSearchMatchTier {
+  if (label === "title") return "title";
+  if (label === "path") return "path";
+  if (label === "representative families") return "family";
+  if (label === "aliases" || label === "workflow tags") return "related";
+  if (label === "specifications") return "specification";
+  if (label === "description") return "description";
+  if (label === "applications" || label === "workflow details") return "application";
+  return "context";
+}
+
+function matchTierRank(tier: ProductSearchMatchTier) {
+  const ranks: Record<ProductSearchMatchTier, number> = {
+    title: 10,
+    path: 9,
+    family: 8,
+    related: 7,
+    specification: 6,
+    combined: 5,
+    description: 4,
+    application: 3,
+    context: 2,
+    partial: 1
+  };
+
+  return ranks[tier];
 }
 
 function scoreResult(fields: SearchField[], query: string) {
@@ -110,12 +150,15 @@ function scoreResult(fields: SearchField[], query: string) {
   let score = 0;
   let exactPhraseMatch = false;
   let directMatch = false;
-  const directTokens = new Set<string>();
+  const matchedQueryTokens = new Set<string>();
+  const matchedDirectTokens = new Set<string>();
+  let bestCompleteMatchTier: ProductSearchMatchTier | undefined;
 
   fields.forEach((field) => {
     const fieldScore = scoreField(field, normalizedPhrase, tokens);
 
     score += fieldScore.score;
+    fieldScore.matchedTokens.forEach((token) => matchedQueryTokens.add(token));
 
     if (fieldScore.matched) {
       matchedFields.push(field.label);
@@ -123,7 +166,14 @@ function scoreResult(fields: SearchField[], query: string) {
     }
 
     if (field.direct) {
-      fieldScore.matchedTokens.forEach((token) => directTokens.add(token));
+      fieldScore.matchedTokens.forEach((token) => matchedDirectTokens.add(token));
+    }
+
+    if (fieldScore.completeMatch) {
+      const tier = matchTierForField(field.label);
+      if (!bestCompleteMatchTier || matchTierRank(tier) > matchTierRank(bestCompleteMatchTier)) {
+        bestCompleteMatchTier = tier;
+      }
     }
 
     exactPhraseMatch = exactPhraseMatch || fieldScore.exactPhraseMatch;
@@ -133,7 +183,9 @@ function scoreResult(fields: SearchField[], query: string) {
     score,
     exactPhraseMatch,
     directMatch,
-    directTokens: [...directTokens],
+    directTokens: [...matchedDirectTokens],
+    matchTier: bestCompleteMatchTier ?? (matchedQueryTokens.size === tokens.length ? "combined" : "partial"),
+    queryCoverage: tokens.length === 0 ? 0 : matchedQueryTokens.size / tokens.length,
     matchedFields: [...new Set(matchedFields)]
   };
 }
@@ -248,6 +300,8 @@ function stripScore(result: ScoredResult): ProductSearchResult {
     familySlug: result.familySlug,
     productTitle: result.productTitle,
     productSlug: result.productSlug,
+    matchTier: result.matchTier,
+    queryCoverage: result.queryCoverage,
     matchedFields: result.matchedFields
   };
 }
@@ -282,6 +336,8 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
       exactPhraseMatch: scored.exactPhraseMatch,
       directMatch: scored.directMatch,
       directTokens: scored.directTokens,
+      matchTier: scored.matchTier,
+      queryCoverage: scored.queryCoverage,
       segmentScopeRank: result.segmentSlug && segmentIntentSlugs.has(result.segmentSlug)
         ? result.type === "segment"
           ? 3
@@ -474,12 +530,17 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     )
     : relevantResults;
 
-  return focusedShortQueryResults
+  const classifiedResults = isCatalogReferenceQuery(query)
+    ? focusedShortQueryResults.filter((result) => result.matchKind === "catalog-reference")
+    : focusedShortQueryResults;
+
+  return classifiedResults
     .sort(
       (a, b) =>
         productUniverseRank(b.type) - productUniverseRank(a.type) ||
         b.segmentScopeRank - a.segmentScopeRank ||
         (b.segmentScopeRank === 2 && a.segmentScopeRank === 2 ? a.order - b.order : 0) ||
+        matchTierRank(b.matchTier) - matchTierRank(a.matchTier) ||
         Number(b.completeTitleMatch) - Number(a.completeTitleMatch) ||
         Number(b.exactPhraseMatch) - Number(a.exactPhraseMatch) ||
         Number(b.directMatch) - Number(a.directMatch) ||

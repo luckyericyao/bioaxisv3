@@ -144,10 +144,13 @@ type RawSegment = {
 };
 
 type SearchResultType = "segment" | "subcategory" | "family" | "product" | "workflow" | "resource";
+export type ProductSearchMatchTier = "title" | "path" | "combined" | "family" | "related" | "specification" | "description" | "application" | "context" | "partial";
 
 export type ProductSearchResult = {
   type: SearchResultType;
   matchKind?: "taxonomy" | "catalog-reference" | "content";
+  matchTier?: ProductSearchMatchTier;
+  queryCoverage?: number;
   title: string;
   description: string;
   href: string;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
-import { getProductSearchIndexSize, getProductSearchResults } from "@/data/productSearch";
+import { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQuery } from "@/data/productSearch";
 import { buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
@@ -63,21 +63,16 @@ function displayQueryLabel(value: string) {
     .replace(/\bu[mM]\b/g, "µm");
 }
 
-function looksLikeCatalogReference(value: string) {
-  const normalized = value.trim();
-  return normalized.length >= 4 && /\d/.test(normalized) && /^[a-z0-9._/-]+$/i.test(normalized);
-}
-
 function queryStateLabel(query: string, results: ProductSearchResult[]) {
   if (results.length === 0) {
-    return looksLikeCatalogReference(query) ? "Reference not found" : "No direct product path match";
+    return isCatalogReferenceQuery(query) ? "Reference not verified" : "No direct product path match";
   }
 
   if (results.some((result) => result.matchKind === "catalog-reference")) {
     return "Verified catalog reference";
   }
 
-  return looksLikeCatalogReference(query) ? "Product path match — reference not verified" : "Product universe match";
+  return isCatalogReferenceQuery(query) ? "Reference not verified" : "Product universe match";
 }
 
 function resultPath(result: ProductSearchResult) {
@@ -129,48 +124,38 @@ function detailHref(result: ProductSearchResult, query: string) {
 }
 
 function relevanceLabel(result: ProductSearchResult) {
-  const fields = result.matchedFields ?? [];
+  const labels = {
+    title: "Full title match",
+    path: "Product path match",
+    combined: "Combined field match",
+    family: "Family match",
+    related: "Related term match",
+    specification: "Specification match",
+    description: "Description match",
+    application: "Application match",
+    context: "Sourcing context match",
+    partial: "Partial keyword match"
+  } as const;
 
-  if (fields.includes("title") || fields.includes("path")) {
-    return "Direct title/path match";
-  }
-
-  if (fields.includes("representative families") || fields.includes("aliases")) {
-    return "Product-family match";
-  }
-
-  if (fields.includes("specifications") || fields.includes("applications")) {
-    return "Spec/application match";
-  }
-
-  return "Ranked relevance";
+  return result.matchTier ? labels[result.matchTier] : "Ranked relevance";
 }
 
-function matchedReason(result: ProductSearchResult) {
-  const fields = result.matchedFields ?? [];
+function matchedReason(result: ProductSearchResult, query: string) {
   const path = resultPath(result);
+  const reasons = {
+    title: `All query terms match the title${path ? ` within ${path}` : ""}.`,
+    path: `All query terms match the product path${path ? `: ${path}` : ""}.`,
+    combined: "All query terms appear across the matched product fields; review the listed match sources.",
+    family: `All query terms match a representative product family${path ? ` in ${path}` : ""}.`,
+    related: `All query terms match a related product term${path ? ` in ${path}` : ""}.`,
+    specification: "All query terms match a listed specification or buyer requirement.",
+    description: "All query terms match the product description.",
+    application: "All query terms match application or workflow context.",
+    context: "All query terms match sourcing context attached to this path.",
+    partial: `This path matches ${Math.round((result.queryCoverage ?? 0) * query.split(/\s+/).filter(Boolean).length)} of ${query.split(/\s+/).filter(Boolean).length} query terms.`
+  } as const;
 
-  if (fields.includes("title")) {
-    return `Matched directly in the title${path ? ` within ${path}` : ""}.`;
-  }
-
-  if (fields.includes("path")) {
-    return `Matched the product path${path ? `: ${path}` : ""}.`;
-  }
-
-  if (fields.includes("aliases") || fields.includes("representative families")) {
-    return `Matched a related product-family term${path ? ` in ${path}` : ""}.`;
-  }
-
-  if (fields.includes("specifications")) {
-    return "Matched specification or buyer requirement text.";
-  }
-
-  if (fields.includes("applications")) {
-    return "Matched application or workflow context.";
-  }
-
-  return "Ranked by keyword relevance across BioAxis sourcing content.";
+  return result.matchTier ? reasons[result.matchTier] : "Ranked by keyword relevance across BioAxis sourcing content.";
 }
 
 function highlightText(value: string, query: string) {
@@ -241,7 +226,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       ) : null}
       <h3 className="mt-2 text-base font-bold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
-      <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result)}</p>
+      <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result, query)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
         <div className="mt-4 hidden flex-wrap gap-2 sm:flex">
           {result.matchedFields.slice(0, 5).map((field) => (
@@ -374,6 +359,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     }
   }, [initialQuery, results.length]);
 
+  useEffect(() => {
+    setVisibleResultLimit(18);
+  }, [activeQuery]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     trackBioAxisEvent("search_submit", { queryLength: draftQuery.length, source: "products-directory" });
@@ -461,7 +450,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                   Showing {visibleMatchCount} strongest path{visibleMatchCount === 1 ? "" : "s"}; broader matches are collapsed.
                 </p>
                 <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
-                  {results.length} match{results.length === 1 ? "" : "es"} · {indexedPathCount} indexed sourcing paths
+                  {results.length} matching path{results.length === 1 ? "" : "s"} · {indexedPathCount} indexed paths
                 </p>
                 <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">
                   BioAxis searches {indexedPathCount} product and sourcing paths. This is not a live supplier catalog lookup.
@@ -473,10 +462,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             ) : (
               <>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                  This reference is not in the current BioAxis product and sourcing paths. It has not been presented as a verified catalog match.
+                  No verified catalog-reference record matches this input. This index covers BioAxis product and sourcing paths, not live supplier catalogs.
                 </p>
                 <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
-                  0 matches · {indexedPathCount} indexed sourcing paths
+                  0 verified reference matches · {indexedPathCount} indexed product and sourcing paths
                 </p>
               </>
             )}
@@ -513,7 +502,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                   <span>Explore related matches ({Math.max(0, results.length - 6)})</span>
-                  <span className="text-bioaxis-dim">{relatedMatches.length} loaded</span>
+                  <span className="text-bioaxis-dim">{relatedMatches.length} of {Math.max(0, results.length - 6)} shown</span>
                 </summary>
                 <div className="border-t border-bioaxis-line p-5">
                   <p className="mb-4 max-w-2xl text-sm leading-6 text-bioaxis-dim">
@@ -604,7 +593,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
         <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Manual sourcing review</p>
           <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
-            {looksLikeCatalogReference(activeQuery) ? "Send this reference." : "Send the sourcing input."}
+            {isCatalogReferenceQuery(activeQuery) ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.

@@ -27,7 +27,7 @@ require.extensions[".ts"] = (module, filename) => {
   module._compile(compiled, filename);
 };
 
-const { getProductSearchIndexSize, getProductSearchResults } = require("../src/data/productSearch.ts");
+const { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQuery } = require("../src/data/productSearch.ts");
 const cases = [
   ["cell", "Cell Culture"],
   ["gene", "Molecular Biology & PCR"],
@@ -63,6 +63,9 @@ const cellResults = getProductSearchResults("cell");
 if (cellResults[0]?.title !== "Cell Culture") {
   failures.push(`cell: expected Cell Culture first, got ${cellResults[0]?.title ?? "no results"}`);
 }
+if (cellResults[0]?.matchTier !== "title") {
+  failures.push(`cell: expected a full title match classification, got ${cellResults[0]?.matchTier ?? "no classification"}`);
+}
 if (cellResults.length > 60) {
   failures.push(`cell: focused short-query results remain too broad (${cellResults.length})`);
 }
@@ -75,8 +78,30 @@ for (const expected of ["Tissue Culture Flasks", "Cell Culture Dishes", "Multiwe
   }
 }
 
+const plateResults = getProductSearchResults("96-well PCR plates");
+if (plateResults[0]?.title !== "96-Well PCR Plates" || plateResults[0]?.matchTier !== "title") {
+  failures.push(`96-well PCR plates: expected an exact title match first, got ${plateResults[0]?.title ?? "no results"} (${plateResults[0]?.matchTier ?? "unclassified"})`);
+}
+const pcrTubes = plateResults.find((result) => result.title === "PCR Tubes");
+if (pcrTubes && ["title", "path"].includes(pcrTubes.matchTier ?? "")) {
+  failures.push("96-well PCR plates: PCR Tubes is incorrectly classified as a full title or path match");
+}
+
 if (getProductSearchResults("430641").length !== 0) {
   failures.push("430641: unknown catalog reference must not be presented as a taxonomy match");
+}
+for (const query of ["AB-430641", "D8537", "0000-1234"]) {
+  if (!isCatalogReferenceQuery(query)) {
+    failures.push(`${query}: expected identifier-shaped input to be treated as a catalog reference`);
+  }
+  if (getProductSearchResults(query).length !== 0) {
+    failures.push(`${query}: unverified catalog reference must not fall through to broad taxonomy search`);
+  }
+}
+for (const query of ["cell", "96-well PCR plates", "PES 0.22 µm syringe filters", "filtered 200 µL tips"]) {
+  if (isCatalogReferenceQuery(query)) {
+    failures.push(`${query}: product/specification query was incorrectly classified as a catalog reference`);
+  }
 }
 
 if (getProductSearchIndexSize() !== 429) {

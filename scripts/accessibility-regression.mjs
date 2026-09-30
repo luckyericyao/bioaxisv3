@@ -327,7 +327,7 @@ async function checkMobileSearchFunnel() {
       const style = getComputedStyle(card);
       return !card.closest("details:not([open])") && card.getClientRects().length > 0 && style.visibility !== "hidden" && style.display !== "none";
     });
-    const counts = document.body.innerText.match(/(\d+) matches? · (\d+) indexed sourcing paths/);
+    const counts = document.body.innerText.match(/(\d+) matching paths? · (\d+) indexed paths/);
     return {
       count: cards.length,
       first: cards[0]?.getAttribute("data-search-result-title"),
@@ -356,7 +356,7 @@ async function checkMobileSearchFunnel() {
   await openRoute(page, "/");
   const hero = page.locator("main > section").first();
   const homeIntake = hero.locator('details[data-home-primary-intake="true"]');
-  const homeIntakeSummary = homeIntake.locator("summary");
+  const homeIntakeSummary = homeIntake.locator("summary").first();
   check((await homeIntake.count()) === 1, "homepage does not have exactly one primary sourcing-intake disclosure");
   check((await hero.locator('a[href^="/request-quote"]').count()) === 0, "homepage hero still duplicates the primary intake with a direct RFQ link");
   await homeIntakeSummary.focus();

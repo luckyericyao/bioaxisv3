@@ -108,7 +108,7 @@ const productSearchExpectations = {
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
   "/products?q=zzzxqnotfound999": ["No direct product path match", "Send this reference"],
-  "/products?q=430641": ["Reference not found", "Send this reference"]
+  "/products?q=430641": ["Reference not verified", "Send this reference"]
 };
 const requiredWorkflowStageLabels = [
   "Target Discovery & Biology Validation",
@@ -451,7 +451,7 @@ for (const route of routes) {
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 
-  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not found") || pageText.includes("No direct product path match"));
+  const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not verified") || pageText.includes("No direct product path match"));
 
   if (shouldHaveCompactIntake && !isUnresolvedSearch) {
     ["data-sourcing-intake=\"compact\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
@@ -464,7 +464,7 @@ for (const route of routes) {
   if (route in productSearchExpectations) {
     const expectedTerms = productSearchExpectations[route];
 
-    const noDirectMatch = pageText.includes("Reference not found") || pageText.includes("No direct product path match");
+    const noDirectMatch = pageText.includes("Reference not verified") || pageText.includes("No direct product path match");
 
     ["Product search", "Results for", "Clear search"].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -548,6 +548,14 @@ for (const route of routes) {
     if (segmentResultIndex !== -1 && familyResultIndex !== -1 && segmentResultIndex > familyResultIndex) {
       failures.push(`${route}: Cell Culture segment result appears after family results`);
     }
+
+    if (!pageText.includes("Showing 6 strongest paths; broader matches are collapsed.")) {
+      failures.push(`${route}: the first six search paths are not clearly prioritized`);
+    }
+
+    if (!pageText.includes("12 of 30 shown")) {
+      failures.push(`${route}: related-result truncation does not show the visible and total counts`);
+    }
   }
 
   if (route === "/products?q=filtered%20200%20ul%20tips") {
@@ -563,8 +571,16 @@ for (const route of routes) {
   }
 
   if (route === "/products?q=430641") {
-    if (!pageText.includes("This reference is not in the current BioAxis product and sourcing paths")) {
+    if (!pageText.includes("No verified catalog-reference record matches this input")) {
       failures.push(`${route}: missing honest unresolved-reference boundary`);
+    }
+
+    if (!pageText.includes("0 verified reference matches")) {
+      failures.push(`${route}: missing explicit zero verified-reference count`);
+    }
+
+    if (html.includes('data-search-result-card="true"')) {
+      failures.push(`${route}: an unverified reference rendered a product or taxonomy result card`);
     }
 
     if (pageText.includes("Showing 0 strongest matches")) {
