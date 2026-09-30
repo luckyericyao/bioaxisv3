@@ -1202,7 +1202,8 @@ for (const route of routes) {
     [
       "Availability check",
       "Check current supply evidence before procurement.",
-      "request-level check of current supplier status, documents, samples, dispatch, and replenishment",
+      "to request an availability, document, sample, dispatch, or replenishment check",
+      "Selected-line status is checked per request; this is not a live inventory feed.",
       "BioAxis availability check",
       "Availability",
       "Selected lines only",
@@ -1222,10 +1223,11 @@ for (const route of routes) {
       "Check current evidence",
       "Quality and documentation review",
       "Return a sourcing response",
+      "The response states confirmed details, the check date, unresolved questions, and buyer-side review items.",
       "Typical request coverage",
       "Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.",
       "What each response confirms",
-      "Each step separates supplier-confirmed facts from open questions for the buyer.",
+      "From current line details to availability, documentation, and repeat-supply follow-up.",
       "Request availability check"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -1235,6 +1237,9 @@ for (const route of routes) {
 
     if (pageText.includes("This page is not a real-time inventory feed.") || pageText.includes("A document package may include CoA")) {
       failures.push(`${route}: repeated stock/document disclaimers returned to the coverage section`);
+    }
+    if (pageText.includes("The response separates confirmed details from what remains supplier-dependent.")) {
+      failures.push(`${route}: old repeated supplier-dependent boundary copy remains visible`);
     }
 
     [

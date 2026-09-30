@@ -27,7 +27,7 @@ const readySupplySteps = [
   },
   {
     title: "Return a sourcing response",
-    body: "The response separates what was confirmed, when it was checked, what remains unknown, and what the buyer must review."
+    body: "The response states confirmed details, the check date, unresolved questions, and buyer-side review items."
   }
 ];
 
@@ -42,7 +42,7 @@ export default function ReadySupplyPage() {
               Check current supply evidence before procurement.
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
-              Send a SKU, supplier line, or specification for a request-level check of current supplier status, documents, samples, dispatch, and replenishment. The response separates confirmed details from what remains supplier-dependent.
+              Send a SKU, supplier line, or specification to request an availability, document, sample, dispatch, or replenishment check.
             </p>
             <div className="mt-8">
               <CTAButton href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=availability-check">
@@ -55,14 +55,14 @@ export default function ReadySupplyPage() {
             <aside className="border border-bioaxis-line bg-bioaxis-black p-4">
               <p className="text-xs font-bold uppercase text-bioaxis-accent">BioAxis availability check</p>
               <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
-                Selected-line status is confirmed per request, not shown as public live inventory.
+                Selected-line status is checked per request; this is not a live inventory feed.
               </p>
               <dl className="mt-4 grid gap-2">
                 {[
-                  ["Supply mode", "Supplier-coordinated; confirm per request"],
-                  ["Availability", "No public live inventory; current check required"],
+                  ["Supply mode", "Supplier-coordinated"],
+                  ["Availability", "Checked against current evidence"],
                   ["Documents", "CoA / sterility / compliance check where available"],
-                  ["Replenishment", "Usage, packaging, and backup source reviewed per request"]
+                  ["Replenishment", "Usage and packaging review for recurring demand"]
                 ].map(([label, value]) => (
                   <div key={label} className="grid gap-1 border-t border-white/[0.12] pt-2 sm:grid-cols-[0.38fr_0.62fr] sm:gap-3">
                     <dt className="text-[0.68rem] font-bold uppercase text-bioaxis-dim">{label}</dt>
@@ -94,7 +94,7 @@ export default function ReadySupplyPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:px-10">
           <SectionHeader
             title="How the availability check works"
-            subtitle="Each step separates supplier-confirmed facts from open questions for the buyer."
+            subtitle="From current line details to availability, documentation, and repeat-supply follow-up."
           />
           <div className="grid gap-3">
             {readySupplySteps.map((step, index) => (
@@ -126,7 +126,7 @@ export default function ReadySupplyPage() {
         <div className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
           <SectionHeader
             title="What each response confirms"
-            subtitle="The reply separates supplier-confirmed details, the check date, and items that remain buyer-side for review."
+            subtitle="The response separates confirmed details, the check date, unresolved questions, and buyer-side review."
           />
           {selectedLineRegistry.length > 0 ? (
             <div className="mt-5 grid gap-3">
