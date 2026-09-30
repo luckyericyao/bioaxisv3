@@ -35,26 +35,13 @@ export function HeroSearchSection() {
           </div>
         </div>
 
-        <div className="order-2 mt-8 flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-3 sm:gap-x-6">
-          <CTAButton href="/request-quote?requestType=quote">
-            Send sourcing request
-          </CTAButton>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
-            <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
-              Review equivalent
-            </CTAButton>
-            <CTAButton href="/products" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
-              Browse product lines
-            </CTAButton>
-          </div>
-        </div>
-
-        <details className="order-3 mt-6 max-w-5xl border border-bioaxis-line bg-white/[0.76] shadow-[0_18px_55px_rgba(15,76,129,0.08)] backdrop-blur">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-white focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-            <span>Open sourcing intake</span>
-            <span className="shrink-0 text-[0.68rem] font-semibold text-bioaxis-accent">Email only · +</span>
+        <details data-home-primary-intake="true" className="group order-2 mt-8 max-w-5xl">
+          <summary className="inline-flex min-h-12 w-full cursor-pointer list-none items-center justify-between gap-4 border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-semibold uppercase text-white shadow-sm outline-none transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text focus-visible:ring-2 focus-visible:ring-bioaxis-accent sm:w-fit [&::-webkit-details-marker]:hidden">
+            <span>Send sourcing request</span>
+            <span className="shrink-0 text-[0.68rem] font-semibold text-white/75">Email only</span>
+            <span aria-hidden="true" className="text-base leading-none transition-transform group-open:rotate-45">+</span>
           </summary>
-          <div className="border-t border-bioaxis-line p-4 sm:p-5">
+          <div className="mt-4 border border-bioaxis-line bg-white/[0.76] p-4 shadow-[0_18px_55px_rgba(15,76,129,0.08)] backdrop-blur sm:p-5">
             <CompactSourcingIntake
               sourcePage="/"
               title="Send the sourcing context."
@@ -63,6 +50,15 @@ export function HeroSearchSection() {
             />
           </div>
         </details>
+
+        <div className="order-3 mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
+          <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
+            Review equivalent
+          </CTAButton>
+          <CTAButton href="/products" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
+            Browse product lines
+          </CTAButton>
+        </div>
       </div>
     </section>
   );

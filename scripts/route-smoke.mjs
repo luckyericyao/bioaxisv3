@@ -401,6 +401,28 @@ for (const route of routes) {
     failures.push(`${route}: visible Coming soon copy`);
   }
 
+  if (route === "/trust-center") {
+    [
+      "Operating identity, region, dedicated business contact, and response target are not currently listed publicly.",
+      "Contact BioAxis form to ask a question or start a sourcing request",
+      "After a request is successfully stored, BioAxis provides a reference ID for follow-up.",
+      "Read the Privacy notice"
+    ].forEach((copy) => {
+      if (!pageText.includes(copy)) {
+        failures.push(`${route}: missing buyer-facing transparency copy: ${copy}`);
+      }
+    });
+    [
+      "Production intake implementation and storage configuration reviewed",
+      "Privacy notice and intake payload reviewed",
+      "private durable queue for internal lookup before success is shown"
+    ].forEach((diagnostic) => {
+      if (pageText.includes(diagnostic)) {
+        failures.push(`${route}: internal implementation diagnostic remains visible: ${diagnostic}`);
+      }
+    });
+  }
+
   if (route === "/") {
     [
       'rel="canonical" href="https://bioaxisv3.vercel.app"',
@@ -598,6 +620,15 @@ for (const route of routes) {
         failures.push(`${route}: missing homepage command CTA ${label}`);
       }
     });
+
+    const homeHero = mainBlock(html).match(/<section\b[^>]*>[\s\S]*?<\/section>/)?.[0] ?? "";
+    const primaryIntake = homeHero.match(/<details\b[^>]*data-home-primary-intake="true"[^>]*>[\s\S]*?<\/details>/)?.[0] ?? "";
+    if (!primaryIntake.includes("Send sourcing request") || !primaryIntake.includes('data-sourcing-intake="compact"')) {
+      failures.push(`${route}: primary sourcing CTA must expand the existing compact intake`);
+    }
+    if (/<a\b[^>]*href="\/request-quote\?requestType=quote"/.test(homeHero)) {
+      failures.push(`${route}: duplicate direct RFQ link remains beside the primary intake`);
+    }
 
     if (pageText.includes("Products Suppliers Equivalent Finder Samples Quotes Quality")) {
       failures.push(`${route}: legacy homepage capability chip row`);
@@ -1462,7 +1493,7 @@ for (const route of routes) {
       "Packaging / format information",
       "Compatibility notes when supplier-provided",
       "Contact BioAxis",
-      "successfully stored requests receive a reference ID",
+      "After a request is successfully stored, BioAxis provides a reference ID for follow-up.",
       "Supplier documents and availability",
       "Selected-line evidence",
       "What BioAxis helps organize",
@@ -2266,7 +2297,7 @@ if (
   !trustCenterSource.includes("Business and service information")
   || !trustCenterSource.includes("not currently listed publicly")
   || !trustCenterSource.includes("Contact BioAxis")
-  || !trustCenterSource.includes("successfully stored requests receive a reference ID")
+  || !trustCenterSource.includes("Contact BioAxis form to ask a question or start a sourcing request")
   || !trustCenterSource.includes("Not listed publicly")
   || trustCenterSource.includes("Not published:")
   || trustCenterSource.includes("owner-approved evidence")

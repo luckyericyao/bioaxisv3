@@ -104,7 +104,7 @@ export default function TrustCenterPage() {
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {publicTrustEvidenceSummary.complete
               ? `Public business details and response information are listed with supporting evidence, reviewed ${trustEvidenceAsOf}.`
-              : "Operating identity, region, dedicated business contact, and response target are not currently listed publicly. Use the Contact form to submit a question; successfully stored requests receive a reference ID."}
+              : "Operating identity, region, dedicated business contact, and response target are not currently listed publicly. Use the Contact BioAxis form to ask a question or start a sourcing request."}
           </p>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (
@@ -116,7 +116,13 @@ export default function TrustCenterPage() {
                   </span>
                 </dt>
                 <dd className="mt-3 text-sm font-semibold leading-6 text-bioaxis-text">{fact.value}</dd>
-                {fact.status === "verified" ? (
+                {fact.status === "verified" && fact.label === "Data use" ? (
+                  <dd className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5">
+                    <Link href="/privacy" className="font-semibold text-bioaxis-accent underline underline-offset-4 hover:text-bioaxis-text">
+                      Read the Privacy notice
+                    </Link>
+                  </dd>
+                ) : fact.status === "verified" && fact.label !== "Request handling" ? (
                   <dd className="mt-3 border-t border-bioaxis-line pt-3 text-xs leading-5 text-bioaxis-dim">Evidence: {fact.source}</dd>
                 ) : null}
               </div>

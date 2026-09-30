@@ -354,6 +354,17 @@ async function checkMobileSearchFunnel() {
   check((await page.locator('[data-search-result-card="true"]').count()) === 0, "unknown catalog reference produced a fabricated search result");
 
   await openRoute(page, "/");
+  const hero = page.locator("main > section").first();
+  const homeIntake = hero.locator('details[data-home-primary-intake="true"]');
+  const homeIntakeSummary = homeIntake.locator("summary");
+  check((await homeIntake.count()) === 1, "homepage does not have exactly one primary sourcing-intake disclosure");
+  check((await hero.locator('a[href^="/request-quote"]').count()) === 0, "homepage hero still duplicates the primary intake with a direct RFQ link");
+  await homeIntakeSummary.focus();
+  await homeIntakeSummary.press("Enter");
+  check((await homeIntake.getAttribute("open")) !== null, "keyboard activation does not open the primary homepage intake");
+  await page.getByLabel("Email *", { exact: true }).waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
+  check(await page.getByLabel("Email *", { exact: true }).isVisible().catch(() => false), "homepage primary intake does not reveal the email field");
+
   const menuButton = page.getByRole("button", { name: "Menu", exact: true });
   await menuButton.click();
   check((await menuButton.getAttribute("aria-expanded")) === "true", "mobile menu does not expose its open state");

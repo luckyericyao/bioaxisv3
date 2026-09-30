@@ -102,16 +102,16 @@ export const publicTrustFacts: PublicTrustFact[] = [
   {
     question: "How",
     label: "Request handling",
-    value: "Validated requests receive a reference ID and are stored in a private durable queue for internal lookup before success is shown.",
+    value: "After a request is successfully stored, BioAxis provides a reference ID for follow-up.",
     status: "verified",
-    source: `Production intake implementation and storage configuration reviewed ${implementationEvidenceAsOf}.`
+    source: "Request form behavior."
   },
   {
     question: "Evidence",
     label: "Data use",
-    value: "Submitted contact and product context is used for sourcing review, follow-up, operational traceability, and request security. It is not published as a customer catalog.",
+    value: "Contact details and product context support sourcing review, follow-up, and request security. They are not published as a customer catalog.",
     status: "verified",
-    source: `Privacy notice and intake payload reviewed ${implementationEvidenceAsOf}.`
+    source: "Privacy notice."
   }
 ];
 
