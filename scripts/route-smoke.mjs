@@ -1751,7 +1751,7 @@ for (const route of routes) {
   }
 
   if (segmentProductItemRoutes.includes(route)) {
-    ["Compare this target with a current supplier", "Add to sourcing list", "Buyer inputs", "Typical buyer cases"].forEach((label) => {
+    ["Compare this target with a current supplier", "Add to sourcing list", "Comparison inputs to consider"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product item sourcing module ${label}`);
       }
@@ -1768,11 +1768,17 @@ for (const route of routes) {
     }
 
     if (route.endsWith("/filtered-200ul-pipette-tips")) {
-      if (!html.includes('data-product-specification-group="target"') || !pageText.includes("nominal volume: 200 µL")) {
+      if (!html.includes('data-product-specification-group="target"') || !pageText.includes("Target specifications") || !pageText.includes("nominal volume: 200 µL")) {
         failures.push(`${route}: exact buyer target specification is not separately identified`);
       }
       if (!html.includes('data-product-specification-group="options"') || !pageText.includes("Options and fit to confirm")) {
         failures.push(`${route}: optional sourcing parameters are not separated from target specifications`);
+      }
+      if (!pageText.includes("Confirm supplier specifications, fit, and availability.") || !pageText.includes("pipette or liquid handler model")) {
+        failures.push(`${route}: sourcing caveat or product-specific equivalent inputs are missing`);
+      }
+      if (pageText.includes("Typical buyer cases")) {
+        failures.push(`${route}: generic buyer-case copy is repeated on the product detail page`);
       }
     }
 
@@ -1828,7 +1834,7 @@ for (const route of routes) {
     [
       "Sterile Filtered Universal Pipette Tips",
       "Documentation to request",
-      "Typical RFQ fields",
+      "Template fields to confirm",
       "Equivalent review notes",
       "Related configured paths",
       "Request documents",
@@ -1842,7 +1848,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose") {
-    ["DMEM High Glucose", "Documentation to request", "Typical RFQ fields", "Equivalent review notes", "Cell Culture Media & Buffers"].forEach((label) => {
+    ["DMEM High Glucose", "Documentation to request", "Template fields to confirm", "Equivalent review notes", "Cell Culture Media & Buffers"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing DMEM catalog product content ${label}`);
       }

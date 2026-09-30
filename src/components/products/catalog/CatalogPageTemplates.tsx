@@ -31,17 +31,6 @@ const buyerNeeds = [
   "Need quote from product list"
 ];
 
-const typicalRfqFields = [
-  "Format / volume / size",
-  "Sterile or non-sterile",
-  "Material",
-  "Packaging",
-  "Compatibility requirement",
-  "Documentation requirement",
-  "Quantity / recurring usage",
-  "Current supplier line or catalog reference, if available"
-];
-
 function catalogRequestHref({
   requestType,
   segment,
@@ -408,8 +397,9 @@ export function CatalogProductPage({
       />
       <PageHero title={product.name} subtitle={product.description} compact tight align="start">
         <div className="grid gap-3" data-product-decision-summary="true">
-          <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
-            Sourcing template · not a verified supplier SKU
+          <p role="note" className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-l-2 border-bioaxis-accent/70 pl-3 text-xs leading-5 text-bioaxis-muted">
+            <span className="font-bold uppercase text-bioaxis-accent">Sourcing template</span>
+            <span>No supplier SKU or availability is verified; confirm specifications and fit.</span>
           </p>
           <div data-product-specification-group="options">
             <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Fields and options to confirm</p>
@@ -450,18 +440,6 @@ export function CatalogProductPage({
         </div>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-7xl px-5 pt-16 sm:px-8 lg:px-10">
-        <div className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Typical RFQ fields</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Use this page to prepare a sourcing request.</h2>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {typicalRfqFields.map((field) => (
-              <SpecTag key={field}>{field}</SpecTag>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation to request</p>
@@ -489,8 +467,8 @@ export function CatalogProductPage({
         </section>
 
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Typical RFQ fields</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Quote-ready sourcing configuration</h2>
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Template fields to confirm</p>
+          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Confirm values against supplier documentation.</h2>
           <dl className="mt-5 grid gap-3 md:grid-cols-2">
             {Object.entries(product.specs).map(([key, value]) => (
               <div key={key} className="border border-bioaxis-line bg-bioaxis-black p-4">

@@ -12,26 +12,8 @@ type SupplierComparisonModuleProps = {
   categoryTitle: string;
   familyTitle: string;
   productTitle?: string;
+  buyerInputs: string[];
 };
-
-const buyerInputs = [
-  "Current supplier",
-  "Catalog number",
-  "Quantity",
-  "Sterility / cleanliness",
-  "Format / packaging",
-  "Compatibility",
-  "Required documents",
-  "Timeline"
-];
-
-const buyerCases = [
-  "Current supplier out of stock",
-  "Equivalent candidate review",
-  "Sample before switching",
-  "Documentation before purchasing",
-  "Recurring supply planning"
-];
 
 export function SupplierComparisonModule({
   title,
@@ -43,7 +25,8 @@ export function SupplierComparisonModule({
   segmentTitle,
   categoryTitle,
   familyTitle,
-  productTitle
+  productTitle,
+  buyerInputs
 }: SupplierComparisonModuleProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8 lg:px-10">
@@ -79,25 +62,15 @@ export function SupplierComparisonModule({
                 Compare equivalent path
               </Link>
             </div>
-          </div>
-          <div className="grid gap-5">
-            <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-dim">Buyer inputs</p>
+            </div>
+            <div className="grid gap-5">
+              <div>
+              <p className="text-xs font-bold uppercase text-bioaxis-dim">Comparison inputs to consider</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {buyerInputs.map((input) => (
                   <div key={input} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold text-bioaxis-steel">
                     {input}
                   </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-dim">Typical buyer cases</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {buyerCases.map((item) => (
-                  <span key={item} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold text-bioaxis-steel">
-                    {item}
-                  </span>
                 ))}
               </div>
             </div>

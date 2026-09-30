@@ -72,6 +72,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
         segmentTitle={segment.title}
         categoryTitle={category.title}
         familyTitle={family.title}
+        buyerInputs={family.equivalentMatchingInputs.slice(0, 6)}
       />
 
       <RFQCTA

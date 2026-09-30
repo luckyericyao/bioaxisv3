@@ -68,12 +68,13 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         align="start"
       >
         <div className="grid gap-3" data-product-decision-summary="true">
-          <p className="border border-amber-500/50 bg-amber-50 px-3 py-2 text-xs font-bold uppercase text-amber-800">
-            Sourcing template · supplier specifications, availability, and fit require confirmation
+          <p role="note" className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-l-2 border-bioaxis-accent/70 pl-3 text-xs leading-5 text-bioaxis-muted">
+            <span className="font-bold uppercase text-bioaxis-accent">Sourcing template</span>
+            <span>Confirm supplier specifications, fit, and availability.</span>
           </p>
           {targetSpecifications.length > 0 ? (
             <div data-product-specification-group="target">
-              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Target configuration · not supplier-verified</p>
+              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Target specifications</p>
               <ul className="flex flex-wrap gap-2">
                 {targetSpecifications.map((specification) => (
                   <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification)}</SpecTag></li>
@@ -157,6 +158,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         categoryTitle={category.title}
         familyTitle={family.title}
         productTitle={productItem.name}
+        buyerInputs={productItem.equivalentMatchingInputs.slice(0, 6)}
       />
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
