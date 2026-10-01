@@ -80,7 +80,7 @@ set +a
 RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- http://localhost:3000 https://bioaxisv3.vercel.app
 ```
 
-The round-trip script uses a reserved example address, verifies the immutable stored record by the same request ID, and prints status fields only. Routine `npm run smoke` runs without durable writes; set `SMOKE_DURABLE_WRITE=1` only when explicit queue-write coverage is intended.
+The round-trip script uses a reserved example address, verifies the immutable stored record by the same request ID, and prints status fields only. It leaves the request queued; actual owner review is recorded in a separate step described in [RFQ operations](docs/rfq-operations.md). Routine `npm run smoke` runs without durable writes; set `SMOKE_DURABLE_WRITE=1` only when explicit queue-write coverage is intended.
 
 ## Public Trust Evidence
 

@@ -157,12 +157,65 @@ async function checkTextSpacing(page, label) {
 async function checkRfqStateAnnouncements() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const submissions = [];
+  const productPath = "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips";
+  await page.addInitScript((href) => {
+    window.localStorage.setItem("bioaxis:sourcing-list", JSON.stringify([{
+      id: "QA-RETRY-CONTEXT",
+      title: "Filtered 200 µL Pipette Tips",
+      href,
+      segmentTitle: "Liquid Handling",
+      categoryTitle: "Pipette Tips",
+      familyTitle: "Filtered Pipette Tips",
+      productTitle: "Filtered 200 µL Pipette Tips",
+      quantity: "QA evaluation pack",
+      equivalentNeeded: true,
+      documentationNeeded: true,
+      sourcePageUrl: "/products?q=filtered%20200%20%C2%B5L%20tips"
+    }]));
+  }, productPath);
+
+  await page.route("**/api/turnstile/config", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ enabled: true, siteKey: "qa-widget-key" })
+  }));
+  await page.route("https://challenges.cloudflare.com/turnstile/v0/api.js*", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/javascript",
+    body: `(() => {
+      const widgets = new Map();
+      let issued = 0;
+      function issue(options) { setTimeout(() => options.callback('qa-token-' + (++issued)), 10); }
+      window.__qaTurnstileResets = 0;
+      window.turnstile = {
+        render(container, options) { widgets.set('qa-widget', options); issue(options); return 'qa-widget'; },
+        remove(id) { widgets.delete(id); },
+        reset(id) { window.__qaTurnstileResets++; if (widgets.has(id)) issue(widgets.get(id)); }
+      };
+    })();`
+  }));
 
   await page.route("**/api/rfq", async (route) => {
     const requestPayload = route.request().postDataJSON();
     submissions.push(requestPayload);
 
     if (submissions.length === 1) {
+      await route.abort("failed");
+      return;
+    }
+    if (submissions.length === 2) {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Your request was not stored. Your form is still intact; retry using this reference.", requestId: requestPayload.requestId })
+      });
+      return;
+    }
+    if (submissions.length === 3) {
+      await route.fulfill({ status: 429, contentType: "text/plain", body: "Too Many Requests" });
+      return;
+    }
+    if (submissions.length === 4) {
       await route.fulfill({
         status: 409,
         contentType: "application/json",
@@ -187,39 +240,55 @@ async function checkRfqStateAnnouncements() {
     });
   });
 
-  await openRoute(page, "/request-quote?requestType=quote");
+  const params = new URLSearchParams({
+    requestType: "quote", segment: "liquid-handling", category: "pipette-tips",
+    family: "filtered-pipette-tips", product: "filtered-200ul-pipette-tips",
+    query: "filtered 200 µL tips", sourcePage: "/products?q=filtered%20200%20%C2%B5L%20tips"
+  });
+  await openRoute(page, `/request-quote?${params}`);
   const email = page.getByLabel("Email *", { exact: true });
-  const productInput = page.getByLabel("Product, SKU, product list, or sourcing need", { exact: true });
+  const productInput = page.locator("#sourcing-product-input");
   const submit = page.getByRole("button", { name: "Send sourcing request" });
   await email.fill("a11y-regression@example.com");
-  await productInput.fill("Filtered pipette tips · search: filtered 200 µL tips · sourcing list item included");
-  check(await submit.isEnabled(), "RFQ state test cannot submit when Turnstile is unavailable in local regression mode");
+  const originalInput = await productInput.inputValue();
+  check(originalInput.includes("filtered 200 µL tips"), "RFQ retry test loses its incoming search query");
+  await submit.waitFor({ state: "visible", timeout: 5_000 });
 
-  if (await submit.isEnabled()) {
+  for (const [failureIndex, failureType] of ["network failure", "queue failure", "edge rate limit", "reference conflict"].entries()) {
     await submit.click();
-    const error = page.getByRole("alert");
+    await page.waitForFunction((count) => window.__qaTurnstileResets === count, failureIndex + 1, { timeout: 5_000 });
+    const error = page.locator("form").getByRole("alert");
     await error.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
-    check(await error.isVisible().catch(() => false), "RFQ conflict is not exposed as an alert");
-    check((await email.inputValue()) === "a11y-regression@example.com", "RFQ conflict clears the customer email instead of preserving the form");
-    check((await productInput.inputValue()).includes("sourcing list item included"), "RFQ conflict clears the product/search/list context instead of preserving the form");
-
-    await page.getByRole("button", { name: "Use a new request reference", exact: true }).click();
-    await page.getByRole("status").filter({ hasText: "A new reference is ready." }).waitFor({ state: "visible", timeout: 5_000 });
-    check((await productInput.inputValue()).includes("sourcing list item included"), "rotating the RFQ reference clears the preserved context");
-
-    await submit.click();
-    const reference = page.getByText(`Reference: ${submissions[1]?.requestId}`, { exact: true });
-    await reference.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
-    check(await reference.isVisible().catch(() => false), "RFQ success does not expose the durable request reference");
-    check(
-      await reference.evaluate((node) => node.closest('[role="status"]')?.getAttribute("aria-live") === "polite").catch(() => false),
-      "RFQ success reference is not inside a polite status region"
-    );
-    check(submissions.length === 2, `RFQ conflict recovery produced ${submissions.length} submission attempts instead of two`);
-    check(Boolean(submissions[0]?.requestId && submissions[1]?.requestId && submissions[0].requestId !== submissions[1].requestId), "explicit conflict recovery did not use a new request reference");
-    check(submissions[0]?.productList === submissions[1]?.productList, "explicit conflict recovery changed the submitted product/search/list context");
+    check(await error.isVisible().catch(() => false), `RFQ ${failureType} is not exposed as an alert`);
+    check((await email.inputValue()) === "a11y-regression@example.com", `RFQ ${failureType} clears the customer email`);
+    check((await productInput.inputValue()) === originalInput, `RFQ ${failureType} clears the product/search input`);
+    if (failureType === "edge rate limit") {
+      check((await error.innerText()).includes("Too many requests"), "non-JSON WAF 429 is misreported as a network failure");
+    }
+    await submit.waitFor({ state: "visible", timeout: 5_000 });
   }
 
+  await page.getByRole("button", { name: "Use a new request reference", exact: true }).click();
+  await page.getByRole("status").filter({ hasText: "A new reference is ready." }).waitFor({ state: "visible", timeout: 5_000 });
+  await submit.click();
+  const reference = page.getByText(`Reference: ${submissions[4]?.requestId}`, { exact: true });
+  await reference.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
+  check(await reference.isVisible().catch(() => false), "RFQ success does not expose the durable request reference");
+  check(
+    await reference.evaluate((node) => node.closest('[role="status"]')?.getAttribute("aria-live") === "polite").catch(() => false),
+    "RFQ success reference is not inside a polite status region"
+  );
+  check(submissions.length === 5, `RFQ recovery produced ${submissions.length} submission attempts instead of five`);
+  check(new Set(submissions.slice(0, 4).map((item) => item.requestId)).size === 1, "RFQ retry changes the request reference before explicit conflict recovery");
+  check(submissions[0]?.requestId !== submissions[4]?.requestId, "explicit conflict recovery did not use a new request reference");
+  check(new Set(submissions.map((item) => item.turnstileToken)).size === 5, "RFQ retry reuses a consumed Turnstile token");
+  check(submissions[0]?.sourcingListItems?.length === 1, "RFQ retry test did not include its real sourcing-list object");
+  check(submissions[0]?.productContext?.productName === "Filtered 200 µL Pipette Tips", "RFQ retry test lost its product context");
+  for (const item of submissions.slice(1)) {
+    check(item.productList === submissions[0].productList, "RFQ recovery changed the submitted search input");
+    check(JSON.stringify(item.sourcingListItems) === JSON.stringify(submissions[0].sourcingListItems), "RFQ recovery changed the sourcing-list context");
+    check(JSON.stringify(item.productContext) === JSON.stringify(submissions[0].productContext), "RFQ recovery changed the product context");
+  }
   await page.close();
 }
 
@@ -263,6 +332,18 @@ async function checkSourcingListDrawerFocus() {
     await addedButton.evaluate((element) => element === document.activeElement),
     "closing the sourcing list drawer with Escape does not restore focus to its trigger"
   );
+
+  await addedButton.click();
+  await dialog.getByLabel("Quantity", { exact: true }).fill("QA evaluation pack");
+  await dialog.getByRole("button", { name: "Send list for review", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+  const email = page.getByLabel("Email *", { exact: true });
+  await email.waitFor({ state: "visible", timeout: 5_000 });
+  const emailRect = await email.boundingBox();
+  check(Boolean(emailRect && emailRect.y >= 64 && emailRect.y + emailRect.height <= 844), "sourcing-list RFQ handoff pushes Email below the mobile first viewport");
+  check((await page.locator("#sourcing-product-input").inputValue()).includes("Filtered 200 µL Pipette Tips"), "sourcing-list handoff loses its product list");
+  const storedItems = await page.evaluate(() => JSON.parse(window.sessionStorage.getItem("bioaxis:sourcing-list-items") || "[]"));
+  check(storedItems.length === 1 && storedItems[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses drawer details");
 
   await page.close();
 }
@@ -582,7 +663,20 @@ try {
   const desktopSearchLink = primaryNavigation.getByRole("link", { name: "Search all products" });
   await desktopSearchLink.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
   check(await desktopSearchLink.isVisible(), "desktop Products menu does not open from keyboard focus");
+  const segmentPaths = [
+    "liquid-handling", "lab-plasticware", "cell-culture", "molecular-biology-pcr",
+    "sample-prep-filtration", "storage-cryopreservation", "automation-consumables", "assays-detection",
+    "proteins-antibodies-immunology", "buffers-chemicals-reagents", "small-lab-equipment", "early-bioprocess-single-use"
+  ].map((slug) => `/products/${slug}`);
+  const dropdownPaths = await desktop.locator("#products-segment-dropdown a").evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  check(JSON.stringify(dropdownPaths) === JSON.stringify(["/products", ...segmentPaths]), "Products dropdown does not contain exactly its search entry and 12 top-level segments");
+  for (const expectedPath of ["/products", ...segmentPaths]) {
+    await desktop.keyboard.press("Tab");
+    const focusedPath = await desktop.evaluate(() => document.activeElement?.getAttribute("href"));
+    check(focusedPath === expectedPath, `Products keyboard traversal expected ${expectedPath}, focused ${focusedPath ?? "no link"}`);
+  }
   await desktop.keyboard.press("Escape");
+  await desktop.waitForFunction(() => document.activeElement?.getAttribute("aria-controls") === "products-segment-dropdown", null, { timeout: 5_000 });
   check(!(await desktopSearchLink.isVisible().catch(() => false)), "Escape does not close the Products menu");
   check(await productsTrigger.evaluate((element) => element === document.activeElement), "Escape does not return focus to the Products trigger");
   await desktop.close();
@@ -590,9 +684,9 @@ try {
   if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
     await checkTurnstileFailClosed();
     await checkRfqStateAnnouncements();
-    await checkSourcingListDrawerFocus();
   }
 
+  await checkSourcingListDrawerFocus();
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
   await checkProductDecisionPages();
@@ -624,12 +718,16 @@ console.log(`Accessibility regression passed for ${baseUrl}`);
 console.log("- skip link, landmarks, labels, and live RFQ status");
 console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
-console.log("- preserved form failure alert and polite success/reference announcement");
-console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape close, and focus restoration");
-console.log("- fail-closed Turnstile loading/configuration state with preserved input");
+if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
+  console.log("- simulated RFQ network/503/non-JSON 429/409 recovery, fresh verification tokens, and preserved product/search/list payloads");
+  console.log("- simulated fail-closed Turnstile configuration state with preserved input");
+} else {
+  console.log("- RFQ failure and Turnstile simulations: skipped on deployed URLs; live challenge completion is a separate gate");
+}
+console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- canonical and legacy product-detail specs, first-viewport actions, and RFQ context handoff");
-console.log("- axe-core WCAG A/AA semantics and color contrast on four critical routes");
+console.log(`- axe-core WCAG A/AA semantics and color contrast on ${criticalRoutes.length} critical routes`);
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
 console.log("- WCAG text-spacing overrides without overflow or clipped text");

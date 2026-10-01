@@ -50,5 +50,33 @@ The API key authenticates the operator system but does not provide individual st
 
 - Set a real, staffed queue owner and publish an approved business contact and response target.
 - Approve a data retention period and deletion procedure. No automatic RFQ deletion schedule is implemented until an owner approves the policy.
-- Vercel production WAF is configured for `POST /api/rfq`: fixed window, 20 requests per client IP per 60 seconds, then `429 Too Many Requests`. The application-level in-memory limiter remains per function instance and is only a secondary safeguard.
-- A production round-trip test requires explicit `RFQ_ROUNDTRIP_CONFIRM=1`, `BIOAXIS_INTERNAL_API_KEY`, and `RFQ_ROUNDTRIP_OWNER`. It creates one clearly labelled QA record and marks it `reviewing`; it sends no customer email.
+- Vercel production WAF is configured for `POST /api/rfq`: fixed window, 20 requests per client IP per 60 seconds, then `429 Too Many Requests`. WAF counters are shared outside the function instance but tracked per region, not globally. The application-level in-memory limiter remains per function instance and is only a secondary safeguard. See [Vercel's counter scope](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting).
+- A production submission test requires explicit `RFQ_ROUNDTRIP_CONFIRM=1` and `BIOAXIS_INTERNAL_API_KEY`. It creates one clearly labelled QA record and reads it back without assigning an owner or changing its queued state. A valid production Turnstile token is also needed when submitting to production.
+
+## QA submission and actual owner review
+
+```sh
+RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- https://bioaxisv3.vercel.app https://bioaxisv3.vercel.app
+```
+
+Keep the printed QA request ID. The real operator must read the request through the internal lookup and explicitly confirm review. Only then record that acknowledgment:
+
+```sh
+RFQ_ROUNDTRIP_PHASE=confirm-owner \
+RFQ_ROUNDTRIP_REQUEST_ID=BIOAXIS-QA-REPLACE-WITH-THE-SAVED-ID \
+RFQ_ROUNDTRIP_OWNER=approved-operator-name \
+RFQ_OWNER_REVIEW_CONFIRMED=1 \
+npm run test:rfq-roundtrip -- https://bioaxisv3.vercel.app https://bioaxisv3.vercel.app
+```
+
+This second step updates the existing QA request to `reviewing`, reads it back, and checks the original submitted context is unchanged. Repeating the same acknowledged assignment does not create another event. Use `RFQ_ROUNDTRIP_PHASE=verify` with the same request ID for read-only follow-up. An automated workflow update never proves a human reply; only record `responded` after the operator actually replies.
+
+`npm run test:rfq-roundtrip-phases` checks these safety gates against a local mock: no unauthorized QA write, no owner event without acknowledgment, no customer-request mutation, and no overwrite of an advanced workflow. It is not evidence of production storage or human review.
+
+## Bounded WAF enforcement check
+
+```sh
+RFQ_EDGE_LIMIT_CONFIRM=1 npm run test:rfq-edge-limit -- https://bioaxisv3.vercel.app
+```
+
+This opt-in probe sends at most 21 requests with the honeypot filled, so it never stores an RFQ. It distinguishes the application's JSON rate-limit response from the Vercel edge response and reports the observed region. Run it in a quiet window; it temporarily consumes the test IP's submission allowance. A dashboard rule alone does not prove runtime enforcement.

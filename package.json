@@ -14,10 +14,12 @@
     "test:product-profiles": "node scripts/product-profile-regression.mjs",
     "test:rfq-queue": "node scripts/rfq-queue-regression.mjs",
     "test:rfq-payload": "node scripts/rfq-payload-limit-regression.mjs",
+    "test:rfq-edge-limit": "node scripts/rfq-edge-limit-regression.mjs",
     "test:a11y-checklist": "node scripts/accessibility-regression.mjs",
     "test:trust-evidence": "node scripts/trust-evidence-regression.mjs",
     "test:trust-intake": "node scripts/public-trust-intake-regression.mjs",
     "test:rfq-roundtrip": "node scripts/rfq-durable-roundtrip.mjs",
+    "test:rfq-roundtrip-phases": "node scripts/rfq-roundtrip-phase-regression.mjs",
     "validate:trust-intake": "node scripts/validate-public-trust-intake.mjs"
   },
   "dependencies": {

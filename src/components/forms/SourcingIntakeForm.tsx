@@ -298,6 +298,7 @@ export function SourcingIntakeForm({
   const [retryReferenceReady, setRetryReferenceReady] = useState(false);
   const [restoredSessionInput, setRestoredSessionInput] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   // Fail closed during SSR and hydration. Runtime Turnstile configuration is
   // fetched after hydration, so treating the initial state as unavailable
   // briefly exposes an enabled native form that can navigate before React has
@@ -405,6 +406,7 @@ export function SourcingIntakeForm({
     setRequestReferenceConflict(false);
     setRetryReferenceReady(false);
     setTurnstileToken("");
+    setTurnstileResetKey(0);
     setRestoredSessionInput(false);
     setSourcingListItems([]);
     startedAtRef.current = Date.now();
@@ -471,6 +473,7 @@ export function SourcingIntakeForm({
       });
 
       if (!payload.ok) {
+        refreshVerification();
         trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "api", requestType: state.requestType });
         const hasConflict = payload.httpStatus === 409;
         setRequestReferenceConflict(hasConflict);
@@ -494,6 +497,7 @@ export function SourcingIntakeForm({
       setRestoredSessionInput(false);
       setSourcingListItems([]);
     } catch {
+      refreshVerification();
       setRequestReferenceConflict(false);
       trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "network", requestType: state.requestType });
       setError(requestErrorMessage);
@@ -501,6 +505,13 @@ export function SourcingIntakeForm({
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function refreshVerification() {
+    if (!turnstileAvailable) return;
+    // Siteverify consumes a token even when the subsequent queue write fails.
+    setTurnstileToken("");
+    setTurnstileResetKey((current) => current + 1);
   }
 
   if (submitted) {
@@ -601,6 +612,7 @@ export function SourcingIntakeForm({
         <div className="mt-4 grid gap-3">
           <div className="order-1">
             <TurnstileWidget
+              resetKey={turnstileResetKey}
               compact={compact}
               onAvailabilityChange={setTurnstileAvailable}
               onFailure={handleTurnstileFailure}

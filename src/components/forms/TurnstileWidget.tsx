@@ -15,6 +15,7 @@ type TurnstileRenderOptions = {
 type TurnstileApi = {
   render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
   remove: (widgetId: string) => void;
+  reset: (widgetId: string) => void;
 };
 
 declare global {
@@ -28,6 +29,7 @@ type TurnstileWidgetProps = {
   onAvailabilityChange?: (available: boolean) => void;
   onFailure?: (reason: string) => void;
   compact?: boolean;
+  resetKey?: number;
 };
 
 type TurnstileConfigResponse = {
@@ -39,7 +41,7 @@ type TurnstileConfigState = "loading" | "ready" | "disabled" | "error";
 
 const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
-export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false }: TurnstileWidgetProps) {
+export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false, resetKey = 0 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
@@ -129,6 +131,17 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
       }
     };
   }, [compact, onFailure, onTokenChange, scriptReady, siteKey]);
+
+  useEffect(() => {
+    if (!resetKey) return;
+
+    onTokenChange("");
+    setVerificationStatus("");
+    setWidgetIssue("");
+    if (widgetIdRef.current && window.turnstile) {
+      window.turnstile.reset(widgetIdRef.current);
+    }
+  }, [onTokenChange, resetKey]);
 
   if (!siteKey) {
     if (configState === "disabled") {

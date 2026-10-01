@@ -6,20 +6,23 @@ Run the automated check against a local or deployed build:
 npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
 ```
 
-The script is a release gate for `/`, a populated product search, one product sourcing template, and `/request-quote`. It verifies:
+The script is a release gate for `/`, a populated product search, product sourcing templates, `/request-quote`, and `/trust-center`. It verifies:
 
 - skip link, landmarks, labels, persistent RFQ live status, keyboard-open and Escape-close behavior;
-- a simulated durable-write failure that preserves the email and announces an alert, followed by a simulated success that announces its reference in a polite status region;
+- on a local build, simulated network, durable-write, non-JSON WAF 429, and reference-conflict failures preserve email, product context, search input, and sourcing-list objects; every retry uses a fresh verification token while keeping the same request ID until an explicit new-reference action;
 - a fail-closed server-rendered submit state and a simulated Turnstile configuration failure that keeps the request disabled while preserving entered data;
 - approximately 44 px mobile controls, hidden RFQ source paths, and 320 px overflow/context wrapping;
 - retained mobile search input, the first result and its first action inside the 390 px initial viewport, and a Products-menu search handoff that closes navigation after two choices;
+- Tab access to all 12 desktop product segments, Escape focus restoration, sourcing-drawer focus wrapping, and a list-to-RFQ handoff with Email inside the 390×844 first viewport;
 - axe-core WCAG 2 A/AA, WCAG 2.1 A/AA, and WCAG 2.2 AA rules, including visible text color contrast;
 - reflow at 640 px and 320 px CSS viewports, equivalent to 200% and 400% zoom from 1280 px, including focused controls beneath the sticky header;
 - WCAG text-spacing overrides without horizontal overflow or clipped text.
 
 For deployed URLs, navigation is retried up to three times when the browser cannot connect; a persistent failure reports the exact URL after the final attempt. Set `A11Y_NAV_RETRIES` only when diagnosing network behavior. Local checks remain single-attempt so application failures are not hidden.
 
-Complete these assistive-technology and visual spot checks on the same four routes before each production release. They complement rather than replace the automated gate:
+Mocked RFQ and Turnstile failure checks run only against local builds, and the report labels them as skipped for deployed URLs. Their passing result does not prove completion of a real Cloudflare challenge or a production durable write. The deployed drawer test changes only isolated browser storage and does not submit an RFQ.
+
+Complete these assistive-technology and visual spot checks on the same critical routes before each production release. They complement rather than replace the automated gate:
 
 - Keyboard: use Tab, Shift+Tab, Enter, Space, and Escape without a pointer. Focus must remain visible, follow reading order, reach every action, and never become trapped.
 - Screen reader: with VoiceOver on macOS/iOS, navigate by landmarks and headings; confirm form labels, required state, verification completion, errors, success, and the request reference are announced once and in context.

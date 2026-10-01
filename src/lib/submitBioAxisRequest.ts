@@ -92,14 +92,20 @@ export async function submitBioAxisRequest(payload: BioAxisRequestPayload): Prom
     },
     body: JSON.stringify(enrichedPayload)
   });
-  const body = (await response.json()) as BioAxisRequestResponse;
+  const parsed: unknown = await response.json().catch(() => null);
+  const body = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+    ? parsed as BioAxisRequestResponse
+    : null;
 
-  if (!response.ok) {
+  if (!response.ok || body?.ok !== true) {
     return {
       ok: false,
       httpStatus: response.status,
-      error: body?.error ?? requestErrorMessage,
-      referenceId: body?.referenceId
+      error: typeof body?.error === "string" ? body.error : response.status === 429
+        ? "Too many requests. Please wait a moment and try again; your entries are still here."
+        : requestErrorMessage,
+      referenceId: body?.referenceId ?? payload.requestId,
+      requestId: body?.requestId ?? payload.requestId
     };
   }
 
