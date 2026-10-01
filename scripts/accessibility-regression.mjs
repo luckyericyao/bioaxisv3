@@ -243,7 +243,9 @@ async function checkRfqStateAnnouncements() {
   const params = new URLSearchParams({
     requestType: "quote", segment: "liquid-handling", category: "pipette-tips",
     family: "filtered-pipette-tips", product: "filtered-200ul-pipette-tips",
-    query: "filtered 200 µL tips", sourcePage: "/products?q=filtered%20200%20%C2%B5L%20tips"
+    query: "filtered 200 µL tips", sourcePage: "/products?q=filtered%20200%20%C2%B5L%20tips",
+    supplier: "QA supplier reference", catalogNumber: "QA-CATALOG-200", quantity: "2 cases",
+    timeline: "Within 6 weeks", requiredDocuments: "CoA; SDS; lot statement"
   });
   await openRoute(page, `/request-quote?${params}`);
   const email = page.getByLabel("Email *", { exact: true });
@@ -252,6 +254,13 @@ async function checkRfqStateAnnouncements() {
   await email.fill("a11y-regression@example.com");
   const originalInput = await productInput.inputValue();
   check(originalInput.includes("filtered 200 µL tips"), "RFQ retry test loses its incoming search query");
+  for (const [id, expected] of [
+    ["sourcing-supplier", "QA supplier reference"], ["sourcing-catalog", "QA-CATALOG-200"],
+    ["sourcing-quantity", "2 cases"], ["sourcing-timeline", "Within 6 weeks"],
+    ["sourcing-docs", "CoA; SDS; lot statement"]
+  ]) {
+    check((await page.locator(`#${id}`).inputValue()) === expected, `RFQ query handoff loses ${id}`);
+  }
   await submit.waitFor({ state: "visible", timeout: 5_000 });
 
   for (const [failureIndex, failureType] of ["network failure", "queue failure", "edge rate limit", "reference conflict"].entries()) {
@@ -284,6 +293,13 @@ async function checkRfqStateAnnouncements() {
   check(new Set(submissions.map((item) => item.turnstileToken)).size === 5, "RFQ retry reuses a consumed Turnstile token");
   check(submissions[0]?.sourcingListItems?.length === 1, "RFQ retry test did not include its real sourcing-list object");
   check(submissions[0]?.productContext?.productName === "Filtered 200 µL Pipette Tips", "RFQ retry test lost its product context");
+  check(submissions[0]?.productContext?.productUrl === productPath, "RFQ handoff overwrites the product URL with its search source");
+  check(submissions[0]?.productContext?.sourcePageUrl === params.get("sourcePage"), "RFQ handoff loses the distinct search source");
+  for (const item of submissions) {
+    check(item.currentSupplier === params.get("supplier") && item.catalogNumber === params.get("catalogNumber"), "RFQ submission loses the incoming supplier or catalog reference");
+    check(item.quantity === params.get("quantity") && item.timeline === params.get("timeline"), "RFQ submission loses incoming quantity or timing");
+    check(item.documentationNeeds === params.get("requiredDocuments"), "RFQ submission loses incoming document requirements");
+  }
   for (const item of submissions.slice(1)) {
     check(item.productList === submissions[0].productList, "RFQ recovery changed the submitted search input");
     check(JSON.stringify(item.sourcingListItems) === JSON.stringify(submissions[0].sourcingListItems), "RFQ recovery changed the sourcing-list context");
@@ -440,6 +456,21 @@ async function checkMobileSearchFunnel() {
   check(firstViewport.resultStartsInViewport, "390px search does not place the first result in the initial viewport");
   check(firstViewport.actionFitsInViewport, "390px search does not expose a first-result action in the initial viewport");
 
+  const directQuoteHref = new URL(await firstResult.getByRole("link", { name: "Send as quote request", exact: true }).getAttribute("href"), baseUrl);
+  const directSearchSource = new URL(directQuoteHref.searchParams.get("sourcePage"), baseUrl);
+  check(directSearchSource.pathname === "/products" && directSearchSource.searchParams.get("q") === query, "search-result RFQ link replaces its search source with the target product");
+  await firstAction.click();
+  await page.waitForURL((url) => url.pathname.endsWith("/filtered-200ul-pipette-tips"), { timeout: 15_000 });
+  const itemActions = page.locator('[data-product-primary-actions="true"] a');
+  await itemActions.first().waitFor({ state: "visible", timeout: 5_000 });
+  await page.waitForFunction((expected) => [...document.querySelectorAll('[data-product-primary-actions="true"] a')].every((link) => new URL(link.href).searchParams.get("query") === expected), query, { timeout: 5_000 });
+  for (const href of await itemActions.evaluateAll((links) => links.map((link) => link.href))) {
+    check(new URL(href).searchParams.get("query") === query, "search-to-detail handoff loses the query from a quote/sample/equivalent action");
+  }
+  await itemActions.filter({ hasText: /^Request quote$/i }).click();
+  await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+  check((await page.locator("#sourcing-product-input").inputValue()).includes(query), "search-to-detail-to-RFQ handoff loses the original query");
+
   await openRoute(page, "/products");
   const mobileDiscovery = await page.evaluate(() => {
     const search = document.querySelector("#product-search");
@@ -532,6 +563,9 @@ async function checkProductDecisionPages() {
   for (const route of routes) {
     await openRoute(page, route);
     const productName = (await page.locator("main h1").first().innerText()).trim();
+    const breadcrumbNames = await page.locator('nav[aria-label="Breadcrumb"] ol li').evaluateAll((items) =>
+      items.map((item) => item.firstElementChild?.textContent?.trim() ?? "")
+    );
     const decision = await page.evaluate(() => {
       const summary = document.querySelector('[data-product-decision-summary="true"]');
       const groups = [...(summary?.querySelectorAll("[data-product-specification-group]") ?? [])].map((group) => ({
@@ -584,15 +618,29 @@ async function checkProductDecisionPages() {
       check(Boolean(action && new URL(action.href).searchParams.get("requestType") === requestType), `${route}: ${label} has the wrong request type`);
     }
 
-    const quoteLink = page.locator('[data-product-primary-actions="true"] a').filter({ hasText: "Request quote" });
-    await quoteLink.click();
-    await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 }).catch(() => undefined);
-    const context = page.locator('[data-product-context-summary="true"]');
-    await context.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
-    const contextText = (await context.innerText().catch(() => "")).toLocaleLowerCase();
-    check(contextText.includes(productName.toLocaleLowerCase()), `${route}: product name is missing from the RFQ context`);
-    for (const label of ["Product", "Family", "Category", "Segment"]) {
-      check(contextText.includes(label.toLocaleLowerCase()), `${route}: RFQ context is missing ${label}`);
+    for (const [actionIndex, [label, requestType]] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]].entries()) {
+      if (actionIndex > 0) await openRoute(page, route);
+      const actionLink = page.locator('[data-product-primary-actions="true"] a').filter({ hasText: new RegExp(`^${label}$`, "i") });
+      await actionLink.click();
+      await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+      const context = page.locator('[data-product-context-summary="true"]');
+      await context.waitFor({ state: "visible", timeout: 15_000 });
+      const contextValues = await context.locator("dl > div").evaluateAll((rows) => Object.fromEntries(rows.map((row) => [
+        row.querySelector("dt")?.textContent?.replace(/:$/, "").trim().toLocaleLowerCase(),
+        row.querySelector("dd")?.textContent?.trim().toLocaleLowerCase()
+      ])));
+      for (const [field, expected] of [
+        ["product", productName], ["segment", breadcrumbNames[2]], ["category", breadcrumbNames[3]], ["family", breadcrumbNames[4]]
+      ]) {
+        check(Boolean(expected) && contextValues[field] === expected.toLocaleLowerCase(), `${route}: ${requestType} handoff loses the exact ${field} name`);
+      }
+      check(new URL(page.url()).searchParams.get("requestType") === requestType, `${route}: ${label} navigates to the wrong RFQ request type`);
+      const selectedTypes = page.locator('[aria-label="Request type options"] button[aria-pressed="true"]');
+      check((await selectedTypes.count()) === 1, `${route}: ${requestType} handoff does not select exactly one request type`);
+      const selectedLabel = (await selectedTypes.getAttribute("aria-label"))?.toLocaleLowerCase() ?? "";
+      check(selectedLabel.startsWith(`${requestType}. selected.`), `${route}: ${requestType} handoff defaults to a different optional request type`);
+      const emailRect = await page.getByLabel("Email *", { exact: true }).boundingBox();
+      check(Boolean(emailRect && emailRect.y >= 64 && emailRect.y + emailRect.height <= 844), `${route}: ${requestType} handoff pushes Email out of the mobile first viewport`);
     }
   }
 
@@ -727,7 +775,7 @@ if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
 console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
-console.log("- canonical and legacy product-detail specs, first-viewport actions, and RFQ context handoff");
+console.log("- canonical and legacy product-detail specs and all quote/sample/equivalent handoffs with exact product hierarchy");
 console.log(`- axe-core WCAG A/AA semantics and color contrast on ${criticalRoutes.length} critical routes`);
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
 console.log("- WCAG text-spacing overrides without overflow or clipped text");

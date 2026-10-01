@@ -35,6 +35,13 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       product={productContext?.productName}
       title="Paste what you have."
       defaultMessage={defaultMessage}
+      initialDetails={{
+        currentSupplier: initialValues.supplier ?? "",
+        catalogNumber: initialValues.catalogNumber ?? "",
+        quantity: initialValues.quantity ?? "",
+        timeline: initialValues.timeline ?? "",
+        requiredDocuments: initialValues.requiredDocuments ?? ""
+      }}
       compact
       contextLocked={Boolean(productContext)}
       productContext={productContext}

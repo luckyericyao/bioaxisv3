@@ -402,7 +402,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     ? "/ready-supply"
     : sourcePage === "support"
       ? "/support"
-      : sourcePage || (workflowMatch ? `/workflows#${workflowMatch.slug}` : buildSourceProductUrl({ segment, subcategory, family, product }));
+      : buildSourceProductUrl({ segment, subcategory, family, product }) || (workflowMatch ? `/workflows#${workflowMatch.slug}` : sourcePage);
+  const requestSourcePage = sourcePage === "support" ? "/support" : sourcePage || sourceProductUrl;
   const productCategory = productCategoryParam || labels.subcategoryName || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labelize(subcategory) || readySupplyContext?.productCategory || "";
   const productName = productNameParam || productMatch?.productItem.name || catalogProductMatch?.product.name || labels.familyName || labelize(product) || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
@@ -414,7 +415,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           productCategory: productCategory || (workflowMatch ? "Workflow mapping" : supportPathLabel ? "Support routing" : ""),
           productSegment: labels.segmentName || catalogProductMatch?.segment.name || catalogFamilyMatch?.segment.name || labelize(segment) || readySupplyContext?.productSegment || (workflowMatch ? "Drug R&D workflow" : supportPathLabel ? "BioAxis support" : ""),
           productUrl: sourceProductUrl,
-          sourcePageUrl: sourceProductUrl,
+          sourcePageUrl: requestSourcePage,
           relevantSpecs:
             productMatch?.productItem.commonSpecifications.slice(0, 8) ??
             familyMatch?.family.keySpecifications.slice(0, 8) ??

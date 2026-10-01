@@ -52,6 +52,7 @@ export type SourcingIntakeFormProps = {
   product?: string;
   title?: string;
   defaultMessage?: string;
+  initialDetails?: Partial<Pick<IntakeState, "currentSupplier" | "catalogNumber" | "quantity" | "timeline" | "requiredDocuments">>;
   compact?: boolean;
   contextLocked?: boolean;
   productContext?: BioAxisProductContext;
@@ -133,19 +134,19 @@ const requestStarterTemplates = [
   }
 ];
 
-function createInitialIntakeState(requestType: string, productInput = ""): IntakeState {
+function createInitialIntakeState(requestType: string, productInput = "", initialDetails: SourcingIntakeFormProps["initialDetails"] = {}): IntakeState {
   return {
     requestType,
     email: "",
     productInput,
     name: "",
     company: "",
-    currentSupplier: "",
-    catalogNumber: "",
-    quantity: "",
-    timeline: "",
+    currentSupplier: initialDetails.currentSupplier ?? "",
+    catalogNumber: initialDetails.catalogNumber ?? "",
+    quantity: initialDetails.quantity ?? "",
+    timeline: initialDetails.timeline ?? "",
     shippingRegion: "",
-    requiredDocuments: "",
+    requiredDocuments: initialDetails.requiredDocuments ?? "",
     notes: "",
     phone: "",
     roleTitle: "",
@@ -217,7 +218,7 @@ function initialProductContext(props: SourcingIntakeFormProps, requestType: stri
     productFamily: props.family ?? props.productContext?.productFamily ?? "",
     productCategory: props.category ?? props.productContext?.productCategory ?? "",
     productSegment: props.segment ?? props.productContext?.productSegment ?? "",
-    productUrl: props.sourcePage ?? props.productContext?.productUrl ?? "",
+    productUrl: props.productContext?.productUrl ?? props.sourcePage ?? "",
     sourcePageUrl: props.sourcePage ?? props.productContext?.sourcePageUrl ?? "",
     relevantSpecs: props.productContext?.relevantSpecs ?? [],
     documentationNotes: props.productContext?.documentationNotes ?? [],
@@ -255,7 +256,7 @@ function displaySourcePage(value: string) {
 }
 
 function contextRows(productContext: BioAxisProductContext) {
-  const sourcePage = productContext.productUrl || productContext.sourcePageUrl || "";
+  const sourcePage = productContext.sourcePageUrl || productContext.productUrl || "";
 
   return [
     ["Request type", requestTypeLabel(productContext.requestType ?? "quote")],
@@ -276,6 +277,7 @@ export function SourcingIntakeForm({
   product,
   title = "Paste what you have. BioAxis will structure the sourcing request.",
   defaultMessage = "",
+  initialDetails,
   compact = false,
   contextLocked = false,
   productContext,
@@ -289,7 +291,7 @@ export function SourcingIntakeForm({
   const startedAtRef = useRef(Date.now());
   const requestIdRef = useRef(getBioAxisRequestId());
   const intakeStartedRef = useRef(false);
-  const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage));
+  const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage, initialDetails));
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
@@ -937,6 +939,7 @@ function SelectField({
   options: string[];
   onChange: (value: string) => void;
 }) {
+  const visibleOptions = value && !options.includes(value) ? [value, ...options] : options;
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
@@ -950,7 +953,7 @@ function SelectField({
         className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
       >
         <option value="">Not sure</option>
-        {options.map((option) => (
+        {visibleOptions.map((option) => (
           <option key={option} value={option}>
             {option}
           </option>

@@ -12,8 +12,9 @@ The script is a release gate for `/`, a populated product search, product sourci
 - on a local build, simulated network, durable-write, non-JSON WAF 429, and reference-conflict failures preserve email, product context, search input, and sourcing-list objects; every retry uses a fresh verification token while keeping the same request ID until an explicit new-reference action;
 - a fail-closed server-rendered submit state and a simulated Turnstile configuration failure that keeps the request disabled while preserving entered data;
 - approximately 44 px mobile controls, hidden RFQ source paths, and 320 px overflow/context wrapping;
-- retained mobile search input, the first result and its first action inside the 390 px initial viewport, and a Products-menu search handoff that closes navigation after two choices;
+- retained mobile search input, the first result and its first action inside the 390 px initial viewport, search-to-detail-to-RFQ query preservation, and a Products-menu search handoff that closes navigation after two choices;
 - Tab access to all 12 desktop product segments, Escape focus restoration, sourcing-drawer focus wrapping, and a list-to-RFQ handoff with Email inside the 390×844 first viewport;
+- actual quote, sample, and equivalent navigation from six canonical/legacy item pages preserves exact product, family, category, and segment names and selects the matching optional request type; local retry checks also preserve supplier, catalog reference, quantity, custom timing, document requirements, and distinct product/search source URLs;
 - axe-core WCAG 2 A/AA, WCAG 2.1 A/AA, and WCAG 2.2 AA rules, including visible text color contrast;
 - reflow at 640 px and 320 px CSS viewports, equivalent to 200% and 400% zoom from 1280 px, including focused controls beneath the sticky header;
 - WCAG text-spacing overrides without horizontal overflow or clipped text.

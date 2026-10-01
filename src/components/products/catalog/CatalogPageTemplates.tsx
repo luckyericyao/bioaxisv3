@@ -5,6 +5,7 @@ import { SpecTag } from "@/components/ui/SpecTag";
 import type { DocumentStatus, ProductCatalogCategory, ProductCatalogFamily, ProductCatalogItem, ProductCatalogSegment } from "@/data/productCatalog";
 import { productCatalogHref } from "@/data/productCatalog";
 import { Breadcrumbs } from "../Breadcrumbs";
+import { SourcingRequestLink } from "../SourcingRequestLink";
 import { CatalogProductBrowser, type CatalogProductRow } from "./CatalogProductBrowser";
 
 const statusLabels: Record<DocumentStatus, string> = {
@@ -97,30 +98,30 @@ function ContextActions({
 }) {
   return (
     <div className={product ? "grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" : "flex flex-col gap-3 sm:flex-row sm:flex-wrap"} data-product-primary-actions={product ? "true" : undefined}>
-      <Link
+      <SourcingRequestLink
         href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
         className={product
           ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
       >
         Request quote
-      </Link>
-      <Link
+      </SourcingRequestLink>
+      <SourcingRequestLink
         href={catalogEquivalentHref(segment, category, family, product)}
         className={product
           ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Review equivalent
-      </Link>
-      <Link
+      </SourcingRequestLink>
+      <SourcingRequestLink
         href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
         className={product
           ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Request sample
-      </Link>
+      </SourcingRequestLink>
     </div>
   );
 }

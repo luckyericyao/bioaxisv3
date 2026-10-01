@@ -6,6 +6,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { SpecTag } from "@/components/ui/SpecTag";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { SupplierComparisonModule } from "./SupplierComparisonModule";
+import { SourcingRequestLink } from "./SourcingRequestLink";
 
 type ProductItemPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -95,24 +96,24 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           ) : null}
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" data-product-primary-actions="true">
-            <Link
+            <SourcingRequestLink
               href={requestLinks[0].href}
               className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
             >
               Request quote
-            </Link>
-            <Link
+            </SourcingRequestLink>
+            <SourcingRequestLink
               href={requestLinks[2].href}
               className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Request sample
-            </Link>
-            <Link
+            </SourcingRequestLink>
+            <SourcingRequestLink
               href={requestLinks[1].href}
               className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Review equivalent
-            </Link>
+            </SourcingRequestLink>
           </div>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
@@ -120,12 +121,12 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
               <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
-              <Link
+              <SourcingRequestLink
                 href={requestLinks[3].href}
                 className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 Ask for documents
-              </Link>
+              </SourcingRequestLink>
               <AddToSourcingListButton
                 title={productItem.name}
                 href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
@@ -236,13 +237,13 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
       {links.length > 0 ? (
         <div className="grid gap-2 border-t border-bioaxis-line p-5 sm:grid-cols-2 lg:grid-cols-4">
           {links.map((request) => (
-            <Link
+            <SourcingRequestLink
               key={request.label}
               href={request.href}
               className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               {request.label}
-            </Link>
+            </SourcingRequestLink>
           ))}
         </div>
       ) : null}

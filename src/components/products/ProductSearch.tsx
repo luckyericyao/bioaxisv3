@@ -97,7 +97,7 @@ function requestHref(result: ProductSearchResult, requestType: "quote" | "equiva
     category: result.categorySlug,
     family: result.familySlug,
     product: result.productSlug,
-    sourcePage: sourcePageFromResult(result),
+    sourcePage: result.segmentSlug ? `/products?q=${encodeURIComponent(query)}` : sourcePageFromResult(result),
     query
   };
 

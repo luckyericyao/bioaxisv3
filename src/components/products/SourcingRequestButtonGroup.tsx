@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { buildRequestHref } from "@/data/productTaxonomy";
+import { SourcingRequestLink } from "./SourcingRequestLink";
 
 type SourcingRequestButtonGroupProps = {
   segment?: string;
@@ -46,7 +46,7 @@ export function SourcingRequestButtonGroup({
   return (
     <div className={layout === "grid" ? "grid gap-2 sm:grid-cols-2 xl:grid-cols-4" : "flex flex-col gap-2 sm:flex-row sm:flex-wrap"}>
       {requests.map((request) => (
-        <Link
+        <SourcingRequestLink
           key={request.requestType}
           href={buildRequestHref({ segment, category, subcategory, family, product, requestType: request.requestType, sourcePage, query })}
           className={[
@@ -58,7 +58,7 @@ export function SourcingRequestButtonGroup({
           ].join(" ")}
         >
           {request.label}
-        </Link>
+        </SourcingRequestLink>
       ))}
     </div>
   );
