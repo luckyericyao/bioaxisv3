@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 
-type SourcingRequestLinkProps = { href: string; className?: string; children: ReactNode };
+type SourcingRequestLinkProps = { href: string; className?: string; children: ReactNode; preserveProductQuery?: boolean };
 
 export function SourcingRequestLink(props: SourcingRequestLinkProps) {
   return (
@@ -14,7 +14,7 @@ export function SourcingRequestLink(props: SourcingRequestLinkProps) {
   );
 }
 
-function ContextualRequestLink({ href, className, children }: SourcingRequestLinkProps) {
+function ContextualRequestLink({ href, className, children, preserveProductQuery = false }: SourcingRequestLinkProps) {
   const currentParams = useSearchParams();
   const pathname = usePathname();
   const query = currentParams.get("query") || currentParams.get("q");
@@ -23,6 +23,9 @@ function ContextualRequestLink({ href, className, children }: SourcingRequestLin
   if (query && target.origin === "https://bioaxis.local" && target.pathname === "/request-quote") {
     if (!target.searchParams.has("query")) target.searchParams.set("query", query);
     target.searchParams.set("sourcePage", `${pathname}?q=${encodeURIComponent(query)}`);
+    requestHref = `${target.pathname}${target.search}${target.hash}`;
+  } else if (query && preserveProductQuery && target.origin === "https://bioaxis.local" && target.pathname.startsWith("/products/")) {
+    if (!target.searchParams.has("q")) target.searchParams.set("q", query);
     requestHref = `${target.pathname}${target.search}${target.hash}`;
   }
 

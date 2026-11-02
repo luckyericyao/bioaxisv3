@@ -26,36 +26,27 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
           { label: family.title }
         ]}
       />
-      <PageHero eyebrow={`${segment.title} / ${category.title}`} title={family.title} subtitle={family.shortDescription}>
-        <div className="grid gap-3">
-          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} size="md" layout="inline" includeDocumentation />
-          <Link href={`/products/${segment.slug}/${category.slug}`} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+      <PageHero title={family.title} subtitle={family.shortDescription} compact tight align="start">
+        <div className="grid gap-3" data-family-decision-summary="true">
+          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} layout="decision" includeDocumentation />
+          <Link href={`/products/${segment.slug}/${category.slug}`} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {category.title}
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Family overview</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">What this family is used for</h2>
-          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{family.longDescription}</p>
-        </section>
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Buyer checklist</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Specification checklist</h2>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {family.recommendedRFQFields.slice(0, 8).map((field) => (
-              <SpecTag key={field}>{cleanListItem(field)}</SpecTag>
-            ))}
-          </div>
-        </section>
-      </section>
-
       <ProductConfigurationSection segment={segment} category={category} family={family} />
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-3">
+          <details className="group border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
+              <span>Family overview</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <p className="border-t border-bioaxis-line p-5 text-sm leading-6 text-bioaxis-muted">{family.longDescription}</p>
+          </details>
+          <Disclosure title="Buyer checklist" items={family.recommendedRFQFields} />
           <Disclosure title="How to select" items={family.selectionCriteria} />
           <Disclosure title="Equivalent switching considerations" items={family.equivalentSwitchingConsiderations} />
           <Disclosure title="Documentation checklist" items={family.documentationChecklist} />
@@ -98,16 +89,16 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
-        <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+        <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
       <div className="border-t border-bioaxis-line p-5">
-        <div className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2">
           {items.map((item) => (
-            <SpecTag key={item}>{cleanListItem(item)}</SpecTag>
+            <li key={item} className="flex max-w-full"><SpecTag>{cleanListItem(item)}</SpecTag></li>
           ))}
-        </div>
+        </ul>
       </div>
     </details>
   );

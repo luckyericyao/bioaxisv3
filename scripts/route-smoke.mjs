@@ -1755,7 +1755,7 @@ for (const route of routes) {
     });
 
     [
-      ["Typical RFQ fields", "Specification checklist"],
+      ["Typical RFQ fields", "Buyer checklist"],
       ["Equivalent review notes", "Equivalent switching considerations"],
       ["Documentation to request", "Documentation checklist"],
       ["Add to list", "Add to sourcing list"]
@@ -1764,6 +1764,30 @@ for (const route of routes) {
         failures.push(`${route}: missing family progressive disclosure content ${options.join(" or ")}`);
       }
     });
+
+    if (!html.includes('data-family-decision-summary="true"')) {
+      failures.push(`${route}: missing compact family decision summary`);
+    } else {
+      const mainHtml = mainBlock(html);
+      const primaryActions = mainHtml.match(/data-sourcing-primary-actions="true"[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? "";
+      const actionHrefs = hrefsFromHtml(primaryActions).map((href) => new URL(href, baseUrl));
+      const parts = canonicalPath.split("/").filter(Boolean);
+      if (actionHrefs.length !== 3 || ["quote", "equivalent", "sample"].some((type) => !actionHrefs.some((href) => href.searchParams.get("requestType") === type))) {
+        failures.push(`${route}: family hero must have exactly quote, sample, and equivalent primary actions`);
+      }
+      if (actionHrefs.some((href) => href.pathname !== "/request-quote" || href.searchParams.get("segment") !== parts[1] || href.searchParams.get("category") !== parts[2] || href.searchParams.get("family") !== parts[3])) {
+        failures.push(`${route}: family primary action loses taxonomy context`);
+      }
+      const configurationsIndex = mainHtml.indexOf('data-family-configurations="true"');
+      const overviewIndex = mainHtml.indexOf("Family overview");
+      if (configurationsIndex < 0 || overviewIndex < configurationsIndex) {
+        failures.push(`${route}: configurations must precede generic family overview and checklist`);
+      }
+      const generalDisclosure = mainHtml.match(/<details\b[^>]*data-general-family-templates="true"[^>]*>/)?.[0];
+      if (!generalDisclosure || /\sopen(?:[\s=>])/.test(generalDisclosure)) {
+        failures.push(`${route}: general sourcing templates must remain available but collapsed by default`);
+      }
+    }
   }
 
   if (segmentProductItemRoutes.includes(route)) {
@@ -2144,7 +2168,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
   ["Products page", productsPageSource, ["ProductCategoryGrid", "Browse BioAxis product lines"]],
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
   ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
-  ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "Specification checklist", "Compliance disclaimer", "ProductConfigurationSection"]],
+  ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "data-family-decision-summary", 'layout="decision"', "Compliance disclaimer", "ProductConfigurationSection"]],
   ["Product item template", productItemTemplateSource, ["Sourcing template details", "Configuration fields to confirm", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
 ].forEach(([label, source, required]) => {
@@ -2345,6 +2369,7 @@ if (
 
 [
   "checkMobileSearchFunnel",
+  "checkFamilyDecisionPages",
   "mobile search does not retain the submitted query",
   "390px search does not expose a first-result action in the initial viewport",
   "mobile menu remains expanded after search navigation"

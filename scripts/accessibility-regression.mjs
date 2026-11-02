@@ -1,5 +1,7 @@
 import axe from "axe-core";
 import { chromium } from "playwright";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 
 const baseUrl = process.argv[2] ?? process.env.A11Y_TEST_BASE_URL ?? "http://localhost:3000";
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined;
@@ -12,6 +14,7 @@ const navigationAttempts = ["localhost", "127.0.0.1"].includes(new URL(baseUrl).
 const criticalRoutes = [
   { label: "home", path: "/" },
   { label: "search", path: "/products?q=filtered%20200%20%C2%B5L%20tips" },
+  { label: "product family", path: "/products/liquid-handling/pipette-tips/filtered-pipette-tips" },
   {
     label: "product template",
     path: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips"
@@ -549,6 +552,132 @@ async function checkMobileSearchFunnel() {
   await page.close();
 }
 
+async function checkFamilyDecisionPages() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const query = "filtered 200 µL tips";
+  const cases = [
+    ["/products/liquid-handling/pipette-tips/filtered-pipette-tips", "filtered-200ul-pipette-tips"],
+    ["/products/sample-prep-filtration/syringe-filters/pes-syringe-filters", "pes-022um-syringe-filters"],
+    ["/products/cell-culture/media-and-supplements/serum-free-media", "serum-free-cell-culture-media"],
+    ["/products/lab-plasticware/tubes/microcentrifuge-tubes", null]
+  ];
+  const screenshotDir = process.env.FAMILY_SCREENSHOT_DIR;
+  if (screenshotDir) await mkdir(screenshotDir, { recursive: true });
+
+  for (const [caseIndex, [route, specificSlug]] of cases.entries()) {
+    const queryParam = caseIndex % 2 === 0 ? "q" : "query";
+    const familyPath = `${route}?${queryParam}=${encodeURIComponent(query)}`;
+    await openRoute(page, familyPath);
+    const familyName = (await page.locator("main h1").innerText()).trim();
+    const breadcrumbNames = await page.locator('nav[aria-label="Breadcrumb"] ol li').evaluateAll((items) =>
+      items.map((item) => item.firstElementChild?.textContent?.trim() ?? "")
+    );
+    const decision = page.locator('[data-family-decision-summary="true"]');
+    const actions = decision.locator('[data-sourcing-primary-actions="true"] a');
+    check((await actions.count()) === 3, `${route}: family hero must have exactly three primary actions`);
+    const layout = await page.evaluate(() => {
+      const configurations = document.querySelector('[data-family-configurations="true"]');
+      const overview = [...document.querySelectorAll("details > summary")].find((summary) => summary.textContent.includes("Family overview"));
+      const checklist = [...document.querySelectorAll("details > summary")].find((summary) => summary.textContent.includes("Buyer checklist"));
+      return {
+        configurationsFirst: Boolean(configurations && overview && configurations.compareDocumentPosition(overview) & Node.DOCUMENT_POSITION_FOLLOWING),
+        overviewCollapsed: Boolean(overview && !overview.parentElement.open),
+        checklistCollapsed: Boolean(checklist && !checklist.parentElement.open),
+        configurationHeadingVisible: (() => {
+          const rect = configurations?.querySelector("h2")?.getBoundingClientRect();
+          return Boolean(rect && rect.top >= 0 && rect.bottom <= innerHeight);
+        })(),
+        overflow: document.documentElement.scrollWidth > innerWidth + 1
+      };
+    });
+    check(layout.configurationsFirst, `${route}: configuration choices follow generic overview copy`);
+    check(layout.overviewCollapsed && layout.checklistCollapsed, `${route}: family overview or buyer checklist is expanded by default`);
+    check(layout.configurationHeadingVisible, `${route}: configuration choices do not enter the mobile first viewport`);
+    check(!layout.overflow, `${route}: family page overflows the mobile viewport`);
+
+    for (const action of await actions.all()) {
+      const box = await action.boundingBox();
+      check(Boolean(box && box.y >= 64 && box.y + box.height <= 844 && box.height >= 44), `${route}: family primary action is outside the first viewport or too small`);
+      check(await action.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return top === element || element.contains(top);
+      }), `${route}: family primary action is covered by another element`);
+    }
+
+    const configurations = page.locator('[data-family-configurations="true"]');
+    const general = configurations.locator('[data-general-family-templates="true"]');
+    check((await general.count()) === 1 && (await general.getAttribute("open")) === null, `${route}: general templates are not collapsed by default`);
+    check(!(await general.locator("article").first().isVisible()), `${route}: general template card is exposed before expansion`);
+    const specificCards = configurations.locator('[data-family-template-kind="specific"]');
+    check((await specificCards.count()) === (specificSlug ? 1 : 0), `${route}: configured and general templates are not separated correctly`);
+    if (specificSlug) {
+      const href = new URL(await specificCards.first().getByRole("link", { name: "View template", exact: true }).getAttribute("href"), baseUrl);
+      check(href.pathname === `${route}/${specificSlug}`, `${route}: a general template outranks the specific configuration`);
+      check((await specificCards.first().locator("ul li").count()) === 3, `${route}: configuration sourcing fields are not a compact semantic list`);
+    }
+    if (screenshotDir) await page.screenshot({ path: join(screenshotDir, `${route.split("/").at(-1)}-mobile.png`) });
+
+    const generalSummary = general.locator("summary");
+    await generalSummary.focus();
+    await generalSummary.press("Enter");
+    check(await general.locator("article").first().isVisible(), `${route}: keyboard cannot reveal the preserved general template`);
+    const generalHref = new URL(await general.getByRole("link", { name: "View template", exact: true }).first().getAttribute("href"), baseUrl);
+    check(generalHref.pathname === `${route}/${route.split("/").at(-1)}-general`, `${route}: general template route changed`);
+    check(generalHref.searchParams.get("q") === query, `${route}: general template link loses the search query`);
+    await generalSummary.press("Enter");
+
+    const moreActions = decision.locator("details");
+    const documentation = moreActions.getByRole("link", { name: "Ask for documents", exact: true });
+    check(!(await documentation.isVisible()), `${route}: documentation is a fourth default primary action`);
+    await moreActions.locator("summary").click();
+    check(await documentation.isVisible(), `${route}: documentation request is no longer reachable`);
+    check(new URL(await documentation.getAttribute("href"), baseUrl).searchParams.get("requestType") === "documentation", `${route}: documentation request type changed`);
+
+    for (const [label, requestType] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]]) {
+      await openRoute(page, familyPath);
+      await page.locator('[data-family-decision-summary="true"] [data-sourcing-primary-actions="true"]').getByRole("link", { name: label, exact: true }).click();
+      await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+      const handoff = new URL(page.url());
+      const source = new URL(handoff.searchParams.get("sourcePage"), baseUrl);
+      check(handoff.searchParams.get("requestType") === requestType && handoff.searchParams.get("query") === query, `${route}: ${requestType} handoff loses request type or query`);
+      check(source.pathname === route && source.searchParams.get("q") === query, `${route}: ${requestType} handoff loses the immediate source page`);
+      const context = page.locator('[data-product-context-summary="true"]');
+      await context.waitFor({ state: "visible", timeout: 15_000 });
+      const values = await context.locator("dl > div").evaluateAll((rows) => Object.fromEntries(rows.map((row) => [
+        row.querySelector("dt")?.textContent?.replace(/:$/, "").trim().toLowerCase(), row.querySelector("dd")?.textContent?.trim()
+      ])));
+      for (const [field, expected] of [["segment", breadcrumbNames[2]], ["category", breadcrumbNames[3]], ["family", familyName]]) {
+        check(Boolean(expected) && values[field] === expected, `${route}: ${requestType} handoff loses exact ${field} context`);
+      }
+      check((await page.locator("#sourcing-product-input").inputValue()).includes(query), `${route}: ${requestType} RFQ loses the search prefill`);
+      check((await page.locator('form input[required], form textarea[required]').count()) === 1, `${route}: family handoff adds required RFQ fields`);
+    }
+
+    await openRoute(page, familyPath);
+    if (!specificSlug) await general.locator("summary").click();
+    const itemLink = configurations.locator(`[data-family-template-kind="${specificSlug ? "specific" : "general"}"]`).first().getByRole("link", { name: "View template", exact: true });
+    await itemLink.click();
+    const expectedItemPath = `${route}/${specificSlug ?? `${route.split("/").at(-1)}-general`}`;
+    await page.waitForURL((url) => url.pathname === expectedItemPath, { timeout: 15_000 });
+    check(new URL(page.url()).searchParams.get("q") === query, `${route}: family-to-item navigation loses the query`);
+    const productName = (await page.locator("main h1").innerText()).trim();
+    await page.locator('[data-product-primary-actions="true"]').getByRole("link", { name: "Request quote", exact: true }).click();
+    await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+    const itemContext = page.locator('[data-product-context-summary="true"]');
+    await itemContext.waitFor({ state: "visible", timeout: 15_000 });
+    check((await itemContext.innerText()).includes(productName), `${route}: family-to-item-to-RFQ loses the product name`);
+    check(new URL(page.url()).searchParams.get("query") === query, `${route}: family-to-item-to-RFQ loses the query`);
+  }
+
+  if (screenshotDir) {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openRoute(page, cases[0][0]);
+    await page.screenshot({ path: join(screenshotDir, "filtered-pipette-tips-desktop.png") });
+  }
+  await page.close();
+}
+
 async function checkProductDecisionPages() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const routes = [
@@ -737,6 +866,7 @@ try {
   await checkSourcingListDrawerFocus();
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
+  await checkFamilyDecisionPages();
   await checkProductDecisionPages();
 
   for (const route of criticalRoutes) {
@@ -775,6 +905,7 @@ if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
 console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
+console.log("- family-specific configurations first, collapsed general templates, three visible actions, and preserved family/item/RFQ context");
 console.log("- canonical and legacy product-detail specs and all quote/sample/equivalent handoffs with exact product hierarchy");
 console.log(`- axe-core WCAG A/AA semantics and color contrast on ${criticalRoutes.length} critical routes`);
 console.log("- 200%/400% zoom-equivalent reflow and sticky-focus visibility");
