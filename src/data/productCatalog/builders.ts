@@ -145,4 +145,3 @@ export function buildSegment(segment: SegmentSeed): ProductCatalogSegment {
     categories: segment.categories.map((category) => buildCategory(segment, category))
   };
 }
-

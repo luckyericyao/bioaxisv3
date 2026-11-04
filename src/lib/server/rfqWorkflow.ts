@@ -20,6 +20,14 @@ export type RfqWorkflowEvent = RfqWorkflowEventDetails & (
   | { schemaVersion: 2; status: RfqActionStatus; supplierConfirmation: string; revision: number }
 );
 
+type StoredRfqWorkflowEvent = RfqWorkflowEvent | (RfqWorkflowEventDetails & {
+  schemaVersion: 2;
+  status: RfqActionStatus | "reviewing";
+  canonicalStatus: RfqActionStatus;
+  supplierConfirmation: string;
+  revision: number;
+});
+
 export type RfqWorkflowState = {
   status: RfqWorkflowStatus;
   assignedOwner: string;
@@ -65,7 +73,12 @@ async function readWorkflowEvent(pathname: string): Promise<RfqWorkflowEvent | n
   const result = await get(pathname, { access: "private", useCache: false });
 
   if (!result || result.statusCode !== 200 || !result.stream) return null;
-  return (await new Response(result.stream).json()) as RfqWorkflowEvent;
+  const event = (await new Response(result.stream).json()) as StoredRfqWorkflowEvent;
+  if ("canonicalStatus" in event) {
+    const { canonicalStatus, ...storedEvent } = event;
+    return { ...storedEvent, status: canonicalStatus };
+  }
+  return event;
 }
 
 export async function getRfqWorkflow(requestId: string): Promise<RfqWorkflowState> {
@@ -81,20 +94,15 @@ export async function getRfqWorkflow(requestId: string): Promise<RfqWorkflowStat
     cursor = page.hasMore ? page.cursor : undefined;
   } while (cursor);
 
-  // Existing operation-keyed events remain untouched. Revision slots serialize
-  // new updates independently of timestamps and legacy event counts.
-  events.sort((left, right) => {
-    if (left.schemaVersion === 2 && right.schemaVersion === 2) return left.revision - right.revision;
-    if (left.schemaVersion !== right.schemaVersion) return left.schemaVersion - right.schemaVersion;
-    return left.recordedAt.localeCompare(right.recordedAt) || left.operationId.localeCompare(right.operationId);
-  });
-  let revision = 0;
+  const revisionEvents = events.filter((event) => event.schemaVersion === 2)
+    .sort((left, right) => left.revision - right.revision);
   for (const event of events) {
     if (event.requestId !== requestId) throw new Error("Workflow request ID mismatch.");
-    if (event.schemaVersion === 2) {
-      revision += 1;
-      if (event.revision !== revision) throw new Error("Workflow revision gap.");
-    }
+  }
+  let revision = 0;
+  for (const event of revisionEvents) {
+    revision += 1;
+    if (event.revision !== revision) throw new Error("Workflow revision gap.");
   }
   // A listing may predate a just-completed write. Read the next immutable slot
   // from origin so retries and readback also see a tail omitted by that listing.
@@ -104,10 +112,25 @@ export async function getRfqWorkflow(requestId: string): Promise<RfqWorkflowStat
     if (next.schemaVersion !== 2 || next.revision !== revision || next.requestId !== requestId) {
       throw new Error("Invalid workflow revision.");
     }
-    events.push(next);
+    revisionEvents.push(next);
     next = await readWorkflowEvent(workflowPath(requestId, revision + 1));
   }
-  const latest = events.at(-1);
+
+  // Merge timestamp-ordered legacy writes with the revision-ordered stream.
+  // A backwards v2 clock cannot move that revision ahead of its predecessors.
+  const legacyEvents = events.filter((event) => event.schemaVersion === 1)
+    .sort((left, right) => left.recordedAt.localeCompare(right.recordedAt) || left.operationId.localeCompare(right.operationId));
+  const orderedEvents: RfqWorkflowEvent[] = [];
+  let legacyIndex = 0;
+  for (const event of revisionEvents) {
+    while (legacyIndex < legacyEvents.length && legacyEvents[legacyIndex].recordedAt <= event.recordedAt) {
+      orderedEvents.push(legacyEvents[legacyIndex]);
+      legacyIndex += 1;
+    }
+    orderedEvents.push(event);
+  }
+  orderedEvents.push(...legacyEvents.slice(legacyIndex));
+  const latest = orderedEvents.at(-1);
   const status = latest?.status ?? "stored";
 
   return {
@@ -118,7 +141,7 @@ export async function getRfqWorkflow(requestId: string): Promise<RfqWorkflowStat
     supplierConfirmation: latest?.supplierConfirmation ?? "",
     updatedAt: latest?.recordedAt ?? "",
     revision,
-    events
+    events: orderedEvents
   };
 }
 
@@ -147,13 +170,19 @@ export async function appendRfqWorkflowEvent(input: {
   }
 
   const current = await getRfqWorkflow(input.requestId);
+  // Old readers sort only by time. Keep every new revision later than the
+  // observed history, including rollback writes and equal/backwards clocks.
+  let recordedAt = Date.now();
+  for (const previous of current.events) {
+    recordedAt = Math.max(recordedAt, Date.parse(previous.recordedAt) + 1);
+  }
   const event: RfqWorkflowEvent = {
     schemaVersion: 2,
     ...input,
     status: status as RfqActionStatus,
     supplierConfirmation: input.supplierConfirmation ?? "",
     revision: current.revision + 1,
-    recordedAt: new Date().toISOString()
+    recordedAt: new Date(recordedAt).toISOString()
   };
   const previousOperation = current.events.find((previous) => previous.operationId === event.operationId);
   if (previousOperation) {
@@ -170,9 +199,16 @@ export async function appendRfqWorkflowEvent(input: {
   }
 
   const pathname = workflowPath(input.requestId, event.revision);
+  // a7eb824 reads status directly and only knows the legacy transition table.
+  // Preserve the full action separately while projecting new states to reviewing.
+  const storedEvent: StoredRfqWorkflowEvent = {
+    ...event,
+    status: event.status === "in-review" || event.status === "supplier-confirmed" ? "reviewing" : event.status,
+    canonicalStatus: event.status
+  };
 
   try {
-    const blob = await put(pathname, JSON.stringify(event), {
+    const blob = await put(pathname, JSON.stringify(storedEvent), {
       access: "private",
       addRandomSuffix: false,
       allowOverwrite: false,

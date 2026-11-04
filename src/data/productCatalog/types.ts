@@ -102,4 +102,3 @@ export type SegmentSeed = {
   heroDescription: string;
   categories: CategorySeed[];
 };
-

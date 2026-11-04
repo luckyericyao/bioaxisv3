@@ -48,4 +48,3 @@ export function initialProductContext(props: SourcingIntakeFormProps, requestTyp
     timestamp: props.productContext?.timestamp ?? new Date().toISOString()
   };
 }
-

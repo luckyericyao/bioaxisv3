@@ -142,4 +142,3 @@ function buildProductContextPath({
   const parts = ["products", segment, subcategory, family, product].filter(Boolean);
   return parts.length > 1 ? `/${parts.join("/")}` : "";
 }
-

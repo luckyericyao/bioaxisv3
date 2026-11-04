@@ -34,13 +34,30 @@ A real response can be recorded before supplier confirmation, for example when t
 
 The original `rfq/by-id/<requestId>.json` intake record retains `status: "queued"` and its submitted context for its lifetime. Use `workflow.status` in a detail lookup or `requests[].status` in a queue listing for the current lifecycle state. An intake retry with identical content returns the first record. Reusing the same request ID with different content returns a conflict.
 
-Historical schema-v1 workflow events remain immutable. Derived workflow status maps legacy `queued` to `stored` and `reviewing` to `in-review`. The internal PATCH endpoint accepts `reviewing` as a compatibility alias for `in-review`. New events use canonical names, while `workflow.events` preserves historical event content.
+Historical schema-v1 workflow events remain immutable. Derived workflow status maps legacy `queued` to `stored` and `reviewing` to `in-review`. The internal PATCH endpoint accepts `reviewing` as a compatibility alias for `in-review`. The current API exposes canonical statuses for schema-v2 events and preserves schema-v1 event content in `workflow.events`.
 
-Workflow changes are separate private, append-only schema-v2 events in consecutive revision slots under `rfq/workflow/by-id/<requestId>/revisions/`. The derived `revision` starts at zero for a request with only historical events and advances with each new event. Ordering follows these revisions, so equal timestamps or clock differences cannot reorder new events.
+Workflow changes are separate private, append-only schema-v2 events in consecutive revision slots under `rfq/workflow/by-id/<requestId>/revisions/`. The derived `revision` starts at zero for a request with only historical events and advances with each schema-v2 event. Schema-v2 events retain revision order even with equal or backwards timestamps. Schema-v1 events sort by `recordedAt`, then `operationId`, and merge into that stream by time. A v1 event precedes the first v2 revision whose timestamp is at least its own, or follows all revisions if its timestamp is later. This also applies to revisions recovered directly from storage after an incomplete listing. Thus a later v1 update during rollback can become the current state, and upgrading again resumes the next v2 revision.
+
+Every new revision receives a timestamp at least one millisecond after all observed event timestamps, or the current time if later. This keeps new writes ordered for timestamp-only readers even when the writer's clock moves backwards. Existing revision order takes precedence where historical v2 timestamps disagree. Cross-version ordering relies on legacy timestamps because v1 writers have no shared revision sequence. Concurrent v1/v2 writes or skewed v1 clocks cannot establish an unambiguous causal order.
 
 Use a new `operationId` for each distinct action. Retrying the exact same normalized action with its original ID returns `replayed: true` and adds no event, including after later workflow updates. Reusing an operation ID with different status, owner, or summary fields returns HTTP 409. The legacy `reviewing` alias and canonical `in-review` are equivalent for retry comparisons.
 
 Concurrent updates from the same revision compete for one immutable slot. A distinct losing action receives HTTP 409. Read the current workflow again, reconsider the intended transition, and retry only if it remains appropriate. A storage error returns HTTP 503. If the first write succeeded before a response was lost, retrying the same operation ID recovers that event.
+
+## Rollback compatibility with a7eb824
+
+Newly written schema-v2 records retain all legacy event fields. Their stored `status` uses the old vocabulary, projecting both `in-review` and `supplier-confirmed` to `reviewing`. `needs-info`, `responded`, and `closed` keep their names. A separate `canonicalStatus` stores the full current status, and `supplierConfirmation` and `revision` remain in the same record. Current readers decode `canonicalStatus` before deriving state or comparing retries. Readers also accept earlier v2 records that stored the canonical name directly in `status`.
+
+The `a7eb824` reader ignores these additional fields and reads `status` directly. It can therefore read newly written records and use its transition table safely. During rollback, a supplier-confirmed request appears as `reviewing`. Use the current event history to recover the supplier evidence after upgrading again. Old writers append operation-keyed v1 events, and the current reader includes their later updates on re-upgrade. Exact retries retain their original operation IDs across that sequence.
+
+For a controlled rollback, follow these steps.
+
+1. Pause operator workflow updates and drain in-flight writers before switching versions. Preserve a private backup of intake and workflow history in the authorized storage environment.
+2. With the patched version, inspect requests written by earlier v2 versions. Records whose raw `status` is `in-review` or `supplier-confirmed` remain incompatible with the old transition table. For each affected request, append a new, accurate allowed workflow update through the patched API, with a distinct operation ID and an operator explanation. A reviewed request can move to `needs-info` when information is genuinely missing, or a supplier-confirmed request can return to `in-review` for an actual renewed review. Verify the latest stored record has a legacy-compatible status and a strictly later timestamp before switching. If no accurate transition is available, retain the patched workflow service until the request can be handled safely.
+3. Switch to `a7eb824` only after that verification. Its workflow vocabulary and validation apply during rollback. Keep updates on one application version at a time because v1 operation-keyed writes bypass v2 revision contention checks.
+4. Before upgrading again, pause and drain the old writers. Read back affected requests through the patched API and verify the latest v1 action, owner, summaries, and history. Resume updates with fresh operation IDs. Retry an uncertain earlier action only with its original ID and identical content.
+
+The patch applies the compatible shape to future writes. Earlier immutable records retain their original bytes, including any incompatible status names. Existing records therefore require the pre-rollback review above. The regression uses an independent snapshot of the old reader's status and transition semantics against an in-memory Blob mock, including mixed histories, re-upgrade, and lost-response retries. Live storage behavior requires separately authorized QA verification.
 
 ## Internal API
 
@@ -115,7 +132,7 @@ npm run test:rfq-roundtrip -- http://localhost:3000 http://localhost:3000
 
 Record `responded` after the operator actually replies outside this system.
 
-`npm run test:rfq-queue` checks the lifecycle, required fields, immutable intake, legacy history, retries, and concurrent updates with a local Blob mock. All summaries in this regression are synthetic QA fixtures. `npm run test:rfq-roundtrip-phases` checks explicit QA submission, acknowledged owner review, context preservation, legacy status compatibility, and protection of an advanced workflow against a local fetch mock in an isolated subprocess. These regressions provide local behavioral coverage. Production storage and human review require separate checks.
+`npm run test:rfq-queue`, included in `npm test`, checks the lifecycle, required fields, immutable intake, legacy-compatible stored shapes, rollback and re-upgrade, mixed-schema ordering, retries, and concurrent updates with a local Blob mock. All summaries in this regression are synthetic QA fixtures. `npm run test:rfq-roundtrip-phases` checks explicit QA submission, acknowledged owner review, context preservation, legacy status compatibility, and protection of an advanced workflow against a local fetch mock in an isolated subprocess. These regressions provide local behavioral coverage. Production storage and human review require separate checks.
 
 ## Bounded WAF enforcement check
 

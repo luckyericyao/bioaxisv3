@@ -225,4 +225,3 @@ export function buildSegment(index: number, segment: RawSegment): ProductSegment
     metaDescription: segment.shortDescription
   };
 }
-

@@ -75,6 +75,14 @@ Module._load = function load(request, parent, isMain) {
         assert.equal(options.addRandomSuffix, false);
         assert.equal(options.contentType, "application/json");
         writes.push({ pathname, body: String(body) });
+        if (pathname.startsWith("rfq/workflow/")) {
+          const event = JSON.parse(String(body));
+          assert.equal(event.schemaVersion, 2);
+          assert.ok(["reviewing", "needs-info", "responded", "closed"].includes(event.status), "stored status must be safe for a7eb824");
+          for (const field of ["requestId", "operationId", "assignedOwner", "needsInfo", "responseSummary", "recordedAt", "canonicalStatus", "supplierConfirmation"]) {
+            assert.equal(typeof event[field], "string", `stored event requires ${field}`);
+          }
+        }
         if (failStorage) throw new Error("private-storage-error-secret");
         const gate = writeGate;
         if (gate && pathname.startsWith(gate.prefix)) {
@@ -158,6 +166,30 @@ function seedEvent(requestId, operationId, status, details = {}) {
   return { event, pathname };
 }
 
+// Freeze a7eb824's raw status reader and transition lookup independently of the
+// current decoder. The baseline ignores schemaVersion and sorts only by time.
+const legacyTransitions = {
+  queued: ["reviewing", "needs-info"],
+  reviewing: ["needs-info", "responded", "closed"],
+  "needs-info": ["reviewing", "responded", "closed"],
+  responded: ["reviewing", "closed"],
+  closed: []
+};
+
+function readLegacyWorkflow(requestId) {
+  const events = [...blobs.keys()].filter((pathname) => pathname.startsWith(`rfq/workflow/by-id/${requestId}/`))
+    .sort().reverse().map((pathname) => JSON.parse(blobs.get(pathname)))
+    .sort((left, right) => left.recordedAt.localeCompare(right.recordedAt));
+  return { status: events.at(-1)?.status ?? "queued", events };
+}
+
+function assertLegacyStatus(requestId, expectedStatus, nextStatus, allowed = true) {
+  const workflow = readLegacyWorkflow(requestId);
+  assert.equal(workflow.status, expectedStatus);
+  // Keep the original unguarded includes call so unknown new states reproduce P1.
+  assert.equal(legacyTransitions[workflow.status].includes(nextStatus), allowed);
+}
+
 const referenceId = "BIOAXIS-QA-IDEMPOTENCY";
 const originalRequest = {
   email: "first@example.test", organization: "QA fixture", productList: "Immutable synthetic request",
@@ -235,6 +267,7 @@ assert.equal(reviewed.workflow.status, "in-review");
 assert.equal(reviewed.workflow.events[0].status, "in-review");
 assert.equal(reviewed.workflow.events[0].schemaVersion, 2);
 assert.equal(reviewed.replayed, false);
+assertLegacyStatus(referenceId, "reviewing", "needs-info");
 const repeatedReview = await patch(reviewAction);
 assert.equal(repeatedReview.replayed, true);
 assert.equal(repeatedReview.workflow.events.length, 1);
@@ -242,12 +275,17 @@ assert.equal(repeatedReview.workflow.events.length, 1);
 const needsInfo = await patch(action(referenceId, "needs-info-000001", "needs-info", { needsInfo: "Confirm the requested plate format." }));
 assert.equal(needsInfo.workflow.status, "needs-info");
 assert.equal(needsInfo.workflow.needsInfo, "Confirm the requested plate format.");
+assertLegacyStatus(referenceId, "needs-info", "reviewing");
 await patch(action(referenceId, "resume-review-001", "in-review"));
 const supplierAction = action(referenceId, "supplier-step-001", "supplier-confirmed", { supplierConfirmation: "Synthetic QA confirmation reference QA-001." });
 const supplierConfirmed = await patch(supplierAction);
 assert.equal(supplierConfirmed.workflow.status, "supplier-confirmed");
 assert.equal(supplierConfirmed.workflow.supplierConfirmation, supplierAction.supplierConfirmation);
 assert.equal(supplierConfirmed.workflow.responseSummary, "");
+assertLegacyStatus(referenceId, "reviewing", "responded");
+const storedConfirmation = readLegacyWorkflow(referenceId).events.at(-1);
+assert.equal(storedConfirmation.canonicalStatus, "supplier-confirmed");
+assert.equal(storedConfirmation.supplierConfirmation, supplierAction.supplierConfirmation);
 const listing = await internal("GET", "limit=50");
 const supplierSummary = listing.body.requests.find((item) => item.requestId === referenceId);
 assert.equal(supplierSummary.status, "supplier-confirmed");
@@ -258,6 +296,7 @@ const responseAction = action(referenceId, "responded-step-001", "responded", { 
 const responded = await patch(responseAction);
 assert.equal(responded.workflow.status, "responded");
 assert.equal(responded.workflow.responseSummary, responseAction.responseSummary);
+assertLegacyStatus(referenceId, "responded", "closed");
 const replayAfterAdvance = await patch(reviewAction);
 assert.equal(replayAfterAdvance.replayed, true);
 assert.equal(replayAfterAdvance.workflow.status, "responded");
@@ -275,6 +314,7 @@ await patch({ ...responseAction, responseSummary: "Different synthetic response"
 const closed = await patch(action(referenceId, "closed-step-0001", "closed", { responseSummary: "Synthetic QA follow-up completed." }));
 assert.equal(closed.workflow.status, "closed");
 assert.equal(closed.workflow.revision, 6);
+assertLegacyStatus(referenceId, "closed", "reviewing", false);
 await patch(action(referenceId, "reopen-closed-001", "in-review"), 409);
 assert.deepEqual((await readQueuedRfq(referenceId)), firstWrite.record);
 
@@ -291,6 +331,67 @@ assert.equal(legacyReplay.workflow.events.at(-1).status, "reviewing");
 const advancedLegacy = await patch(action(legacyId, "legacy-supplier-001", "supplier-confirmed", { supplierConfirmation: "Synthetic legacy upgrade fixture." }));
 assert.equal(advancedLegacy.workflow.revision, 1, "v2 revisions start independently of legacy event count");
 assert.equal(advancedLegacy.workflow.events.length, 3);
+
+// Upgrade, roll back to a timestamp-only v1 writer, then upgrade again. A future
+// legacy timestamp also verifies the new writer's clock-regression protection.
+const rollbackId = "BIOAXIS-QA-ROLLBACK";
+await enqueueRfq(rollbackId, { email: "rollback@example.test" });
+const rollbackReviewAction = action(rollbackId, "rollback-review-001", "in-review");
+await patch(rollbackReviewAction);
+const rollbackSupplierAction = action(rollbackId, "rollback-supplier-001", "supplier-confirmed", { supplierConfirmation: "Synthetic rollback evidence." });
+await patch(rollbackSupplierAction);
+assertLegacyStatus(rollbackId, "reviewing", "responded");
+const legacyResponseAction = action(rollbackId, "rollback-response-001", "responded", { responseSummary: "Synthetic reply recorded by the old writer." });
+const legacyResponse = seedEvent(rollbackId, legacyResponseAction.operationId, legacyResponseAction.status, {
+  assignedOwner: legacyResponseAction.assignedOwner,
+  responseSummary: legacyResponseAction.responseSummary,
+  recordedAt: new Date(Date.now() + 60_000).toISOString()
+});
+const afterRollback = await internal("GET", `requestId=${rollbackId}`);
+assert.equal(afterRollback.response.status, 200);
+assert.equal(afterRollback.body.workflow.status, "responded");
+assert.equal(afterRollback.body.workflow.responseSummary, legacyResponseAction.responseSummary);
+assert.equal(afterRollback.body.workflow.supplierConfirmation, "");
+assert.equal(afterRollback.body.workflow.revision, 2);
+assert.deepEqual(afterRollback.body.workflow.events.map((event) => event.operationId), [
+  rollbackReviewAction.operationId, rollbackSupplierAction.operationId, legacyResponseAction.operationId
+]);
+assert.equal(afterRollback.body.workflow.events[1].supplierConfirmation, rollbackSupplierAction.supplierConfirmation);
+assertLegacyStatus(rollbackId, "responded", "reviewing");
+
+const rollbackSupplierPath = `rfq/workflow/by-id/${rollbackId}/revisions/000000000002.json`;
+omittedListings.add(rollbackSupplierPath);
+const recoveredRollback = await getRfqWorkflow(rollbackId);
+assert.equal(recoveredRollback.status, "responded", "an origin-recovered v2 tail must precede a later v1 event");
+assert.equal(recoveredRollback.revision, 2);
+assert.deepEqual(recoveredRollback.events, afterRollback.body.workflow.events);
+omittedListings.delete(rollbackSupplierPath);
+
+const rollbackRetryWrites = writes.length;
+assert.equal((await patch(rollbackSupplierAction)).replayed, true);
+assert.equal((await patch(legacyResponseAction)).replayed, true);
+assert.equal(writes.length, rollbackRetryWrites, "v1 and v2 retries after rollback must add no writes");
+await patch({ ...legacyResponseAction, responseSummary: "Changed legacy response." }, 409);
+
+const upgradeAction = action(rollbackId, "rollback-upgrade-001", "in-review");
+failAfterWrite = `rfq/workflow/by-id/${rollbackId}/revisions/`;
+const upgraded = await patch(upgradeAction);
+assert.equal(upgraded.replayed, true, "a lost response during re-upgrade recovers the same revision");
+assert.equal(upgraded.workflow.status, "in-review");
+assert.equal(upgraded.workflow.revision, 3);
+assert.deepEqual(upgraded.workflow.events.map((event) => event.operationId), [
+  rollbackReviewAction.operationId, rollbackSupplierAction.operationId, legacyResponseAction.operationId, upgradeAction.operationId
+]);
+assert.equal(upgraded.workflow.updatedAt, new Date(Date.parse(legacyResponse.event.recordedAt) + 1).toISOString());
+assertLegacyStatus(rollbackId, "reviewing", "needs-info");
+const upgradedRetryWrites = writes.length;
+for (const input of [rollbackReviewAction, rollbackSupplierAction, legacyResponseAction, upgradeAction]) {
+  const retried = await patch(input);
+  assert.equal(retried.replayed, true);
+  assert.equal(retried.workflow.status, "in-review");
+  assert.equal(retried.workflow.events.length, 4);
+}
+assert.equal(writes.length, upgradedRetryWrites);
 
 // Both requests reach the same immutable revision slot before either can commit.
 const concurrentId = "BIOAXIS-QA-CONCURRENT";
@@ -353,6 +454,25 @@ omittedListings.add(tail.pathname);
 assert.equal((await getRfqWorkflow(orderingId)).status, "responded", "origin reads recover an unlisted revision tail");
 omittedListings.delete(tail.pathname);
 
+// Mixed histories retain revision order across backwards clocks. Legacy ties
+// use operationId, and a legacy event at a revision's timestamp precedes it.
+const mixedOrderingId = "BIOAXIS-QA-MIXED-ORDERING";
+seedEvent(mixedOrderingId, "mixed-v2-first-001", "in-review", { schemaVersion: 2, revision: 1, supplierConfirmation: "", recordedAt: "2026-02-03T00:00:00.000Z" });
+seedEvent(mixedOrderingId, "mixed-v2-backward-002", "needs-info", { schemaVersion: 2, revision: 2, supplierConfirmation: "", recordedAt: "2026-02-01T00:00:00.000Z" });
+seedEvent(mixedOrderingId, "mixed-v1-before-001", "reviewing", { recordedAt: "2026-02-02T00:00:00.000Z" });
+seedEvent(mixedOrderingId, "mixed-v1-after-002", "responded", { recordedAt: "2026-02-04T00:00:00.000Z", responseSummary: "Synthetic mixed ordering reply." });
+seedEvent(mixedOrderingId, "mixed-v1-after-001", "reviewing", { recordedAt: "2026-02-04T00:00:00.000Z" });
+const mixedTail = seedEvent(mixedOrderingId, "mixed-v2-last-003", "in-review", { schemaVersion: 2, revision: 3, supplierConfirmation: "", recordedAt: "2026-02-04T00:00:00.000Z" });
+const mixedOrdering = await getRfqWorkflow(mixedOrderingId);
+assert.equal(mixedOrdering.status, "in-review");
+assert.deepEqual(mixedOrdering.events.map((event) => event.operationId), [
+  "mixed-v1-before-001", "mixed-v2-first-001", "mixed-v2-backward-002",
+  "mixed-v1-after-001", "mixed-v1-after-002", "mixed-v2-last-003"
+]);
+omittedListings.add(mixedTail.pathname);
+assert.deepEqual((await getRfqWorkflow(mixedOrderingId)).events, mixedOrdering.events);
+omittedListings.delete(mixedTail.pathname);
+
 const paginatedId = "BIOAXIS-QA-HISTORY-PAGES";
 for (let index = 0; index < 105; index += 1) {
   seedEvent(paginatedId, `legacy-page-${String(index).padStart(4, "0")}`, "reviewing");
@@ -411,4 +531,4 @@ for (const [pathname, bytes] of immutableBytes) assert.equal(blobs.get(pathname)
 assert.ok(writes.some(({ pathname }) => pathname.endsWith("/revisions/000000000001.json")));
 Module._load = originalLoad;
 globalThis.fetch = originalFetch;
-console.log("RFQ queue regression passed: canonical lifecycle and internal API, legacy history, immutable intake/events, validation, idempotency, revision contention/recovery, pagination, and private errors. All Blob operations used the local mock.");
+console.log("RFQ queue regression passed: canonical lifecycle and internal API, a7eb824-compatible writes, rollback/re-upgrade, mixed-schema ordering, immutable intake/events, validation, idempotency, revision contention/recovery, pagination, and private errors. All Blob operations used the local mock.");

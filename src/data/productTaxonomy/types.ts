@@ -166,4 +166,3 @@ export type ProductSearchResult = {
   productSlug?: string;
   matchedFields?: string[];
 };
-

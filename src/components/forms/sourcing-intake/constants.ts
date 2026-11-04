@@ -38,4 +38,3 @@ export const requestStarterTemplates = [
     value: "Recurring demand for:\nEstimated monthly or annual usage:\nPackaging, lead time, or backup-source requirements:"
   }
 ];
-

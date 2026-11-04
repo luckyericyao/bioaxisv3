@@ -160,4 +160,3 @@ export function SourcingListSummary({ items }: { items: SourcingListSummaryItem[
     </section>
   );
 }
-
