@@ -1,6 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { headerNavigationFailures, noResultSearchFailures } from "./route-smoke-contracts.mjs";
 
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://localhost:3000";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -107,7 +108,7 @@ const productSearchExpectations = {
   "/products?q=qPCR%20plates": ["qPCR", "PCR"],
   "/products?q=sterile%20syringe%20filter": ["Sterile", "Syringe"],
   "/products?q=low%20retention%20tips": ["Low Retention", "Pipette Tips"],
-  "/products?q=zzzxqnotfound999": ["No direct product path match", "Send this reference"],
+  "/products?q=zzzxqnotfound999": ["No direct product path match", "Send sourcing input"],
   "/products?q=430641": ["Reference not verified", "Send this reference"]
 };
 const requiredWorkflowStageLabels = [
@@ -423,6 +424,7 @@ for (const route of routes) {
   }
 
   if (route === "/") {
+    failures.push(...headerNavigationFailures(html).map((failure) => `Header: ${failure}`));
     [
       'rel="canonical" href="https://bioaxisv3.vercel.app"',
       'property="og:title"',
@@ -502,23 +504,19 @@ for (const route of routes) {
           failures.push(`${route}: missing search-to-RFQ action for ${requestType}`);
         }
       });
-    } else if (!hasHrefWithParams(html, "/request-quote", { requestType: "product-list-review" })) {
-      failures.push(`${route}: missing no-result product-list RFQ handoff`);
     }
 
     if (noDirectMatch) {
-      ["Send this reference"].forEach((label) => {
-        if (!pageText.includes(label)) {
-          failures.push(`${route}: missing no-result sourcing path ${label}`);
-        }
-      });
-    } else {
-      expectedTerms.forEach((term) => {
-        if (!new RegExp(term, "i").test(pageText)) {
-          failures.push(`${route}: missing expected search result term ${term}`);
-        }
-      });
+      const query = new URL(route, baseUrl).searchParams.get("q");
+      failures.push(...noResultSearchFailures(html, expectedTerms.at(-1), query, baseUrl)
+        .map((failure) => `${route}: ${failure}`));
     }
+
+    expectedTerms.forEach((term) => {
+      if (!new RegExp(term, "i").test(pageText)) {
+        failures.push(`${route}: missing expected search result term ${term}`);
+      }
+    });
   }
 
   if (route === "/products?q=cell") {
@@ -2115,7 +2113,6 @@ if (!submitHelperSource.includes('fetch("/api/rfq"')) {
   "bg-white shadow-2xl",
   "Product segments",
   "productNavigationSegments",
-  'aria-controls="mobile-primary-navigation"',
   'id="mobile-primary-navigation"'
 ].forEach((label) => {
   if (!headerSource.includes(label)) {

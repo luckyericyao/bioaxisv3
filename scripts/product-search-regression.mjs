@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { noResultSearchFailures } from "./route-smoke-contracts.mjs";
 
 const require = createRequire(import.meta.url);
 const Module = require("node:module");
@@ -390,8 +391,10 @@ for (const query of ["cell", "filtered 200 µL tips + / & #?", workflows[0].titl
   for (let index = 0; index < results.length; index += 1) await checkCard(renderedCards[index], results[index], query);
 }
 
-for (const query of ["430641", "AB-430641", "D8537", "0000-1234"]) {
+for (const query of ["430641", "AB-430641", "D8537", "0000-1234", "zzzxqnotfound9999"]) {
+  assert.equal(isCatalogReferenceQuery(query), true);
   const html = renderSearch(query);
+  assert.deepEqual(noResultSearchFailures(html, "Send this reference", query, origin), []);
   assert.equal(cards(html).length, 0, "Unresolved references must never fabricate a product result");
   assert.match(textContent(html), /Reference not verified/);
   const unresolved = one(html, "section", 'data-search-unresolved-reference="true"');
@@ -412,11 +415,27 @@ for (const query of ["430641", "AB-430641", "D8537", "0000-1234"]) {
   assert.equal(formProps.productContext.productName, query);
   checkedRequests += 1;
 }
-const emptyHtml = renderSearch("zzzxqnotfound");
-assert.match(textContent(emptyHtml), /No product or sourcing path matches this input/);
-assert.doesNotMatch(textContent(emptyHtml), /Reference not verified|No verified catalog-reference record|Unresolved reference/);
-assert.equal(elements(emptyHtml, "section", 'data-search-unresolved-reference="true"').length, 0);
-assert.equal(links(emptyHtml).filter((link) => link.url.pathname === "/request-quote").length, 1);
+for (const query of ["zzzxqnotfound", "zzzxqnotfound999", "zzzxqnotfound999 + / #?"]) {
+  assert.equal(isCatalogReferenceQuery(query), false, "Ordinary no-result input must not claim to be a catalog reference");
+  const html = renderSearch(query);
+  assert.equal(cards(html).length, 0);
+  assert.match(textContent(html), /No direct product path match/);
+  assert.match(textContent(html), /No product or sourcing path matches this input/);
+  assert.doesNotMatch(textContent(html), /Reference not verified|No verified catalog-reference record|Unresolved reference/);
+  assert.equal(elements(html, "section", 'data-search-unresolved-reference="true"').length, 0);
+  assert.deepEqual(noResultSearchFailures(html, "Send sourcing input", query, origin), []);
+  const action = links(html).find((link) => link.url.pathname === "/request-quote");
+  formProps = undefined;
+  renderToStaticMarkup(await requestRoute.default({ searchParams: Promise.resolve(Object.fromEntries(action.url.searchParams)) }));
+  assert.equal(formProps.initialValues.requestType, "product-list-review");
+  assert.ok(formProps.initialValues.productList.includes(query), "Ordinary no-result query must reach the RFQ form");
+  assert.equal(formProps.productContext.productName, query);
+  checkedRequests += 1;
+
+  assert.ok(noResultSearchFailures(html, "Send this reference", query, origin).length > 0, "Smoke must reject the wrong action label");
+  assert.ok(noResultSearchFailures(html + action.html, "Send sourcing input", query, origin).length > 0, "Smoke must reject duplicate sourcing actions");
+  assert.ok(noResultSearchFailures(html, "Send sourcing input", `${query}-lost`, origin).length > 0, "Smoke must reject lost query context");
+}
 
 // TEST-ONLY in-memory record: exercise verified-reference behavior without inventing
 // supplier evidence or adding any record to the production registry on disk.
@@ -456,7 +475,7 @@ assert.equal(getProductSearchIndexSize(), 429, "Fixture must not change the prod
 assert.deepEqual([...seenKinds].sort(), Object.keys(matchLabels).sort(), "Cover every result match kind");
 
 console.log(`Product search regression passed (${cases.length} ranking queries; four match kinds; ${checkedRequests} RFQ prefills; ${getProductSearchIndexSize()} indexed paths).`);
-console.log("Offline SSR checked visible match explanations, strongest 6, collapsed related results, load-more +12, query reset, unresolved-reference actions, and TEST-ONLY verified-reference normalization.");
+console.log("Offline SSR checked visible match explanations, strongest 6, collapsed related results, load-more +12, query reset, reference/ordinary no-result smoke contracts, and TEST-ONLY verified-reference normalization.");
 console.log(`cell first six: ${cellResults.slice(0, 6).map((result) => result.title).join(" | ")}`);
 } finally {
   Module._resolveFilename = originalResolveFilename;

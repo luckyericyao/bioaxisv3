@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { headerNavigationFailures } from "./route-smoke-contracts.mjs";
 
 const require = createRequire(import.meta.url);
 const Module = require("node:module");
@@ -12,13 +13,22 @@ const originalResolve = Module._resolveFilename;
 const originalLoad = Module._load;
 const originalFetch = globalThis.fetch;
 const originalExtensions = new Map([".ts", ".tsx"].map((extension) => [extension, require.extensions[extension]]));
+const headerFilename = path.resolve("src/components/layout/Header.tsx");
+let headerState = [];
+let headerStateCursor = 0;
 
 // Exercise real SSR markup without a server, browser, or network access.
 Module._resolveFilename = function resolve(request, parent, isMain, options) {
   return originalResolve.call(this, request.startsWith("@/") ? path.resolve("src", request.slice(2)) : request, parent, isMain, options);
 };
 Module._load = function load(request, parent, isMain) {
-  if (request === "next/navigation") return { useRouter: () => ({ push: () => {} }) };
+  if (request === "react" && parent?.filename === headerFilename) {
+    return { ...React, useState: (initial) => [headerState[headerStateCursor++] ?? initial, () => {}] };
+  }
+  if (request === "@/components/sourcing/SourcingListProvider" && parent?.filename === headerFilename) {
+    return { useSourcingList: () => ({ items: [], openDrawer: () => {} }) };
+  }
+  if (request === "next/navigation") return { useRouter: () => ({ push: () => {} }), usePathname: () => "/" };
   if (request === "next/script") return () => null;
   return originalLoad.call(this, request, parent, isMain);
 };
@@ -57,6 +67,29 @@ function contrast(foreground, background) {
 }
 
 try {
+  const { Header } = require("../src/components/layout/Header.tsx");
+  const { productNavigationSegments } = require("../src/data/productNavigation.ts");
+  // Render each disclosure state with real SSR hooks except the injected state.
+  // Effects, focus movement, and hydration still require browser acceptance.
+  for (const state of [[false, false, false], [false, true, false], [true, false, false], [true, false, true]]) {
+    headerState = state;
+    headerStateCursor = 0;
+    const [menuOpen, productsOpen, mobileProductsOpen] = state;
+    const html = renderToStaticMarkup(React.createElement(Header, { productNavigationSegments }));
+    checkReferences(html);
+    assert.deepEqual(headerNavigationFailures(html, menuOpen), []);
+    for (const [id, expanded] of [["mobile-primary-navigation", menuOpen], ["products-segment-dropdown", productsOpen], ["mobile-products-navigation", mobileProductsOpen]]) {
+      assert.equal(html.includes(`id="${id}"`), expanded, `${id}: panel must follow its disclosure state`);
+      assert.equal(html.includes(`aria-controls="${id}"`), expanded, `${id}: controls must follow the rendered panel`);
+    }
+    assert.ok(headerNavigationFailures(html, !menuOpen).length > 0, "Smoke must reject the wrong Menu expansion state");
+    if (menuOpen) {
+      assert.ok(headerNavigationFailures(html.replace('id="mobile-primary-navigation"', ""), true).length > 0, "Smoke must reject a missing controlled panel");
+    } else {
+      const dangling = html.replace('aria-expanded="false"', 'aria-expanded="false" aria-controls="mobile-primary-navigation"');
+      assert.ok(headerNavigationFailures(dangling).length > 0, "Smoke must reject dangling aria-controls on a closed Menu");
+    }
+  }
   const { SourcingIntakeForm } = require("../src/components/forms/SourcingIntakeForm.tsx");
   const { Field } = require("../src/components/forms/sourcing-intake/fields.tsx");
   const { SearchBox } = require("../src/components/ui/SearchBox.tsx");
@@ -122,7 +155,7 @@ try {
   assert.match(css, /\.field-focus:focus\s*\{[^}]*outline: 2px solid #0f4c81/);
   assert.match(css, /footer :where\(a, button\):focus-visible\s*\{\s*outline-color: #38bdf8/);
   assert.match(css, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/);
-  console.log(`Static accessibility regression passed: form labels/ARIA, named errors, search help, filter state, ${disclosures} native disclosures, palette contrast, and focus CSS.`);
+  console.log(`Static accessibility regression passed: four Header disclosure states/smoke contracts, form labels/ARIA, named errors, search help, filter state, ${disclosures} native disclosures, palette contrast, and focus CSS.`);
 } finally {
   Module._resolveFilename = originalResolve;
   Module._load = originalLoad;
