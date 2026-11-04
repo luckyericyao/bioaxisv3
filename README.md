@@ -1,157 +1,86 @@
 # BioAxis v3
 
-BioAxis is a one-stop life science consumables sourcing platform for biotech, pharma, academic labs, and research labs.
+Next.js App Router application for life science consumables discovery and sourcing requests. Product directories, search, specification review and sourcing lists feed a shared RFQ intake backed by a private Blob queue.
 
-## Local Development
+## Local development
+
+Run from the repository root with Node and npm on `PATH` and the existing `node_modules` available.
 
 ```bash
-npm install
+node --version
+npm --version
 npm run dev
 ```
 
-## Verification
+Open `http://localhost:3000`. Public catalog pages use local TypeScript data. RFQ acceptance requires a connected private Blob store. Full RFQ readiness also requires Turnstile and an internal API key. The architecture guide lists the configuration names and their roles. [Architecture overview](docs/architecture.md)
+
+## Architecture
+
+| Area | Entry points and responsibility |
+| --- | --- |
+| Routes | `src/app` contains public pages, four product hierarchy levels, resource articles and API handlers. |
+| Product data | `src/data/productTaxonomy.ts` defines the primary hierarchy. `productItems.ts` derives sourcing profiles. `productCatalog.ts` supplies additional catalog paths through the same routes. |
+| Search | `/products?q=...` computes ranked results on the server through `src/data/productSearch.ts` and passes results to the interactive search component. |
+| RFQ | Product links and sourcing lists carry context into `SourcingIntakeForm`, then `submitBioAxisRequest` posts to `/api/rfq`. |
+| Persistence | `src/lib/server/rfqQueue.ts` stores immutable intake records. `rfqWorkflow.ts` appends revisioned owner-review events. |
+| Public trust | `publicTrustProfile.ts` validates publishable owner facts against evidence and review dates. Owner-approved intake has its own validation workflow. |
+
+The detailed guide covers route resolution, breadcrumbs, data ownership, RFQ query aliases, browser storage, API behavior and build release identifiers. [Architecture overview](docs/architecture.md)
+
+## Local verification
 
 ```bash
 npm run lint
 node node_modules/typescript/bin/tsc --noEmit --incremental false
 npm test
+node scripts/accessibility-static-regression.mjs
+node scripts/client-boundary-regression.mjs
+npm run test:rfq-roundtrip-phases
 npm run build
-npm run smoke
-npm run readiness
 ```
 
-`npm test` runs local regressions without a browser or network access. The pure-data checks can also be run separately with `npm run test:request-types` (RFQ/equivalent links and request aliases), `npm run test:taxonomy-builders` (scientific names, route slugs, and empty seeds), and `npm run test:taxonomy-search` (ranking, query normalization, and stable result limits). Test fixtures stay in memory and do not add production catalog or trust records.
+`npm test` runs 12 offline regressions. The next three commands complete the 15-script offline set. These checks use local fixtures and mocks. The regression guide lists every `scripts/*-regression.mjs` file, its individual command and its prerequisites. [Regression checks](docs/regression-checks.md)
 
-`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile, the private durable RFQ queue, and internal lookup configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint returns service status labels and a public `release` identifier; it never returns secret values.
-
-### Release traceability
-
-At build time, `next.config.ts` injects the full Git commit SHA: a valid `VERCEL_GIT_COMMIT_SHA` takes priority, with local `git rev-parse --verify HEAD` as the fallback. Only a full hexadecimal SHA (40 characters, or 64 for SHA-256 repositories) is accepted and normalized to lowercase. If neither source is available, the release is `unknown`. No environment file changes or runtime Git access are required.
-
-`GET /api/rfq` includes `release` in both its HTTP 200 and HTTP 503 JSON responses, and the readiness script prints `release` on success or validation failure. The identifier is fixed in the compiled build, so changing runtime variables or moving Git HEAD does not relabel an existing artifact. A local SHA identifies HEAD; it does not attest to uncommitted working-tree changes. Build from a clean checkout when validating a specific commit.
-
-To require an exact release match, pass the full expected SHA to the checker:
+For HTTP checks, start the production build in another terminal and pass a local URL explicitly.
 
 ```bash
-EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" npm run readiness -- http://localhost:3000
+npm run start -- --hostname 127.0.0.1
 ```
-
-`EXPECTED_RELEASE_SHA` is optional and accepts uppercase or lowercase full SHAs. When set, a mismatched, missing, invalid, or `unknown` release fails the check with exit code 1, alongside the existing readiness checks. An invalid expected SHA fails before making requests and its raw value is never printed. Without an expected SHA, an older endpoint with no release remains compatible and is reported as `release: unknown`. Only validated SHAs are printed from remote release values.
-
-Run `npm run test:release` for the offline regression covering build SHA selection, safe RFQ health responses, and the optional expected-release gate. It mocks external services and does not submit RFQs.
-
-## Durable RFQ Delivery
-
-The request quote, contact, sample, equivalent, and product-list review flows post to the server-side `POST /api/rfq` endpoint. The legacy `POST /api/request-quote` endpoint is kept as a compatibility alias.
-
-Supported `requestType` values:
-
-- `quote`
-- `equivalent`
-- `sample`
-- `documentation`
-- `recurring-supply`
-- `contact`
-- `product-list-review`
-
-RFQ success means the validated request was written to a private Vercel Blob store. Email is not the system of record and is not required for acceptance.
-
-Set these environment variables in Vercel:
 
 ```bash
-BLOB_READ_WRITE_TOKEN=provided_when_the_private_blob_store_is_connected
-BIOAXIS_INTERNAL_API_KEY=generate_a_long_random_server_only_value
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
-TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
-TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
-POSTHOG_API_KEY=your_server_only_posthog_project_api_key
-POSTHOG_HOST=https://us.i.posthog.com
-BIOAXIS_ALERT_WEBHOOK_URL=your_server_only_alert_webhook_url
+npm run test:rfq-payload -- http://127.0.0.1:3000
 ```
 
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is the public Cloudflare Turnstile widget key. `TURNSTILE_SITE_KEY` is an optional server-served alias. `TURNSTILE_SECRET_KEY`, `BLOB_READ_WRITE_TOKEN`, and `BIOAXIS_INTERNAL_API_KEY` are server-only. `POST /api/rfq` validates the Turnstile token before writing the request.
+Browser checks require an existing Chromium binary. `readiness`, edge-limit and durable round-trip scripts can contact production or connected services. Review their effects and consent flags before running them. [Regression checks](docs/regression-checks.md)
 
-### Vercel Blob and Turnstile setup
+## RFQ intake and operations
 
-1. Create a private Vercel Blob store and connect it to production, preview, and development.
-2. Generate a long random `BIOAXIS_INTERNAL_API_KEY` and store it as a sensitive server-only variable.
-3. Create a Cloudflare Turnstile widget for the production domain.
-4. Configure the Turnstile site and secret keys.
-5. Redeploy, then require `GET /api/rfq` to return HTTP 200 with `durableQueue: reachable`, `antiSpam: configured`, and `internalLookup: configured`.
-6. Submit a test RFQ, retain its reference ID, and retrieve it internally with `GET /api/rfq/internal?requestId=...` plus `Authorization: Bearer <BIOAXIS_INTERNAL_API_KEY>`.
-7. Confirm the stored record contains the same request ID and expected test context. Never paste the internal key into tickets, screenshots, logs, or client code.
+The shared intake supports `quote`, `equivalent`, `sample`, `documentation`, `recurring-supply`, `private-label`, `contact` and `product-list-review`.
 
-Product search and RFQ funnel events are posted without customer-entered PII to `POST /api/analytics`. They are visible in Vercel function logs; set `POSTHOG_API_KEY` and `POSTHOG_HOST` to persist them. The same request ID is carried through validation, queue-write, success, and failure events. Set `BIOAXIS_ALERT_WEBHOOK_URL` for optional immediate server-side failure alerts; alert delivery never changes whether the durable write succeeded.
+A normal accepted request returns `mode: durable-queue` and a reference ID after its validated payload is stored. Identical retries reuse the immutable record. Changed content under the same reference returns HTTP 409. Storage failure returns HTTP 503 and preserves the form for retry. Honeypot responses have a separate mode and should be classified separately when testing.
 
-To test durable delivery:
+Authenticated internal lookup retrieves the saved request and workflow. Owner review, supplier confirmation and response updates use a separate event history. The operations guide documents transitions, retry rules, internal API inputs and the live QA phases. [RFQ operations](docs/rfq-operations.md)
 
-1. Deploy with Blob, internal lookup, and Turnstile variables configured.
-2. Submit `/request-quote` with a valid email. Product context, sourcing list items, and optional notes are included when available.
-3. Confirm the UI shows the reference ID, then retrieve the same record through the authenticated internal endpoint.
+## Public trust evidence
 
-If the queue write fails, the API returns HTTP 503 with the same request ID, the browser preserves all form data, and no success state is shown. Queue and internal lookup credentials are never exposed to browser code.
+Publication requires an approved value, publishable evidence and a valid non-future evidence date. Enterprise email and measurable response-window checks apply. Incomplete records display `Not published`.
 
-For a repeatable queue-write plus internal-lookup proof, start a local production preview that is connected to the private Blob store, load the server-only key into the shell without printing it, and explicitly authorize one QA record:
+Use the placeholder intake template to collect approved evidence and validate a completed file locally.
 
 ```bash
-set -a
-. ./.env.local
-set +a
-RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- http://localhost:3000 https://bioaxisv3.vercel.app
+npm run validate:trust-intake -- /absolute/path/to/intake.json
 ```
 
-The round-trip script uses a reserved example address, verifies the immutable stored record by the same request ID, and prints status fields only. It leaves the request queued; actual owner review is recorded in a separate step described in [RFQ operations](docs/rfq-operations.md). Routine `npm run smoke` runs without durable writes; set `SMOKE_DURABLE_WRITE=1` only when explicit queue-write coverage is intended.
+The owner handoff documents the four required records and their publication mapping. [Public trust owner intake](docs/public-trust-owner-intake.md)
 
-## Public Trust Evidence
+## Documentation
 
-Trust Center identity and service commitments are fail-closed. A fact is shown as `Verified` only when its publishable value, its evidence source, and a valid non-future `NEXT_PUBLIC_BIOAXIS_EVIDENCE_AS_OF` date are all configured. Enterprise contact values must use a non-consumer domain, and response targets must contain a measurable number of hours or days. Leave the owner evidence date blank until a source is actually reviewed. Incomplete records remain hidden behind the explicit `Not published` state, and the separate implementation-review date does not imply owner-profile verification.
-
-- Legal identity: `NEXT_PUBLIC_BIOAXIS_LEGAL_NAME` + `NEXT_PUBLIC_BIOAXIS_LEGAL_EVIDENCE`
-- Operating region/address: `NEXT_PUBLIC_BIOAXIS_OPERATING_REGION` + `NEXT_PUBLIC_BIOAXIS_OPERATING_EVIDENCE`
-- Enterprise-domain email: `NEXT_PUBLIC_BIOAXIS_BUSINESS_EMAIL` + `NEXT_PUBLIC_BIOAXIS_CONTACT_EVIDENCE`
-- Response target: `NEXT_PUBLIC_BIOAXIS_RESPONSE_TARGET` + `NEXT_PUBLIC_BIOAXIS_RESPONSE_EVIDENCE`
-
-Evidence variables are public website content. Use a publishable registration, address/domain-ownership record, or response-policy reference; never place private credentials or internal-only documents in them.
-
-`npm run readiness` reports the published evidence count without taking the RFQ service offline when owner evidence is incomplete. Use `REQUIRE_TRUST_EVIDENCE=1 npm run readiness` as the strict publication gate after all four records have been approved.
-
-Run `npm run test:trust-evidence` to verify fail-closed behavior for missing sources, invalid or future dates, consumer email domains, complete four-record publication, and the absence of hard-coded personal email addresses in production source.
-
-Use `docs/public-trust-owner-intake.md` for the owner handoff. A filled JSON intake can be checked with `npm run validate:trust-intake -- /absolute/path/to/intake.json`; `npm run test:trust-intake` covers approval, source, date, enterprise-email, and response-window rejection cases.
-
-## Smoke Test
-
-Build and start the app, then run:
-
-```bash
-npm run smoke
-```
-
-Use another base URL if needed:
-
-```bash
-SMOKE_BASE_URL=https://bioaxisv3.vercel.app npm run smoke
-```
-
-Run the scientific-unit and accessibility release gates against the same build:
-
-```bash
-npm run test:units-visual -- https://bioaxisv3.vercel.app
-npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
-```
-
-The accessibility gate covers the four critical routes documented in `docs/accessibility-acceptance.md`, including axe-core WCAG A/AA contrast and semantics, 200%/400% zoom-equivalent reflow, WCAG text spacing, keyboard behavior, mobile target size, the privacy-to-contact anchored mobile handoff, and locally simulated RFQ failure/success announcements. The route smoke test also requires route-specific canonical, Open Graph, Twitter, and hierarchical BreadcrumbList metadata.
-
-Deployed read-only checks retry transient connection failures up to three times before failing and include the final URL in the error. Override this only for diagnostics with `SMOKE_READ_RETRIES`, `A11Y_NAV_RETRIES`, or `UNIT_NAV_RETRIES`. Submission checks are never retried implicitly; durable queue writes remain explicitly opt-in and request-ID idempotent.
-
-## Routes
-
-- `/` - premium dark landing page with search-led sourcing flow
-- `/products` - data-driven product universe search and directory
-- `/about` - BioAxis positioning and sourcing-platform boundaries
-- `/contact` - durable-queue-backed contact and sourcing request form
-- `/supplier-qualification` - supplier qualification, documentation, lot traceability, sample-first evaluation, and equivalent review approach
-- `/request-quote` - low-friction RFQ form backed by a private durable queue
-- `/equivalent-finder` - equivalent-review intake (not an automatic candidate finder)
-- `/samples` - sample evaluation request flow
-- `/quality` - documentation, qualification, and switching support
+- [Architecture overview](docs/architecture.md)
+- [Regression scripts and running instructions](docs/regression-checks.md)
+- [RFQ operations and owner review](docs/rfq-operations.md)
+- [Public trust owner evidence intake](docs/public-trust-owner-intake.md)
+- [Accessibility acceptance](docs/accessibility-acceptance.md)
+- [Performance measurement](docs/lighthouse-baseline.md)
+- [Client rendering and asset notes](docs/performance-notes.md)
+- [Implementation maintenance notes](docs/implementation-note.md)
+- [Product catalog research references](docs/product-catalog-research-notes.md)

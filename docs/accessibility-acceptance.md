@@ -1,6 +1,6 @@
 # BioAxis accessibility acceptance checklist
 
-## Static component review on 2026-11-04
+## Static component coverage
 
 The local review covers forms, navigation, the sourcing-list drawer, product search and filters, native disclosures, action links, and shared color/focus styles.
 
@@ -8,7 +8,7 @@ The local review covers forms, navigation, the sourcing-list drawer, product sea
 - Search help is associated with its input. Catalog filters expose toggle state with `aria-pressed`, use `fieldset`/`legend` grouping, and announce the matching count. Loading more search results moves focus to the first newly added result.
 - Collapsed navigation omits references to unmounted panels. The Products dropdown exposes ordinary navigation links and stays open while a child retains keyboard focus. Escape restores focus to the Products trigger.
 - Opening the sourcing-list dialog makes page content `inert`. Tab wraps among visible dialog controls. Closing restores a connected trigger or falls back to main content. Removing an item focuses the next removal action or Close. The empty list has a status message and disabled send action. Page and RFQ navigation close the drawer.
-- Native `details`/`summary` semantics provide expanded/collapsed state. All 26 source disclosures have an explicit minimum height of at least 44px and contain no nested interactive controls. Decorative plus signs are hidden from assistive technology. Reviewed buttons and action links use explicit 44px heights, and compact Compare labels provide a 44×44px target. Coarse-pointer sizing excludes checkbox/radio glyphs so their labels carry the larger target.
+- Native `details`/`summary` semantics provide expanded/collapsed state. Source disclosures have an explicit minimum height of at least 44px and contain no nested interactive controls. Decorative plus signs are hidden from assistive technology. Reviewed buttons and action links use explicit 44px heights, and compact Compare labels provide a 44×44px target. Coarse-pointer sizing excludes checkbox/radio glyphs so their labels carry the larger target.
 - Secondary text `#5b6b82` replaces `#64748b`, whose contrast on `#eef3f8` was approximately 4.26. The static gate checks at least 4.5 for secondary text on white, page, and soft-panel backgrounds. Input focus uses an opaque accent outline, focusable scroll regions receive an outline, and footer links use a light focus outline on the dark footer. The homepage document action uses dark green, and the primary disclosure hint inherits its hover text color.
 
 Run the offline gate with the existing dependencies.
@@ -19,16 +19,14 @@ node scripts/accessibility-static-regression.mjs
 
 It renders the actual full/compact intake, error field, two search boxes, and an empty catalog filter panel. It checks unique IDs and label/ARIA references, required Email, disabled initial submission, persistent status markup, filter semantics, all native disclosure structures, palette contrast, and focus CSS. Browser focus movement and computed layout remain separate acceptance checks.
 
-All 14 offline regressions passed, covering accessibility-static, request-types, product-search, product-profile, family-page, category-page, structured-data, taxonomy-builders, taxonomy-search, trust-evidence, public-trust-intake, release-readiness, RFQ queue, and RFQ roundtrip-phase. `npm run lint`, `node node_modules/typescript/bin/tsc --noEmit --incremental false`, and `npm run build` also passed, with 1,027 pages generated. The browser script passed `node --check`. The supplied runtime path is unavailable on this machine, so validation used the existing cached Node and npm without installing dependencies.
-
-Browser-dependent `accessibility-regression.mjs` and `scientific-units-regression.mjs` are deferred for this static-review task, as are URL-dependent payload and edge-limit probes. The browser accessibility script includes new assertions for drawer background isolation, empty-list deletion focus, same-page navigation, and handoff closure. VoiceOver announcements, hover/disabled rendering, actual tap bounds, reflow, and dynamic focus still require the browser and manual gates below.
+Run the offline gate for each candidate build. Browser focus movement, computed layout, VoiceOver announcements, hover/disabled rendering, tap bounds, and reflow need the browser and manual checks below. The script inventory covers the other offline regressions and URL-dependent probes. [Regression checks](regression-checks.md)
 
 ## Browser and assistive-technology acceptance
 
-Run the automated check against a local or deployed build:
+Build and start the app locally, then run the automated check against that build.
 
 ```bash
-npm run test:a11y-checklist -- https://bioaxisv3.vercel.app
+npm run test:a11y-checklist -- http://localhost:3000
 ```
 
 The script is a release gate for `/`, a populated product search, product sourcing templates, `/request-quote`, and `/trust-center`. It verifies:

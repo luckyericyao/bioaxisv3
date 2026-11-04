@@ -1,6 +1,6 @@
 # 性能检查与客户端体积对比
 
-日期：2026-11-04。基线：本地分支 `codex/auto-backlog-2026-11-04` 的 `1ed9f92`；优化后：本次工作区。两次均使用现有 Next.js 15.5.21、Node v24.22.1 和既有依赖构建，没有安装依赖或修改配置。
+本页记录 2026-11-04 的历史构建对比。基线提交为 `1ed9f92`，优化提交为 `960a7c9`。两次使用 Next.js 15.5.21、Node v24.22.1 和既有依赖构建。下文的路由体积、页面数量和回归结果属于这两个提交的记录，当前构建可按文中命令重新测量。
 
 ## 变更
 
@@ -8,7 +8,7 @@
 - `/products` 在服务器一次计算当前 q 的排序结果、索引数量和参考编号判断；客户端仅保留输入、分页展开、焦点与事件追踪。完整搜索索引、产品与资源文章留在服务器。无查询时结果为空；有查询时传入该查询的全部匹配，保留原来的 6 个主要结果、18 条初始展开和每次增加 12 条。
 - RFQ 与 equivalent URL 构造函数原样移到不依赖数据的 `src/lib/productRequestHref.ts`，旧 taxonomy 导出继续兼容，防止客户端为构造链接而带入完整分类数据。
 - 删除 RequestTypeSelector 和两个 sourcing-intake hooks 的重复 `use client`，由 SourcingIntakeForm 的边界覆盖。显式边界从 12 处减到 9 处；这些交互依赖仍在客户端，减少标记本身不作为体积收益。
-- 新增 `scripts/client-boundary-regression.mjs`，检查去除类型后的真实本地运行时依赖，阻止任意客户端入口重新导入完整目录和内容数据。当前为 9 个入口、25 个运行时模块。
+- 新增 `scripts/client-boundary-regression.mjs`，检查去除类型后的真实本地运行时依赖，阻止任意客户端入口重新导入完整目录和内容数据。该优化提交的检查覆盖 9 个入口、25 个运行时模块。
 
 ## next build 原始输出
 
@@ -101,13 +101,14 @@ JS
 
 中小屏分别匹配实际列数和 40/64/80px 页面横向留白。图片更改影响候选资源选择，不计入 JS 缩减数字；没有声称已实测图片传输量或 LCP 改善。
 
-## 验证与限制
+## 对比提交的验证记录
 
 - `npm run lint`、`node node_modules/typescript/bin/tsc --noEmit --incremental false`、`npm run build`：通过。
 - `npm test` 的 12 项离线回归：request-types、taxonomy-builders、taxonomy-search、product-search、product-profile、family-page、category-page、structured-data、rfq-queue、trust-evidence、public-trust-intake、release-readiness：全部通过。
 - 额外运行 `node scripts/accessibility-static-regression.mjs`、`node scripts/rfq-roundtrip-phase-regression.mjs`、`node scripts/client-boundary-regression.mjs`：通过。
 - 搜索回归包含 20 个排序查询、429 个索引路径、944 个 RFQ 预填链接、分页和 query 重置；增加真实服务器页面的空 q、空白、数组和未知参考编号输入检查。URL helper 保持原函数实现，现有路由、面包屑和 RFQ query/context 回归通过。
 - 跳过需要浏览器或运行中 URL 的 accessibility、scientific-units、rfq-payload-limit、rfq-edge-limit regression，以及 route-smoke、Lighthouse 和真实 RFQ roundtrip；本次仅做离线验证，没有启动浏览器、请求线上、提交真实 RFQ 或测量现场性能。
-- 用户给定的 Node 路径不存在，使用本机已有 bundled Node 与相邻 `../.tools/npm/bin/npm-cli.js`。现有 npm shell 启动器与独立 Node 不兼容，通过 CLI 执行相同 npm scripts；`npm test` 的嵌套调用使用临时启动包装器，没有更改项目依赖、环境变量配置或密钥。
 
 后续可用已有 `scripts/lighthouse-baseline.mjs` 在相同设备、浏览器和生产构建条件下验证 LCP/CLS；当前结果仅证明构建体积与离线行为。极宽泛查询仍传递其全部匹配结果以保留现有展开行为，未引入新的分页 API。
+
+当前验证入口和全部回归脚本的运行条件见[回归检查清单](regression-checks.md)。

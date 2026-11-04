@@ -1,6 +1,12 @@
 # RFQ operations
 
-The public RFQ route stores the original request as an immutable private Blob record. It does not send email or Telegram notifications. An operator must poll the private queue, claim each request, record any missing information, and mark a reply only after a human has actually responded.
+The public RFQ route stores the accepted request as an immutable private Blob record. An operator polls the private queue, claims each request, records any missing information, and records a response after replying outside this system. Optional analytics capture and failure webhooks support service monitoring.
+
+Shared forms post to `POST /api/rfq`, with `POST /api/request-quote` retained as a compatibility alias. Accepted request types are `quote`, `equivalent`, `sample`, `documentation`, `recurring-supply`, `private-label`, `contact`, and `product-list-review`. The route requires a valid email for durable acceptance and retains normalized product hierarchy, source URLs, search context, and sourcing-list items.
+
+The public route caps the complete JSON payload at 160,000 bytes, including streamed bodies. Internal workflow PATCH payloads are capped at 12,000 bytes. Invalid JSON returns HTTP 400, oversized payloads return HTTP 413, duplicate references with different content return HTTP 409, and storage failures return HTTP 503. Browser retries preserve form context and reuse the current reference until the user explicitly starts a new reference. The form refreshes verification for each attempt.
+
+`GET /api/rfq` returns HTTP 200 when the private queue is reachable and anti-spam and internal lookup are configured, otherwise HTTP 503. Both responses include the compiled `release` identifier and service status labels. The readiness check performs a queue listing. Full route and data flow details are in the architecture overview. [Architecture](architecture.md)
 
 ## Workflow states
 
@@ -48,7 +54,7 @@ curl --fail-with-body \
   "https://bioaxisv3.vercel.app/api/rfq/internal?limit=20"
 ```
 
-The list is private and uncached. It does not contact customers or change workflow state.
+The authenticated list returns private, uncached triage data.
 
 Read one request and its current workflow.
 
@@ -72,17 +78,21 @@ The API key authenticates the operator system but does not provide individual st
 
 After reviewing actual supplier evidence, send a new operation with `status: "supplier-confirmed"`, `assignedOwner`, `operationId`, and `supplierConfirmation`. After replying outside this system, send a new operation with `status: "responded"` and `responseSummary`. Each summary belongs to its event. Consult the event history for earlier confirmations, missing-information notes, and replies.
 
-## Release prerequisites still requiring owner action
+## Owner and service prerequisites
 
 - Set a real, staffed queue owner and publish an approved business contact and response target.
 - Approve a data retention period and deletion procedure. No automatic RFQ deletion schedule is implemented until an owner approves the policy.
-- Vercel production WAF is configured for `POST /api/rfq` with a fixed window of 20 requests per client IP per 60 seconds, then `429 Too Many Requests`. WAF counters are shared outside the function instance but tracked per region. The application-level in-memory limiter remains per function instance and is only a secondary safeguard. See [Vercel's counter scope](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting).
-- A production submission test requires explicit `RFQ_ROUNDTRIP_CONFIRM=1` and `BIOAXIS_INTERNAL_API_KEY`. It creates one clearly labelled QA record and reads back its initial `stored` workflow. A valid production Turnstile token is also needed when submitting to production.
+- The application limits each client IP to 20 requests per 60-second window within one function instance. Platform WAF configuration must be checked in the target environment. The bounded probe below expects an edge HTTP 429 within at most 21 requests in one region and one minute, and distinguishes it from the application response.
+- A live submission test requires `RFQ_ROUNDTRIP_CONFIRM=1` and `BIOAXIS_INTERNAL_API_KEY`. It creates one labelled QA record and reads back the immutable intake and current workflow. Supply a valid `RFQ_ROUNDTRIP_TURNSTILE_TOKEN` when Turnstile is configured on the submission target.
 
 ## QA submission and actual owner review
 
+These checks contact a running service and private storage. The `submit` phase writes one QA record, and `confirm-owner` appends a workflow event. Use them for an explicitly authorized target. Pass both base URLs so submission and lookup address the intended service and the same Blob store. The script defaults submission to localhost and lookup to the public deployment when arguments are omitted.
+
+For an authorized local service connected to a private QA store, with the existing credentials loaded securely in the shell, run the following command.
+
 ```sh
-RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- https://bioaxisv3.vercel.app https://bioaxisv3.vercel.app
+RFQ_ROUNDTRIP_CONFIRM=1 npm run test:rfq-roundtrip -- http://localhost:3000 http://localhost:3000
 ```
 
 Keep the printed QA request ID. The real operator must read the request through the internal lookup and explicitly confirm review. Only then record that acknowledgment.
@@ -92,10 +102,18 @@ RFQ_ROUNDTRIP_PHASE=confirm-owner \
 RFQ_ROUNDTRIP_REQUEST_ID=BIOAXIS-QA-REPLACE-WITH-THE-SAVED-ID \
 RFQ_ROUNDTRIP_OWNER=approved-operator-name \
 RFQ_OWNER_REVIEW_CONFIRMED=1 \
-npm run test:rfq-roundtrip -- https://bioaxisv3.vercel.app https://bioaxisv3.vercel.app
+npm run test:rfq-roundtrip -- http://localhost:3000 http://localhost:3000
 ```
 
-This second step updates the existing QA request to `in-review`, reads it back, and checks the original submitted context is unchanged. Repeating the same acknowledged assignment does not create another event. Use `RFQ_ROUNDTRIP_PHASE=verify` with the same request ID for read-only follow-up. An automated workflow update never proves a human reply. Only record `responded` after the operator actually replies.
+This second step updates the existing QA request to `in-review`, reads it back, and checks the original submitted context is unchanged. Repeating the same acknowledged assignment does not create another event. Use the `verify` phase with the saved request ID for read-only follow-up.
+
+```sh
+RFQ_ROUNDTRIP_PHASE=verify \
+RFQ_ROUNDTRIP_REQUEST_ID=BIOAXIS-QA-REPLACE-WITH-THE-SAVED-ID \
+npm run test:rfq-roundtrip -- http://localhost:3000 http://localhost:3000
+```
+
+Record `responded` after the operator actually replies outside this system.
 
 `npm run test:rfq-queue` checks the lifecycle, required fields, immutable intake, legacy history, retries, and concurrent updates with a local Blob mock. All summaries in this regression are synthetic QA fixtures. `npm run test:rfq-roundtrip-phases` checks explicit QA submission, acknowledged owner review, context preservation, legacy status compatibility, and protection of an advanced workflow against a local fetch mock in an isolated subprocess. These regressions provide local behavioral coverage. Production storage and human review require separate checks.
 
@@ -105,4 +123,6 @@ This second step updates the existing QA request to `in-review`, reads it back, 
 RFQ_EDGE_LIMIT_CONFIRM=1 npm run test:rfq-edge-limit -- https://bioaxisv3.vercel.app
 ```
 
-This opt-in probe sends at most 21 requests with the honeypot filled, so it never stores an RFQ. It distinguishes the application's JSON rate-limit response from the Vercel edge response and reports the observed region. Run it in a quiet window because it temporarily consumes the test IP's submission allowance. A dashboard rule alone does not prove runtime enforcement.
+This opt-in probe sends at most 21 requests with the honeypot filled. Honeypot responses bypass the durable queue. It distinguishes the application's JSON rate-limit response from the edge response and reports the observed region. Run it against an authorized target in a quiet window because it temporarily consumes the test IP's submission allowance. Treat a passing result as evidence for that target, region, and observation window.
+
+Routine offline validation uses local mocks. The full script inventory describes browser, URL, and live-write prerequisites. [Regression checks](regression-checks.md)
