@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
 import type { DocumentStatus, ProductCatalogItem } from "@/data/productCatalog";
+import { SourcingRequestLink } from "../SourcingRequestLink";
 
 export type CatalogProductRow = {
   href: string;
@@ -20,6 +20,7 @@ type CatalogProductBrowserProps = {
   rows: CatalogProductRow[];
   heading?: string;
   compact?: boolean;
+  templateKind?: "specific" | "general";
 };
 
 const statusLabels: Record<DocumentStatus, string> = {
@@ -128,7 +129,7 @@ function DocsSummary({ product }: { product: ProductCatalogItem }) {
   );
 }
 
-export function CatalogProductBrowser({ rows, heading = "Sourcing template preview", compact = false }: CatalogProductBrowserProps) {
+export function CatalogProductBrowser({ rows, heading = "Sourcing template preview", compact = false, templateKind }: CatalogProductBrowserProps) {
   const [query, setQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedSterility, setSelectedSterility] = useState<string[]>([]);
@@ -214,11 +215,11 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
               </thead>
               <tbody>
                 {visibleRows.map((row) => (
-                  <tr key={row.product.id} className="align-top">
+                  <tr key={row.product.id} className="align-top" data-family-template-kind={templateKind}>
                     <td className="border-b border-l border-bioaxis-line px-3 py-4">
-                      <Link href={row.href} className="text-sm font-bold text-bioaxis-text transition hover:text-bioaxis-accent">
+                      <SourcingRequestLink href={row.href} preserveProductQuery className="text-sm font-bold text-bioaxis-text transition hover:text-bioaxis-accent">
                         {row.product.name}
-                      </Link>
+                      </SourcingRequestLink>
                       <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.familyTitle}</p>
                     </td>
                     <td className="border-b border-bioaxis-line px-3 py-4">
@@ -247,11 +248,11 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
 
           <div className="grid gap-3 lg:hidden">
             {visibleRows.map((row) => (
-              <article key={row.product.id} className="border border-bioaxis-line bg-bioaxis-black p-4">
+              <article key={row.product.id} className="border border-bioaxis-line bg-bioaxis-black p-4" data-family-template-kind={templateKind}>
                 <div>
-                  <Link href={row.href} className="text-base font-bold text-bioaxis-text">
+                  <SourcingRequestLink href={row.href} preserveProductQuery className="text-base font-bold text-bioaxis-text">
                     {row.product.name}
-                  </Link>
+                  </SourcingRequestLink>
                   <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.segmentTitle} / {row.categoryTitle} / {row.familyTitle}</p>
                 </div>
                 <div className="mt-4 grid gap-2 text-xs leading-5 text-bioaxis-steel">
@@ -312,30 +313,31 @@ function FilterGroup({
 function RowActions({ row }: { row: CatalogProductRow }) {
   return (
     <div className="grid gap-2">
-      <Link
+      <SourcingRequestLink
         href={row.href}
+        preserveProductQuery
         className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Details
-      </Link>
-      <Link
+      </SourcingRequestLink>
+      <SourcingRequestLink
         href={requestHref(row, "quote", "quote")}
         className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-[11px] font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
       >
         Request quote
-      </Link>
-      <Link
+      </SourcingRequestLink>
+      <SourcingRequestLink
         href={equivalentHref(row)}
         className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Equivalent
-      </Link>
-      <Link
+      </SourcingRequestLink>
+      <SourcingRequestLink
         href={requestHref(row, "documentation", "documents")}
         className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Documents
-      </Link>
+      </SourcingRequestLink>
       <AddToSourcingListButton
         title={row.product.name}
         href={row.href}

@@ -89,18 +89,22 @@ function ContextActions({
   segment,
   category,
   family,
-  product
+  product,
+  decision = false
 }: {
   segment: ProductCatalogSegment;
   category?: ProductCatalogCategory;
   family?: ProductCatalogFamily;
   product?: ProductCatalogItem;
+  decision?: boolean;
 }) {
+  const compactActions = Boolean(product || decision);
+
   return (
-    <div className={product ? "grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" : "flex flex-col gap-3 sm:flex-row sm:flex-wrap"} data-product-primary-actions={product ? "true" : undefined}>
+    <div className={compactActions ? "grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" : "flex flex-col gap-3 sm:flex-row sm:flex-wrap"} data-product-primary-actions={product ? "true" : undefined} data-sourcing-primary-actions={decision ? "true" : undefined}>
       <SourcingRequestLink
         href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
-        className={product
+        className={compactActions
           ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
       >
@@ -108,7 +112,7 @@ function ContextActions({
       </SourcingRequestLink>
       <SourcingRequestLink
         href={catalogEquivalentHref(segment, category, family, product)}
-        className={product
+        className={compactActions
           ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
@@ -116,7 +120,7 @@ function ContextActions({
       </SourcingRequestLink>
       <SourcingRequestLink
         href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
-        className={product
+        className={compactActions
           ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
@@ -312,6 +316,14 @@ export function CatalogFamilyPage({
   family: ProductCatalogFamily;
 }) {
   const rows = rowsForFamily(segment, category, family);
+  // These generated variants share the family specifications instead of defining a specific configuration.
+  const generalNames = new Set([
+    `${family.name} General Configuration`,
+    `Sterile ${family.name}`,
+    `Documentation-Ready ${family.name}`
+  ]);
+  const specificRows = rows.filter((row) => !generalNames.has(row.product.name));
+  const generalRows = rows.filter((row) => generalNames.has(row.product.name));
 
   return (
     <>
@@ -324,40 +336,57 @@ export function CatalogFamilyPage({
           { label: family.name }
         ]}
       />
-      <PageHero eyebrow={`${segment.name} / ${category.name}`} title={family.name} subtitle={family.description}>
-        <div className="grid gap-4">
-          <ContextActions segment={segment} category={category} family={family} />
-          <Link href={productCatalogHref(segment.slug, category.slug)} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+      <PageHero title={family.name} subtitle={family.description} compact tight align="start">
+        <div className="grid gap-3" data-family-decision-summary="true">
+          <ContextActions segment={segment} category={category} family={family} decision />
+          <details className="group border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+              <span>More sourcing actions</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="grid gap-2 border-t border-bioaxis-line p-3">
+              <SourcingRequestLink
+                href={catalogRequestHref({ requestType: "documentation", segment, category, family, need: "documents" })}
+                className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              >
+                Ask for documents
+              </SourcingRequestLink>
+            </div>
+          </details>
+          <Link href={productCatalogHref(segment.slug, category.slug)} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {category.name}
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Buyer checklist</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Clarify these fields before RFQ.</h2>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {family.typicalSpecs.slice(0, 8).map((spec) => (
-              <SpecTag key={spec}>{spec}</SpecTag>
-            ))}
-          </div>
-        </section>
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Typical RFQ fields</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">BioAxis can map this family into quote-ready fields.</h2>
-          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            Add current supplier, catalog number, required specs, sample needs, CoA/SDS requirements, and recurring usage when available. Email-only submission still works.
+      <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-family-configurations="true">
+        <div className="mb-5">
+          <p className="mb-2 text-xs font-semibold text-bioaxis-accent">Sourcing configuration templates</p>
+          <h2 className="text-2xl font-bold text-bioaxis-text">Configurations for review</h2>
+          <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
+            Specifications and availability need confirmation.
           </p>
-        </section>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-          <CatalogProductBrowser rows={rows} heading="Sourcing configuration templates" />
+        </div>
+        {specificRows.length > 0 ? (
+          <CatalogProductBrowser rows={specificRows} heading="Specific configuration templates" templateKind="specific" />
+        ) : null}
+        {generalRows.length > 0 ? (
+          <details className="group mt-4 border-t border-bioaxis-line" data-general-family-templates="true">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 py-3 text-sm font-semibold text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+              <span>General sourcing templates</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="pt-2">
+              <CatalogProductBrowser rows={generalRows} heading="General configuration templates" templateKind="general" />
+            </div>
+          </details>
+        ) : null}
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-3">
+          <Disclosure title="Family overview" items={[family.description]} />
+          <Disclosure title="Buyer checklist" items={family.typicalSpecs.slice(0, 8)} />
           <Disclosure title="Typical RFQ fields" items={family.typicalSpecs} />
           <Disclosure title="Documentation to request" items={["CoA/SDS availability depends on product and supplier review", "Sterility, animal-origin, lot-level, or material documents may require request", "BioAxis can collect document requirements for RFQ preparation"]} />
           <Disclosure title="Equivalent review notes" items={["Compare current supplier and catalog number when available", "Review critical dimensions, material, surface, formulation, sterility, and packaging", "Request samples when fit or workflow sensitivity matters"]} />
@@ -417,9 +446,9 @@ export function CatalogProductPage({
               <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
-              <Link href={catalogRequestHref({ requestType: "documentation", segment, category, family, product })} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
+              <SourcingRequestLink href={catalogRequestHref({ requestType: "documentation", segment, category, family, product })} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
                 Ask for documents
-              </Link>
+              </SourcingRequestLink>
               <AddToSourcingListButton
                 title={product.name}
                 href={productCatalogHref(segment.slug, category.slug, family.slug, product.slug)}
@@ -433,9 +462,9 @@ export function CatalogProductPage({
                 productTitle={product.name}
                 className="min-h-11 px-3 text-xs"
               />
-              <Link href={productCatalogHref(segment.slug, category.slug, family.slug)} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
+              <SourcingRequestLink href={productCatalogHref(segment.slug, category.slug, family.slug)} preserveProductQuery className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
                 Back to family
-              </Link>
+              </SourcingRequestLink>
             </div>
           </details>
         </div>
@@ -459,12 +488,12 @@ export function CatalogProductPage({
               );
             })}
           </div>
-          <Link
+          <SourcingRequestLink
             href={catalogRequestHref({ requestType: "documentation", segment, category, family, product, need: "documents" })}
             className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request documents
-          </Link>
+          </SourcingRequestLink>
         </section>
 
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
@@ -488,12 +517,12 @@ export function CatalogProductPage({
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help compare supplier, catalog number, critical specs, documentation, sample needs, and workflow fit. Buyer-side technical review remains required before substitution.
           </p>
-          <Link
+          <SourcingRequestLink
             href={catalogEquivalentHref(segment, category, family, product)}
             className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Start equivalent review
-          </Link>
+          </SourcingRequestLink>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sample-first evaluation</p>
@@ -501,12 +530,12 @@ export function CatalogProductPage({
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help organize sample requests, documentation requirements, packaging preferences, and recurring usage details before preparing RFQ follow-up.
           </p>
-          <Link
+          <SourcingRequestLink
             href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
             className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request sample path
-          </Link>
+          </SourcingRequestLink>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <p className="text-sm font-semibold uppercase text-bioaxis-accent">Recurring supply considerations</p>
@@ -514,26 +543,27 @@ export function CatalogProductPage({
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             Share monthly or annual usage, shipping region, preferred packaging, and documentation requirements so BioAxis can organize recurring supply review without implying live inventory.
           </p>
-          <Link
+          <SourcingRequestLink
             href={catalogRequestHref({ requestType: "recurring-supply", segment, category, family, product, need: "recurring-supply" })}
             className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Review recurring supply
-          </Link>
+          </SourcingRequestLink>
         </section>
         {relatedProducts.length > 0 ? (
           <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
             <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related configured paths</p>
             <div className="mt-5 grid gap-3">
               {relatedProducts.map((related) => (
-                <Link
+                <SourcingRequestLink
                   key={related.slug}
                   href={productCatalogHref(segment.slug, category.slug, family.slug, related.slug)}
+                  preserveProductQuery
                   className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
                 >
                   <span className="text-sm font-bold text-bioaxis-text">{related.name}</span>
                   <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
-                </Link>
+                </SourcingRequestLink>
               ))}
             </div>
           </section>
@@ -578,18 +608,18 @@ function CatalogCTA({
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-          <Link
+          <SourcingRequestLink
             href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Request quote
-          </Link>
-          <Link
+          </SourcingRequestLink>
+          <SourcingRequestLink
             href={catalogRequestHref({ requestType: "product-list-review", segment, category, family, product, need: "product-list" })}
             className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request quote with list
-          </Link>
+          </SourcingRequestLink>
         </div>
       </div>
     </section>

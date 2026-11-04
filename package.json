@@ -12,6 +12,7 @@
     "test:units-visual": "node scripts/scientific-units-regression.mjs",
     "test:search-ranking": "node scripts/product-search-regression.mjs",
     "test:product-profiles": "node scripts/product-profile-regression.mjs",
+    "test:family-pages": "node scripts/family-page-regression.mjs",
     "test:rfq-queue": "node scripts/rfq-queue-regression.mjs",
     "test:rfq-payload": "node scripts/rfq-payload-limit-regression.mjs",
     "test:rfq-edge-limit": "node scripts/rfq-edge-limit-regression.mjs",

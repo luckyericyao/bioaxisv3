@@ -405,7 +405,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
       : buildSourceProductUrl({ segment, subcategory, family, product }) || (workflowMatch ? `/workflows#${workflowMatch.slug}` : sourcePage);
   const requestSourcePage = sourcePage === "support" ? "/support" : sourcePage || sourceProductUrl;
   const productCategory = productCategoryParam || labels.subcategoryName || catalogProductMatch?.category.name || catalogFamilyMatch?.category.name || labelize(subcategory) || readySupplyContext?.productCategory || "";
-  const productName = productNameParam || productMatch?.productItem.name || catalogProductMatch?.product.name || labels.familyName || labelize(product) || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
+  const productName = productNameParam || productMatch?.productItem.name || catalogProductMatch?.product.name || labels.familyName || labelize(product) || catalogFamilyMatch?.family.name || readySupplyContext?.productName || workflowMatch?.title || supportPathLabel || labelize(family) || query || "";
   const productContext: BioAxisProductContext | undefined =
     segment || subcategory || family || product || productNameParam || workflowMatch || query || sourcePage || supportPathLabel || readySupplyContext
       ? {
