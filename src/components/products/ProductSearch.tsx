@@ -34,7 +34,8 @@ const matchedFieldLabels: Record<string, string> = {
   metadata: "Sourcing context",
   "workflow tags": "Workflow fit",
   "workflow details": "Workflow detail",
-  "resource body": "Guide content"
+  "resource body": "Guide content",
+  "catalog reference": "Verified reference record"
 };
 
 function resultTypeLabel(type: ProductSearchResult["type"]) {
@@ -46,9 +47,23 @@ function resultTypeLabel(type: ProductSearchResult["type"]) {
 }
 
 function matchKindLabel(result: ProductSearchResult) {
-  if (result.matchKind === "catalog-reference") return "Catalog reference";
+  if (result.matchKind === "catalog-reference") return "Verified catalog reference";
+  if (result.matchKind === "sourcing-template") return "Sourcing template";
   if (result.matchKind === "content") return "Sourcing content";
-  return "Taxonomy path";
+  return "Taxonomy match";
+}
+
+function matchKindDescription(result: ProductSearchResult) {
+  if (result.matchKind === "catalog-reference") {
+    return `Reference ${result.catalogReference ?? "record"} matches a supplier document or buyer-provided record. Availability needs confirmation.`;
+  }
+  if (result.matchKind === "sourcing-template") {
+    return "Specific sourcing configuration for review. Supplier SKU, specifications, and availability need confirmation.";
+  }
+  if (result.matchKind === "content") {
+    return "Workflow or guide content to help prepare a sourcing request.";
+  }
+  return "Product segment, category, or family match for exploring sourcing requirements.";
 }
 
 function matchedFieldLabel(field: string) {
@@ -72,7 +87,7 @@ function queryStateLabel(query: string, results: ProductSearchResult[]) {
     return "Verified catalog reference";
   }
 
-  return isCatalogReferenceQuery(query) ? "Reference not verified" : "Product universe match";
+  return "Product and sourcing matches";
 }
 
 function resultPath(result: ProductSearchResult) {
@@ -124,6 +139,8 @@ function detailHref(result: ProductSearchResult, query: string) {
 }
 
 function relevanceLabel(result: ProductSearchResult) {
+  if (result.matchKind === "catalog-reference") return "Exact reference match";
+
   const labels = {
     title: "Full title match",
     path: "Product path match",
@@ -141,6 +158,10 @@ function relevanceLabel(result: ProductSearchResult) {
 }
 
 function matchedReason(result: ProductSearchResult, query: string) {
+  if (result.matchKind === "catalog-reference") {
+    return "The reference matches the verified registry after normalizing case, spaces, and hyphens.";
+  }
+
   const path = resultPath(result);
   const reasons = {
     title: `All query terms match the title${path ? ` within ${path}` : ""}.`,
@@ -208,6 +229,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       data-search-result-card="true"
       data-search-result-type={result.type}
       data-search-result-title={result.title}
+      data-search-match-kind={result.matchKind}
       className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-5"
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -217,7 +239,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <span className="hidden border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-accent sm:inline-flex">
           {relevanceLabel(result)}
         </span>
-        <span className="hidden border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel sm:inline-flex">
+        <span data-search-match-label="true" className="inline-flex border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
           {matchKindLabel(result)}
         </span>
       </div>
@@ -225,6 +247,7 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <p className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent sm:mt-4">{highlightText(path, query)}</p>
       ) : null}
       <h3 className="mt-2 text-base font-bold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
+      <p data-search-match-description="true" className="mt-2 text-xs leading-5 text-bioaxis-dim">{matchKindDescription(result)}</p>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
       <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result, query)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
@@ -452,7 +475,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
                   {results.length} matching path{results.length === 1 ? "" : "s"} · {indexedPathCount} indexed paths
                 </p>
-                <p className="mt-2 hidden text-xs leading-5 text-bioaxis-dim sm:block">
+                <p className="mt-2 text-xs leading-5 text-bioaxis-dim">
                   BioAxis searches {indexedPathCount} product and sourcing paths. This is not a live supplier catalog lookup.
                 </p>
                 <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
@@ -462,10 +485,13 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             ) : (
               <>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                  No verified catalog-reference record matches this input. This index covers BioAxis product and sourcing paths, not live supplier catalogs.
+                  {isCatalogReferenceQuery(activeQuery)
+                    ? "No verified catalog-reference record matches this input."
+                    : "No product or sourcing path matches this input."}{" "}
+                  This index covers BioAxis product and sourcing paths, not live supplier catalogs.
                 </p>
                 <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
-                  0 verified reference matches · {indexedPathCount} indexed product and sourcing paths
+                  {isCatalogReferenceQuery(activeQuery) ? "0 verified reference matches" : "0 matching paths"} · {indexedPathCount} indexed product and sourcing paths
                 </p>
               </>
             )}
@@ -492,14 +518,14 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                 Product and family matches appear before broader workflow or description matches.
               </p>
             </div>
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div data-search-strongest-matches="true" className="grid gap-4 xl:grid-cols-2">
               {topMatches.map((result) => (
                 <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={activeQuery} />
               ))}
             </div>
 
             {relatedMatches.length > 0 ? (
-              <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
+              <details data-search-related-matches="true" className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                   <span>Explore related matches ({Math.max(0, results.length - 6)})</span>
                   <span className="text-bioaxis-dim">{relatedMatches.length} of {Math.max(0, results.length - 6)} shown</span>
@@ -516,6 +542,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                   {visibleResultLimit < results.length ? (
                     <button
                       type="button"
+                      data-search-load-more="true"
                       onClick={() => setVisibleResultLimit((current) => Math.min(current + 12, results.length))}
                       className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
                     >
@@ -590,8 +617,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </div>
         </section>
       ) : (
-        <section className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Manual sourcing review</p>
+        <section data-search-unresolved-reference={isCatalogReferenceQuery(activeQuery) ? "true" : undefined} className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
+            {isCatalogReferenceQuery(activeQuery) ? "Unresolved reference" : "Manual sourcing review"}
+          </p>
           <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
             {isCatalogReferenceQuery(activeQuery) ? "Send this reference." : "Send the sourcing input."}
           </h3>
@@ -603,7 +632,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               href={productListSearchHref}
               className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
-              Send this reference
+              {isCatalogReferenceQuery(activeQuery) ? "Send this reference" : "Send sourcing input"}
             </Link>
           </div>
         </section>

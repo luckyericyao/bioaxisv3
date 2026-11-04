@@ -313,6 +313,34 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     return [];
   }
 
+  // Registry lookup is exact after reference normalization, independent of keyword ranking.
+  // A documented reference must not disappear because its punctuation tokenizes differently.
+  const references = findVerifiedCatalogReferences(query);
+  if (references.length > 0) {
+    return references.map((reference) => ({
+      type: "product",
+      matchKind: "catalog-reference",
+      catalogReference: reference.reference,
+      title: reference.title,
+      description: reference.description,
+      href: reference.href,
+      segmentTitle: reference.segmentTitle,
+      segmentSlug: reference.segmentSlug,
+      categoryTitle: reference.categoryTitle,
+      categorySlug: reference.categorySlug,
+      familyTitle: reference.familyTitle,
+      familySlug: reference.familySlug,
+      productTitle: reference.productTitle,
+      productSlug: reference.productSlug,
+      queryCoverage: 1,
+      matchedFields: ["catalog reference"]
+    }));
+  }
+
+  if (isCatalogReferenceQuery(query)) {
+    return [];
+  }
+
   const preferDirectMatches = tokens.length === 1 && tokens[0].length <= 4;
   const results: ScoredResult[] = [];
   let order = 0;
@@ -427,6 +455,7 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
           addResult(
             {
               type: "product",
+              matchKind: "sourcing-template",
               title: productItem.name,
               description: productItem.shortDescription,
               href: getProductItemHref(segment.slug, subcategory.slug, family.slug, productItem.slug),
@@ -453,27 +482,6 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
         });
       });
     });
-  });
-
-  findVerifiedCatalogReferences(query).forEach((reference) => {
-    addResult(
-      {
-        type: "product",
-        matchKind: "catalog-reference",
-        title: reference.title,
-        description: reference.description,
-        href: reference.href,
-        segmentTitle: reference.segmentTitle,
-        segmentSlug: reference.segmentSlug,
-        categoryTitle: reference.categoryTitle,
-        categorySlug: reference.categorySlug,
-        familyTitle: reference.familyTitle,
-        familySlug: reference.familySlug,
-        productTitle: reference.productTitle,
-        productSlug: reference.productSlug
-      },
-      [{ label: "catalog reference", text: reference.reference, weight: 220, phraseBonus: 280, direct: true }]
-    );
   });
 
   workflows.forEach((workflow) => {
@@ -525,16 +533,11 @@ export function getProductSearchResults(query: string): ProductSearchResult[] {
     ? relevantResults.filter((result) =>
       titleContainsQueryTokens(result.title, query) ||
       (result.type === "segment" && result.matchedFields?.includes("aliases")) ||
-      (result.type === "family" && result.matchedFields?.includes("aliases")) ||
-      result.matchKind === "catalog-reference"
+      (result.type === "family" && result.matchedFields?.includes("aliases"))
     )
     : relevantResults;
 
-  const classifiedResults = isCatalogReferenceQuery(query)
-    ? focusedShortQueryResults.filter((result) => result.matchKind === "catalog-reference")
-    : focusedShortQueryResults;
-
-  return classifiedResults
+  return focusedShortQueryResults
     .sort(
       (a, b) =>
         productUniverseRank(b.type) - productUniverseRank(a.type) ||

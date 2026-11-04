@@ -148,7 +148,8 @@ export type ProductSearchMatchTier = "title" | "path" | "combined" | "family" | 
 
 export type ProductSearchResult = {
   type: SearchResultType;
-  matchKind?: "taxonomy" | "catalog-reference" | "content";
+  matchKind?: "taxonomy" | "sourcing-template" | "catalog-reference" | "content";
+  catalogReference?: string;
   matchTier?: ProductSearchMatchTier;
   queryCoverage?: number;
   title: string;
