@@ -1,6 +1,16 @@
 const baseUrl = process.argv[2] ?? process.env.READINESS_BASE_URL ?? "https://bioaxisv3.vercel.app";
 const targetUrl = new URL(baseUrl);
 const failures = [];
+const shaPattern = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
+const expectedReleaseValue = process.env.EXPECTED_RELEASE_SHA;
+const expectedReleaseSha = expectedReleaseValue?.trim().toLowerCase();
+
+if (expectedReleaseValue !== undefined && !shaPattern.test(expectedReleaseSha ?? "")) {
+  console.error("Deployment readiness failed:");
+  console.error("- EXPECTED_RELEASE_SHA must be a full 40- or 64-character hexadecimal Git SHA.");
+  console.error("- release: unknown");
+  process.exit(1);
+}
 
 async function get(pathname) {
   return fetch(new URL(pathname, baseUrl), {
@@ -61,6 +71,14 @@ try {
   failures.push(`/api/rfq: invalid readiness response (HTTP ${rfqHealthResponse.status})`);
 }
 
+// Only print a validated public SHA, never arbitrary remote response content.
+const reportedRelease = typeof rfqHealth?.release === "string" ? rfqHealth.release.trim().toLowerCase() : "";
+const release = shaPattern.test(reportedRelease) ? reportedRelease : "unknown";
+
+if (expectedReleaseSha && release !== expectedReleaseSha) {
+  failures.push(`/api/rfq: release mismatch (expected ${expectedReleaseSha}; received ${release})`);
+}
+
 if (!rfqHealth?.ready) {
   const durableQueue = rfqHealth?.services?.durableQueue ?? "unknown";
   const antiSpam = rfqHealth?.services?.antiSpam ?? "unknown";
@@ -71,10 +89,12 @@ if (!rfqHealth?.ready) {
 if (failures.length > 0) {
   console.error("Deployment readiness failed:");
   failures.forEach((failure) => console.error(`- ${failure}`));
+  console.error(`- release: ${release}`);
   process.exit(1);
 }
 
 console.log(`Deployment readiness passed for ${baseUrl}`);
+console.log(`- release: ${release}`);
 console.log("- core routes: ready");
 console.log("- security headers: ready");
 console.log("- RFQ durable queue: reachable");

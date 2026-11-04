@@ -399,6 +399,7 @@ export async function GET() {
     {
       ok: readiness.ready,
       ready: readiness.ready,
+      release: process.env.BIOAXIS_RELEASE_SHA || "unknown",
       services: readiness.services
     },
     {

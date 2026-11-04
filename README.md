@@ -13,12 +13,29 @@ npm run dev
 
 ```bash
 npm run lint
+node node_modules/typescript/bin/tsc --noEmit --incremental false
 npm run build
 npm run smoke
 npm run readiness
 ```
 
-`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile, the private durable RFQ queue, and internal lookup configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint reports status labels only and never returns secret values.
+`npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile, the private durable RFQ queue, and internal lookup configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint returns service status labels and a public `release` identifier; it never returns secret values.
+
+### Release traceability
+
+At build time, `next.config.ts` injects the full Git commit SHA: a valid `VERCEL_GIT_COMMIT_SHA` takes priority, with local `git rev-parse --verify HEAD` as the fallback. Only a full hexadecimal SHA (40 characters, or 64 for SHA-256 repositories) is accepted and normalized to lowercase. If neither source is available, the release is `unknown`. No environment file changes or runtime Git access are required.
+
+`GET /api/rfq` includes `release` in both its HTTP 200 and HTTP 503 JSON responses, and the readiness script prints `release` on success or validation failure. The identifier is fixed in the compiled build, so changing runtime variables or moving Git HEAD does not relabel an existing artifact. A local SHA identifies HEAD; it does not attest to uncommitted working-tree changes. Build from a clean checkout when validating a specific commit.
+
+To require an exact release match, pass the full expected SHA to the checker:
+
+```bash
+EXPECTED_RELEASE_SHA="$(git rev-parse HEAD)" npm run readiness -- http://localhost:3000
+```
+
+`EXPECTED_RELEASE_SHA` is optional and accepts uppercase or lowercase full SHAs. When set, a mismatched, missing, invalid, or `unknown` release fails the check with exit code 1, alongside the existing readiness checks. An invalid expected SHA fails before making requests and its raw value is never printed. Without an expected SHA, an older endpoint with no release remains compatible and is reported as `release: unknown`. Only validated SHAs are printed from remote release values.
+
+Run `npm run test:release` for the offline regression covering build SHA selection, safe RFQ health responses, and the optional expected-release gate. It mocks external services and does not submit RFQs.
 
 ## Durable RFQ Delivery
 
