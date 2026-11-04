@@ -54,7 +54,7 @@ export function BuyerTriggerSection() {
                 {trigger.title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{trigger.body}</p>
-              <span className={["mt-5 inline-flex text-xs font-bold uppercase", trigger.title.includes("Documents") ? "text-bioaxis-trust" : "text-bioaxis-accent"].join(" ")}>{trigger.cta}</span>
+              <span className={["mt-5 inline-flex text-xs font-bold uppercase", trigger.title.includes("Documents") ? "text-emerald-700" : "text-bioaxis-accent"].join(" ")}>{trigger.cta}</span>
             </Link>
           ))}
         </div>

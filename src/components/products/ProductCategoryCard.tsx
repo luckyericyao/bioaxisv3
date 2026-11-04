@@ -88,19 +88,19 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
         <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5 sm:grid-cols-3">
           <Link
             href={`/products/${segment.slug}`}
-            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Browse families
           </Link>
           <Link
             href={buildRequestHref({ segment: segment.slug, requestType: "quote" })}
-            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request quote
           </Link>
           <Link
             href={buildRequestHref({ segment: segment.slug, requestType: "equivalent" })}
-            className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Review equivalent
           </Link>

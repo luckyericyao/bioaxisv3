@@ -23,10 +23,10 @@ export function ResourceCard({ guide }: ResourceCardProps) {
         ))}
       </ul>
       <div className="mt-6 grid gap-2">
-        <Link href={sourcePage} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        <Link href={sourcePage} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           {guide.ctaCopy}
         </Link>
-        <Link href={requestHref} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+        <Link href={requestHref} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
           Use as request starter
         </Link>
       </div>

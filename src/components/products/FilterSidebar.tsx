@@ -24,14 +24,14 @@ export function FilterSidebar({ subcategory }: FilterSidebarProps) {
       </p>
       <div className="mt-6 grid gap-6">
         {filterGroups.map((group) => (
-          <div key={group.title}>
-            <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">{group.title}</p>
+          <fieldset key={group.title} className="min-w-0">
+            <legend className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">{group.title}</legend>
             <div className="grid gap-2">
               {group.values.slice(0, 5).map((value) => (
                 <FilterChip key={value} name={group.title} label={value} />
               ))}
             </div>
-          </div>
+          </fieldset>
         ))}
       </div>
     </aside>

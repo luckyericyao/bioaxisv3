@@ -83,7 +83,7 @@ export function PrioritySourcingLinesSection() {
                 <div className="mt-5">
                   <Link
                     href={line.href}
-                    className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-white"
+                    className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-white"
                   >
                     {line.cta}
                   </Link>

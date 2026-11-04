@@ -85,7 +85,7 @@ export function Header() {
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
         <Link
           href="/"
-          className="text-base font-bold uppercase text-bioaxis-text transition hover:text-bioaxis-accent"
+          className="inline-flex min-h-11 items-center text-base font-bold uppercase text-bioaxis-text transition hover:text-bioaxis-accent"
           aria-label="BioAxis home"
           onClick={closeMobileMenu}
         >
@@ -98,7 +98,7 @@ export function Header() {
             type="button"
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
             aria-expanded={menuOpen}
-            aria-controls="mobile-primary-navigation"
+            aria-controls={menuOpen ? "mobile-primary-navigation" : undefined}
             onClick={() => setMenuOpen((current) => !current)}
           >
             Menu
@@ -113,7 +113,11 @@ export function Header() {
                 ref={productsMenuRef}
                 className="relative flex min-h-16 items-center"
                 onMouseEnter={() => setProductsOpen(true)}
-                onMouseLeave={() => setProductsOpen(false)}
+                onMouseLeave={(event) => {
+                  if (!event.currentTarget.contains(document.activeElement)) {
+                    setProductsOpen(false);
+                  }
+                }}
                 onFocus={() => {
                   if (!suppressProductsFocusOpenRef.current) {
                     setProductsOpen(true);
@@ -130,9 +134,8 @@ export function Header() {
                   ref={productsTriggerRef}
                   href={item.href}
                   onClick={() => setProductsOpen(false)}
-                  aria-haspopup="true"
                   aria-expanded={productsOpen}
-                  aria-controls="products-segment-dropdown"
+                  aria-controls={productsOpen ? "products-segment-dropdown" : undefined}
                   className="inline-flex min-h-16 items-center px-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
                 >
                   {item.label}
@@ -150,8 +153,8 @@ export function Header() {
                 onClick={() => setProductsOpen(false)}
                 className={
                   item.label === "Request Quote"
-                    ? "ml-1 inline-flex min-h-10 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
-                    : "px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
+                    ? "ml-1 inline-flex min-h-11 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
+                    : "inline-flex min-h-11 items-center px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
                 }
               >
                 {item.label}
@@ -170,7 +173,7 @@ export function Header() {
                   <button
                     type="button"
                     aria-expanded={mobileProductsOpen}
-                    aria-controls="mobile-products-navigation"
+                    aria-controls={mobileProductsOpen ? "mobile-products-navigation" : undefined}
                     onClick={() => setMobileProductsOpen((current) => !current)}
                     className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold uppercase text-bioaxis-muted"
                   >
@@ -199,6 +202,7 @@ export function Header() {
             {sourcingListItems.length > 0 ? (
               <button
                 type="button"
+                aria-haspopup="dialog"
                 onClick={() => {
                   openDrawer(mobileMenuButtonRef.current);
                   closeMobileMenu();
@@ -240,7 +244,7 @@ function ProductSegmentDropdown({
             key={segment.slug}
             href={segment.href}
             onClick={onNavigate}
-            className="group flex items-center justify-between gap-3 border border-transparent px-3 py-3 transition hover:border-bioaxis-line hover:bg-bioaxis-panelSoft focus:border-bioaxis-accent focus:bg-bioaxis-panelSoft focus:outline-none"
+            className="group flex min-h-11 items-center justify-between gap-3 border border-transparent px-3 py-3 transition hover:border-bioaxis-line hover:bg-bioaxis-panelSoft focus:border-bioaxis-accent focus:bg-bioaxis-panelSoft"
           >
             <span className="flex min-w-0 items-start gap-3">
               <span className="mt-0.5 w-5 text-[11px] font-bold text-bioaxis-dim">{segment.index}</span>

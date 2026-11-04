@@ -12,7 +12,7 @@ const config: Config = {
           line: "#d7e1ea",
           text: "#111827",
           muted: "#475569",
-          dim: "#64748b",
+          dim: "#5b6b82",
           accent: "#0f4c81",
           ice: "#38bdf8",
           trust: "#10b981",

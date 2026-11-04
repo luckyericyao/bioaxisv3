@@ -35,7 +35,7 @@ export function ProductSegmentCard({ segment, index, mode = "preview" }: Product
       </div>
 
       <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5">
-        <Link href={`/products/${segment.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        <Link href={`/products/${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           View segment
         </Link>
         <SourcingRequestButtonGroup segment={segment.slug} />

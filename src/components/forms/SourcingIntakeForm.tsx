@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { CapturedInputCard, RequestContextCard, SourcingListNotice, SourcingListSummary } from "./sourcing-intake/contextCards";
 import { contextualHelperText, defaultEquivalentChips, optionalHelperText, primaryHelperText, requestStarterTemplates } from "./sourcing-intake/constants";
@@ -44,6 +45,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
     sourcingListItems,
     restoredSessionInput,
     error,
+    emailInvalid,
     submitted,
     submitting,
     requestReferenceConflict,
@@ -74,27 +76,48 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const currentSubmitLabel = submitLabelFor(state.requestType, submitLabel);
   const waitingForVerification = turnstileAvailable && !turnstileToken;
   const submitButtonLabel = submitting ? "Sending..." : waitingForVerification ? "Complete verification to send" : currentSubmitLabel;
+  const formRef = useRef<HTMLFormElement>(null);
+  const nextRequestRef = useRef<HTMLButtonElement>(null);
+  const hadSubmittedRef = useRef(false);
+
+  useEffect(() => {
+    if (submitted) {
+      nextRequestRef.current?.focus();
+    } else if (hadSubmittedRef.current) {
+      formRef.current?.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+    }
+    hadSubmittedRef.current = Boolean(submitted);
+  }, [submitted]);
+
+  useEffect(() => {
+    if (emailInvalid) {
+      formRef.current?.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+    }
+  }, [emailInvalid]);
 
   if (submitted) {
     return (
-      <div role="status" aria-live="polite" tabIndex={-1} className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 outline-none sm:p-8">
-        <p className="text-sm font-semibold uppercase text-bioaxis-accent">{successTitle}</p>
-        <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">BioAxis has the sourcing context.</h2>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
-          {submitted.message}
-        </p>
-        <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">BioAxis will review</p>
-          <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
-            {["Product context", "Equivalent path", "Documentation needs", "Sample or quote next step"].map((item) => (
-              <li key={item} className="border border-white/[0.12] px-3 py-2">
-                {item}
-              </li>
-            ))}
-          </ul>
+      <div className="border border-bioaxis-accent/70 bg-bioaxis-panel p-5 sm:p-8">
+        <div role="status" aria-live="polite" aria-atomic="true">
+          <p className="text-sm font-semibold uppercase text-bioaxis-accent">{successTitle}</p>
+          <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">BioAxis has the sourcing context.</h2>
+          <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
+            {submitted.message}
+          </p>
+          <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
+            <p className="text-sm font-semibold uppercase text-bioaxis-accent">BioAxis will review</p>
+            <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+              {["Product context", "Equivalent path", "Documentation needs", "Sample or quote next step"].map((item) => (
+                <li key={item} className="border border-white/[0.12] px-3 py-2">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
         </div>
-        {submitted.referenceId ? <p className="mt-4 text-sm text-bioaxis-dim">Reference: {submitted.referenceId}</p> : null}
         <button
+          ref={nextRequestRef}
           type="button"
           onClick={startAnotherRequest}
           className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
@@ -107,9 +130,11 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       onFocusCapture={trackIntakeStart}
       noValidate
+      aria-labelledby="sourcing-intake-title"
       data-api-endpoint="/api/rfq"
       data-rfq-mode="durable-queue-plus-context"
       className={["grid gap-5", compact ? "text-sm" : ""].filter(Boolean).join(" ")}
@@ -132,7 +157,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
       <section className={compact ? "border border-bioaxis-accent/70 bg-bioaxis-panel p-4 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-5" : "border border-bioaxis-accent/70 bg-bioaxis-panel p-5 shadow-[0_0_0_1px_rgba(40,255,191,0.06)] sm:p-7"}>
         <div className={compact ? "mb-2" : "mb-4"}>
           <p className={compact ? "sr-only" : "text-sm font-semibold uppercase text-bioaxis-accent"}>Sourcing intake</p>
-          <h2 className={compact ? "text-lg font-bold text-bioaxis-text sm:text-2xl" : "mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl"}>{title}</h2>
+          <h2 id="sourcing-intake-title" className={compact ? "text-lg font-bold text-bioaxis-text sm:text-2xl" : "mt-2 text-xl font-bold text-bioaxis-text sm:text-2xl"}>{title}</h2>
           <div className={compact ? "mt-1 grid gap-1 text-xs leading-5 text-bioaxis-muted" : "mt-2 grid gap-1 text-sm leading-5 text-bioaxis-muted"}>
             <p>{compact ? "Email is the only required field." : primaryHelperText}</p>
             {compact ? <span className="sr-only">{primaryHelperText}</span> : null}
@@ -148,6 +173,8 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
             type="email"
             value={state.email}
             required
+            invalid={emailInvalid}
+            describedBy={emailInvalid ? "sourcing-intake-error" : undefined}
             autoComplete="email"
             inputMode="email"
             placeholder="you@organization.com"
@@ -182,7 +209,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
           </div>
           {error && requestReferenceConflict ? (
             <div className="order-2 border border-bioaxis-accent/50 bg-bioaxis-black p-3">
-              <p role="alert" className="text-sm font-semibold text-bioaxis-accent">{error}</p>
+              <p id="sourcing-intake-error" role="alert" className="text-sm font-semibold text-bioaxis-accent">{error}</p>
               <button
                 type="button"
                 onClick={rotateRequestReference}
@@ -192,7 +219,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
               </button>
             </div>
           ) : error ? (
-            <p role="alert" className="order-2 text-sm font-semibold text-bioaxis-accent">
+            <p id="sourcing-intake-error" role="alert" className="order-2 text-sm font-semibold text-bioaxis-accent">
               {error}
             </p>
           ) : null}
@@ -221,9 +248,9 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
           ) : null}
         </div>
         <details data-request-starters="true" className="group mt-4 border border-bioaxis-line bg-bioaxis-black/70">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-3 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
             <span>Use a request starter</span>
-            <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
           </summary>
           <div className="border-t border-bioaxis-line p-3">
             <p className="text-xs leading-5 text-bioaxis-muted">Use a starter, then edit any line. BioAxis can follow up for missing details.</p>

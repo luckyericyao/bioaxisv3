@@ -20,7 +20,7 @@ export function SupportCard({ supportType }: SupportCardProps) {
           ))}
         </ul>
       </div>
-      <Link href={supportType.requestHref} className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+      <Link href={supportType.requestHref} className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
         {supportType.ctaLabel}
       </Link>
     </article>

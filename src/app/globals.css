@@ -67,8 +67,9 @@ textarea {
 }
 
 .field-focus:focus {
-  border-color: rgba(56, 189, 248, 0.78);
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+  border-color: #0f4c81;
+  outline: 2px solid #0f4c81;
+  outline-offset: 3px;
 }
 
 .skip-link {
@@ -90,14 +91,19 @@ textarea {
   transform: translateY(0);
 }
 
-:where(a, button, summary, input, select, textarea):focus-visible {
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid #0f4c81;
   outline-offset: 3px;
 }
 
+footer :where(a, button):focus-visible {
+  outline-color: #38bdf8;
+}
+
 @media (pointer: coarse) {
-  :where(button, summary, input, select, textarea, a[class*="inline-flex"], a[class*="flex"], label[class*="cursor-pointer"]) {
+  :where(button, summary, input:not([type="checkbox"]):not([type="radio"]), select, textarea, a[class*="inline-flex"], a[class*="flex"], label[class*="cursor-pointer"]) {
     min-height: 44px;
+    min-width: 44px;
   }
 }
 

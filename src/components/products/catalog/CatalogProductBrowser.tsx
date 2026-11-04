@@ -99,8 +99,9 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={[
-        "border px-2.5 py-1.5 text-[11px] font-semibold uppercase transition",
+        "inline-flex min-h-11 min-w-11 items-center justify-center border px-2.5 py-1.5 text-[11px] font-semibold uppercase transition",
         active
           ? "border-bioaxis-accent bg-bioaxis-accent text-bioaxis-black"
           : "border-bioaxis-line bg-bioaxis-black text-bioaxis-steel hover:border-bioaxis-accent hover:text-bioaxis-accent"
@@ -179,7 +180,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Filter by RFQ field, family, or specification..."
-              className="field-focus min-h-10 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
+              className="field-focus min-h-11 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
             />
           </label>
           <FilterGroup title="Product type" values={productTypes} active={selectedTypes} onToggle={(value) => toggleFilter(value, selectedTypes, setSelectedTypes)} />
@@ -195,7 +196,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
         <div className="min-w-0">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching templates</p>
+              <p role="status" aria-atomic="true" className="text-xs font-bold uppercase text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching templates</p>
               {compact && filteredRows.length > visibleRows.length ? (
                 <p className="mt-1 text-xs leading-5 text-bioaxis-muted">Preview list capped here. Open the family or product page for the full context.</p>
               ) : null}
@@ -299,14 +300,14 @@ function FilterGroup({
   }
 
   return (
-    <div className="mt-5">
-      <p className="mb-2 text-xs font-bold uppercase text-bioaxis-steel">{title}</p>
+    <fieldset className="mt-5 min-w-0">
+      <legend className="mb-2 text-xs font-bold uppercase text-bioaxis-steel">{title}</legend>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => (
           <FilterButton key={value} label={value} active={active.includes(value)} onClick={() => onToggle(value)} />
         ))}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -316,25 +317,25 @@ function RowActions({ row }: { row: CatalogProductRow }) {
       <SourcingRequestLink
         href={row.href}
         preserveProductQuery
-        className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Details
       </SourcingRequestLink>
       <SourcingRequestLink
         href={requestHref(row, "quote", "quote")}
-        className="inline-flex min-h-9 items-center justify-center border border-bioaxis-accent px-3 text-[11px] font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-[11px] font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
       >
         Request quote
       </SourcingRequestLink>
       <SourcingRequestLink
         href={equivalentHref(row)}
-        className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Equivalent
       </SourcingRequestLink>
       <SourcingRequestLink
         href={requestHref(row, "documentation", "documents")}
-        className="inline-flex min-h-9 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Documents
       </SourcingRequestLink>
@@ -352,7 +353,7 @@ function RowActions({ row }: { row: CatalogProductRow }) {
         label="Add to list"
         addedLabel="Added"
         requestedAction="Quote"
-        className="min-h-9 px-3 text-[11px]"
+        className="min-h-11 px-3 text-[11px]"
       />
     </div>
   );

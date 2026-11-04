@@ -5,6 +5,8 @@ export function Field({
   value,
   type = "text",
   required = false,
+  invalid = false,
+  describedBy,
   autoComplete,
   inputMode,
   placeholder,
@@ -16,6 +18,8 @@ export function Field({
   value: string;
   type?: "email" | "text";
   required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
   autoComplete?: string;
   inputMode?: "email" | "text";
   placeholder?: string;
@@ -34,6 +38,8 @@ export function Field({
         value={value}
         placeholder={placeholder}
         required={required}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         autoComplete={autoComplete}
         inputMode={inputMode}
         onChange={(event) => onChange(event.target.value)}

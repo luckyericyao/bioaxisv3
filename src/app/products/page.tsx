@@ -82,7 +82,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
         {query ? (
           <details className="border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Browse all product lines</span>
               <span className="text-bioaxis-dim">Optional directory</span>
             </summary>

@@ -116,14 +116,14 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </SourcingRequestLink>
           </div>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
-              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
               <SourcingRequestLink
                 href={requestLinks[3].href}
-                className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 Ask for documents
               </SourcingRequestLink>
@@ -138,9 +138,9 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                 categoryTitle={category.title}
                 familyTitle={family.title}
                 productTitle={productItem.name}
-                className="min-h-10 px-3 text-xs"
+                className="min-h-11 px-3 text-xs"
               />
-              <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+              <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                 Back to family
               </Link>
             </div>
@@ -223,9 +223,9 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
 
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
         <span>{title}</span>
-        <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+        <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
       <ul className="grid gap-3 border-t border-bioaxis-line p-5">
         {items.map((item) => (
@@ -240,7 +240,7 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
             <SourcingRequestLink
               key={request.label}
               href={request.href}
-              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               {request.label}
             </SourcingRequestLink>

@@ -21,7 +21,7 @@ export function FeaturedFamilyCard({ family, segmentSlug, subcategorySlug }: Fea
         <TagBlock title="Documentation needs" tags={family.documentationNeeds} />
       </div>
       <div className="mt-6 grid gap-2">
-        <Link href={`/products/${segmentSlug}/${subcategorySlug}/${family.slug}`} className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+        <Link href={`/products/${segmentSlug}/${subcategorySlug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
           View product family
         </Link>
         <SourcingRequestButtonGroup segment={segmentSlug} category={subcategorySlug} family={family.slug} />

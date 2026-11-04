@@ -82,10 +82,10 @@ export default function PrivateLabelPage() {
             subtitle="Private-label and neutral-label discussions are most useful when buyers already know the product type, required specifications, use case, and documentation expectations."
           />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href="/products" className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href="/products" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               Back to Products
             </Link>
-            <Link href="/equivalent-finder" className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href="/equivalent-finder" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               Equivalent Review
             </Link>
           </div>

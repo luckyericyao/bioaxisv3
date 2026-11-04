@@ -39,6 +39,7 @@ export function AddToSourcingListButton({
     <button
       type="button"
       aria-pressed={alreadyAdded}
+      aria-haspopup="dialog"
       onClick={() => {
         if (!alreadyAdded) {
           trackBioAxisEvent("sourcing_list_add", { itemType: item.productSlug ? "product" : "family" });

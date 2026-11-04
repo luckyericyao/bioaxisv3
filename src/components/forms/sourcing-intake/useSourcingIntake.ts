@@ -140,6 +140,10 @@ export function useSourcingIntake({
       }
       setError(validationError);
       setSubmitted(null);
+      if (validationError === emailErrorMessage) {
+        const emailInput = event.currentTarget.elements.namedItem("email");
+        if (emailInput instanceof HTMLElement) emailInput.focus();
+      }
       return;
     }
 
@@ -238,6 +242,7 @@ export function useSourcingIntake({
     sourcingListItems,
     restoredSessionInput,
     error,
+    emailInvalid: error === emailErrorMessage,
     submitted,
     submitting,
     requestReferenceConflict,

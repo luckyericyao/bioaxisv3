@@ -327,6 +327,18 @@ async function checkSourcingListDrawerFocus() {
     await closeButton.evaluate((element) => element === document.activeElement),
     "opening the sourcing list drawer does not focus its close control"
   );
+  const modalBackground = await page.evaluate(() => {
+    const main = document.querySelector("main#main-content");
+    const backgroundButton = main?.querySelector('[aria-haspopup="dialog"]');
+    if (backgroundButton instanceof HTMLElement) backgroundButton.focus();
+    return {
+      landmarksInert: [main, document.querySelector("header"), document.querySelector("footer")]
+        .every((element) => Boolean(element?.closest("[inert]"))),
+      focusInside: Boolean(document.querySelector("#sourcing-list-dialog")?.contains(document.activeElement))
+    };
+  });
+  check(modalBackground.landmarksInert, "sourcing list drawer leaves page landmarks exposed while modal");
+  check(modalBackground.focusInside, "a background action can take focus from the sourcing list drawer");
 
   await page.keyboard.press("Shift+Tab");
   check(
@@ -351,11 +363,44 @@ async function checkSourcingListDrawerFocus() {
     await addedButton.evaluate((element) => element === document.activeElement),
     "closing the sourcing list drawer with Escape does not restore focus to its trigger"
   );
+  check(await page.locator("main#main-content").evaluate((element) => !element.closest("[inert]")), "closing the sourcing list drawer leaves the page inert");
+
+  await addedButton.click();
+  await dialog.getByRole("button", { name: "Remove Filtered 200 µL Pipette Tips", exact: true }).click();
+  await dialog.locator("article").waitFor({ state: "hidden", timeout: 5_000 });
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-label") === "Close sourcing list",
+    null,
+    { timeout: 5_000 }
+  ).catch(() => undefined);
+  check(await closeButton.evaluate((element) => element === document.activeElement), "removing the last sourcing item loses focus instead of focusing Close");
+  check(await dialog.getByRole("button", { name: "Send list for review", exact: true }).isDisabled(), "empty sourcing list can still be sent for review");
+  check((await dialog.getByRole("status").innerText()).includes("Your sourcing list is empty"), "empty sourcing list is not announced");
+  await page.keyboard.press("Escape");
+  await dialog.waitFor({ state: "hidden", timeout: 5_000 });
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-pressed") === "false",
+    null,
+    { timeout: 5_000 }
+  ).catch(() => undefined);
+  check(await addButton.evaluate((element) => element === document.activeElement), "closing an empty sourcing drawer does not restore focus to its original trigger");
+
+  await addButton.click();
+  await dialog.getByRole("link", { name: "View page", exact: true }).click();
+  await dialog.waitFor({ state: "hidden", timeout: 5_000 });
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-pressed") === "true",
+    null,
+    { timeout: 5_000 }
+  ).catch(() => undefined);
+  check(await addedButton.evaluate((element) => element === document.activeElement), "same-page View page navigation closes the sourcing drawer without restoring focus");
 
   await addedButton.click();
   await dialog.getByLabel("Quantity", { exact: true }).fill("QA evaluation pack");
   await dialog.getByRole("button", { name: "Send list for review", exact: true }).click();
   await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+  check((await dialog.count()) === 0, "sourcing drawer remains open after its RFQ handoff");
+  check(await page.locator("main#main-content").evaluate((element) => !element.closest("[inert]")), "sourcing RFQ handoff leaves the page inert");
   const email = page.getByLabel("Email *", { exact: true });
   await email.waitFor({ state: "visible", timeout: 5_000 });
   const emailRect = await email.boundingBox();
@@ -853,7 +898,7 @@ try {
     check(focusedPath === expectedPath, `Products keyboard traversal expected ${expectedPath}, focused ${focusedPath ?? "no link"}`);
   }
   await desktop.keyboard.press("Escape");
-  await desktop.waitForFunction(() => document.activeElement?.getAttribute("aria-controls") === "products-segment-dropdown", null, { timeout: 5_000 });
+  await desktop.waitForFunction((trigger) => document.activeElement === trigger, await productsTrigger.elementHandle(), { timeout: 5_000 });
   check(!(await desktopSearchLink.isVisible().catch(() => false)), "Escape does not close the Products menu");
   check(await productsTrigger.evaluate((element) => element === document.activeElement), "Escape does not return focus to the Products trigger");
   await desktop.close();

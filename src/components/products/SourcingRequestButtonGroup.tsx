@@ -19,7 +19,7 @@ const baseClass =
   "inline-flex items-center justify-center border text-center font-semibold uppercase transition";
 
 const sizeClass = {
-  sm: "min-h-10 px-3 text-xs",
+  sm: "min-h-11 px-3 text-xs",
   md: "min-h-11 px-5 text-sm"
 };
 

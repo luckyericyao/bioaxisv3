@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQuery } from "@/data/productSearch";
@@ -312,9 +312,9 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
 
   return (
     <details className="border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
         <span>Sourcing next steps</span>
-        <span className="text-bioaxis-dim">Optional actions · +</span>
+        <span className="text-bioaxis-dim">Optional actions <span aria-hidden="true">· +</span></span>
       </summary>
       <div className="border-t border-bioaxis-line p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -324,7 +324,7 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
           <Link
             href={productListHref}
             onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_product_list" })}
-            className="inline-flex min-h-10 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Send product list
           </Link>
@@ -355,6 +355,8 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [visibleResultLimit, setVisibleResultLimit] = useState(18);
+  const relatedMatchesRef = useRef<HTMLDivElement>(null);
+  const nextMatchFocusIndex = useRef<number | null>(null);
   const draftQuery = query.trim();
   const activeQuery = initialQuery.trim();
   const displayedQuery = displayQueryLabel(activeQuery);
@@ -386,6 +388,13 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
     setVisibleResultLimit(18);
   }, [activeQuery]);
 
+  useEffect(() => {
+    const index = nextMatchFocusIndex.current;
+    if (index === null) return;
+    nextMatchFocusIndex.current = null;
+    relatedMatchesRef.current?.children[index]?.querySelector<HTMLAnchorElement>("a[href]")?.focus();
+  }, [visibleResultLimit]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     trackBioAxisEvent("search_submit", { queryLength: draftQuery.length, source: "products-directory" });
@@ -404,7 +413,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={compact ? "Refine results" : "Search product name, catalog reference, supplier line, or consumable type"}
-          className={["field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim", compact ? "min-h-10 text-sm sm:min-h-12 sm:text-base" : "min-h-12 text-base sm:text-lg"].join(" ")}
+          className={["field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim", compact ? "min-h-11 text-sm sm:min-h-12 sm:text-base" : "min-h-12 text-base sm:text-lg"].join(" ")}
         />
         <button
           type="submit"
@@ -426,7 +435,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             <Link
               key={item.label}
               href={item.href}
-              className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               {item.label}
             </Link>
@@ -444,7 +453,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <QuickSearchLinks />
         </div>
         <details className="mt-3 border border-bioaxis-line bg-bioaxis-panel sm:hidden">
-          <summary className="cursor-pointer list-none px-4 py-3 text-xs font-semibold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+          <summary className="min-h-11 cursor-pointer list-none px-4 py-3 text-xs font-semibold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
             Quick searches
           </summary>
           <div className="border-t border-bioaxis-line p-3">
@@ -526,7 +535,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
 
             {relatedMatches.length > 0 ? (
               <details data-search-related-matches="true" className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                   <span>Explore related matches ({Math.max(0, results.length - 6)})</span>
                   <span className="text-bioaxis-dim">{relatedMatches.length} of {Math.max(0, results.length - 6)} shown</span>
                 </summary>
@@ -534,7 +543,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                   <p className="mb-4 max-w-2xl text-sm leading-6 text-bioaxis-dim">
                     Additional matches are ranked by relevance. Refine the search to narrow the list.
                   </p>
-                  <div className="grid gap-4 xl:grid-cols-2">
+                  <div ref={relatedMatchesRef} className="grid gap-4 xl:grid-cols-2">
                     {relatedMatches.map((result) => (
                       <ProductResultCard key={`${result.type}-${result.href}`} result={result} query={activeQuery} />
                     ))}
@@ -543,7 +552,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
                     <button
                       type="button"
                       data-search-load-more="true"
-                      onClick={() => setVisibleResultLimit((current) => Math.min(current + 12, results.length))}
+                      onClick={() => {
+                        nextMatchFocusIndex.current = relatedMatches.length;
+                        setVisibleResultLimit((current) => Math.min(current + 12, results.length));
+                      }}
                       className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
                     >
                       Show next 12 ({results.length - visibleResultLimit} remaining)
@@ -555,7 +567,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </div>
 
           <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Send this search context</span>
               <span className="text-bioaxis-dim">Email only to start</span>
             </summary>
@@ -573,7 +585,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </details>
 
           <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Search coverage</span>
               <span className="text-bioaxis-dim">Optional detail</span>
             </summary>
@@ -630,7 +642,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={productListSearchHref}
-              className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
               {isCatalogReferenceQuery(activeQuery) ? "Send this reference" : "Send sourcing input"}
             </Link>
@@ -644,7 +656,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
         </p>
         <Link
           href="/products#product-categories"
-          className="mt-4 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          className="mt-4 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Browse all product segments
         </Link>

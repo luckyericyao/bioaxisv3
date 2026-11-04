@@ -77,7 +77,7 @@ export default function ServicesPage() {
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{service.description}</p>
               <Link
                 href={service.href}
-                className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+                className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
               >
                 {service.cta}
               </Link>

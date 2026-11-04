@@ -102,19 +102,19 @@ export default function ApplicationsPage() {
               <div className="mt-6 grid gap-2">
                 <Link
                   href={application.href}
-                  className="inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
                 >
                   View product lines
                 </Link>
                 <Link
                   href={application.requestHref}
-                  className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                 >
                   Map sourcing request
                 </Link>
                 <Link
                   href={application.equivalentHref}
-                  className="inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                 >
                   Review equivalent
                 </Link>

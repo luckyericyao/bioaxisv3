@@ -65,7 +65,7 @@ export default function SuppliersPage() {
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{item.body}</p>
               <Link
                 href={item.href}
-                className="mt-6 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 {item.cta}
               </Link>

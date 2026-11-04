@@ -38,7 +38,7 @@ export function HeroSearchSection() {
         <details data-home-primary-intake="true" className="group order-2 mt-8 max-w-5xl">
           <summary className="inline-flex min-h-12 w-full cursor-pointer list-none items-center justify-between gap-4 border border-bioaxis-text bg-bioaxis-text px-6 text-sm font-semibold uppercase text-white shadow-sm outline-none transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text focus-visible:ring-2 focus-visible:ring-bioaxis-accent sm:w-fit [&::-webkit-details-marker]:hidden">
             <span>Send sourcing request</span>
-            <span className="shrink-0 text-[0.68rem] font-semibold text-white/75">Email only</span>
+            <span className="shrink-0 text-[0.68rem] font-semibold text-inherit">Email only</span>
             <span aria-hidden="true" className="text-base leading-none transition-transform group-open:rotate-45">+</span>
           </summary>
           <div className="mt-4 border border-bioaxis-line bg-white/[0.76] p-4 shadow-[0_18px_55px_rgba(15,76,129,0.08)] backdrop-blur sm:p-5">
@@ -52,10 +52,10 @@ export function HeroSearchSection() {
         </details>
 
         <div className="order-3 mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
-          <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
+          <CTAButton href="/equivalent-finder" variant="secondary" className="!min-h-11 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
             Review equivalent
           </CTAButton>
-          <CTAButton href="/products" variant="secondary" className="!min-h-9 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
+          <CTAButton href="/products" variant="secondary" className="!min-h-11 !border-transparent !bg-transparent !px-0 !text-xs !shadow-none hover:!border-transparent hover:!bg-transparent hover:!text-bioaxis-accent">
             Browse product lines
           </CTAButton>
         </div>

@@ -93,8 +93,9 @@ export function SearchBox({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
+          aria-describedby={helperText ? `${inputId}-help` : undefined}
           className={[
-            "field-focus min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim placeholder:whitespace-normal",
+            "field-focus min-h-11 min-w-0 flex-1 border-0 bg-transparent font-semibold text-bioaxis-text placeholder:text-bioaxis-dim placeholder:whitespace-normal",
             inputClass
           ].join(" ")}
         />
@@ -105,7 +106,7 @@ export function SearchBox({
           {submitLabel}
         </button>
       </div>
-      {helperText ? <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{helperText}</p> : null}
+      {helperText ? <p id={`${inputId}-help`} className="mt-4 text-sm leading-6 text-bioaxis-muted">{helperText}</p> : null}
     </form>
   );
 }

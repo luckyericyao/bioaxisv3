@@ -188,7 +188,7 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
               <Link
                 key={need}
                 href={catalogRequestHref({ requestType: "quote", segment, need: need.toLowerCase().replace(/[^a-z0-9]+/g, "-") })}
-                className="border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-11 items-center border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 {need}
               </Link>
@@ -450,9 +450,9 @@ export function CatalogProductPage({
           </div>
           <ContextActions segment={segment} category={category} family={family} product={product} />
           <details className="group border border-bioaxis-line bg-bioaxis-black">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
-              <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
               <SourcingRequestLink href={catalogRequestHref({ requestType: "documentation", segment, category, family, product })} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold text-bioaxis-steel hover:border-bioaxis-accent">
@@ -499,7 +499,7 @@ export function CatalogProductPage({
           </div>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "documentation", segment, category, family, product, need: "documents" })}
-            className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request documents
           </SourcingRequestLink>
@@ -528,7 +528,7 @@ export function CatalogProductPage({
           </p>
           <SourcingRequestLink
             href={catalogEquivalentHref(segment, category, family, product)}
-            className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Start equivalent review
           </SourcingRequestLink>
@@ -541,7 +541,7 @@ export function CatalogProductPage({
           </p>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
-            className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request sample path
           </SourcingRequestLink>
@@ -554,7 +554,7 @@ export function CatalogProductPage({
           </p>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "recurring-supply", segment, category, family, product, need: "recurring-supply" })}
-            className="mt-5 inline-flex min-h-10 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Review recurring supply
           </SourcingRequestLink>
@@ -638,9 +638,9 @@ function CatalogCTA({
 function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
         <span>{title}</span>
-        <span className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+        <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
       <div className="border-t border-bioaxis-line p-5">
         <div className="flex flex-wrap gap-2">

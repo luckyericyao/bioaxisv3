@@ -144,9 +144,8 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     setDrawerOpen(false);
     requestAnimationFrame(() => {
       const element = lastActiveElementRef.current;
-      if (element?.isConnected) {
-        element.focus();
-      }
+      const focusTarget = element?.isConnected ? element : document.getElementById("main-content");
+      focusTarget?.focus();
       lastActiveElementRef.current = null;
     });
   }, []);
@@ -198,7 +197,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
 
       const focusable = [...dialog.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )].filter((element) => element.getAttribute("aria-hidden") !== "true");
+      )].filter((element) => element.getClientRects().length > 0 && !element.closest('[aria-hidden="true"], [inert]'));
 
       if (focusable.length === 0) {
         return;
@@ -207,7 +206,10 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
 
-      if (event.shiftKey && document.activeElement === first) {
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -255,21 +257,26 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       storedInput: "1"
     });
 
+    setDrawerOpen(false);
+    lastActiveElementRef.current = null;
     router.push(`/request-quote?${params.toString()}`);
   }
 
   return (
     <SourcingListContext.Provider value={value}>
-      {children}
-      {items.length > 0 ? (
-        <button
-          type="button"
-          onClick={() => openDrawer()}
-          className="fixed bottom-5 right-5 z-50 hidden min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-bold uppercase text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent sm:inline-flex"
-        >
-          Sourcing list ({items.length})
-        </button>
-      ) : null}
+      <div inert={drawerOpen}>
+        {children}
+        {items.length > 0 ? (
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            onClick={() => openDrawer()}
+            className="fixed bottom-5 right-5 z-50 hidden min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-bold uppercase text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent sm:inline-flex"
+          >
+            Sourcing list ({items.length})
+          </button>
+        ) : null}
+      </div>
 
       {drawerOpen ? (
         <div
@@ -297,27 +304,49 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={closeDrawer}
                 aria-label="Close sourcing list"
-                className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="min-h-11 min-w-11 shrink-0 border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 Close
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-5">
+              {items.length === 0 ? (
+                <p role="status" className="text-sm leading-6 text-bioaxis-muted">
+                  Your sourcing list is empty. Close this panel to add items.
+                </p>
+              ) : null}
               <div className="grid gap-4">
-                {items.map((item) => (
-                  <article key={item.id} className="border border-bioaxis-line bg-bioaxis-panel p-4">
+                {items.map((item, itemIndex) => (
+                  <article key={item.id} aria-label={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="text-base font-bold text-bioaxis-text">{item.title}</h3>
                         <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                           {[item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ")}
                         </p>
-                        <Link href={item.href} className="mt-2 inline-flex text-xs font-semibold uppercase text-bioaxis-accent">
+                        <Link
+                          href={item.href}
+                          onClick={closeDrawer}
+                          className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold uppercase text-bioaxis-accent"
+                        >
                           View page
                         </Link>
                       </div>
-                      <button type="button" onClick={() => value.removeItem(item.id)} className="border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <button
+                        type="button"
+                        data-remove-sourcing-item="true"
+                        aria-label={`Remove ${item.title}`}
+                        onClick={() => {
+                          value.removeItem(item.id);
+                          requestAnimationFrame(() => {
+                            const remainingButtons = dialogRef.current?.querySelectorAll<HTMLButtonElement>("[data-remove-sourcing-item]");
+                            const nextButton = remainingButtons?.[Math.min(itemIndex, remainingButtons.length - 1)];
+                            (nextButton ?? closeButtonRef.current)?.focus();
+                          });
+                        }}
+                        className="min-h-11 border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                      >
                         Remove
                       </button>
                     </div>
@@ -332,7 +361,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                       <select
                         value={item.requestedAction}
                         onChange={(event) => value.updateItem(item.id, { requestedAction: event.target.value })}
-                        className="field-focus min-h-10 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
+                        className="field-focus min-h-11 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
                       >
                         <option>Quote</option>
                         <option>Equivalent</option>
@@ -363,8 +392,9 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             <div className="border-t border-bioaxis-line p-5">
               <button
                 type="button"
+                disabled={items.length === 0}
                 onClick={submitSourcingList}
-                className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Send list for review
               </button>
@@ -393,7 +423,7 @@ function DrawerField({ label, value, onChange }: { label: string; value: string;
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="field-focus min-h-10 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
+        className="field-focus min-h-11 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
       />
     </label>
   );
@@ -401,7 +431,7 @@ function DrawerField({ label, value, onChange }: { label: string; value: string;
 
 function DrawerToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return (
-    <label className="flex min-h-10 items-center gap-3 border border-bioaxis-line bg-bioaxis-black px-3 text-xs font-bold uppercase text-bioaxis-steel">
+    <label className="flex min-h-11 items-center gap-3 border border-bioaxis-line bg-bioaxis-black px-3 text-xs font-bold uppercase text-bioaxis-steel">
       <input
         type="checkbox"
         checked={checked}

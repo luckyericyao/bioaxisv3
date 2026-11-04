@@ -19,14 +19,14 @@ export function SourcingDetailFields({
 
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left sm:p-8">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 p-5 text-left sm:p-8">
         <span>
           <span className="block text-2xl font-bold uppercase text-bioaxis-text">Add details — optional</span>
           <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">
             Request type, supplier, quantity, timeline, documents, region, contact details, or notes.
           </span>
         </span>
-        <span className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
+        <span aria-hidden="true" className="text-sm font-bold uppercase text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
       <div className="grid gap-5 border-t border-bioaxis-line p-5 md:grid-cols-2 sm:p-8">
         <div className="md:col-span-2">

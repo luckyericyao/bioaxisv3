@@ -72,9 +72,9 @@ export default function ReadySupplyPage() {
               </dl>
             </aside>
             <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                 <span>Open availability request</span>
-                <span className="text-xs font-semibold text-bioaxis-accent">Email only to start · +</span>
+                <span className="text-xs font-semibold text-bioaxis-accent">Email only to start <span aria-hidden="true">· +</span></span>
               </summary>
               <div className="border-t border-bioaxis-line p-4 sm:p-5">
                 <CompactSourcingIntake

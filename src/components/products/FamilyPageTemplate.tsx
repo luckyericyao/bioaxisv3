@@ -89,7 +89,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
         <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
