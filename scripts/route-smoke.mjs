@@ -1740,7 +1740,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/liquid-handling/pipette-tips") {
-    ["Choose a product family", "Buyer decision filters", "Common specs as chips", "View family"].forEach((label) => {
+    ["Choose a product family", "Buyer decision filters", "Common specifications", "View family"].forEach((label) => {
       if (!mainText.includes(label)) {
         failures.push(`${route}: missing category-level family flow content ${label}`);
       }
@@ -1999,6 +1999,8 @@ const catalogTemplatesSource = await readRequiredProjectFile("src/components/pro
 const catalogBrowserSource = await readRequiredProjectFile("src/components/products/catalog/CatalogProductBrowser.tsx");
 const segmentTemplateSource = await readRequiredProjectFile("src/components/products/SegmentPageTemplate.tsx");
 const categoryTemplateSource = await readRequiredProjectFile("src/components/products/CategoryPageTemplate.tsx");
+// Scope category checks so compact family/product renderers cannot mask a legacy category layout.
+const catalogCategoryTemplateSource = catalogTemplatesSource.match(/export function CatalogCategoryPage\b[\s\S]*?(?=export function CatalogFamilyPage\b)/)?.[0] ?? "";
 const familyTemplateSource = await readRequiredProjectFile("src/components/products/FamilyPageTemplate.tsx");
 const productItemTemplateSource = await readRequiredProjectFile("src/components/products/ProductItemPageTemplate.tsx");
 const rfqQueueSource = await readRequiredProjectFile("src/lib/server/rfqQueue.ts");
@@ -2167,7 +2169,7 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
 [
   ["Products page", productsPageSource, ["ProductCategoryGrid", "Browse BioAxis product lines"]],
   ["Segment template", segmentTemplateSource, ["Choose a", "category", "Common sourcing questions"]],
-  ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specs as chips"]],
+  ["Category template", categoryTemplateSource, ["Choose a product family", "Buyer decision filters", "Common specifications"]],
   ["Family template", familyTemplateSource, ["Disclosure", "Buyer checklist", "data-family-decision-summary", 'layout="decision"', "Compliance disclaimer", "ProductConfigurationSection"]],
   ["Product item template", productItemTemplateSource, ["Sourcing template details", "Configuration fields to confirm", "AddToSourcingListButton"]],
   ["Request type selector", requestTypeSelectorSource, ["shortRequestTypeLabel", "shortRequestTypeDescription", "min-h-20"]]
@@ -2178,6 +2180,41 @@ if (productNavigationSource.includes("productCatalogMenuSegments") || productNav
     }
   }
 });
+
+for (const [label, source, actionPattern] of [
+  ["Category template", categoryTemplateSource, /<SourcingRequestButtonGroup\b[^>]*\blayout="decision"/],
+  ["Catalog category template", catalogCategoryTemplateSource, /<ContextActions\b[^>]*\bdecision(?:\s|\/?>)/]
+]) {
+  for (const marker of [
+    'data-category-decision-summary="true"',
+    'data-category-families="true"',
+    'data-category-guidance="true"',
+    "Choose a product family",
+    "Buyer decision filters",
+    "Common specifications"
+  ]) {
+    if (!source.includes(marker)) {
+      failures.push(`${label}: missing category decision source marker ${marker}`);
+    }
+  }
+
+  const hero = source.match(/<PageHero\b[^>]*>/)?.[0] ?? "";
+  if (!/\scompact(?:\s|>)/.test(hero) || !/\stight(?:\s|>)/.test(hero) || !hero.includes('align="start"')) {
+    failures.push(`${label}: expected compact, tight, start-aligned decision hero`);
+  }
+  if (!actionPattern.test(source)) {
+    failures.push(`${label}: expected quote, equivalent, and sample decision actions`);
+  }
+  const familiesIndex = source.indexOf('data-category-families="true"');
+  const guidanceIndex = source.indexOf('data-category-guidance="true"');
+  if (familiesIndex < 0 || guidanceIndex < familiesIndex) {
+    failures.push(`${label}: family choices must precede category guidance`);
+  }
+}
+
+if (!catalogCategoryTemplateSource.includes("Product list preview") || !catalogCategoryTemplateSource.includes("<details")) {
+  failures.push("Catalog category template: expected a Product list preview disclosure");
+}
 
 if (!sourcingIntakeFormSource.includes("emailErrorMessage") || !sourcingIntakeFormSource.includes("data-rfq-mode=\"durable-queue-plus-context\"")) {
   failures.push("SourcingIntakeForm: expected durable-queue-plus-context validation mode");

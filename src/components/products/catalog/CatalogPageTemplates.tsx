@@ -235,20 +235,19 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
           { label: category.name }
         ]}
       />
-      <PageHero eyebrow={segment.name} title={category.name} subtitle={category.description}>
-        <div className="grid gap-4">
-          <ContextActions segment={segment} category={category} />
-          <Link href={productCatalogHref(segment.slug)} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+      <PageHero title={category.name} subtitle={category.description} compact tight align="start">
+        <div className="grid gap-3" data-category-decision-summary="true">
+          <ContextActions segment={segment} category={category} decision />
+          <Link href={productCatalogHref(segment.slug)} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {segment.name}
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
+      <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-category-families="true">
+        <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Next layer</p>
-            <h2 className="mt-3 text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">Choose a product family.</h2>
+            <h2 className="text-2xl font-bold text-bioaxis-text">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Family pages show sourcing configuration templates, buyer checklists, documentation requests, and sourcing-list actions.
@@ -256,9 +255,10 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {category.families.map((family) => (
-            <Link
+            <SourcingRequestLink
               key={family.slug}
               href={productCatalogHref(segment.slug, category.slug, family.slug)}
+              preserveProductQuery
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
               <h3 className="text-lg font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
@@ -269,36 +269,29 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
                 ))}
               </div>
               <span className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">View family</span>
-            </Link>
+            </SourcingRequestLink>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Buyer decision filters</p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {["Supplier equivalent", "Sterility", "Format", "Material", "Packaging", "Documentation", "Sample need", "Recurring supply"].map((filter) => (
-              <SpecTag key={filter}>{filter}</SpecTag>
-            ))}
-          </div>
-        </section>
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Common specs as chips</p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {category.tags.slice(0, 10).map((tag) => (
-              <SpecTag key={tag}>{tag}</SpecTag>
-            ))}
-          </div>
-        </section>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
-        {rows.length > 0 ? (
-          <CatalogProductBrowser rows={rows} heading="Sourcing template preview" compact />
-        ) : (
-          <EmptyCatalogPanel title="Sourcing template preview" body="This category is handled through RFQ context first. Send BioAxis the category and required documentation, sample, or equivalent need." />
-        )}
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10" data-category-guidance="true">
+        <div className="grid gap-3">
+          <Disclosure title="Buyer decision filters" items={["Supplier equivalent", "Sterility", "Format", "Material", "Packaging", "Documentation", "Sample need", "Recurring supply"]} />
+          <Disclosure title="Common specifications" items={category.tags.slice(0, 10)} />
+          <details className="group border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
+              <span>Product list preview</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="border-t border-bioaxis-line p-3 sm:p-5">
+              {rows.length > 0 ? (
+                <CatalogProductBrowser rows={rows} heading="Sourcing template preview" compact />
+              ) : (
+                <EmptyCatalogPanel title="Sourcing template preview" body="This category is handled through RFQ context first. Send BioAxis the category and required documentation, sample, or equivalent need." />
+              )}
+            </div>
+          </details>
+        </div>
       </section>
 
       <CatalogCTA segment={segment} category={category} title={`Send ${category.name} context to BioAxis.`} />

@@ -23,20 +23,19 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
           { label: category.title }
         ]}
       />
-      <PageHero eyebrow={segment.title} title={category.title} subtitle={category.longDescription}>
-        <div className="grid gap-3">
-          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} size="md" layout="inline" />
-          <Link href={`/products/${segment.slug}`} className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+      <PageHero title={category.title} subtitle={category.shortDescription} compact tight align="start">
+        <div className="grid gap-3" data-category-decision-summary="true">
+          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} layout="decision" includeDocumentation />
+          <Link href={`/products/${segment.slug}`} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {segment.title}
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
+      <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-category-families="true">
+        <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Next step</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Choose a product family.</h2>
+            <h2 className="text-2xl font-bold text-bioaxis-text">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Family pages show product item cards, buyer checklists, and request context. Detailed specifications live on product item pages.
@@ -49,9 +48,18 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <DecisionPanel title="Buyer decision filters" items={category.selectionCriteria.slice(0, 8)} />
-        <DecisionPanel title="Common specs as chips" items={category.specifications.slice(0, 10)} />
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10" data-category-guidance="true">
+        <div className="grid gap-3">
+          <details className="group border border-bioaxis-line bg-bioaxis-panel">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
+              <span>Category overview</span>
+              <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+            </summary>
+            <p className="border-t border-bioaxis-line p-5 text-sm leading-6 text-bioaxis-muted">{category.longDescription}</p>
+          </details>
+          <Disclosure title="Buyer decision filters" items={category.selectionCriteria.slice(0, 8)} />
+          <Disclosure title="Common specifications" items={category.specifications.slice(0, 10)} />
+        </div>
       </section>
 
       <RFQCTA
@@ -64,15 +72,20 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
   );
 }
 
-function DecisionPanel({ title, items }: { title: string; items: string[] }) {
+function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold text-bioaxis-text">{title}</h2>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {items.map((item) => (
-          <SpecTag key={item}>{item}</SpecTag>
-        ))}
+    <details className="group border border-bioaxis-line bg-bioaxis-panel">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-bioaxis-text [&::-webkit-details-marker]:hidden">
+        <span>{title}</span>
+        <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
+      </summary>
+      <div className="border-t border-bioaxis-line p-5">
+        <ul className="flex flex-wrap gap-2">
+          {items.map((item) => (
+            <li key={item} className="flex max-w-full"><SpecTag>{item}</SpecTag></li>
+          ))}
+        </ul>
       </div>
-    </section>
+    </details>
   );
 }
