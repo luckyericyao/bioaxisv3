@@ -14,10 +14,13 @@ npm run dev
 ```bash
 npm run lint
 node node_modules/typescript/bin/tsc --noEmit --incremental false
+npm test
 npm run build
 npm run smoke
 npm run readiness
 ```
+
+`npm test` runs local regressions without a browser or network access. The pure-data checks can also be run separately with `npm run test:request-types` (RFQ/equivalent links and request aliases), `npm run test:taxonomy-builders` (scientific names, route slugs, and empty seeds), and `npm run test:taxonomy-search` (ranking, query normalization, and stable result limits). Test fixtures stay in memory and do not add production catalog or trust records.
 
 `npm run readiness` checks the public production deployment by default, including core routes, security headers, Turnstile, the private durable RFQ queue, and internal lookup configuration. Pass a URL (`npm run readiness -- http://localhost:3000`) or set `READINESS_BASE_URL` when checking another deployment. The readiness endpoint returns service status labels and a public `release` identifier; it never returns secret values.
 
