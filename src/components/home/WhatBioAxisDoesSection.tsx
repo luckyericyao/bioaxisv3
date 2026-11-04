@@ -37,7 +37,7 @@ export function WhatBioAxisDoesSection() {
               src={pageVisuals.structuredSourcingOutput.src}
               alt={pageVisuals.structuredSourcingOutput.alt}
               fill
-              sizes="(min-width: 1024px) 38vw, 100vw"
+              sizes="(min-width: 1280px) 472px, (min-width: 1024px) calc(40vw - 40px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
               className="object-cover grayscale-[10%] saturate-[0.78]"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,24,39,0.08)_0%,rgba(17,24,39,0.58)_100%)]" aria-hidden="true" />

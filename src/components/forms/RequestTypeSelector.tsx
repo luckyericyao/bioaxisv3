@@ -1,5 +1,3 @@
-"use client";
-
 import type { RequestType } from "@/data/requestTypes";
 
 type RequestTypeSelectorProps = {

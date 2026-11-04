@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 import { getBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
 import { requestErrorMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";

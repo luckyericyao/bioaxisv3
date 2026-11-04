@@ -5,6 +5,15 @@ import { Header } from "@/components/layout/Header";
 import { SourcingListProvider } from "@/components/sourcing/SourcingListProvider";
 import { JsonLd } from "@/components/seo/StructuredData";
 import { siteStructuredData } from "@/lib/structuredData";
+import { productTaxonomy } from "@/data/productTaxonomy";
+
+// Only the visible segment links cross into the interactive header.
+const headerProductSegments = productTaxonomy.map((segment) => ({
+  slug: segment.slug,
+  href: `/products/${segment.slug}`,
+  index: String(segment.index).padStart(2, "0"),
+  label: segment.name
+}));
 
 export const metadata: Metadata = {
   title: "BioAxis | One-Stop Life Science Consumables Sourcing",
@@ -54,7 +63,7 @@ export default function RootLayout({
         <JsonLd data={siteStructuredData} />
         <SourcingListProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Header />
+          <Header productNavigationSegments={headerProductSegments} />
           <main id="main-content" tabIndex={-1}>{children}</main>
           <Footer />
         </SourcingListProvider>

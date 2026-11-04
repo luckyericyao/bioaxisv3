@@ -230,6 +230,30 @@ const { workflows } = require("../src/data/workflows.ts");
 const { getFamilyBySlug } = require("../src/data/productTaxonomy.ts");
 assert.equal(verifiedCatalogReferences.length, 0, "Production reference registry must remain empty until records have evidence");
 
+// Verify the real server page prepares only the active query's results. The client
+// keeps presentation and expansion state without loading the catalog/search index.
+const productsRoute = require("../src/app/products/page.tsx");
+function findSearchElement(node) {
+  if (!React.isValidElement(node)) return undefined;
+  if (node.type === ProductSearch) return node;
+  return React.Children.toArray(node.props.children).map(findSearchElement).find(Boolean);
+}
+for (const [params, expectedQuery] of [
+  [{}, ""],
+  [{ q: "  cell  " }, "cell"],
+  [{ q: ["  PCR tubes  ", "ignored"] }, "PCR tubes"],
+  [{ q: "430641" }, "430641"]
+]) {
+  const tree = await productsRoute.default({ searchParams: Promise.resolve(params) });
+  const search = findSearchElement(tree);
+  assert.ok(search, "Products page must render the interactive search");
+  assert.equal(search.props.initialQuery, expectedQuery, "Server search must preserve q normalization");
+  assert.deepEqual(search.props.results, getProductSearchResults(expectedQuery), "Server-prepared results must preserve search ranking and context");
+  assert.equal(search.props.indexedPathCount, getProductSearchIndexSize());
+  assert.equal(search.props.referenceQuery, isCatalogReferenceQuery(expectedQuery));
+  assert.deepEqual(Object.keys(search.props).sort(), ["indexedPathCount", "initialQuery", "referenceQuery", "results"], "Only query-scoped search data may cross the client boundary");
+}
+
 function renderSearch(query, reset = true) {
   if (reset) {
     state = [];
@@ -244,7 +268,12 @@ function renderSearch(query, reset = true) {
     pendingEffects = [];
     loadMore = undefined;
     dirty = false;
-    html = renderToStaticMarkup(React.createElement(ProductSearch, { initialQuery: query }));
+    html = renderToStaticMarkup(React.createElement(ProductSearch, {
+      initialQuery: query,
+      results: getProductSearchResults(query),
+      indexedPathCount: getProductSearchIndexSize(),
+      referenceQuery: isCatalogReferenceQuery(query)
+    }));
     pendingEffects.forEach((effect) => effect());
   } while (dirty);
   return html;

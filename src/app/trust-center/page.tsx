@@ -151,7 +151,7 @@ export default function TrustCenterPage() {
                   src={pageVisuals.trustDocuments.src}
                   alt={pageVisuals.trustDocuments.alt}
                   fill
-                  sizes="(min-width: 1024px) 38vw, 100vw"
+                  sizes="(min-width: 1280px) 480px, (min-width: 1024px) calc(40vw - 32px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/70 via-transparent to-transparent" aria-hidden="true" />

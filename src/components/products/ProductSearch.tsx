@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
-import { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQuery } from "@/data/productSearch";
-import { buildRequestHref, type ProductSearchResult } from "@/data/productTaxonomy";
+import type { ProductSearchResult } from "@/data/productTaxonomy";
+import { buildRequestHref } from "@/lib/productRequestHref";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
 type ProductSearchProps = {
   initialQuery?: string;
+  results: ProductSearchResult[];
+  indexedPathCount: number;
+  referenceQuery: boolean;
 };
 
 const quickSearches = [
@@ -78,9 +81,9 @@ function displayQueryLabel(value: string) {
     .replace(/\bu[mM]\b/g, "µm");
 }
 
-function queryStateLabel(query: string, results: ProductSearchResult[]) {
+function queryStateLabel(referenceQuery: boolean, results: ProductSearchResult[]) {
   if (results.length === 0) {
-    return isCatalogReferenceQuery(query) ? "Reference not verified" : "No direct product path match";
+    return referenceQuery ? "Reference not verified" : "No direct product path match";
   }
 
   if (results.some((result) => result.matchKind === "catalog-reference")) {
@@ -351,7 +354,7 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
   );
 }
 
-export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
+export function ProductSearch({ initialQuery = "", results, indexedPathCount, referenceQuery }: ProductSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [visibleResultLimit, setVisibleResultLimit] = useState(18);
@@ -360,12 +363,10 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
   const draftQuery = query.trim();
   const activeQuery = initialQuery.trim();
   const displayedQuery = displayQueryLabel(activeQuery);
-  const results = useMemo(() => getProductSearchResults(activeQuery), [activeQuery]);
-  const indexedPathCount = useMemo(() => getProductSearchIndexSize(), []);
   const topMatches = results.slice(0, 6);
   const relatedMatches = results.slice(6, visibleResultLimit);
   const visibleMatchCount = topMatches.length;
-  const searchState = queryStateLabel(activeQuery, results);
+  const searchState = queryStateLabel(referenceQuery, results);
   const typeCounts = resultTypes.map((type) => [resultTypeLabel(type), results.filter((result) => result.type === type).length] as const);
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
@@ -494,13 +495,13 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
             ) : (
               <>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                  {isCatalogReferenceQuery(activeQuery)
+                  {referenceQuery
                     ? "No verified catalog-reference record matches this input."
                     : "No product or sourcing path matches this input."}{" "}
                   This index covers BioAxis product and sourcing paths, not live supplier catalogs.
                 </p>
                 <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
-                  {isCatalogReferenceQuery(activeQuery) ? "0 verified reference matches" : "0 matching paths"} · {indexedPathCount} indexed product and sourcing paths
+                  {referenceQuery ? "0 verified reference matches" : "0 matching paths"} · {indexedPathCount} indexed product and sourcing paths
                 </p>
               </>
             )}
@@ -629,12 +630,12 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
           </div>
         </section>
       ) : (
-        <section data-search-unresolved-reference={isCatalogReferenceQuery(activeQuery) ? "true" : undefined} className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
+        <section data-search-unresolved-reference={referenceQuery ? "true" : undefined} className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
-            {isCatalogReferenceQuery(activeQuery) ? "Unresolved reference" : "Manual sourcing review"}
+            {referenceQuery ? "Unresolved reference" : "Manual sourcing review"}
           </p>
           <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
-            {isCatalogReferenceQuery(activeQuery) ? "Send this reference." : "Send the sourcing input."}
+            {referenceQuery ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis can still review a supplier line, catalog reference, partial product name, workflow, or messy list and turn it into a sourcing path.
@@ -644,7 +645,7 @@ export function ProductSearch({ initialQuery = "" }: ProductSearchProps) {
               href={productListSearchHref}
               className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
-              {isCatalogReferenceQuery(activeQuery) ? "Send this reference" : "Send sourcing input"}
+              {referenceQuery ? "Send this reference" : "Send sourcing input"}
             </Link>
           </div>
         </section>

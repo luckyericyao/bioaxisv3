@@ -70,7 +70,7 @@ export function PrioritySourcingLinesSection() {
                   src={line.image.src}
                   alt={line.image.alt}
                   fill
-                  sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                  sizes="(min-width: 1280px) 392px, (min-width: 1024px) calc(50vw - 46px), (min-width: 768px) calc(50vw - 38px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
                   className="object-cover grayscale-[8%] saturate-[0.82] transition duration-500 group-hover:scale-[1.03] group-hover:saturate-100"
                 />
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,252,0.12)_0%,rgba(15,76,129,0.10)_100%)]" aria-hidden="true" />

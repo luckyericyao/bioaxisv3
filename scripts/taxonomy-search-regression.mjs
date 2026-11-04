@@ -4,14 +4,16 @@ import path from "node:path";
 import ts from "typescript";
 
 const dataDirectory = path.resolve("src/data");
+const requestHrefModule = path.resolve("src/lib/productRequestHref.ts");
 const modules = new Map();
 const originalFetch = globalThis.fetch;
 
 // Evaluate real local TypeScript in a private cache, without installing require hooks.
-// An unexpected package or non-data dependency fails before it can load or do I/O.
+// Only taxonomy data and the shared, data-free URL builder may load. An unexpected
+// package or other dependency fails before it can load or do I/O.
 function loadDataModule(filename) {
   const resolved = path.resolve(filename);
-  assert.ok(resolved.startsWith(`${dataDirectory}${path.sep}`) && resolved.endsWith(".ts"));
+  assert.ok((resolved.startsWith(`${dataDirectory}${path.sep}`) && resolved.endsWith(".ts")) || resolved === requestHrefModule, `Unexpected taxonomy dependency: ${resolved}`);
   if (modules.has(resolved)) return modules.get(resolved).exports;
   const localModule = { exports: {} };
   modules.set(resolved, localModule);

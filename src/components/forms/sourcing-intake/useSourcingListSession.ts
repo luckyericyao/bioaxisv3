@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { IntakeState, SourcingListSummaryItem } from "./types";
 

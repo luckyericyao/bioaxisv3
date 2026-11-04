@@ -54,7 +54,7 @@ export function ProductCategoryCard({ segment }: ProductCategoryCardProps) {
             src={image.src}
             alt={image.alt}
             fill
-            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+            sizes="(min-width: 1280px) 390px, (min-width: 1024px) calc(50vw - 48px), (min-width: 768px) calc(50vw - 40px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
             className="object-cover opacity-80 grayscale-[18%] saturate-[0.72] transition duration-500 group-hover:scale-[1.02] group-hover:opacity-90"
           />
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(17,24,39,0.82),rgba(15,76,129,0.22)_52%,rgba(16,185,129,0.12))]" aria-hidden="true" />

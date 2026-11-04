@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { brand } from "@/data/brand";
 import { navigationItems } from "@/data/navigation";
-import { productNavigationSegments } from "@/data/productNavigation";
+import type { ProductNavigationSegment } from "@/data/productNavigation";
 import { useSourcingList } from "@/components/sourcing/SourcingListProvider";
 
-export function Header() {
+export type HeaderProductSegment = Pick<ProductNavigationSegment, "slug" | "href" | "index" | "label">;
+
+export function Header({ productNavigationSegments }: { productNavigationSegments: HeaderProductSegment[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
@@ -142,6 +144,7 @@ export function Header() {
                 </Link>
                 {productsOpen ? (
                   <ProductSegmentDropdown
+                    segments={productNavigationSegments}
                     onNavigate={() => setProductsOpen(false)}
                   />
                 ) : null}
@@ -181,7 +184,7 @@ export function Header() {
                     <span className="text-bioaxis-accent">{mobileProductsOpen ? "Close" : "Open"}</span>
                   </button>
                   {mobileProductsOpen ? (
-                    <MobileProductsAccordion onNavigate={closeMobileMenu} />
+                    <MobileProductsAccordion segments={productNavigationSegments} onNavigate={closeMobileMenu} />
                   ) : null}
                 </div>
               ) : (
@@ -220,8 +223,10 @@ export function Header() {
 }
 
 function ProductSegmentDropdown({
+  segments,
   onNavigate
 }: {
+  segments: HeaderProductSegment[];
   onNavigate: () => void;
 }) {
   return (
@@ -239,7 +244,7 @@ function ProductSegmentDropdown({
           <span>Search all products</span>
           <span aria-hidden="true">→</span>
         </Link>
-        {productNavigationSegments.map((segment) => (
+        {segments.map((segment) => (
           <Link
             key={segment.slug}
             href={segment.href}
@@ -262,7 +267,7 @@ function ProductSegmentDropdown({
   );
 }
 
-function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
+function MobileProductsAccordion({ segments, onNavigate }: { segments: HeaderProductSegment[]; onNavigate: () => void }) {
   return (
     <div id="mobile-products-navigation" className="border-t border-bioaxis-line bg-bioaxis-panelSoft p-3">
       <div className="grid gap-2">
@@ -274,7 +279,7 @@ function MobileProductsAccordion({ onNavigate }: { onNavigate: () => void }) {
           <span>Search all products</span>
           <span aria-hidden="true">→</span>
         </Link>
-        {productNavigationSegments.map((segment) => (
+        {segments.map((segment) => (
           <Link
             key={segment.slug}
             href={segment.href}

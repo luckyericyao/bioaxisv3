@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ProductCategoryGrid } from "@/components/products/ProductCategoryGrid";
 import { ProductSearch } from "@/components/products/ProductSearch";
-import { getProductSearchResults } from "@/data/productSearch";
+import { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQuery } from "@/data/productSearch";
 import { productTaxonomy } from "@/data/productTaxonomy";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 import { DirectoryItemList } from "@/components/seo/StructuredData";
@@ -31,7 +31,13 @@ function normalizeQuery(value: string | string[] | undefined) {
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const query = normalizeQuery(params?.q).trim();
-  const hasSearchResults = query ? getProductSearchResults(query).length > 0 : false;
+  const searchProps = {
+    initialQuery: query,
+    results: getProductSearchResults(query),
+    indexedPathCount: getProductSearchIndexSize(),
+    referenceQuery: isCatalogReferenceQuery(query)
+  };
+  const hasSearchResults = searchProps.results.length > 0;
 
   return (
     <>
@@ -47,7 +53,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <div>
             <h1 className="sr-only">BioAxis product search</h1>
             <div>
-              <ProductSearch key={query} initialQuery={query} />
+              <ProductSearch key={query} {...searchProps} />
             </div>
           </div>
         ) : (
@@ -61,7 +67,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </p>
             </div>
             <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-              <ProductSearch key="product-search" initialQuery={query} />
+              <ProductSearch key="product-search" {...searchProps} />
             </div>
           </div>
         )}
