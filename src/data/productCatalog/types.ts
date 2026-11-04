@@ -13,6 +13,7 @@ export type ProductCatalogItem = {
   id: string;
   slug: string;
   name: string;
+  configurationKind: "generic" | "specific";
   supplier?: string;
   catalogNumber?: string;
   description: string;

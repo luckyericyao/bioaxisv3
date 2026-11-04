@@ -72,6 +72,7 @@ function makeCatalogProduct(segment: SegmentSeed, category: CategorySeed, family
     id: `${segment.slug}-${category.slug}-${family.slug}-${slug}`,
     slug,
     name,
+    configurationKind: override ? "specific" : "generic",
     supplier: "Buyer supplier input optional",
     catalogNumber: "Buyer SKU input optional",
     description:

@@ -320,14 +320,8 @@ export function CatalogFamilyPage({
   family: ProductCatalogFamily;
 }) {
   const rows = rowsForFamily(segment, category, family);
-  // These generated variants share the family specifications instead of defining a specific configuration.
-  const generalNames = new Set([
-    `${family.name} General Configuration`,
-    `Sterile ${family.name}`,
-    `Documentation-Ready ${family.name}`
-  ]);
-  const specificRows = rows.filter((row) => !generalNames.has(row.product.name));
-  const generalRows = rows.filter((row) => generalNames.has(row.product.name));
+  const specificRows = rows.filter((row) => row.product.configurationKind === "specific");
+  const generalRows = rows.filter((row) => row.product.configurationKind === "generic");
 
   return (
     <>

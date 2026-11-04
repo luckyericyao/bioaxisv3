@@ -111,6 +111,31 @@ function links(html) {
   }));
 }
 
+function catalogConfigurationKinds(html, familyPath) {
+  const configurations = one(html, "section", 'data-family-configurations="true"');
+  const general = one(configurations.html, "details", 'data-general-family-templates="true"');
+  assert.doesNotMatch(general.opening, /\sopen(?:[\s=>])/, `${familyPath}: general templates must start collapsed`);
+  const cards = [
+    ...elements(configurations.html, "article", 'data-family-template-kind="[^"]+"'),
+    ...elements(configurations.html, "tr", 'data-family-template-kind="[^"]+"')
+  ];
+  const kinds = new Map();
+  for (const card of cards) {
+    const productLink = links(card.html).find((link) => link.url.pathname.startsWith(`${familyPath}/`));
+    assert.ok(productLink, `${familyPath}: configuration must link to its product`);
+    const kind = card.opening.match(/data-family-template-kind="([^"]+)"/)[1];
+    assert.ok(kind === "general" || kind === "specific", `${familyPath}: unexpected template kind ${kind}`);
+    if (kind === "specific") assert.ok(card.index < general.index, `${familyPath}: specific configuration must come first`);
+    else assert.ok(card.index > general.index && card.index < general.index + general.html.length, `${familyPath}: general template must be inside disclosure`);
+    const productKind = kind === "general" ? "generic" : "specific";
+    if (kinds.has(productLink.url.pathname)) {
+      assert.equal(kinds.get(productLink.url.pathname), productKind, `${productLink.url.pathname}: mobile and table groups must agree`);
+    }
+    kinds.set(productLink.url.pathname, productKind);
+  }
+  return kinds;
+}
+
 function checkBreadcrumbs(html, expected) {
   const nav = one(html, "nav", 'aria-label="Breadcrumb"');
   const items = elements(nav.body, "li");
@@ -286,17 +311,44 @@ try {
     }
   }
 
-  // Catalog routes currently use generated variants. Also guard specific-first ordering
-  // with an existing catalog family that supplies an explicit named configuration.
-  const configuredCatalog = catalog.productCatalogSegments.flatMap((segment) => segment.categories.flatMap((category) =>
+  // Keep the old name-based rule only as a compatibility oracle for the original data.
+  // Render every catalog family directly, including those shadowed by taxonomy routes.
+  const catalogFamilies = catalog.productCatalogSegments.flatMap((segment) => segment.categories.flatMap((category) =>
     category.families.map((family) => ({ segment, category, family }))
-  )).find(({ family }) => family.products.some((product) => product.slug === "sterile-filtered-universal-pipette-tips"));
-  assert.ok(configuredCatalog, "Configured catalog fixture missing");
-  currentUrl = new URL(catalog.productCatalogHref(configuredCatalog.segment.slug, configuredCatalog.category.slug, configuredCatalog.family.slug), origin);
-  const configuredHtml = renderToStaticMarkup(React.createElement(CatalogFamilyPage, configuredCatalog));
-  const configuredSpecificIndex = configuredHtml.indexOf('data-family-template-kind="specific"');
-  const configuredGeneralIndex = configuredHtml.indexOf('data-general-family-templates="true"');
-  assert.ok(configuredSpecificIndex >= 0 && configuredGeneralIndex > configuredSpecificIndex, "Explicit catalog configurations must precede generated variants");
+  ));
+  assert.deepEqual(new Set(catalogFamilies.flatMap(({ family }) => family.products.map((product) => product.configurationKind))), new Set(["generic", "specific"]), "Cover both catalog configuration kinds");
+  let catalogClassificationRenders = 0;
+  for (const context of catalogFamilies) {
+    const { segment, category, family } = context;
+    const familyPath = catalog.productCatalogHref(segment.slug, category.slug, family.slug);
+    const legacyGenericNames = new Set([
+      `${family.name} General Configuration`, `Sterile ${family.name}`, `Documentation-Ready ${family.name}`
+    ]);
+    const expectedKinds = new Map(family.products.map((product) => [
+      `${familyPath}/${product.slug}`, legacyGenericNames.has(product.name) ? "generic" : "specific"
+    ]));
+    const renamedFamily = { ...family, name: `TEST-ONLY renamed ${family.slug}` };
+    const renameProducts = (input) => ({
+      ...input,
+      products: input.products.map((product, index) => ({
+        ...product,
+        // Give specific products a legacy generic name to catch the reverse misclassification too.
+        name: expectedKinds.get(`${familyPath}/${product.slug}`) === "specific"
+          ? `Sterile ${input.name}`
+          : `TEST-ONLY renamed configuration ${index + 1}`
+      }))
+    });
+    const versions = [family, renamedFamily, renameProducts(family), renameProducts(renamedFamily)];
+    currentUrl = new URL(familyPath, origin);
+    for (const [index, version] of versions.entries()) {
+      const html = renderToStaticMarkup(React.createElement(CatalogFamilyPage, { ...context, family: version }));
+      assert.deepEqual(catalogConfigurationKinds(html, familyPath), expectedKinds, `${familyPath}: classification changed in rename scenario ${index}`);
+      catalogClassificationRenders += 1;
+    }
+    for (const product of family.products) {
+      assert.equal(product.configurationKind, expectedKinds.get(`${familyPath}/${product.slug}`), `${familyPath}/${product.slug}: data classification must match the legacy result`);
+    }
+  }
 
   currentUrl = new URL(`/products/test?query=${encodeURIComponent(query)}`, origin);
   const externalHref = "https://example.test/request-quote?query=external";
@@ -311,6 +363,7 @@ try {
   assert.ok(taxonomyCount > 0 && catalogCount > 0 && specificFamilyCount > 0 && generalOnlyCount > 0, "Both route implementations and configuration cases must be covered");
   console.log(`Family page regression passed (${paths.length} families: ${taxonomyCount} taxonomy, ${catalogCount} catalog; ${specificFamilyCount} with specific configurations, ${generalOnlyCount} general-only).`);
   console.log(`Checked ${scenarios.length} query scenarios, ${productCount} product renders, and ${requestCount} RFQ form contexts without network or browser access.`);
+  console.log(`Checked legacy classification and family/product renaming across all ${catalogFamilies.length} catalog families (${catalogClassificationRenders} renders).`);
 } finally {
   Module._resolveFilename = originalResolveFilename;
   Module._load = originalLoad;
