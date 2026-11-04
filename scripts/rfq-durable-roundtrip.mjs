@@ -17,6 +17,12 @@ function fail(message) {
   process.exit(1);
 }
 
+function workflowStatus(workflow) {
+  if (workflow?.status === "queued") return "stored";
+  if (workflow?.status === "reviewing") return "in-review";
+  return workflow?.status;
+}
+
 if (!["submit", "verify", "confirm-owner"].includes(phase)) {
   fail("RFQ_ROUNDTRIP_PHASE must be submit, verify, or confirm-owner");
 }
@@ -132,12 +138,12 @@ if (phase !== "confirm-owner") {
   process.exit(0);
 }
 
-if (lookupPayload.workflow?.status === "reviewing" && lookupPayload.workflow?.assignedOwner === assignedOwner) {
+if (workflowStatus(lookupPayload.workflow) === "in-review" && lookupPayload.workflow?.assignedOwner === assignedOwner) {
   console.log(`RFQ owner review is already recorded for ${requestId}; no duplicate event written.`);
   process.exit(0);
 }
-if (lookupPayload.workflow?.status !== "queued") {
-  fail("owner confirmation requires a queued QA request; this test will not overwrite an existing workflow");
+if (workflowStatus(lookupPayload.workflow) !== "stored") {
+  fail("owner confirmation requires a stored QA request. This test will not overwrite an existing workflow");
 }
 
 const operationId = randomUUID();
@@ -147,7 +153,7 @@ const workflowResponse = await fetch(new URL(`/api/rfq/internal?requestId=${enco
     Authorization: `Bearer ${internalApiKey}`,
     "Content-Type": "application/json"
   },
-  body: JSON.stringify({ status: "reviewing", assignedOwner, operationId }),
+  body: JSON.stringify({ status: "in-review", assignedOwner, operationId }),
   signal: AbortSignal.timeout(30_000)
 }).catch((error) => fail(`workflow confirmation could not connect (${error instanceof Error ? error.name : "unknown error"})`));
 const workflowPayload = await workflowResponse.json().catch(() => ({}));
@@ -155,7 +161,7 @@ const workflowPayload = await workflowResponse.json().catch(() => ({}));
 if (
   !workflowResponse.ok ||
   workflowPayload?.ok !== true ||
-  workflowPayload?.workflow?.status !== "reviewing" ||
+  workflowStatus(workflowPayload?.workflow) !== "in-review" ||
   workflowPayload?.workflow?.assignedOwner !== assignedOwner
 ) {
   fail(`workflow confirmation returned HTTP ${workflowResponse.status} without the expected owner/status`);
@@ -171,7 +177,7 @@ const readbackResponse = await fetch(new URL(`/api/rfq/internal?requestId=${enco
   signal: AbortSignal.timeout(30_000)
 });
 const readback = await readbackResponse.json().catch(() => ({}));
-if (!readbackResponse.ok || readback.workflow?.status !== "reviewing" || readback.workflow?.assignedOwner !== assignedOwner || JSON.stringify(readback.record) !== JSON.stringify(record)) {
+if (!readbackResponse.ok || workflowStatus(readback.workflow) !== "in-review" || readback.workflow?.assignedOwner !== assignedOwner || JSON.stringify(readback.record) !== JSON.stringify(record)) {
   fail("owner status could not be read back with the original immutable request intact");
 }
 

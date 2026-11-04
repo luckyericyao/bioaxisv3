@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { listQueuedRfqs, readQueuedRfq } from "@/lib/server/rfqQueue";
-import { appendRfqWorkflowEvent, canTransitionRfqWorkflow, getRfqWorkflow, type RfqActionStatus, type RfqWorkflowStatus } from "@/lib/server/rfqWorkflow";
+import { appendRfqWorkflowEvent, getRfqWorkflow, RfqWorkflowUpdateError } from "@/lib/server/rfqWorkflow";
 import { PayloadTooLargeError, readLimitedJsonBody } from "@/lib/server/readLimitedJsonBody";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +53,11 @@ export async function GET(request: NextRequest) {
           receivedAt: record.receivedAt,
           status: workflow.status,
           assignedOwner: workflow.assignedOwner,
+          needsInfo: workflow.needsInfo,
+          supplierConfirmation: workflow.supplierConfirmation,
+          responseSummary: workflow.responseSummary,
+          updatedAt: workflow.updatedAt,
+          revision: workflow.revision,
           email: cleanText(payload.email, 240),
           organization: cleanText(payload.organization || payload.company, 180),
           requestType: cleanText(payload.requestType, 80),
@@ -98,8 +103,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-const actionStatuses = new Set<RfqWorkflowStatus>(["reviewing", "needs-info", "responded", "closed"]);
-
 function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
@@ -126,21 +129,12 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const status = cleanText(payload.status, 32) as RfqWorkflowStatus;
+  const status = cleanText(payload.status, 32);
   const operationId = cleanText(payload.operationId, 100);
   const assignedOwner = cleanText(payload.assignedOwner, 180);
   const needsInfo = cleanText(payload.needsInfo, 1600);
   const responseSummary = cleanText(payload.responseSummary, 1600);
-
-  if (!actionStatuses.has(status) || !/^[a-zA-Z0-9_-]{8,100}$/.test(operationId) || !assignedOwner) {
-    return NextResponse.json({ error: "A valid status, operationId, and assignedOwner are required." }, { status: 400 });
-  }
-  if (status === "needs-info" && !needsInfo) {
-    return NextResponse.json({ error: "needsInfo is required for this status." }, { status: 400 });
-  }
-  if ((status === "responded" || status === "closed") && !responseSummary) {
-    return NextResponse.json({ error: "responseSummary is required for this status." }, { status: 400 });
-  }
+  const supplierConfirmation = cleanText(payload.supplierConfirmation, 1600);
 
   try {
     const record = await readQueuedRfq(requestId);
@@ -148,36 +142,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Request not found.", requestId }, { status: 404 });
     }
 
-    const current = await getRfqWorkflow(requestId);
-    const previousOperation = current.events.find((event) => event.operationId === operationId);
-    if (previousOperation) {
-      const matches = previousOperation.status === status
-        && previousOperation.assignedOwner === assignedOwner
-        && previousOperation.needsInfo === needsInfo
-        && previousOperation.responseSummary === responseSummary;
-      if (!matches) {
-        return NextResponse.json({ error: "operationId was already used for a different update." }, { status: 409 });
-      }
-
-      return NextResponse.json({
-        ok: true,
-        replayed: true,
-        workflow: current
-      }, { headers: { "Cache-Control": "private, no-store, max-age=0" } });
-    }
-
-    if (!canTransitionRfqWorkflow(current.status, status)) {
-      return NextResponse.json({ error: `Status transition ${current.status} -> ${status} is not allowed.` }, { status: 409 });
-    }
-
-    const actionStatus = status as RfqActionStatus;
     const update = await appendRfqWorkflowEvent({
       requestId,
       operationId,
-      status: actionStatus,
+      status,
       assignedOwner,
       needsInfo,
-      responseSummary
+      responseSummary,
+      supplierConfirmation
     });
 
     return NextResponse.json({
@@ -186,6 +158,12 @@ export async function PATCH(request: NextRequest) {
       workflow: await getRfqWorkflow(requestId)
     }, { headers: { "Cache-Control": "private, no-store, max-age=0" } });
   } catch (error) {
+    if (error instanceof RfqWorkflowUpdateError) {
+      return NextResponse.json({ error: error.message, requestId }, {
+        status: error.statusCode,
+        headers: { "Cache-Control": "private, no-store, max-age=0" }
+      });
+    }
     console.error("[BioAxis RFQ workflow update] failed", { requestId, error });
     return NextResponse.json({ error: "Workflow update failed.", requestId }, { status: 503 });
   }
