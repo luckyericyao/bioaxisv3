@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -1976,7 +1976,15 @@ const submitHelperSource = await readRequiredProjectFile("src/lib/submitBioAxisR
 const quoteFormSource = await readRequiredProjectFile("src/components/forms/QuoteRequestForm.tsx");
 const contactFormSource = await readRequiredProjectFile("src/components/forms/ContactForm.tsx");
 const simpleFormSource = await readRequiredProjectFile("src/components/forms/SimpleRequestForm.tsx");
-const sourcingIntakeFormSource = await readRequiredProjectFile("src/components/forms/SourcingIntakeForm.tsx");
+const sourcingIntakeDirectory = "src/components/forms/sourcing-intake";
+const sourcingIntakeFormFiles = [
+  "src/components/forms/SourcingIntakeForm.tsx",
+  ...(await readdir(resolve(repoRoot, sourcingIntakeDirectory)))
+    .filter((filename) => /\.tsx?$/.test(filename))
+    .sort()
+    .map((filename) => `${sourcingIntakeDirectory}/${filename}`)
+];
+const sourcingIntakeFormSource = (await Promise.all(sourcingIntakeFormFiles.map(readRequiredProjectFile))).join("\n");
 const compactSourcingIntakeSource = await readRequiredProjectFile("src/components/forms/CompactSourcingIntake.tsx");
 const sourcingListProviderSource = await readRequiredProjectFile("src/components/sourcing/SourcingListProvider.tsx");
 const turnstileWidgetSource = await readRequiredProjectFile("src/components/forms/TurnstileWidget.tsx");
