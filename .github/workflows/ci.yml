@@ -25,6 +25,7 @@ jobs:
         run: node node_modules/typescript/bin/tsc --noEmit --incremental false
       - name: Build
         run: npm run build
-      - name: Offline regressions
+      - name: Offline regressions (15 checks)
+        # Static rendering, source checks, and mocked RFQ phases need no network or browser.
         # Browser and HTTP regressions keep their separate test:* commands.
         run: npm test
