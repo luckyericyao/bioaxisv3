@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
-import { pageVisuals } from "@/data/visualAssets";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = createRouteMetadata({
@@ -142,8 +140,8 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
     <>
       <PageHero
         eyebrow="Equivalent review"
-        title="Structure an alternatives review for current consumables"
-        subtitle="This service structures comparison criteria and a sourcing request; it does not automatically return verified candidate products. BioAxis reviews practical fit across format, material, sterility, packaging, workflow constraints, documents, samples, and recurring supply needs."
+        title="Review consumable alternatives"
+        subtitle="Send your current product or catalog number and must-match requirements. This starts a sourcing review; it does not automatically return verified alternatives."
         compact
         tight
         align="start"
@@ -151,7 +149,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         <div className="grid gap-3">
           <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-              <span>Open equivalent review</span>
+              <span>Start review</span>
               <span className="text-xs font-semibold text-bioaxis-accent">Email only to start · +</span>
             </summary>
             <div className="border-t border-bioaxis-line p-4 sm:p-5">
@@ -176,80 +174,10 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         </div>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
-        <aside className="overflow-hidden border border-bioaxis-line bg-bioaxis-black">
-          <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panel">
-            <Image
-              src={pageVisuals.equivalentReview.src}
-              alt={pageVisuals.equivalentReview.alt}
-              fill
-              sizes="(min-width: 1024px) 38vw, 100vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/75 via-transparent to-transparent" aria-hidden="true" />
-          </div>
-          <div className="p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Fit assessment, not a name match.</h2>
-          <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
-            BioAxis turns current-product information into a practical alternatives review across fit, evidence, sample path, and sourcing follow-up.
-          </p>
-          <div className="mt-6 grid gap-2">
-            {["Format, material, sterility, packaging", "Workflow fit and automation constraints", "Documentation and sample path"].map((item) => (
-              <div key={item} className="border border-white/[0.1] bg-bioaxis-panel px-4 py-3 text-sm font-semibold uppercase text-bioaxis-steel">
-                {item}
-              </div>
-            ))}
-          </div>
-          </div>
-        </aside>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
-          <div>
-            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Comparison matrix</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">A cleaner way to compare alternatives.</h2>
-          </div>
-          <p className="text-sm leading-6 text-bioaxis-muted">
-            BioAxis structures the inputs buyers need before requesting candidates, samples, documentation, or quotes.
-          </p>
-        </div>
-        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
-          <table className="min-w-full border-separate border-spacing-0 text-left">
-            <thead>
-              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
-                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Current product</th>
-                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Candidate option</th>
-                <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparisonRows.map((row) => (
-                <tr key={row.area} className="align-top">
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold uppercase text-bioaxis-text">
-                    {row.area}{" "}
-                  </td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">
-                    {row.candidate}{" "}
-                  </td>
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
-          <p className="text-sm leading-6 text-bioaxis-muted">
-            BioAxis supports equivalent review and sourcing comparison. Final suitability depends on supplier documentation, sample testing, and customer-side validation.
-          </p>
-        </div>
-      </section>
-
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Common equivalent requests</p>
-            <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Start with the current product type.</h2>
+            <h2 className="text-3xl font-bold text-bioaxis-text sm:text-4xl">Choose a product type</h2>
           </div>
           <Link
             href={requestHref()}
@@ -265,10 +193,45 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
               href={requestHref(request)}
               className="group border border-bioaxis-line bg-bioaxis-panel p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
-              <h3 className="text-sm font-bold uppercase leading-6 text-bioaxis-text transition group-hover:text-bioaxis-accent">{request}</h3>
+              <h3 className="text-sm font-bold leading-6 text-bioaxis-text transition group-hover:text-bioaxis-accent">{request}</h3>
               <span className="mt-4 block text-xs font-bold uppercase text-bioaxis-accent">Request review</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+        <div className="mb-8">
+          <h2 id="comparison-heading" className="text-3xl font-bold text-bioaxis-text sm:text-4xl">Compare requirements</h2>
+        </div>
+        <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
+          <table aria-labelledby="comparison-heading" className="min-w-full border-separate border-spacing-0 text-left">
+            <thead>
+              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
+                <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review area</th>
+                <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Candidate details to check</th>
+                <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map((row) => (
+                <tr key={row.area} className="align-top">
+                  <th scope="row" className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold text-bioaxis-text">
+                    {row.area}{" "}
+                  </th>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">
+                    {row.candidate}{" "}
+                  </td>
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-muted">{row.notes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
+          <p className="text-sm leading-6 text-bioaxis-muted">
+            Final suitability depends on supplier documentation, sample testing, and customer-side validation.
+          </p>
         </div>
       </section>
     </>

@@ -132,14 +132,13 @@ const requiredWorkflowCtaLabels = [
 ];
 const requestTypeLabels = ["Quote", "Product list", "Equivalent", "Sample", "Documentation", "Recurring supply", "Private label / OEM", "General sourcing question"];
 const equivalentFinderContent = [
-  "Structure an alternatives review for current consumables",
-  "does not automatically return verified candidate products",
+  "Review consumable alternatives",
+  "does not automatically return verified alternatives",
+  "Start review",
   "Send the current product.",
   "Complete verification to send",
-  "Fit assessment, not a name match.",
-  "A cleaner way to compare alternatives.",
-  "Common equivalent requests",
-  "BioAxis supports equivalent review and sourcing comparison",
+  "Choose a product type",
+  "Compare requirements",
   "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
 ];
 const requiredPrimaryNavigation = ["Availability Check", "Products", "Equivalent Review", "Private Label / OEM", "Trust Center", "Resources", "Request Quote"];
@@ -796,14 +795,14 @@ for (const route of routes) {
 
   if (route === "/resources") {
     [
+      "Consumables sourcing guides",
       "Filtered vs non-filtered pipette tips",
       "How to prepare a consumables RFQ",
       "How to source automation-compatible tips",
       "How to qualify equivalent lab consumables before switching",
-      "Read the guide",
-      "Send the context",
-      "BioAxis structures next steps",
+      "Read guide",
       "Use as request starter",
+      "Start a sourcing request",
       "Send product context"
     ].forEach((label) => {
       if (!pageText.includes(label)) {
@@ -1222,13 +1221,13 @@ for (const route of routes) {
 
   if (route === "/private-label-oem") {
     [
-      "Private-label sourcing for recurring consumables demand",
-      "Built for recurring demand conversations.",
+      "Private-label & OEM sourcing",
+      "Send product and volume needs",
+      "Choose a review",
       "Priority categories",
-      "Pipette tips private-label review",
-      "Tubes / plates recurring demand review",
-      "Filtration / PCR plastics OEM-style sourcing",
       "Pipette tips",
+      "Tubes and plates",
+      "Filtration and PCR plastics",
       "Tubes, plates, and storage",
       "Automation-compatible consumables",
       "Discuss private-label sourcing",
