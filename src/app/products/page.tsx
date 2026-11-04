@@ -5,6 +5,7 @@ import { ProductSearch } from "@/components/products/ProductSearch";
 import { getProductSearchResults } from "@/data/productSearch";
 import { productTaxonomy } from "@/data/productTaxonomy";
 import { createRouteMetadata } from "@/lib/siteMetadata";
+import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 export const metadata: Metadata = createRouteMetadata({
   title: "Products | BioAxis",
@@ -34,6 +35,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <>
+      {(!query || hasSearchResults) ? (
+        <DirectoryItemList
+          name="Browse BioAxis product lines"
+          path="/products"
+          items={productTaxonomy.map((segment) => ({ name: segment.name, href: `/products/${segment.slug}` }))}
+        />
+      ) : null}
       <section className={`mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10 ${query ? "pb-4 pt-3 sm:pb-6 sm:pt-5" : "pb-4 pt-4 sm:pb-12 sm:pt-12"}`}>
         {query ? (
           <div>

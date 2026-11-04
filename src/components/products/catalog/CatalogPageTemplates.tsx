@@ -7,6 +7,7 @@ import { productCatalogHref } from "@/data/productCatalog";
 import { Breadcrumbs } from "../Breadcrumbs";
 import { SourcingRequestLink } from "../SourcingRequestLink";
 import { CatalogProductBrowser, type CatalogProductRow } from "./CatalogProductBrowser";
+import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 const statusLabels: Record<DocumentStatus, string> = {
   available: "Available",
@@ -133,6 +134,11 @@ function ContextActions({
 export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment }) {
   return (
     <>
+      <DirectoryItemList
+        name={segment.name}
+        path={productCatalogHref(segment.slug)}
+        items={segment.categories.map((category) => ({ name: category.name, href: productCatalogHref(segment.slug, category.slug) }))}
+      />
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Products", href: "/products" }, { label: segment.name }]} />
       <PageHero eyebrow={`Product segment ${segment.index}`} title={segment.name} subtitle={segment.heroDescription}>
         <div className="grid gap-4">
@@ -227,6 +233,11 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
 
   return (
     <>
+      <DirectoryItemList
+        name={category.name}
+        path={productCatalogHref(segment.slug, category.slug)}
+        items={category.families.map((family) => ({ name: family.name, href: productCatalogHref(segment.slug, category.slug, family.slug) }))}
+      />
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -320,6 +331,11 @@ export function CatalogFamilyPage({
 
   return (
     <>
+      <DirectoryItemList
+        name={family.name}
+        path={productCatalogHref(segment.slug, category.slug, family.slug)}
+        items={[...specificRows, ...generalRows].map((row) => ({ name: row.product.name, href: row.href }))}
+      />
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },

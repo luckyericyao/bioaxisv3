@@ -6,6 +6,7 @@ import { Breadcrumbs } from "./Breadcrumbs";
 import { ProductFamilyCard } from "./ProductFamilyCard";
 import { RFQCTA } from "./RFQCTA";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
+import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 type CategoryPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -15,6 +16,11 @@ type CategoryPageTemplateProps = {
 export function CategoryPageTemplate({ segment, category }: CategoryPageTemplateProps) {
   return (
     <>
+      <DirectoryItemList
+        name={category.title}
+        path={`/products/${segment.slug}/${category.slug}`}
+        items={category.productFamilies.map((family) => ({ name: family.title, href: `/products/${segment.slug}/${category.slug}/${family.slug}` }))}
+      />
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },

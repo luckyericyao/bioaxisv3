@@ -1,6 +1,7 @@
 import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 import { SourcingRequestLink } from "./SourcingRequestLink";
+import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 type ProductConfigurationSectionProps = {
   segment: ProductTaxonomySegment;
@@ -58,6 +59,14 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
 
   return (
     <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-family-configurations="true">
+      <DirectoryItemList
+        name={family.title}
+        path={`/products/${segment.slug}/${category.slug}/${family.slug}`}
+        items={[...specificItems, ...generalItems].map((item) => ({
+          name: item.name,
+          href: getProductItemHref(segment.slug, category.slug, family.slug, item.slug)
+        }))}
+      />
       <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-xs font-semibold text-bioaxis-accent">Sourcing configuration templates</p>

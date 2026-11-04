@@ -4,6 +4,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
 import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
+import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 type SegmentPageTemplateProps = {
   segment: ProductTaxonomySegment;
@@ -12,6 +13,11 @@ type SegmentPageTemplateProps = {
 export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
   return (
     <>
+      <DirectoryItemList
+        name={segment.title}
+        path={`/products/${segment.slug}`}
+        items={segment.subcategories.map((category) => ({ name: category.title, href: `/products/${segment.slug}/${category.slug}` }))}
+      />
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Products", href: "/products" }, { label: segment.title }]} />
       <PageHero eyebrow={`Product segment ${String(segment.index).padStart(2, "0")}`} title={segment.title} subtitle={segment.heroDescription}>
         <div className="grid gap-3">

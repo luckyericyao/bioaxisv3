@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { bioAxisSiteUrl } from "@/lib/siteMetadata";
+import { JsonLd } from "@/components/seo/StructuredData";
+import { createBreadcrumbStructuredData } from "@/lib/structuredData";
 
 export type BreadcrumbItem = {
   label: string;
@@ -11,20 +12,9 @@ type BreadcrumbsProps = {
 };
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.label,
-      ...(item.href ? { item: new URL(item.href, bioAxisSiteUrl).toString() } : {})
-    }))
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\u003c") }} />
+      <JsonLd data={createBreadcrumbStructuredData(items)} />
       <nav aria-label="Breadcrumb" className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8 lg:px-10">
         <ol className="flex flex-wrap items-center gap-2 text-xs font-semibold text-bioaxis-dim">
         {items.map((item, index) => (
