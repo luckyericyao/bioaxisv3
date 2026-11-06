@@ -3,7 +3,6 @@ import type { ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { PageHero } from "@/components/ui/PageHero";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { RFQCTA } from "./RFQCTA";
-import { SourcingRequestButtonGroup } from "./SourcingRequestButtonGroup";
 import { DirectoryItemList } from "@/components/seo/StructuredData";
 
 type SegmentPageTemplateProps = {
@@ -21,21 +20,22 @@ export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Products", href: "/products" }, { label: segment.title }]} />
       <PageHero eyebrow={`Product segment ${String(segment.index).padStart(2, "0")}`} title={segment.title} subtitle={segment.heroDescription}>
         <div className="grid gap-3">
-          <SourcingRequestButtonGroup segment={segment.slug} size="md" layout="inline" />
+          <Link href="#segment-categories" className="action-primary w-fit">Browse categories</Link>
+          <Link href={`/products?view=configurations&segment=${segment.slug}`} className="inline-flex min-h-11 items-center text-sm font-medium text-bioaxis-accent">Compare configuration targets</Link>
           <Link href="/products" className="text-sm font-semibold  text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to products
           </Link>
         </div>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+      <section id="segment-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 py-10 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.7fr] lg:items-end">
           <div>
             <p className="mb-3 text-sm font-semibold  text-bioaxis-accent">Next step</p>
             <h2 className="text-3xl font-semibold text-bioaxis-text sm:text-4xl">Choose a {segment.shortTitle} category.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
-            Category pages reveal product families, buyer filters, and request context. Item-level details stay deeper in the flow.
+            Compare the product types and key formats for your requirement.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -81,8 +81,8 @@ export function SegmentPageTemplate({ segment }: SegmentPageTemplateProps) {
       </section>
 
       <RFQCTA
-        title="Send this segment to BioAxis."
-        body="Choose a category first when possible, or send this segment with an email and BioAxis can follow up for product family, supplier, catalog number, quantity, sample, or documentation details."
+        title="Have a reference or a requirement?"
+        body="Send your current product or key specifications for quote, sample, document or alternative review."
         segment={segment.slug}
       />
     </>

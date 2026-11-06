@@ -29,5 +29,12 @@ function ContextualRequestLink({ href, className, children, preserveProductQuery
     requestHref = `${target.pathname}${target.search}${target.hash}`;
   }
 
+  const productList = currentParams.get("productList");
+  if (productList && target.origin === "https://bioaxis.local" && (target.pathname === "/request-quote" || (preserveProductQuery && target.pathname.startsWith("/products/")))) {
+    const contextual = new URL(requestHref, "https://bioaxis.local");
+    if (!contextual.searchParams.has("productList")) contextual.searchParams.set("productList", productList.slice(0, 12000));
+    requestHref = `${contextual.pathname}${contextual.search}${contextual.hash}`;
+  }
+
   return <Link href={requestHref} className={className}>{children}</Link>;
 }

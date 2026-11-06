@@ -5,7 +5,7 @@
 :root {
   color-scheme: light;
   --background: #ffffff;
-  --foreground: #18212b;
+  --foreground: #253746;
 }
 
 * {
@@ -31,19 +31,41 @@ body {
 
 .page-container {
   width: 100%;
-  max-width: 1264px;
+  max-width: 1344px;
   margin-inline: auto;
   padding-inline: 20px;
 }
 .section-space { padding-block: 48px; }
-.home-hero-photo { mask-image: linear-gradient(to right, transparent, #000 96px); }
+.home-header, .home-hero { background: #062436; }
+.home-header .home-header-quote { border-color: #ffffff; background: transparent; color: #ffffff; }
+.home-header .home-header-quote:hover { background: #ffffff; color: #102a43; }
+.home-header :focus-visible, .home-hero :focus-visible { outline-color: #ffffff; }
+.home-header #products-segment-dropdown :focus-visible,
+.home-header #sourcing-support-dropdown :focus-visible,
+.home-header #mobile-primary-navigation :focus-visible { outline-color: #0b7f86; }
+.home-hero-photo { position: absolute; left: -50%; right: 0; bottom: 0; height: 370px; }
+.home-hero-content { padding-top: 16px; padding-bottom: 270px; }
+.home-hero-copy { max-width: 680px; }
+.hero-line { display: contents; }
+#sourcing-value { scroll-margin-top: 88px; }
+.configuration-overview { display: grid; gap: 16px; padding-top: 12px; padding-bottom: 40px; }
+.configuration-visual { min-width: 0; margin: 0; }
+.configuration-image { height: 220px; }
+.configuration-image img { object-fit: cover; object-position: center 46%; }
+.configuration-overview h1.configuration-title { font-size: 30px; line-height: 38px; font-weight: 500; }
+.configuration-overview p.helper-text { font-size: 14px; line-height: 21px; }
+.configuration-fields { min-width: 0; }
+.configuration-fields table { overflow-wrap: anywhere; }
 main h1, main h1[class] { font-size: 32px; line-height: 40px; font-weight: 500; }
 main h2, main h2[class] { font-size: 28px; line-height: 36px; font-weight: 600; }
 main h3, main h3[class], main article h2[class] { font-size: 18px; line-height: 26px; font-weight: 500; }
-main h1.home-brand { font-size: 48px; line-height: 52px; font-weight: 600; }
+main h1.home-brand { max-width: 310px; font-size: 40px; line-height: 44px; font-weight: 500; }
 main p[class] { font-size: 16px; line-height: 25px; font-weight: 400; }
-main p.home-purpose { font-size: 20px; line-height: 28px; }
-main .helper-text { font-size: 14px; line-height: 21px; }
+main p.home-purpose { max-width: 570px; font-size: 16px; line-height: 25px; }
+.home-hero .home-label { font-size: 14px; line-height: 21px; font-weight: 500; }
+.home-hero .home-purpose { margin-top: 20px; }
+.home-hero .home-actions { margin-top: 24px; }
+main p.helper-text, main .helper-text { font-size: 14px; line-height: 21px; }
 main .body-copy { font-size: 16px; line-height: 25px; font-weight: 400; }
 main .body-copy li { font-size: inherit; line-height: inherit; font-weight: inherit; }
 main td[class] { font-size: 16px; line-height: 25px; font-weight: 400; }
@@ -54,7 +76,7 @@ main h2.tool-heading { font-size: 20px; line-height: 28px; font-weight: 500; }
   align-items: center;
   justify-content: center;
   gap: 12px;
-  border: 1px solid #245b78;
+  border: 1px solid #0b7f86;
   border-radius: 4px;
   padding: 12px 20px;
   font-size: 14px;
@@ -63,10 +85,11 @@ main h2.tool-heading { font-size: 20px; line-height: 28px; font-weight: 500; }
   text-align: center;
   transition: background-color 150ms ease, color 150ms ease;
 }
-.action-primary { color: #ffffff; background: #245b78; }
-.action-primary:hover { background: #1b4358; }
-.action-secondary { color: #245b78; background: #ffffff; }
-.action-secondary:hover { background: #f7fafb; }
+.action-primary { color: #ffffff; background: #0b7f86; }
+.action-primary:hover { background: #08636a; }
+.action-secondary { color: #0b7f86; background: #ffffff; }
+.action-secondary:hover { background: #f7f9fb; }
+.home-explore { min-height: 48px; font-size: 16px; }
 .action-primary:disabled { cursor: wait; opacity: 0.7; }
 .nav-dropdown-link {
   display: flex;
@@ -79,18 +102,39 @@ main h2.tool-heading { font-size: 20px; line-height: 28px; font-weight: 500; }
   line-height: 20px;
   font-weight: 500;
 }
-.nav-dropdown-link:hover { color: #245b78; background: #f7fafb; }
+.nav-dropdown-link:hover { color: #0b7f86; background: #f7f9fb; }
 input:not([type="checkbox"]):not([type="radio"]), select, textarea { border-color: #75889a; }
 @media (min-width: 640px) {
   .page-container { padding-inline: 32px; }
 }
 @media (min-width: 1024px) {
+  .configuration-overview { padding-top: 24px; padding-bottom: 64px; }
+  .configuration-overview.has-visual { grid-template-columns: 0.95fr 1.05fr; column-gap: 40px; row-gap: 16px; }
+  .configuration-overview.has-visual .configuration-intro { grid-column: 2; grid-row: 1; }
+  .configuration-overview.has-visual .configuration-visual { grid-column: 1; grid-row: 1 / span 2; }
+  .configuration-overview.has-visual .configuration-fields { grid-column: 2; grid-row: 2; }
+  .configuration-image { height: auto; aspect-ratio: 1; }
+  .configuration-image img { object-fit: contain; }
+  .configuration-overview h1.configuration-title { font-size: 36px; line-height: 44px; }
+  .home-hero { min-height: calc(86svh - 72px); display: flex; align-items: flex-start; }
+  .home-hero-content { padding-top: 112px; padding-bottom: 96px; }
+  .home-hero-copy { width: 58%; }
+  .home-hero-photo { inset: 0; height: auto; }
+  .hero-line { display: block; }
+  .home-hero .home-purpose { margin-top: 24px; }
+  .home-hero .home-label { font-size: 20px; line-height: 28px; margin-bottom: 16px; }
+  .home-hero .home-actions { margin-top: 32px; }
+  .home-explore { min-height: 56px; padding-inline: 28px; }
   .section-space { padding-block: 64px; }
   main h1, main h1[class] { font-size: 48px; line-height: 58px; }
   main h2, main h2[class] { font-size: 32px; line-height: 40px; }
   main h3, main h3[class], main article h2[class] { font-size: 20px; line-height: 28px; }
-  main h1.home-brand { font-size: 72px; line-height: 76px; }
-  main p.home-purpose { font-size: 24px; line-height: 34px; }
+  main h1.home-brand { max-width: none; font-size: 56px; line-height: 62px; }
+  main p.home-purpose { font-size: 20px; line-height: 30px; }
+}
+
+@media (min-width: 1280px) {
+  main h1.home-brand { font-size: 68px; line-height: 74px; }
 }
 
 a {

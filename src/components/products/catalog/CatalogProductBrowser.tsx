@@ -148,7 +148,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
     return rows.filter((row) => {
       if (normalizedQuery && !productHaystack(row).includes(normalizedQuery)) return false;
       if (selectedTypes.length > 0 && !selectedTypes.includes(row.product.productType)) return false;
-      if (selectedSterility.length > 0 && !selectedSterility.some((value) => fieldValue(row.product, "Sterility").includes(value))) return false;
+      if (selectedSterility.length > 0 && !selectedSterility.some((value) => normalize(fieldValue(row.product, "Sterility")).trim() === normalize(value).trim())) return false;
       if (
         selectedDocs.length > 0 &&
         !Object.values(row.product.documents).some((status) => status && selectedDocs.includes(statusLabels[status]))

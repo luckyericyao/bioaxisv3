@@ -13,7 +13,6 @@ export function BrandMotion() {
       return;
     }
     brand.current?.animate([{ opacity: 0.65, transform: "translateY(4px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 500, easing: "ease-out" });
-    brand.current?.querySelector("[data-brand-axis]")?.animate([{ transform: "scaleX(0.9)" }, { transform: "scaleX(1)" }], { duration: 500, easing: "ease-out" });
   }, []);
-  return <h1 ref={brand} aria-label="BioAxis" className="home-brand" data-home-brand="true">Bio<span data-brand-axis className="inline-block">A</span>xis</h1>;
+  return <h1 ref={brand} className="home-brand" data-home-brand="true"><span className="hero-line">Explore a new world</span>{" "}<span className="hero-line">of life science</span>{" "}<span className="hero-line">consumables.</span></h1>;
 }

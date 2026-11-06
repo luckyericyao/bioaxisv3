@@ -6,6 +6,7 @@ import { getProductSearchIndexSize, getProductSearchResults, isCatalogReferenceQ
 import { productTaxonomy } from "@/data/productTaxonomy";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 import { DirectoryItemList } from "@/components/seo/StructuredData";
+import { SourcingConfigurationBrowser } from "@/components/products/SourcingConfigurationBrowser";
 
 export const metadata: Metadata = createRouteMetadata({
   title: "Products | BioAxis",
@@ -15,9 +16,7 @@ export const metadata: Metadata = createRouteMetadata({
 });
 
 type ProductsPageProps = {
-  searchParams?: Promise<{
-    q?: string | string[];
-  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 function normalizeQuery(value: string | string[] | undefined) {
@@ -31,6 +30,9 @@ function normalizeQuery(value: string | string[] | undefined) {
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const query = normalizeQuery(params?.q).trim();
+  if (normalizeQuery(params?.view) === "configurations") {
+    return <SourcingConfigurationBrowser filters={{ q: query.slice(0, 180), segment: normalizeQuery(params?.segment), category: normalizeQuery(params?.category), volume: normalizeQuery(params?.volume), barrier: normalizeQuery(params?.barrier), sterility: normalizeQuery(params?.sterility), packaging: normalizeQuery(params?.packaging), includeUnconfirmed: normalizeQuery(params?.includeUnconfirmed) === "1" }} />;
+  }
   const searchProps = {
     initialQuery: query,
     results: getProductSearchResults(query),
@@ -82,9 +84,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-muted sm:block">
               {query
                 ? "Search results are ranked above. Use this compact directory when you want to browse across BioAxis product lines."
-                : "Start with one of 12 top-level product segments. Each segment opens into category and family pages with sourcing templates, equivalent review paths, sample requests, and quote-ready fields."}
+                : "Browse a product line, or go directly to configuration targets and compare the fields that matter."}
             </p>
           </div>
+          <Link href="/products?view=configurations" className="inline-flex min-h-11 items-center text-sm font-medium text-bioaxis-accent underline underline-offset-4">Compare configuration targets</Link>
         </div>
         {query ? (
           <details className="border border-bioaxis-line bg-bioaxis-panel">

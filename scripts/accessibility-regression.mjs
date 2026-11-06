@@ -516,7 +516,7 @@ async function checkMobileSearchFunnel() {
   for (const href of await itemActions.evaluateAll((links) => links.map((link) => link.href))) {
     check(new URL(href).searchParams.get("query") === query, "search-to-detail handoff loses the query from a quote/sample/equivalent action");
   }
-  await itemActions.filter({ hasText: /^Request quote$/i }).click();
+  await itemActions.filter({ hasText: /^Request a quote$/i }).click();
   await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
   check((await page.locator("#sourcing-product-input").inputValue()).includes(query), "search-to-detail-to-RFQ handoff loses the original query");
 
@@ -572,7 +572,7 @@ async function checkMobileSearchFunnel() {
   await openRoute(page, "/");
   const hero = page.locator("main > section").first();
   check((await hero.locator("form, input, textarea").count()) === 0, "homepage still expands a procurement form");
-  const requestSourcing = hero.getByRole("link", { name: "Request sourcing", exact: true });
+  const requestSourcing = hero.getByRole("link", { name: "Request a quote", exact: true });
   check((await hero.locator("a").count()) === 2, "homepage hero must expose exactly two actions");
   await requestSourcing.focus();
   await requestSourcing.press("Enter");
@@ -620,7 +620,10 @@ async function checkFamilyDecisionPages() {
     );
     const decision = page.locator('[data-family-decision-summary="true"]');
     const actions = decision.locator('[data-sourcing-primary-actions="true"] a');
-    check((await actions.count()) === 3, `${route}: family hero must have exactly three primary actions`);
+    check((await actions.count()) === 3, `${route}: family sourcing actions must remain reachable`);
+    check(!(await actions.first().isVisible()), `${route}: sourcing actions must start collapsed while choosing a configuration`);
+    const chooseConfiguration = decision.getByRole("link", { name: "View configurations", exact: true });
+    check(await chooseConfiguration.isVisible(), `${route}: family must offer a direct configuration choice`);
     const layout = await page.evaluate(() => {
       const configurations = document.querySelector('[data-family-configurations="true"]');
       const overview = [...document.querySelectorAll("details > summary")].find((summary) => summary.textContent.includes("Family overview"));
@@ -641,7 +644,7 @@ async function checkFamilyDecisionPages() {
     check(layout.configurationHeadingVisible, `${route}: configuration choices do not enter the mobile first viewport`);
     check(!layout.overflow, `${route}: family page overflows the mobile viewport`);
 
-    for (const action of await actions.all()) {
+    for (const action of [chooseConfiguration]) {
       const box = await action.boundingBox();
       check(Boolean(box && box.y >= 64 && box.y + box.height <= 844 && box.height >= 44), `${route}: family primary action is outside the first viewport or too small`);
       check(await action.evaluate((element) => {
@@ -658,7 +661,7 @@ async function checkFamilyDecisionPages() {
     const specificCards = configurations.locator('[data-family-template-kind="specific"]');
     check((await specificCards.count()) === (specificSlug ? 1 : 0), `${route}: configured and general templates are not separated correctly`);
     if (specificSlug) {
-      const href = new URL(await specificCards.first().getByRole("link", { name: "View template", exact: true }).getAttribute("href"), baseUrl);
+      const href = new URL(await specificCards.first().getByRole("link", { name: "Review configuration", exact: true }).getAttribute("href"), baseUrl);
       check(href.pathname === `${route}/${specificSlug}`, `${route}: a general template outranks the specific configuration`);
       check((await specificCards.first().locator("ul li").count()) === 3, `${route}: configuration sourcing fields are not a compact semantic list`);
     }
@@ -668,12 +671,13 @@ async function checkFamilyDecisionPages() {
     await generalSummary.focus();
     await generalSummary.press("Enter");
     check(await general.locator("article").first().isVisible(), `${route}: keyboard cannot reveal the preserved general template`);
-    const generalHref = new URL(await general.getByRole("link", { name: "View template", exact: true }).first().getAttribute("href"), baseUrl);
+    const generalHref = new URL(await general.getByRole("link", { name: "Review configuration", exact: true }).first().getAttribute("href"), baseUrl);
     check(generalHref.pathname === `${route}/${route.split("/").at(-1)}-general`, `${route}: general template route changed`);
     check(generalHref.searchParams.get("q") === query, `${route}: general template link loses the search query`);
     await generalSummary.press("Enter");
 
-    const moreActions = decision.locator("details");
+    await decision.getByText("Request sourcing support", { exact: true }).click();
+    const moreActions = decision.locator("details").filter({ has: page.getByText("More sourcing actions", { exact: true }) }).last();
     const documentation = moreActions.getByRole("link", { name: "Ask for documents", exact: true });
     check(!(await documentation.isVisible()), `${route}: documentation is a fourth default primary action`);
     await moreActions.locator("summary").click();
@@ -682,6 +686,7 @@ async function checkFamilyDecisionPages() {
 
     for (const [label, requestType] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]]) {
       await openRoute(page, familyPath);
+      await page.locator('[data-family-decision-summary="true"]').getByText("Request sourcing support", { exact: true }).click();
       await page.locator('[data-family-decision-summary="true"] [data-sourcing-primary-actions="true"]').getByRole("link", { name: label, exact: true }).click();
       await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
       const handoff = new URL(page.url());
@@ -702,13 +707,13 @@ async function checkFamilyDecisionPages() {
 
     await openRoute(page, familyPath);
     if (!specificSlug) await general.locator("summary").click();
-    const itemLink = configurations.locator(`[data-family-template-kind="${specificSlug ? "specific" : "general"}"]`).first().getByRole("link", { name: "View template", exact: true });
+    const itemLink = configurations.locator(`[data-family-template-kind="${specificSlug ? "specific" : "general"}"]`).first().getByRole("link", { name: "Review configuration", exact: true });
     await itemLink.click();
     const expectedItemPath = `${route}/${specificSlug ?? `${route.split("/").at(-1)}-general`}`;
     await page.waitForURL((url) => url.pathname === expectedItemPath, { timeout: 15_000 });
     check(new URL(page.url()).searchParams.get("q") === query, `${route}: family-to-item navigation loses the query`);
     const productName = (await page.locator("main h1").innerText()).trim();
-    await page.locator('[data-product-primary-actions="true"]').getByRole("link", { name: "Request quote", exact: true }).click();
+    await page.locator('[data-product-primary-actions="true"]').getByRole("link", { name: "Request a quote", exact: true }).click();
     await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
     const itemContext = page.locator('[data-product-context-summary="true"]');
     await itemContext.waitFor({ state: "visible", timeout: 15_000 });
@@ -743,9 +748,9 @@ async function checkProductDecisionPages() {
     );
     const decision = await page.evaluate(() => {
       const summary = document.querySelector('[data-product-decision-summary="true"]');
-      const groups = [...(summary?.querySelectorAll("[data-product-specification-group]") ?? [])].map((group) => ({
+      const groups = [...(summary?.querySelectorAll("[data-product-specification-group]") ?? [])].filter((group) => group.getClientRects().length).map((group) => ({
         name: group.getAttribute("data-product-specification-group"),
-        values: [...group.querySelectorAll("li")].map((item) => item.innerText.trim())
+        values: [group.innerText.trim()]
       }));
       const actions = [...(document.querySelector('[data-product-primary-actions="true"]')?.querySelectorAll("a") ?? [])].map((link) => {
         const rect = link.getBoundingClientRect();
@@ -788,12 +793,12 @@ async function checkProductDecisionPages() {
       check(!action.covered, `${route}: ${action.text} is covered by another element`);
     }
 
-    for (const [label, requestType] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]]) {
+    for (const [label, requestType] of [["Request a quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]]) {
       const action = decision.actions.find((entry) => entry.text.toLocaleLowerCase() === label.toLocaleLowerCase());
       check(Boolean(action && new URL(action.href).searchParams.get("requestType") === requestType), `${route}: ${label} has the wrong request type`);
     }
 
-    for (const [actionIndex, [label, requestType]] of [["Request quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]].entries()) {
+    for (const [actionIndex, [label, requestType]] of [["Request a quote", "quote"], ["Request sample", "sample"], ["Review equivalent", "equivalent"]].entries()) {
       if (actionIndex > 0) await openRoute(page, route);
       const actionLink = page.locator('[data-product-primary-actions="true"] a').filter({ hasText: new RegExp(`^${label}$`, "i") });
       await actionLink.click();

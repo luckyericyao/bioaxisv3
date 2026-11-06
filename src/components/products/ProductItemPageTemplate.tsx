@@ -2,8 +2,7 @@ import Link from "next/link";
 import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getIndexableProductItemsForFamily, getProductItemHref } from "@/data/productItems";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
-import { PageHero } from "@/components/ui/PageHero";
-import { SpecTag } from "@/components/ui/SpecTag";
+import { SourcingConfigurationOverview } from "./SourcingConfigurationOverview";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { SupplierComparisonModule } from "./SupplierComparisonModule";
 import { SourcingRequestLink } from "./SourcingRequestLink";
@@ -16,9 +15,6 @@ type ProductItemPageTemplateProps = {
 };
 
 export function ProductItemPageTemplate({ segment, category, family, productItem }: ProductItemPageTemplateProps) {
-  const specificationGroups = splitSpecificationGroups(productItem.commonSpecifications);
-  const targetSpecifications = specificationGroups.targets.slice(0, 5);
-  const optionsToConfirm = specificationGroups.toConfirm.slice(0, 5 - targetSpecifications.length);
   const relatedConfigurations = getIndexableProductItemsForFamily(segment.slug, category.slug, family.slug)
     .filter((item) => item.slug !== productItem.slug)
     .slice(0, 6);
@@ -61,45 +57,18 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           { label: productItem.name }
         ]}
       />
-      <PageHero
+      <SourcingConfigurationOverview
         title={productItem.name}
-        subtitle={productItem.shortDescription}
-        compact
-        tight
-        align="start"
+        description={productItem.shortDescription}
+        specifications={productItem.commonSpecifications}
       >
-        <div className="grid gap-3" data-product-decision-summary="true">
-          <p role="note" className="helper-text border-l-2 border-bioaxis-accent/70 pl-3 text-bioaxis-muted">
-            Sourcing template: confirm supplier specifications and availability.
-          </p>
-          {targetSpecifications.length > 0 ? (
-            <div data-product-specification-group="target">
-              <p className="helper-text mb-2 text-bioaxis-dim">Target specifications</p>
-              <ul className="flex flex-wrap gap-2">
-                {targetSpecifications.map((specification) => (
-                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification).replace(/^[^:]+:\s*/, "")}</SpecTag></li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {optionsToConfirm.length > 0 ? (
-            <div data-product-specification-group="options">
-              <p className="helper-text mb-2 text-bioaxis-dim">
-                {specificationGroups.targets.length > 0 ? "Options and fit to confirm" : "Fields and options to confirm"}
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {optionsToConfirm.map((specification) => (
-                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification).replace(/^[^:]+:\s*/, "")}</SpecTag></li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+        <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" data-product-primary-actions="true">
             <SourcingRequestLink
               href={requestLinks[0].href}
-              className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+              className="action-primary col-span-2"
             >
-              Request quote
+              Request a quote
             </SourcingRequestLink>
             <SourcingRequestLink
               href={requestLinks[2].href}
@@ -145,7 +114,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
             </div>
           </details>
         </div>
-      </PageHero>
+      </SourcingConfigurationOverview>
 
       <SupplierComparisonModule
         title={productItem.name}
@@ -164,7 +133,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8">
           <p className="mb-3 text-sm font-semibold  text-bioaxis-accent">Sourcing template details</p>
-          <h2 className="text-3xl font-semibold  text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
+          <h2 className="text-3xl font-semibold  text-bioaxis-text sm:text-4xl">Application and review details</h2>
         </div>
         <div className="grid gap-3">
           <InfoPanel title="Sourcing context" items={productItem.details} />
@@ -252,41 +221,4 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
 
 function cleanListItem(item: string) {
   return item.replace(/^\s*(?:[-*•]\s*)+/, "").trim();
-}
-
-function splitSpecificationGroups(specifications: string[]) {
-  const explicitTargetFields = new Set([
-    "nominal volume",
-    "format",
-    "profile",
-    "membrane",
-    "pore size",
-    "surface",
-    "filter barrier",
-    "sterility",
-    "serum status",
-    "base formulation",
-    "volume",
-    "diameter",
-    "mwco",
-    "barcode",
-    "barcode format",
-    "thread style"
-  ]);
-  const targets: string[] = [];
-  const toConfirm: string[] = [];
-
-  specifications.forEach((specification) => {
-    const separator = specification.indexOf(":");
-    const field = separator < 0 ? "" : specification.slice(0, separator).trim().toLowerCase();
-    const value = separator < 0 ? "" : specification.slice(separator + 1).trim();
-    const isSpecificTarget = explicitTargetFields.has(field)
-      && Boolean(value)
-      && !/\b(?:or|option|review|required|relevant|dependent|compatibility)\b/i.test(value)
-      && !/\b(?:review|option|fit|compatibility)\b/i.test(field);
-
-    (isSpecificTarget ? targets : toConfirm).push(specification);
-  });
-
-  return { targets, toConfirm };
 }

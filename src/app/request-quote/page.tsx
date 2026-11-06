@@ -421,7 +421,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           relevantSpecs:
             productMatch?.productItem.commonSpecifications.slice(0, 8) ??
             familyMatch?.family.keySpecifications.slice(0, 8) ??
-            (catalogProductMatch ? catalogProductMatch.product.tags.slice(0, 8) :
+            (catalogProductMatch ? Object.entries(catalogProductMatch.product.specs).slice(0, 8).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`) :
             catalogFamilyMatch ? catalogFamilyMatch.family.typicalSpecs.slice(0, 8) :
             []),
           documentationNotes:

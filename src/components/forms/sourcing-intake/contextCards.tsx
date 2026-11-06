@@ -1,5 +1,6 @@
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 import type { SourcingListSummaryItem } from "./types";
+import { sourcingSpecifications } from "@/lib/sourcingSpecifications";
 
 function sourceLabel(value: string | undefined) {
   if (!value) return "";
@@ -23,19 +24,23 @@ export function RequestContextCard({ productContext }: {
   ].filter((row): row is [string, string] => Boolean(row[1]));
   const title = productContext.productName || productContext.productFamily || productContext.productCategory || productContext.productSegment || "Source page included";
   return (
-    <details data-product-context-summary="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft">
-      <summary className="min-h-11 cursor-pointer px-4 py-3 text-sm font-medium">
-        Request context: <span className="break-words">{title}</span>
-      </summary>
-      <div className="border-t border-bioaxis-line px-4 pb-4">
+    <section data-product-context-summary="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft px-4 py-3" aria-label="Included request context">
+      <h2 className="tool-heading">Request context</h2>
+      <p className="mt-2 break-words font-medium">{title}</p>
+      {productContext.relevantSpecs?.length ? <ul className="mt-3 grid gap-1 text-sm text-bioaxis-muted" aria-label="Target details to review">{sourcingSpecifications(productContext.relevantSpecs).slice(0, 3).map((spec) => <li key={spec.key}>{spec.label}: {spec.status === "target" ? spec.value : "To confirm"}</li>)}</ul> : null}
+      <details className="mt-2">
+        <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-bioaxis-accent">More context</summary>
+        <div className="border-t border-bioaxis-line pb-1">
         <dl className="grid gap-3 pt-3">
           {rows.map(([label, value]) => <div key={label} className="grid gap-1 sm:grid-cols-[100px_minmax(0,1fr)]">
             <dt className="text-sm text-bioaxis-muted">{label}</dt><dd className="break-words text-sm">{value}</dd>
           </div>)}
         </dl>
-        <p className="helper-text mt-3 text-bioaxis-muted">Included automatically. Edit your request in the field above.</p>
-      </div>
-    </details>
+        {productContext.relevantSpecs?.length ? <ul className="mt-3 grid gap-2 text-sm text-bioaxis-muted" aria-label="All source specifications">{productContext.relevantSpecs.map((spec, index) => <li key={`${index}-${spec}`}>{spec}</li>)}</ul> : null}
+        </div>
+      </details>
+      <p className="helper-text text-bioaxis-muted">Included automatically; details to confirm.</p>
+    </section>
   );
 }
 

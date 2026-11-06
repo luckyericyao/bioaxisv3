@@ -13,9 +13,9 @@ export function HomeMetrics() {
       const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
       if (!link || !link.closest("main, header")) return;
       const url = new URL(link.href);
-      if (url.origin !== location.origin || url.pathname === "/") return;
+      if (url.origin !== location.origin || (url.pathname === "/" && !url.hash)) return;
       trackBioAxisEvent("cta_click", {
-        cta: "homepage_navigation", destination: url.pathname,
+        cta: "homepage_navigation", destination: `${url.pathname}${url.hash}`,
         firstAction, msSinceHomeInteractive: Math.round(performance.now() - interactiveAt)
       });
       firstAction = false;

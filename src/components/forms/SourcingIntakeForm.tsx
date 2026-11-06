@@ -79,13 +79,13 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
           helperText={hasSelectedNeed ? "Your selected product or list is included. Add details only if useful." : "A product name, catalog reference or rough purchasing list is enough."}
           placeholder="Product, catalog reference, list or sourcing need"
           onChange={(value) => updateField("productInput", value)} />
-        {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
-        {sourcingListItems.length ? <SourcingListSummary items={sourcingListItems}
-          onEdit={(target) => openDrawer(target)} /> : null}
         <Field id="sourcing-email" name="email" label="Email" type="email" value={state.email} required
           invalid={emailInvalid} describedBy={emailInvalid ? "sourcing-intake-error" : undefined}
           autoComplete="email" inputMode="email" placeholder="you@organization.com"
           onChange={(value) => updateField("email", value)} />
+        {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
+        {sourcingListItems.length ? <SourcingListSummary items={sourcingListItems}
+          onEdit={(target) => openDrawer(target)} /> : null}
       </section>
 
       <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip}>

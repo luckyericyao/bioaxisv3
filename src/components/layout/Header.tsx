@@ -13,6 +13,7 @@ type OpenMenu = "products" | "support" | null;
 
 export function Header({ productNavigationSegments }: { productNavigationSegments: HeaderProductSegment[] }) {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState<OpenMenu>(null);
@@ -47,24 +48,24 @@ export function Header({ productNavigationSegments }: { productNavigationSegment
   const supportLinks = <>{supportItems.map((item) => <Link key={item.href} href={item.href} onClick={closeAll} className="nav-dropdown-link">{item.label}<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>)}</>;
 
   return (
-    <header ref={root} className="sticky top-0 z-50 border-b border-bioaxis-line bg-white">
+    <header ref={root} data-home-header={isHome || undefined} className={`sticky top-0 z-50 border-b ${isHome ? "home-header border-white/10 text-white" : "border-bioaxis-line bg-white"}`}>
       <div className="page-container flex h-16 items-center justify-between gap-6 lg:h-[72px]">
         <Link href="/" aria-label="BioAxis home" className="inline-flex min-h-11 items-center text-2xl font-semibold">BioAxis</Link>
         <button ref={mobileMenu} type="button" aria-label={menuOpen ? "Close menu" : "Menu"} title={menuOpen ? "Close menu" : "Menu"} aria-expanded={menuOpen} aria-controls={menuOpen ? "mobile-primary-navigation" : undefined} onClick={() => { setMenuOpen(!menuOpen); setMobileOpen(null); }} className="flex h-11 w-11 items-center justify-center rounded border border-bioaxis-line lg:hidden">{menuOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}</button>
         <nav aria-label="Primary navigation" id="primary-navigation" className="hidden h-full items-center gap-6 lg:flex">
           {navigationItems.map((item) => {
             const kind = item.label === "Products" ? "products" : item.children ? "support" : null;
-            if (!kind) return <Link key={item.href} href={item.href} onClick={closeAll} className={item.href === "/request-quote" ? "action-primary" : "inline-flex min-h-11 items-center text-sm font-medium text-bioaxis-text"}>{item.label}</Link>;
+            if (!kind) return <Link key={item.href} href={item.href} onClick={closeAll} className={item.href === "/request-quote" ? `action-primary ${isHome ? "home-header-quote" : ""}` : "inline-flex min-h-11 items-center text-sm font-medium"}>{item.label}</Link>;
             const id = kind === "products" ? "products-segment-dropdown" : "sourcing-support-dropdown";
             return <div key={kind} className="relative flex h-full items-center" onMouseEnter={() => setOpenMenu(kind)} onMouseLeave={() => { if (!root.current?.querySelector(`#${id}`)?.contains(document.activeElement)) setOpenMenu(null); }} onFocus={() => { if (!suppressFocus.current) setOpenMenu(kind); }} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenMenu(null); }}>
               {kind === "products" ? <Link ref={productsTrigger} href={item.href} aria-expanded={openMenu === kind} aria-controls={openMenu === kind ? id : undefined} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">{item.label}<ChevronDown aria-hidden="true" size={16} /></Link> :
                 <button ref={supportTrigger} type="button" aria-expanded={openMenu === kind} aria-controls={openMenu === kind ? id : undefined} onClick={() => setOpenMenu(kind)} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">{item.label}<ChevronDown aria-hidden="true" size={16} /></button>}
-              {openMenu === kind ? <div id={id} className="absolute left-0 top-full z-50 max-h-[70vh] w-[340px] overflow-y-auto border border-bioaxis-line bg-white p-2 shadow-lg">{kind === "products" ? productLinks : supportLinks}</div> : null}
+              {openMenu === kind ? <div id={id} className="absolute left-0 top-full z-50 max-h-[70vh] w-[340px] overflow-y-auto border border-bioaxis-line bg-white p-2 text-bioaxis-text shadow-lg">{kind === "products" ? productLinks : supportLinks}</div> : null}
             </div>;
           })}
         </nav>
       </div>
-      {menuOpen ? <nav aria-label="Mobile navigation" id="mobile-primary-navigation" className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-bioaxis-line bg-white px-5 py-4 lg:hidden">
+      {menuOpen ? <nav aria-label="Mobile navigation" id="mobile-primary-navigation" className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-bioaxis-line bg-white px-5 py-4 text-bioaxis-text lg:hidden">
         {navigationItems.map((item) => {
           const kind = item.label === "Products" ? "products" : item.children ? "support" : null;
           if (!kind) return <Link key={item.href} href={item.href} onClick={closeAll} className={item.href === "/request-quote" ? "action-primary mt-3 w-full" : "nav-dropdown-link"}>{item.label}</Link>;

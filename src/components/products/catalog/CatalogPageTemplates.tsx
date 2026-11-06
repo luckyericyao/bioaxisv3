@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AddToSourcingListButton } from "@/components/sourcing/AddToSourcingListButton";
 import { PageHero } from "@/components/ui/PageHero";
+import { SourcingConfigurationOverview } from "../SourcingConfigurationOverview";
 import { SpecTag } from "@/components/ui/SpecTag";
 import type { DocumentStatus, ProductCatalogCategory, ProductCatalogFamily, ProductCatalogItem, ProductCatalogSegment } from "@/data/productCatalog";
 import { productCatalogHref } from "@/data/productCatalog";
@@ -105,11 +106,11 @@ function ContextActions({
     <div className={compactActions ? "grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" : "flex flex-col gap-3 sm:flex-row sm:flex-wrap"} data-product-primary-actions={product ? "true" : undefined} data-sourcing-primary-actions={decision ? "true" : undefined}>
       <SourcingRequestLink
         href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
-        className={compactActions
+        className={product ? "action-primary col-span-2" : compactActions
           ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
       >
-        Request quote
+        {product ? "Request a quote" : "Request quote"}
       </SourcingRequestLink>
       <SourcingRequestLink
         href={catalogEquivalentHref(segment, category, family, product)}
@@ -414,7 +415,7 @@ export function CatalogProductPage({
   family: ProductCatalogFamily;
   product: ProductCatalogItem;
 }) {
-  const relatedProducts = family.products.filter((item) => item.slug !== product.slug).slice(0, 6);
+  const relatedProducts = family.products.filter((item) => item.slug !== product.slug && item.configurationKind === "specific").slice(0, 6);
 
   return (
     <>
@@ -428,19 +429,8 @@ export function CatalogProductPage({
           { label: product.name }
         ]}
       />
-      <PageHero title={product.name} subtitle={product.description} compact tight align="start">
-        <div className="grid gap-3" data-product-decision-summary="true">
-          <p role="note" className="helper-text border-l-2 border-bioaxis-accent/70 pl-3 text-bioaxis-muted">
-            Sourcing template: confirm supplier specifications and availability.
-          </p>
-          <div data-product-specification-group="options">
-            <p className="helper-text mb-2 text-bioaxis-dim">Fields and options to confirm</p>
-            <ul className="flex flex-wrap gap-2">
-              {[...new Set(product.tags)].slice(0, 5).map((tag) => (
-                <li key={tag} className="flex max-w-full"><SpecTag>{tag}</SpecTag></li>
-              ))}
-            </ul>
-          </div>
+      <SourcingConfigurationOverview title={product.name} description={product.description} specifications={product.specs}>
+        <div className="grid gap-3">
           <ContextActions segment={segment} category={category} family={family} product={product} />
           <details className="group border border-bioaxis-line bg-bioaxis-black">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold  text-bioaxis-steel [&::-webkit-details-marker]:hidden">
@@ -470,12 +460,11 @@ export function CatalogProductPage({
             </div>
           </details>
         </div>
-      </PageHero>
+      </SourcingConfigurationOverview>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold  text-bioaxis-accent">Documentation to request</p>
-          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Confirm document status before purchase.</h2>
+        <details className="border-t border-bioaxis-line py-5">
+          <summary className="min-h-11 cursor-pointer text-xl font-medium text-bioaxis-text">Documentation to request</summary>
           <div className="mt-5 grid gap-3">
             {documentLabels.map(([key, label]) => {
               const status = product.documents[key];
@@ -496,11 +485,10 @@ export function CatalogProductPage({
           >
             Request documents
           </SourcingRequestLink>
-        </section>
+        </details>
 
-        <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold  text-bioaxis-accent">Template fields to confirm</p>
-          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Confirm values against supplier documentation.</h2>
+        <details className="border-t border-bioaxis-line py-5">
+          <summary className="min-h-11 cursor-pointer text-xl font-medium text-bioaxis-text">All fields to confirm</summary>
           <dl className="mt-5 grid gap-3 md:grid-cols-2">
             {Object.entries(product.specs).map(([key, value]) => (
               <div key={key} className="border border-bioaxis-line bg-bioaxis-black p-4">
@@ -509,7 +497,7 @@ export function CatalogProductPage({
               </div>
             ))}
           </dl>
-        </section>
+        </details>
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">

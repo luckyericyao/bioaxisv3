@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { selectedLineRegistry, selectedLineRegistryNote } from "@/data/readySupplyEvidence";
 import { publicTrustEvidenceSummary, publicTrustFacts, trustEvidenceAsOf } from "@/data/publicTrustProfile";
-import { pageVisuals } from "@/data/visualAssets";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = createRouteMetadata({
@@ -80,12 +78,14 @@ const documentPackage = [
 ];
 
 export default function TrustCenterPage() {
+  const listedFacts = publicTrustFacts.filter((fact) => fact.status === "verified");
+  const pendingFacts = publicTrustFacts.filter((fact) => fact.status !== "verified");
   return (
     <>
       <PageHero
-        eyebrow="Trust Center"
-        title="Clear sourcing evidence before procurement decisions."
-        subtitle="BioAxis helps structure documentation review, supplier screening, sample-first evaluation, and equivalent review while avoiding unsupported claims about live inventory, automatic interchangeability, or final quality release decisions."
+        eyebrow="Sourcing evidence"
+        title="Quality & Documentation"
+        subtitle="Organize supplier documents, compare specifications and define sample evaluation. Final suitability remains with your technical and procurement team."
       />
       <section className="mx-auto w-full max-w-7xl px-5 pt-10 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6" data-business-facts-status={publicTrustEvidenceSummary.complete ? "complete" : "incomplete"}>
@@ -104,11 +104,11 @@ export default function TrustCenterPage() {
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {publicTrustEvidenceSummary.complete
               ? `Public business details and response information are listed with supporting evidence, reviewed ${trustEvidenceAsOf}.`
-              : "Operating identity, region, dedicated business contact, and response target are not currently listed publicly. Use the Contact BioAxis form to ask a question or start a sourcing request."}
+              : `${pendingFacts.map((fact) => fact.label).join(", ")} are not currently listed publicly. Use the Contact BioAxis form to request business information before proceeding.`}
           </p>
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {publicTrustFacts.map((fact) => (
-              <div key={fact.label} className="border border-bioaxis-line bg-bioaxis-panel p-4">
+            {listedFacts.map((fact) => (
+              <div key={fact.label} className="border-t border-bioaxis-line py-4">
                 <dt className="flex items-center justify-between gap-3 text-xs font-semibold  text-bioaxis-accent">
                   <span>{fact.question} · {fact.label}</span>
                   <span className={fact.status === "verified" ? "text-sm font-semibold  text-emerald-700" : "text-sm font-semibold  text-amber-700"}>
@@ -128,6 +128,10 @@ export default function TrustCenterPage() {
               </div>
             ))}
           </dl>
+          {pendingFacts.length ? <details className="mt-4 border-t border-bioaxis-line">
+            <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-bioaxis-accent">Business information still to confirm</summary>
+            <dl className="grid gap-3 pb-4">{pendingFacts.map((fact) => <div key={fact.label}><dt className="font-medium">{fact.label}</dt><dd className="mt-1 text-bioaxis-muted">{fact.value}</dd></div>)}</dl>
+          </details> : null}
         </div>
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
@@ -137,46 +141,30 @@ export default function TrustCenterPage() {
         />
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {trustAreas.map((area) => (
-            <article key={area.title} className="border border-bioaxis-line bg-bioaxis-panel p-6">
+            <article key={area.title} className="border-t border-bioaxis-line py-6">
               <h2 className="text-xl font-semibold  text-bioaxis-text">{area.title}</h2>
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{area.body}</p>
             </article>
           ))}
         </div>
-        <div className="mt-4 overflow-hidden border border-bioaxis-line bg-bioaxis-black">
-          <div className="grid gap-0 lg:grid-cols-[0.9fr_1.35fr] lg:items-stretch">
-            <div>
-              <div className="relative min-h-[240px] border-b border-bioaxis-line bg-bioaxis-panel lg:h-full lg:border-b-0 lg:border-r">
-                <Image
-                  src={pageVisuals.trustDocuments.src}
-                  alt={pageVisuals.trustDocuments.alt}
-                  fill
-                  sizes="(min-width: 1280px) 480px, (min-width: 1024px) calc(40vw - 32px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-bioaxis-black/70 via-transparent to-transparent" aria-hidden="true" />
-              </div>
-            </div>
-            <div className="p-6">
-              <p className="text-sm font-semibold  text-bioaxis-accent">Document package BioAxis can help organize</p>
+        <div id="document-package" className="mt-6 scroll-mt-24 border-y border-bioaxis-line py-8">
+              <h2>Document package BioAxis can help organize</h2>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
                 BioAxis can help organize document requirements and request supplier-provided evidence. BioAxis does not certify, release, validate, or approve final product suitability.
               </p>
               <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {documentPackage.map((document) => (
-                  <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold  text-bioaxis-steel">
+                  <li key={document} className="border-l border-bioaxis-line px-3 py-2 text-base text-bioaxis-steel">
                     {document}
                   </li>
                 ))}
               </ul>
-              <div className="mt-5 border border-white/[0.12] bg-bioaxis-panel p-4">
-                <p className="text-xs font-semibold  text-bioaxis-accent">Supplier documents and availability</p>
+              <div className="mt-5">
+                <h3>Supplier documents and availability</h3>
                 <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                   Line-level stock and certificates are not published on this page. Supplier availability and documents must be confirmed for each request; buyers make the final acceptance decision.
                 </p>
               </div>
-            </div>
-          </div>
         </div>
         <div className="mt-4 border border-bioaxis-line bg-bioaxis-panel p-5">
           <p className="text-xs font-semibold  text-bioaxis-accent">Selected-line evidence</p>

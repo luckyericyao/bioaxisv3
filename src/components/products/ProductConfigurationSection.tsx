@@ -1,4 +1,4 @@
-import { buildRequestHref, type ProductCategory, type ProductFamily, type ProductItem, type ProductTaxonomySegment } from "@/data/productTaxonomy";
+import type { ProductCategory, ProductFamily, ProductItem, ProductTaxonomySegment } from "@/data/productTaxonomy";
 import { getProductItemHref, getProductItemsForFamily } from "@/data/productItems";
 import { SourcingRequestLink } from "./SourcingRequestLink";
 import { DirectoryItemList } from "@/components/seo/StructuredData";
@@ -19,8 +19,6 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
   const specificItems = productItems.filter((item) => item.indexable);
   const generalItems = productItems.filter((item) => !item.indexable);
   const renderConfiguration = (productItem: ProductItem) => {
-    const context = { segment: segment.slug, category: category.slug, family: family.slug, product: productItem.slug };
-
     return (
       <article key={productItem.slug} className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5" data-family-template-kind={productItem.indexable ? "specific" : "general"}>
         <h3 className="text-lg font-semibold leading-snug text-bioaxis-text">{productItem.name}</h3>
@@ -32,25 +30,13 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
             </li>
           ))}
         </ul>
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="mt-5">
           <SourcingRequestLink
             href={getProductItemHref(segment.slug, category.slug, family.slug, productItem.slug)}
             preserveProductQuery
-            className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-xs font-semibold text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="action-secondary w-full"
           >
-            View template
-          </SourcingRequestLink>
-          <SourcingRequestLink
-            href={buildRequestHref({ ...context, requestType: "quote" })}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-          >
-            Request quote
-          </SourcingRequestLink>
-          <SourcingRequestLink
-            href={buildRequestHref({ ...context, requestType: "equivalent" })}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-          >
-            Review equivalent
+            Review configuration
           </SourcingRequestLink>
         </div>
       </article>
@@ -58,7 +44,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
   };
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-family-configurations="true">
+    <section id="family-configurations" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-family-configurations="true">
       <DirectoryItemList
         name={family.title}
         path={`/products/${segment.slug}/${category.slug}/${family.slug}`}
@@ -77,7 +63,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
         </p>
       </div>
       {specificItems.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className={specificItems.length === 1 ? "max-w-xl" : "grid gap-4 md:grid-cols-2 xl:grid-cols-3"}>
           {specificItems.map(renderConfiguration)}
         </div>
       ) : null}

@@ -42,7 +42,7 @@ try {
           brokenImages: [...document.images].filter((node) => visible(node) && (!node.complete || !node.naturalWidth)).map((node) => node.src),
           hero: hero ? {
             title: getComputedStyle(hero.querySelector("h1")).fontSize,
-            purposeLines: hero.querySelector("p").getBoundingClientRect().height / parseFloat(getComputedStyle(hero.querySelector("p")).lineHeight),
+            purposeLines: hero.querySelector(".home-purpose").getBoundingClientRect().height / parseFloat(getComputedStyle(hero.querySelector(".home-purpose")).lineHeight),
             actions: [...hero.querySelectorAll("a")].map((node) => ({ height: node.getBoundingClientRect().height, bottom: node.getBoundingClientRect().bottom })),
             productsTop: document.getElementById("home-products-title").getBoundingClientRect().top
           } : null
@@ -55,12 +55,13 @@ try {
       assert.deepEqual(state.uppercase, [], `${viewport.width} ${route}: forced uppercase`);
       assert.deepEqual(state.brokenImages, [], `${viewport.width} ${route}: missing image`);
       if (state.hero) {
-        assert.equal(state.hero.title, viewport.width < 1024 ? "48px" : "72px");
-        assert.ok(state.hero.purposeLines <= 2.05);
+        assert.equal(state.hero.title, viewport.width < 1024 ? "40px" : "68px");
+        assert.ok(state.hero.purposeLines <= (viewport.width < 640 ? 3.05 : 2.05));
         assert.equal(state.hero.actions.length, 2);
         assert.ok(state.hero.actions.every((action) => action.height >= 44 && action.bottom < viewport.height));
-        assert.ok(state.hero.productsTop < viewport.height, "Products must begin in the first viewport");
-        assert.deepEqual(await page.evaluate(() => window.__brandAnimations), [500, 500]);
+        assert.ok(state.hero.productsTop > viewport.height, "Brand opening must precede the product directory");
+        assert.equal(await page.locator('.home-hero a').first().getAttribute('href'), '#sourcing-value');
+        assert.deepEqual(await page.evaluate(() => window.__brandAnimations), [500]);
         await page.screenshot({ path: path.join(output, `home-${viewport.width}.png`) });
         await page.reload({ waitUntil: "networkidle" });
         assert.deepEqual(await page.evaluate(() => window.__brandAnimations), [], "Brand animation must not replay in the session");
@@ -68,6 +69,20 @@ try {
       if (route === "/request-quote") {
         assert.ok(await page.locator("#sourcing-product-input").getAttribute("required") !== null);
         await page.screenshot({ path: path.join(output, `rfq-${viewport.width}.png`) });
+      }
+      if (route.endsWith("/filtered-200ul-pipette-tips")) {
+        const actions = page.locator('[data-product-primary-actions="true"] a');
+        assert.equal(await actions.count(), 3, "Configuration has one primary and two secondary actions");
+        if (viewport.width < 640) {
+          const bounds = await actions.evaluateAll((links) => links.map((link) => link.getBoundingClientRect().toJSON()));
+          assert.ok(bounds.every((rect) => rect.height >= 44 && rect.bottom <= viewport.height), "Mobile configuration actions remain in the first viewport");
+          assert.equal(await page.getByRole("link", { name: "Ask for documents", exact: true }).isVisible(), false);
+          const fields = page.getByText("Configuration fields to confirm", { exact: true });
+          await fields.click();
+          assert.match(await fields.locator("..").innerText(), /racked, reload, or bulk/);
+          await fields.click();
+        }
+        await page.screenshot({ path: path.join(output, `configuration-${viewport.width}.png`) });
       }
       evidence.push({ viewport, route, ...state });
     }
@@ -101,6 +116,7 @@ try {
   await formPage.locator("#sourcing-email").fill("qa@example.test");
   await formPage.locator("form").evaluate((form) => { form.requestSubmit(); form.requestSubmit(); });
   await formPage.getByText("Reference: QA-LOCAL-ONLY", { exact: true }).waitFor();
+  await formPage.screenshot({ path: path.join(output, "rfq-success-mobile.png") });
   assert.equal(submissions.length, 1, "Concurrent submit events must produce one API call");
   assert.equal(submissions[0].productList, "PCR plates for assay development");
   await formPage.goto(new URL("/request-quote?productName=Filtered%20pipette%20tips", baseUrl).toString());
@@ -112,7 +128,59 @@ try {
   assert.equal(submissions[1].productName, "Filtered pipette tips");
   assert.equal(submissions[1].productList, "");
   await formPage.close();
+  const listFixture = [{ id: "local-test-only", title: "Filtered 200 µL Pipette Tips", href: "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips", quantity: "10 racks", requestedAction: "Quote", addedAt: "2026-11-07T00:00:00.000Z" }];
+  const listSubmissions = [];
+  for (const width of [390, 320]) {
+    const contextPage = await browser.newPage({ viewport: { width, height: 844 } });
+    contextPage.on("pageerror", (error) => errors.push(error.message));
+    await contextPage.addInitScript((items) => localStorage.setItem("bioaxis:sourcing-list", JSON.stringify(items)), listFixture);
+    await contextPage.route("**/api/turnstile/config", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: false }) }));
+    await contextPage.route("**/api/rfq", async (route) => {
+      listSubmissions.push(route.request().postDataJSON());
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, mode: "durable-queue", referenceId: "QA-CONTEXT-LOCAL-ONLY", message: "Request received and stored for BioAxis review." }) });
+    });
+    await contextPage.goto(new URL("/request-quote?requestType=quote&segment=liquid-handling&category=pipette-tips&family=filtered-pipette-tips&product=filtered-200ul-pipette-tips", baseUrl).toString(), { waitUntil: "networkidle" });
+    await contextPage.locator('[data-sourcing-list-summary="true"]').waitFor();
+    const emailBounds = await contextPage.locator("#sourcing-email").boundingBox();
+    assert.ok(emailBounds.y + emailBounds.height <= 844, `${width}: product context and list must not displace Email below the first viewport`);
+    const context = contextPage.locator('[data-product-context-summary="true"]');
+    assert.match(await context.innerText(), /Filtered 200 µL Pipette Tips/);
+    assert.match(await context.innerText(), /Sterility: To confirm/);
+    assert.equal(await contextPage.locator("#sourcing-product-input").getAttribute("required"), null);
+    await contextPage.screenshot({ path: path.join(output, `rfq-context-list-${width}.png`) });
+    await contextPage.locator("#sourcing-email").fill("qa@example.test");
+    await contextPage.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await contextPage.getByText("Reference: QA-CONTEXT-LOCAL-ONLY", { exact: true }).waitFor();
+    assert.equal(listSubmissions.at(-1).sourcingListItems[0].quantity, "10 racks");
+    assert.ok(listSubmissions.at(-1).productContext.relevantSpecs.includes("nominal volume: 200 µL"));
+    await contextPage.close();
+  }
+  const legacyContext = await browser.newPage();
+  await legacyContext.goto(new URL("/request-quote?segment=cell-culture&category=cell-culture-media-buffers&family=classical-media&product=dmem-high-glucose", baseUrl).toString(), { waitUntil: "networkidle" });
+  await legacyContext.locator('[data-product-context-summary="true"] summary').click();
+  assert.match(await legacyContext.getByRole("list", { name: "All source specifications" }).innerText(), /Format: Liquid \/ powder option/);
+  await legacyContext.close();
+  const targets = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await targets.goto(new URL('/products?view=configurations&volume=200+%C2%B5L&barrier=Filtered', baseUrl).toString(), { waitUntil: 'networkidle' });
+  assert.equal(await targets.getByRole('form', { name: 'Filter sourcing targets' }).isVisible(), false, 'Mobile filters must not push results below the fold');
+  const firstTarget = targets.locator('[data-sourcing-target="true"]').first();
+  assert.ok((await firstTarget.boundingBox()).y < 844);
+  await targets.screenshot({ path: path.join(output, 'configuration-results-mobile.png') });
+  const configurationLink = firstTarget.getByRole('link', { name: 'Configure request', exact: true });
+  const configurationPath = new URL(await configurationLink.getAttribute('href'), baseUrl).pathname;
+  await configurationLink.click();
+  await targets.waitForURL(url => url.pathname === configurationPath);
+  assert.match(new URL(targets.url()).searchParams.get('productList'), /Requested volume: 200 µL/);
+  await targets.locator('[data-product-primary-actions="true"]').getByRole('link', { name: 'Request a quote', exact: true }).click();
+  await targets.waitForURL(url => url.pathname === '/request-quote');
+  assert.match(await targets.locator('#sourcing-product-input').inputValue(), /Requested barrier: Filtered/);
+  assert.equal(await targets.locator('[data-product-context-summary="true"]').isVisible(), true);
+  await targets.goto(new URL('/products?view=configurations&sterility=Non-sterile', baseUrl).toString(), { waitUntil: 'networkidle' });
+  const sendRequirement = targets.locator('main a[href^="/request-quote"]');
+  assert.equal(await sendRequirement.count(), 1, 'An exact no-match offers one main requirement handoff');
+  assert.match(new URL(await sendRequirement.getAttribute('href'), baseUrl).searchParams.get('productList'), /Requested sterility: Non-sterile/);
+  await targets.close();
   assert.deepEqual(errors, [], "Browser runtime errors");
-  await writeFile(path.join(output, "acceptance.json"), JSON.stringify({ evidence, errors, reducedMotion: "passed", clientNeedValidation: "passed", concurrentSubmitGuard: "passed", selectedProductWithoutRetyping: "passed" }, null, 2));
+  await writeFile(path.join(output, "acceptance.json"), JSON.stringify({ evidence, errors, reducedMotion: "passed", clientNeedValidation: "passed", concurrentSubmitGuard: "passed", selectedProductWithoutRetyping: "passed", mobileEmailWithContextAndList: "passed", legacyStructuredSpecifications: "passed", localMockSubmissions: submissions.length + listSubmissions.length }, null, 2));
   console.log(`Redesign acceptance passed: ${evidence.length} page/viewport checks, Inter/type minimums, image loading, first-viewport actions, session motion and reduced motion. Screenshots: ${output}`);
 } finally { await browser.close(); }

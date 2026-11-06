@@ -1,0 +1,20 @@
+{
+  "createdOn": "2026-11-06",
+  "usage": "Generated illustrative representations for the approved BioAxis design, not photographs of supplier products, inventory or facilities. No confirmed model, dimensions, material, sterility, compatibility or availability can be inferred.",
+  "assets": [
+    {
+      "path": "/images/systematic/brand-tips.webp",
+      "kind": "generated-brand-illustration",
+      "sourceGeneration": "exec-4648e441-77fa-40c0-b59c-a050f425ee8c.png",
+      "description": "Clear filtered-tip rack on an ink studio backdrop; decorative brand opening.",
+      "processing": "Proportional resize without upscaling and WebP encoding. Responsive framing is CSS-only."
+    },
+    {
+      "path": "/images/systematic/filtered-tips-illustration.webp",
+      "kind": "generated-representative-illustration",
+      "sourceGeneration": "exec-e41da25b-759f-4704-9f51-50feb905f19a.png",
+      "description": "Illustrative filtered-tip rack. Not a confirmed supplier configuration.",
+      "processing": "Proportional resize to 1000px and WebP encoding. Show an explicit illustrative-image caption."
+    }
+  ]
+}

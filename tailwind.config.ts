@@ -8,16 +8,16 @@ const config: Config = {
         bioaxis: {
           black: "#ffffff",
           panel: "#ffffff",
-          panelSoft: "#f7fafb",
-          line: "#d8e2e8",
-          text: "#18212b",
-          muted: "#52616f",
-          dim: "#52616f",
-          accent: "#245b78",
+          panelSoft: "#f7f9fb",
+          line: "#d9e3e8",
+          text: "#102a43",
+          muted: "#526575",
+          dim: "#526575",
+          accent: "#0b7f86",
           ice: "#38bdf8",
           trust: "#10b981",
           trustSoft: "#dff8ee",
-          steel: "#1f2937"
+          steel: "#253746"
         }
       },
       fontFamily: { sans: ["var(--font-inter)", "Arial", "sans-serif"] },

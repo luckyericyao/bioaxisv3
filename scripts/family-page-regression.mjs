@@ -138,9 +138,11 @@ function catalogConfigurationKinds(html, familyPath) {
 
 function checkBreadcrumbs(html, expected) {
   const nav = one(html, "nav", 'aria-label="Breadcrumb"');
-  const items = elements(nav.body, "li");
+  const full = one(nav.html, "ol", 'data-full-breadcrumb="true"');
+  const items = elements(full.body, "li");
   assert.deepEqual(items.map((item) => textContent(item.body).replace(/\s*\/$/, "")), expected.map(([label]) => label));
-  assert.deepEqual(links(nav.body).map((link) => link.url.pathname), expected.slice(0, -1).map(([, href]) => href));
+  assert.deepEqual(links(full.body).map((link) => link.url.pathname), expected.slice(0, -1).map(([, href]) => href));
+  assert.equal(links(nav.body)[0].url.pathname, expected.at(-2)[1], "Mobile breadcrumb returns to the immediate parent");
   assert.equal(links(items.at(-1).html).length, 0, "Current breadcrumb must remain unlinked");
 }
 
@@ -252,6 +254,7 @@ try {
       const html = renderToStaticMarkup(await familyRoute.default({ params: Promise.resolve(params) }));
       checkBreadcrumbs(html, breadcrumbs);
       const decision = one(html, "div", 'data-family-decision-summary="true"');
+      if (match) disclosure(decision.html, "Request sourcing support");
       const actions = links(one(decision.html, "div", 'data-sourcing-primary-actions="true"').body);
       assert.equal(actions.length, 3, `${familyPath}: exactly one primary and two secondary actions`);
       assert.deepEqual(actions.map((link) => link.url.searchParams.get("requestType")).sort(), ["equivalent", "quote", "sample"]);
@@ -289,7 +292,7 @@ try {
             assert.equal(link.url.searchParams.get("q"), scenario.query, `${productPath}: family-to-product query lost`);
           }
           const requests = links(card.html).filter((link) => link.url.pathname === "/request-quote");
-          assert.deepEqual(requests.map((link) => link.url.searchParams.get("requestType")).sort(), match ? ["equivalent", "quote"] : ["documentation", "equivalent", "quote"]);
+          assert.deepEqual(requests.map((link) => link.url.searchParams.get("requestType")).sort(), match ? [] : ["documentation", "equivalent", "quote"]);
           for (const request of requests) {
             assert.equal(request.url.searchParams.get("product"), product.slug, `${productPath}: configuration RFQ must keep the selected product`);
           }

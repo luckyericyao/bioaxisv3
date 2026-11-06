@@ -113,9 +113,11 @@ function links(html) {
 
 function checkBreadcrumbs(html, expected) {
   const nav = one(html, "nav", 'aria-label="Breadcrumb"');
-  const items = elements(nav.body, "li");
+  const full = one(nav.html, "ol", 'data-full-breadcrumb="true"');
+  const items = elements(full.body, "li");
   assert.deepEqual(items.map((item) => textContent(item.body).replace(/\s*\/$/, "")), expected.map(([label]) => label));
-  assert.deepEqual(links(nav.body).map((link) => link.url.pathname), expected.slice(0, -1).map(([, href]) => href));
+  assert.deepEqual(links(full.body).map((link) => link.url.pathname), expected.slice(0, -1).map(([, href]) => href));
+  assert.equal(links(nav.body)[0].url.pathname, expected.at(-2)[1], "Mobile breadcrumb returns to the immediate parent");
   assert.equal(links(items.at(-1).html).length, 0, "Current breadcrumb must remain unlinked");
 }
 
@@ -238,6 +240,7 @@ try {
       ]);
       assert.equal(textContent(one(html, "h1", "").body), context.category.title ?? context.category.name, `${categoryPath}: taxonomy must retain precedence over catalog`);
       const decision = one(html, "div", 'data-category-decision-summary="true"');
+      if (taxonomyMatch) disclosure(decision.html, "Request sourcing support");
       const actions = links(one(decision.html, "div", 'data-sourcing-primary-actions="true"').body);
       assert.equal(actions.length, 3, `${categoryPath}: exactly one primary and two secondary actions`);
       assert.deepEqual(actions.map((link) => link.url.searchParams.get("requestType")).sort(), ["equivalent", "quote", "sample"]);

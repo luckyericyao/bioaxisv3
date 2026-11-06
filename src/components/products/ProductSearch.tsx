@@ -201,7 +201,7 @@ function highlightText(value: string, query: string) {
 
   return parts.map((part, index) =>
     tokens.some((token) => part.toLowerCase() === token.toLowerCase()) ? (
-      <mark key={`${part}-${index}`} className="bg-bioaxis-accent/20 px-1 text-bioaxis-accent">
+      <mark key={`${part}-${index}`} className="bg-bioaxis-accent/10 px-1 text-bioaxis-text">
         {part}
       </mark>
     ) : (

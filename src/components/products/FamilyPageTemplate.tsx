@@ -28,7 +28,8 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
       />
       <PageHero title={family.title} subtitle={family.shortDescription} compact tight align="start">
         <div className="grid gap-3" data-family-decision-summary="true">
-          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} layout="decision" includeDocumentation />
+          <Link href="#family-configurations" className="action-primary w-fit">View configurations</Link>
+          <details><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-bioaxis-accent">Request sourcing support</summary><SourcingRequestButtonGroup segment={segment.slug} category={category.slug} family={family.slug} layout="decision" includeDocumentation /></details>
           <Link href={`/products/${segment.slug}/${category.slug}`} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {category.title}
           </Link>
@@ -67,8 +68,8 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
       />
 
       <RFQCTA
-        title="Send this family to BioAxis."
-        body="BioAxis will include the segment, category, and family context automatically. Only your email is required; add supplier, catalog number, quantity, sample, or documentation details only if useful."
+        title="Review this product requirement."
+        body="The selected family is included automatically. Add a current reference or any specifications you already know."
         segment={segment.slug}
         category={category.slug}
         family={family.slug}

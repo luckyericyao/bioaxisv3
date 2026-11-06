@@ -95,7 +95,7 @@ const productItemDetailSections = [
   "Quote-ready details"
 ];
 
-const requiredHomeCtas = ["Browse products", "Request sourcing"];
+const requiredHomeCtas = ["Explore BioAxis", "Request a quote"];
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -142,8 +142,8 @@ const equivalentFinderContent = [
   "Compare requirements",
   "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
 ];
-const requiredPrimaryNavigation = ["Products", "Sourcing support", "Quality & trust", "Contact", "Request quote"];
-const requiredFooterNavigation = ["About", "Contact", "Supplier qualification", "Availability check", "Products", "Request quote", "Equivalent review", "Workflows", "Samples", "Quality", "Quality & trust", "Resources"];
+const requiredPrimaryNavigation = ["Products", "Sourcing", "Quality & Documentation", "About", "Request a quote"];
+const requiredFooterNavigation = ["About BioAxis", "Contact", "Supplier qualification", "Availability check", "Browse product lines", "Request a quote", "Equivalent review", "Workflows", "Samples", "Product documentation", "Quality & Documentation", "Resources"];
 const requiredProductSegments = [
   "Liquid Handling",
   "Lab Plasticware",
@@ -402,8 +402,8 @@ for (const route of routes) {
 
   if (route === "/trust-center") {
     [
-      "Operating identity, region, dedicated business contact, and response target are not currently listed publicly.",
-      "Contact BioAxis form to ask a question or start a sourcing request",
+      "are not currently listed publicly.",
+      "Use the Contact BioAxis form to request business information before proceeding.",
       "After a request is successfully stored, BioAxis provides a reference ID for follow-up.",
       "Read the Privacy notice"
     ].forEach((copy) => {
@@ -623,15 +623,15 @@ for (const route of routes) {
   if (route === "/") {
     const main = mainBlock(html);
     const hero = main.match(/<section\b[^>]*>[\s\S]*?<\/section>/)?.[0] ?? "";
-    for (const text of ["BioAxis", "Life science consumables, simply sourced.", "Products", "Sourcing support", "Quality and documentation", "Contact BioAxis"]) {
+    for (const text of ["BioAxis", "Explore a new world of life science consumables.", "Choose your next step.", "Evidence for the next decision.", "Contact BioAxis"]) {
       if (!mainText.includes(text)) failures.push(`${route}: missing approved homepage content ${text}`);
     }
     requiredHomeCtas.forEach((text) => { if (!hero.includes(text)) failures.push(`${route}: missing hero action ${text}`); });
-    if (!hero.includes('href="/products"') || !hero.includes('href="/request-quote"')) failures.push("Home: hero actions lose their established routes");
+    if (!hero.includes('href="#sourcing-value"') || !hero.includes('href="/request-quote"')) failures.push("Home: brand opening must allow immediate exploration and quote access");
     if (/<(?:form|input|textarea)\b/.test(main)) failures.push("Home: intake must remain on the dedicated request page");
     const cards = [...main.matchAll(/data-home-product-entry="true"/g)];
     if (cards.length !== 5) failures.push(`Home: expected five product entries, found ${cards.length}`);
-    for (const href of ["/ready-supply", "/equivalent-finder", "/private-label-oem", "/trust-center", "/contact"]) {
+    for (const href of ["/equivalent-finder", "/private-label-oem", "/trust-center#document-package", "/contact"]) {
       if (!main.includes(`href="${href}"`)) failures.push(`Home: missing service or contact route ${href}`);
     }
     for (const old of ["Email is the only required field", "Built for real purchasing situations", "Start with what you have", "Final CTA"]) {
@@ -808,7 +808,7 @@ for (const route of routes) {
       "Family",
       "Category",
       "Segment",
-      "Included automatically. Edit your request in the field above."
+      "Included automatically; details to confirm."
     ].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing product-context summary ${label}`);
@@ -1463,13 +1463,13 @@ for (const route of routes) {
     }
 
     if (route.endsWith("/filtered-200ul-pipette-tips")) {
-      if (!html.includes('data-product-specification-group="target"') || !pageText.includes("Target specifications") || !pageText.includes("nominal volume: 200 µL")) {
+      if (!html.includes('data-product-specification-group="target"') || !pageText.includes("200 µL") || !pageText.includes("Target")) {
         failures.push(`${route}: exact buyer target specification is not separately identified`);
       }
-      if (!html.includes('data-product-specification-group="options"') || !pageText.includes("Options and fit to confirm")) {
+      if (!html.includes('data-product-specification-group="options"') || !pageText.includes("To confirm")) {
         failures.push(`${route}: optional sourcing parameters are not separated from target specifications`);
       }
-      if (!pageText.includes("Sourcing template: confirm supplier specifications and availability.") || !pageText.includes("pipette or liquid handler model")) {
+      if (!pageText.includes("Supplier details confirmed per request.") || !pageText.includes("pipette or liquid handler model")) {
         failures.push(`${route}: sourcing caveat or product-specific equivalent inputs are missing`);
       }
       if (pageText.includes("Typical buyer cases")) {
@@ -1529,9 +1529,8 @@ for (const route of routes) {
     [
       "Sterile Filtered Universal Pipette Tips",
       "Documentation to request",
-      "Template fields to confirm",
+      "All fields to confirm",
       "Equivalent review notes",
-      "Related configured paths",
       "Request documents",
       "Start equivalent review",
       "Add to sourcing list"
@@ -1543,7 +1542,7 @@ for (const route of routes) {
   }
 
   if (route === "/products/cell-culture/cell-culture-media-buffers/classical-media/dmem-high-glucose") {
-    ["DMEM High Glucose", "Documentation to request", "Template fields to confirm", "Equivalent review notes", "Cell Culture Media & Buffers"].forEach((label) => {
+    ["DMEM High Glucose", "Documentation to request", "All fields to confirm", "Equivalent review notes", "Cell Culture Media & Buffers"].forEach((label) => {
       if (!pageText.includes(label)) {
         failures.push(`${route}: missing DMEM catalog product content ${label}`);
       }
@@ -2036,7 +2035,7 @@ if (
   !trustCenterSource.includes("Business and service information")
   || !trustCenterSource.includes("not currently listed publicly")
   || !trustCenterSource.includes("Contact BioAxis")
-  || !trustCenterSource.includes("Contact BioAxis form to ask a question or start a sourcing request")
+  || !trustCenterSource.includes("Use the Contact BioAxis form to request business information before proceeding.")
   || !trustCenterSource.includes("Not listed publicly")
   || trustCenterSource.includes("Not published:")
   || trustCenterSource.includes("owner-approved evidence")

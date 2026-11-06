@@ -31,7 +31,8 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
       />
       <PageHero title={category.title} subtitle={category.shortDescription} compact tight align="start">
         <div className="grid gap-3" data-category-decision-summary="true">
-          <SourcingRequestButtonGroup segment={segment.slug} category={category.slug} layout="decision" includeDocumentation />
+          <Link href={`/products?view=configurations&segment=${segment.slug}&category=${category.slug}`} className="action-primary w-fit">Compare configuration targets</Link>
+          <details><summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-bioaxis-accent">Request sourcing support</summary><SourcingRequestButtonGroup segment={segment.slug} category={category.slug} layout="decision" includeDocumentation /></details>
           <Link href={`/products/${segment.slug}`} className="text-xs font-semibold text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to {segment.title}
           </Link>
@@ -44,7 +45,7 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
             <h2 className="text-2xl font-semibold text-bioaxis-text">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
-            Family pages show product item cards, buyer checklists, and request context. Detailed specifications live on product item pages.
+            Compare formats and choose the requirements that matter to your workflow.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -69,8 +70,8 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
       </section>
 
       <RFQCTA
-        title="Send this category context."
-        body="Choose a family first when you know it, or send this category with your email. BioAxis can follow up for supplier, catalog number, quantity, sample, equivalent, or documentation details."
+        title="Need help narrowing the options?"
+        body="Send a current reference or describe the format and workflow you need."
         segment={segment.slug}
         category={category.slug}
       />
