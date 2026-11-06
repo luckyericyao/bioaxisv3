@@ -54,13 +54,13 @@ export default function PrivateLabelOemPage() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/request-quote?requestType=quote&sourcePage=private-label-oem&need=private-label"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Discuss private-label sourcing
           </Link>
           <Link
             href="/request-quote?requestType=recurring-supply&sourcePage=private-label-oem&need=recurring-supply"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request recurring supply review
           </Link>
@@ -84,9 +84,9 @@ export default function PrivateLabelOemPage() {
         <div className="grid gap-3 lg:grid-cols-3">
           {conversionBlocks.map((block) => (
             <article key={block.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
-              <h3 className="text-base font-bold leading-6 text-bioaxis-text">{block.title}</h3>
+              <h3 className="text-base font-semibold leading-6 text-bioaxis-text">{block.title}</h3>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{block.body}</p>
-              <Link href={block.href} className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">
+              <Link href={block.href} className="mt-5 inline-flex text-xs font-semibold  text-bioaxis-accent">
                 Start review
               </Link>
             </article>
@@ -113,7 +113,7 @@ export default function PrivateLabelOemPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Review limits</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Review limits</p>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             BioAxis does not claim factory ownership, guaranteed inventory, automatic interchangeability, fixed lead time, or final customer-side validation.
           </p>

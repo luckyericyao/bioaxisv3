@@ -62,13 +62,13 @@ export default function PrivateLabelPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/request-quote?requestType=quote&sourcePage=private-label"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Discuss private-label sourcing
           </Link>
           <Link
             href="/request-quote?requestType=quote&sourcePage=private-label-product-list"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Submit a product list
           </Link>
@@ -82,10 +82,10 @@ export default function PrivateLabelPage() {
             subtitle="Private-label and neutral-label discussions are most useful when buyers already know the product type, required specifications, use case, and documentation expectations."
           />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href="/products" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href="/products" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               Back to Products
             </Link>
-            <Link href="/equivalent-finder" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href="/equivalent-finder" className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               Equivalent Review
             </Link>
           </div>
@@ -108,7 +108,7 @@ export default function PrivateLabelPage() {
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {suitableProductAreas.map((area) => (
               <article key={area} className="border border-bioaxis-line bg-bioaxis-black p-5">
-                <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text">{area}</h2>
+                <h2 className="text-lg font-semibold  leading-tight text-bioaxis-text">{area}</h2>
               </article>
             ))}
           </div>
@@ -122,7 +122,7 @@ export default function PrivateLabelPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Compliance / limitation note</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Compliance / limitation note</p>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             Private-label feasibility depends on product type, supplier qualification, documentation requirements, minimum order quantity, destination market, and regulatory/compliance constraints. BioAxis does not present private-label options as interchangeable with regulated products without buyer-side technical and compliance review.
           </p>
@@ -132,8 +132,8 @@ export default function PrivateLabelPage() {
       <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
           <div>
-            <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">Private-label sourcing discussion</p>
-            <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
+            <p className="mb-4 text-sm font-semibold  text-bioaxis-accent">Private-label sourcing discussion</p>
+            <h2 className="max-w-4xl text-3xl font-semibold  text-bioaxis-text sm:text-5xl">
               Prepare a careful RFQ path before discussing label or packaging options.
             </h2>
             <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">
@@ -143,13 +143,13 @@ export default function PrivateLabelPage() {
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
             <Link
               href="/request-quote?requestType=quote&sourcePage=private-label"
-              className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+              className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
             >
               Discuss private-label sourcing
             </Link>
             <Link
               href="/request-quote?requestType=quote&sourcePage=private-label-product-list"
-              className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Submit a product list
             </Link>
@@ -163,7 +163,7 @@ export default function PrivateLabelPage() {
 function ChecklistPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
+      <h2 className="text-2xl font-semibold  text-bioaxis-text">{title}</h2>
       <div className="mt-5 flex flex-wrap gap-2">
         {items.map((item) => (
           <SpecTag key={item}>{item}</SpecTag>

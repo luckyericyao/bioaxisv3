@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "test": "npm run test:request-types && npm run test:taxonomy-builders && npm run test:taxonomy-search && npm run test:search-ranking && npm run test:product-profiles && npm run test:family-pages && npm run test:category-pages && npm run test:structured-data && npm run test:rfq-queue && npm run test:trust-evidence && npm run test:trust-intake && npm run test:release && npm run test:a11y-static && npm run test:client-boundary && npm run test:rfq-roundtrip-phases",
+    "test": "npm run test:request-types && npm run test:taxonomy-builders && npm run test:taxonomy-search && npm run test:search-ranking && npm run test:product-profiles && npm run test:family-pages && npm run test:category-pages && npm run test:structured-data && npm run test:rfq-queue && npm run test:trust-evidence && npm run test:trust-intake && npm run test:release && npm run test:a11y-static && npm run test:client-boundary && npm run test:rfq-roundtrip-phases && npm run test:sourcing-need",
     "test:request-types": "node scripts/request-types-regression.mjs",
     "test:taxonomy-builders": "node scripts/taxonomy-builders-regression.mjs",
     "test:taxonomy-search": "node scripts/taxonomy-search-regression.mjs",
@@ -23,6 +23,8 @@
     "perf:baseline": "node scripts/lighthouse-baseline.mjs",
     "test:rfq-queue": "node scripts/rfq-queue-regression.mjs",
     "test:rfq-payload": "node scripts/rfq-payload-limit-regression.mjs",
+    "test:sourcing-need": "node scripts/sourcing-need-regression.mjs",
+    "test:redesign": "node scripts/redesign-acceptance.mjs",
     "test:rfq-edge-limit": "node scripts/rfq-edge-limit-regression.mjs",
     "test:a11y-checklist": "node scripts/accessibility-regression.mjs",
     "test:a11y-static": "node scripts/accessibility-static-regression.mjs",
@@ -35,7 +37,8 @@
   },
   "dependencies": {
     "@vercel/blob": "2.8.0",
-    "next": "15.5.21",
+    "lucide-react": "^0.468.0",
+    "next": "15.5.29",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
@@ -45,7 +48,8 @@
     "js-yaml": "4.3.1",
     "nanoid": "3.3.18",
     "postcss": "8.5.26",
-    "sharp": "0.35.3"
+    "sharp": "0.35.5",
+    "@vercel/cli-config": { "zod": "4.6.6" }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -55,7 +59,7 @@
     "autoprefixer": "^10.4.21",
     "axe-core": "^4.13.0",
     "eslint": "^9.29.0",
-    "eslint-config-next": "15.5.21",
+    "eslint-config-next": "15.5.29",
     "playwright": "1.62.1",
     "postcss": "8.5.26",
     "tailwindcss": "^3.4.17",

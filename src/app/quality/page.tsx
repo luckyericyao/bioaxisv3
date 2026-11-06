@@ -93,8 +93,8 @@ export default function QualityPage() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-6 border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation package request</p>
-            <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">
+            <p className="text-sm font-semibold  text-bioaxis-accent">Documentation package request</p>
+            <h2 className="mt-4 text-2xl font-semibold  text-bioaxis-text sm:text-3xl">
               Send the product context and document need together.
             </h2>
             <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
@@ -112,12 +112,12 @@ export default function QualityPage() {
       </section>
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Quality support areas</h2>
+          <h2 className="text-3xl font-semibold  text-bioaxis-text sm:text-4xl">Quality support areas</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {trustSections.map((section) => (
             <article key={section.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
-              <h3 className="text-lg font-bold uppercase text-bioaxis-text">{section.title}</h3>
+              <h3 className="text-lg font-semibold  text-bioaxis-text">{section.title}</h3>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{section.body}</p>
             </article>
           ))}

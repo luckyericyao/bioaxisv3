@@ -23,7 +23,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
 
     return (
       <article key={productItem.slug} className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5" data-family-template-kind={productItem.indexable ? "specific" : "general"}>
-        <h3 className="text-lg font-bold leading-snug text-bioaxis-text">{productItem.name}</h3>
+        <h3 className="text-lg font-semibold leading-snug text-bioaxis-text">{productItem.name}</h3>
         <p className="mt-2 flex-1 text-sm leading-6 text-bioaxis-muted">{productItem.shortDescription}</p>
         <ul className="mt-4 flex flex-wrap gap-2" aria-label={`${productItem.name} sourcing fields`}>
           {productItem.commonSpecifications.slice(0, 3).map((specification) => (
@@ -70,7 +70,7 @@ export function ProductConfigurationSection({ segment, category, family }: Produ
       <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-xs font-semibold text-bioaxis-accent">Sourcing configuration templates</p>
-          <h2 className="text-2xl font-bold text-bioaxis-text">Configurations for review</h2>
+          <h2 className="text-2xl font-semibold text-bioaxis-text">Configurations for review</h2>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-bioaxis-muted">
           Sourcing templates, not supplier listings. Specifications and availability need confirmation.

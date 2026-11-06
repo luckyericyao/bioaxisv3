@@ -236,27 +236,27 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
       className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-5"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="border border-bioaxis-line bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-dim">
+        <span className="border border-bioaxis-line bg-bioaxis-panel px-2 py-1 text-sm font-semibold  text-bioaxis-dim">
           {resultTypeLabel(result.type)}
         </span>
-        <span className="hidden border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-accent sm:inline-flex">
+        <span className="hidden border border-bioaxis-accent/40 bg-bioaxis-accent/10 px-2 py-1 text-sm font-semibold  text-bioaxis-accent sm:inline-flex">
           {relevanceLabel(result)}
         </span>
-        <span data-search-match-label="true" className="inline-flex border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-[0.68rem] font-bold uppercase text-bioaxis-steel">
+        <span data-search-match-label="true" className="inline-flex border border-white/[0.12] bg-bioaxis-panel px-2 py-1 text-sm font-semibold  text-bioaxis-steel">
           {matchKindLabel(result)}
         </span>
       </div>
       {path !== result.title ? (
         <p className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent sm:mt-4">{highlightText(path, query)}</p>
       ) : null}
-      <h3 className="mt-2 text-base font-bold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
-      <p data-search-match-description="true" className="mt-2 text-xs leading-5 text-bioaxis-dim">{matchKindDescription(result)}</p>
+      <h3 className="mt-2 text-base font-semibold leading-snug text-bioaxis-text sm:mt-3 sm:text-lg">{highlightText(result.title, query)}</h3>
+      <p data-search-match-description="true" className="helper-text mt-2 text-bioaxis-dim">{matchKindDescription(result)}</p>
       <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{highlightText(result.description, query)}</p>
       <p className="mt-3 hidden border-l border-bioaxis-accent/50 pl-3 text-xs leading-5 text-bioaxis-dim sm:block">{matchedReason(result, query)}</p>
       {result.matchedFields && result.matchedFields.length > 0 ? (
         <div className="mt-4 hidden flex-wrap gap-2 sm:flex">
           {result.matchedFields.slice(0, 5).map((field) => (
-            <span key={field} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[0.68rem] font-semibold uppercase text-bioaxis-steel">
+            <span key={field} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-sm font-semibold  text-bioaxis-steel">
               {matchedFieldLabel(field)}
             </span>
           ))}
@@ -266,21 +266,21 @@ function ProductResultCard({ result, query }: { result: ProductSearchResult; que
         <Link
           href={detailHref(result, query)}
           onClick={() => trackBioAxisEvent("search_result_cta", { cta: "details", resultType: result.type, queryLength: query.length })}
-          className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+          className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
         >
           View details
         </Link>
         <Link
           href={requestHref(result, "quote", query)}
           onClick={() => trackBioAxisEvent("search_result_cta", { cta: "quote", resultType: result.type, queryLength: query.length })}
-          className="inline-flex min-h-11 items-center text-[0.68rem] font-semibold uppercase text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:border sm:px-4 sm:no-underline"
+          className="inline-flex min-h-11 items-center text-sm font-semibold  text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:border sm:px-4 sm:no-underline"
         >
           Send as quote request
         </Link>
         <Link
           href={requestHref(result, "equivalent", query)}
           onClick={() => trackBioAxisEvent("search_result_cta", { cta: "equivalent-review", resultType: result.type, queryLength: query.length })}
-          className="inline-flex min-h-11 items-center text-[0.68rem] font-semibold uppercase text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:border sm:px-4 sm:no-underline"
+          className="inline-flex min-h-11 items-center text-sm font-semibold  text-bioaxis-steel underline decoration-bioaxis-line underline-offset-4 transition hover:text-bioaxis-accent sm:border sm:px-4 sm:no-underline"
         >
           Review equivalent
         </Link>
@@ -315,19 +315,19 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
 
   return (
     <details className="border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
         <span>Sourcing next steps</span>
         <span className="text-bioaxis-dim">Optional actions <span aria-hidden="true">· +</span></span>
       </summary>
       <div className="border-t border-bioaxis-line p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h3 className="text-2xl font-bold uppercase text-bioaxis-text">Turn this search into a sourcing brief.</h3>
+            <h3 className="text-2xl font-semibold  text-bioaxis-text">Turn this search into a sourcing brief.</h3>
           </div>
           <Link
             href={productListHref}
             onClick={() => trackBioAxisEvent("cta_click", { cta: "search_send_product_list" })}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Send product list
           </Link>
@@ -343,7 +343,7 @@ function SearchSourcingActions({ query, productListHref }: { query: string; prod
                 onClick={() => trackBioAxisEvent("cta_click", { cta: action.title })}
                 className="block h-full border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
               >
-                <span className="text-sm font-bold uppercase text-bioaxis-text">{action.title}</span>
+                <span className="text-sm font-semibold  text-bioaxis-text">{action.title}</span>
                 <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{action.body}</span>
               </Link>
             </li>
@@ -418,7 +418,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
         />
         <button
           type="submit"
-          className={["inline-flex shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text", compact ? "min-h-11 px-3 text-[0.68rem] sm:min-h-12 sm:px-6 sm:text-sm" : "min-h-12 px-6 text-sm sm:px-7"].join(" ")}
+          className={["inline-flex shrink-0 items-center justify-center border border-bioaxis-text bg-bioaxis-text font-semibold  text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text", compact ? "min-h-11 px-3 text-sm sm:min-h-12 sm:px-6 sm:text-sm" : "min-h-12 px-6 text-sm sm:px-7"].join(" ")}
         >
           Search
         </button>
@@ -430,7 +430,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
   function QuickSearchLinks({ className = "mt-4" }: { className?: string }) {
     return (
       <div className={className}>
-        <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Quick searches</p>
+        <p className="mb-3 text-xs font-semibold  text-bioaxis-dim">Quick searches</p>
         <div className="flex flex-wrap gap-2">
           {quickSearches.map((item) => (
             <Link
@@ -454,7 +454,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           <QuickSearchLinks />
         </div>
         <details className="mt-3 border border-bioaxis-line bg-bioaxis-panel sm:hidden">
-          <summary className="min-h-11 cursor-pointer list-none px-4 py-3 text-xs font-semibold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+          <summary className="min-h-11 cursor-pointer list-none px-4 py-3 text-xs font-semibold  text-bioaxis-steel [&::-webkit-details-marker]:hidden">
             Quick searches
           </summary>
           <div className="border-t border-bioaxis-line p-3">
@@ -469,24 +469,24 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
     <div className="w-full">
       <section className="border border-bioaxis-line bg-bioaxis-panel p-3 sm:p-5 lg:p-6">
         <div>
-          <p className="text-xs font-semibold uppercase text-bioaxis-dim">Product search</p>
+          <p className="text-xs font-semibold  text-bioaxis-dim">Product search</p>
           <div className="mt-2">{searchForm(true)}</div>
           <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-bioaxis-line pt-3">
-            <h2 className="text-lg font-bold leading-tight text-bioaxis-text sm:text-2xl">
+            <h2 className="tool-heading text-bioaxis-text">
               Results for &ldquo;{displayedQuery}&rdquo;
             </h2>
-            <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">{searchState}</p>
+            <p className="text-xs font-semibold   text-bioaxis-accent">{searchState}</p>
           </div>
             {results.length > 0 ? (
               <>
-                <p className="mt-2 text-xs leading-5 text-bioaxis-muted sm:text-sm">
+                <p className="helper-text mt-2 hidden text-bioaxis-muted sm:block">
                   Showing {visibleMatchCount} strongest path{visibleMatchCount === 1 ? "" : "s"}; broader matches are collapsed.
                 </p>
-                <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
+                <p className="helper-text mt-1 text-bioaxis-dim">
                   {results.length} matching path{results.length === 1 ? "" : "s"} · {indexedPathCount} indexed paths
                 </p>
-                <p className="mt-2 text-xs leading-5 text-bioaxis-dim">
-                  BioAxis searches {indexedPathCount} product and sourcing paths. This is not a live supplier catalog lookup.
+                <p className="helper-text mt-2 text-bioaxis-dim">
+                  BioAxis searches {indexedPathCount} paths, not live supplier catalogs.
                 </p>
                 <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-dim sm:block">
                   Direct product, family, path, and specification matches appear first so buyers can move from a rough input to a quote, document, sample, or equivalent path.
@@ -500,7 +500,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
                     : "No product or sourcing path matches this input."}{" "}
                   This index covers BioAxis product and sourcing paths, not live supplier catalogs.
                 </p>
-                <p className="mt-1 text-xs font-semibold tracking-wide text-bioaxis-dim">
+                <p className="mt-1 text-xs font-semibold  text-bioaxis-dim">
                   {referenceQuery ? "0 verified reference matches" : "0 matching paths"} · {indexedPathCount} indexed product and sourcing paths
                 </p>
               </>
@@ -508,7 +508,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <Link
               href="/products"
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-2 text-[0.68rem] font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:px-4 sm:text-xs"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-2 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:px-4 sm:text-xs"
             >
               Clear search
             </Link>
@@ -521,8 +521,8 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           <div className="min-w-0">
             <div className="sr-only">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Strongest matches</p>
-                <h3 className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">{topMatches.length} strongest match{topMatches.length === 1 ? "" : "es"}</h3>
+                <p className="text-xs font-semibold   text-bioaxis-accent">Strongest matches</p>
+                <h3 className="mt-2 text-2xl font-semibold  text-bioaxis-text">{topMatches.length} strongest match{topMatches.length === 1 ? "" : "es"}</h3>
               </div>
               <p className="max-w-md text-sm leading-6 text-bioaxis-dim">
                 Product and family matches appear before broader workflow or description matches.
@@ -536,7 +536,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
 
             {relatedMatches.length > 0 ? (
               <details data-search-related-matches="true" className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                   <span>Explore related matches ({Math.max(0, results.length - 6)})</span>
                   <span className="text-bioaxis-dim">{relatedMatches.length} of {Math.max(0, results.length - 6)} shown</span>
                 </summary>
@@ -557,7 +557,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
                         nextMatchFocusIndex.current = relatedMatches.length;
                         setVisibleResultLimit((current) => Math.min(current + 12, results.length));
                       }}
-                      className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
+                      className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bioaxis-accent"
                     >
                       Show next 12 ({results.length - visibleResultLimit} remaining)
                     </button>
@@ -568,9 +568,9 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           </div>
 
           <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Send this search context</span>
-              <span className="text-bioaxis-dim">Email only to start</span>
+              <span className="text-bioaxis-dim">Add request details</span>
             </summary>
             <div className="border-t border-bioaxis-line p-4 sm:p-5">
               <CompactSourcingIntake
@@ -586,37 +586,37 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           </details>
 
           <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Search coverage</span>
               <span className="text-bioaxis-dim">Optional detail</span>
             </summary>
             <div className="grid gap-4 border-t border-bioaxis-line p-5 lg:grid-cols-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Search coverage</p>
+                <p className="text-xs font-semibold   text-bioaxis-accent">Search coverage</p>
                 <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {typeCounts.map(([label, count]) => (
                     <div key={label} className="flex items-center justify-between border border-bioaxis-line bg-bioaxis-black px-3 py-2">
-                      <span className="text-xs font-semibold uppercase text-bioaxis-steel">{label}</span>
-                      <span className="text-sm font-bold text-bioaxis-accent">{count}</span>
+                      <span className="text-xs font-semibold  text-bioaxis-steel">{label}</span>
+                      <span className="text-sm font-semibold text-bioaxis-accent">{count}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Top product areas</p>
+                <p className="text-xs font-semibold   text-bioaxis-accent">Top product areas</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {topSegments.map(([segment, count]) => (
-                    <span key={segment} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                    <span key={segment} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold  text-bioaxis-steel">
                       {segment} <span className="text-bioaxis-accent">{count}</span>
                     </span>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Matched across</p>
+                <p className="text-xs font-semibold   text-bioaxis-accent">Matched across</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {matchedFields.map(([field, count]) => (
-                    <span key={field} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                    <span key={field} className="border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-xs font-semibold  text-bioaxis-steel">
                       {field} <span className="text-bioaxis-accent">{count}</span>
                     </span>
                   ))}
@@ -631,10 +631,10 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
         </section>
       ) : (
         <section data-search-unresolved-reference={referenceQuery ? "true" : undefined} className="mt-6 border border-bioaxis-line bg-bioaxis-panel p-4 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">
+          <p className="text-xs font-semibold   text-bioaxis-accent">
             {referenceQuery ? "Unresolved reference" : "Manual sourcing review"}
           </p>
-          <h3 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">
+          <h3 className="mt-3 text-2xl font-semibold  text-bioaxis-text">
             {referenceQuery ? "Send this reference." : "Send the sourcing input."}
           </h3>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
@@ -643,7 +643,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={productListSearchHref}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
               {referenceQuery ? "Send this reference" : "Send sourcing input"}
             </Link>
@@ -657,7 +657,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
         </p>
         <Link
           href="/products#product-categories"
-          className="mt-4 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          className="mt-4 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
         >
           Browse all product segments
         </Link>

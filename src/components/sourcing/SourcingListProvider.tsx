@@ -271,7 +271,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             type="button"
             aria-haspopup="dialog"
             onClick={() => openDrawer()}
-            className="fixed bottom-5 right-5 z-50 hidden min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-bold uppercase text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent sm:inline-flex"
+            className="fixed bottom-5 right-5 z-50 hidden min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-xs font-semibold  text-bioaxis-black shadow-2xl transition hover:bg-bioaxis-black hover:text-bioaxis-accent sm:inline-flex"
           >
             Sourcing list ({items.length})
           </button>
@@ -293,8 +293,8 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
           <div ref={dialogRef} id="sourcing-list-dialog" className="ml-auto flex h-full w-full max-w-3xl flex-col border-l border-bioaxis-line bg-bioaxis-black shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-bioaxis-line p-5">
               <div>
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Sourcing list</p>
-                <h2 id="sourcing-list-title" className="mt-2 text-2xl font-bold uppercase text-bioaxis-text">Review items before sending.</h2>
+                <p className="text-xs font-semibold  text-bioaxis-accent">Sourcing list</p>
+                <h2 id="sourcing-list-title" className="mt-2 text-2xl font-semibold  text-bioaxis-text">Review items before sending.</h2>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
                   Add quantities, supplier context, sample needs, and documentation needs. BioAxis will carry the list into a structured sourcing request.
                 </p>
@@ -304,7 +304,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={closeDrawer}
                 aria-label="Close sourcing list"
-                className="min-h-11 min-w-11 shrink-0 border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="min-h-11 min-w-11 shrink-0 border border-bioaxis-line px-3 py-2 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 Close
               </button>
@@ -321,14 +321,14 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                   <article key={item.id} aria-label={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <h3 className="text-base font-bold text-bioaxis-text">{item.title}</h3>
+                        <h3 className="text-base font-semibold text-bioaxis-text">{item.title}</h3>
                         <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                           {[item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ")}
                         </p>
                         <Link
                           href={item.href}
                           onClick={closeDrawer}
-                          className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold uppercase text-bioaxis-accent"
+                          className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold  text-bioaxis-accent"
                         >
                           View page
                         </Link>
@@ -345,7 +345,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                             (nextButton ?? closeButtonRef.current)?.focus();
                           });
                         }}
-                        className="min-h-11 border border-bioaxis-line px-3 py-2 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                        className="min-h-11 border border-bioaxis-line px-3 py-2 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                       >
                         Remove
                       </button>
@@ -357,7 +357,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                       <DrawerField label="Catalog number" value={item.catalogNumber} onChange={(catalogNumber) => value.updateItem(item.id, { catalogNumber })} />
                     </div>
                     <label className="mt-4 block">
-                      <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Requested action</span>
+                      <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">Requested action</span>
                       <select
                         value={item.requestedAction}
                         onChange={(event) => value.updateItem(item.id, { requestedAction: event.target.value })}
@@ -376,7 +376,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                       <DrawerToggle label="Documentation needed" checked={item.documentationNeeded} onChange={(documentationNeeded) => value.updateItem(item.id, { documentationNeeded })} />
                     </div>
                     <label className="mt-4 block">
-                      <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Notes</span>
+                      <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">Notes</span>
                       <textarea
                         value={item.notes}
                         rows={3}
@@ -394,7 +394,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                 type="button"
                 disabled={items.length === 0}
                 onClick={submitSourcingList}
-                className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Send list for review
               </button>
@@ -419,7 +419,7 @@ export function useSourcingList() {
 function DrawerField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <label>
-      <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">{label}</span>
+      <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -431,7 +431,7 @@ function DrawerField({ label, value, onChange }: { label: string; value: string;
 
 function DrawerToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return (
-    <label className="flex min-h-11 items-center gap-3 border border-bioaxis-line bg-bioaxis-black px-3 text-xs font-bold uppercase text-bioaxis-steel">
+    <label className="flex min-h-11 items-center gap-3 border border-bioaxis-line bg-bioaxis-black px-3 text-xs font-semibold  text-bioaxis-steel">
       <input
         type="checkbox"
         checked={checked}

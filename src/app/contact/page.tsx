@@ -35,7 +35,7 @@ export default function ContactPage() {
           <div className="mt-8 grid gap-4">
             {contactPaths.map((item) => (
               <article key={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-5">
-                <h2 className="text-lg font-bold uppercase text-bioaxis-text">{item.title}</h2>
+                <h2 className="text-lg font-semibold  text-bioaxis-text">{item.title}</h2>
                 <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{item.body}</p>
               </article>
             ))}

@@ -9,7 +9,7 @@ export function ProductFamilyList({ families, maxItems = families.length }: Prod
 
   return (
     <div>
-      <p className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">Product families</p>
+      <p className="mb-3 text-xs font-semibold  text-bioaxis-dim">Product families</p>
       <ul className="grid gap-2 text-sm text-bioaxis-steel sm:grid-cols-2">
         {visibleFamilies.map((family) => (
           <li key={family} className="flex gap-2 leading-5">
@@ -18,7 +18,7 @@ export function ProductFamilyList({ families, maxItems = families.length }: Prod
           </li>
         ))}
       </ul>
-      {hiddenCount > 0 ? <p className="mt-3 text-xs uppercase text-bioaxis-dim">+{hiddenCount} more</p> : null}
+      {hiddenCount > 0 ? <p className="mt-3 text-xs  text-bioaxis-dim">+{hiddenCount} more</p> : null}
     </div>
   );
 }

@@ -69,28 +69,27 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
         align="start"
       >
         <div className="grid gap-3" data-product-decision-summary="true">
-          <p role="note" className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-l-2 border-bioaxis-accent/70 pl-3 text-xs leading-5 text-bioaxis-muted">
-            <span className="font-bold uppercase text-bioaxis-accent">Sourcing template</span>
-            <span>Confirm supplier specifications, fit, and availability.</span>
+          <p role="note" className="helper-text border-l-2 border-bioaxis-accent/70 pl-3 text-bioaxis-muted">
+            Sourcing template: confirm supplier specifications and availability.
           </p>
           {targetSpecifications.length > 0 ? (
             <div data-product-specification-group="target">
-              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Target specifications</p>
+              <p className="helper-text mb-2 text-bioaxis-dim">Target specifications</p>
               <ul className="flex flex-wrap gap-2">
                 {targetSpecifications.map((specification) => (
-                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification)}</SpecTag></li>
+                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification).replace(/^[^:]+:\s*/, "")}</SpecTag></li>
                 ))}
               </ul>
             </div>
           ) : null}
           {optionsToConfirm.length > 0 ? (
             <div data-product-specification-group="options">
-              <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">
+              <p className="helper-text mb-2 text-bioaxis-dim">
                 {specificationGroups.targets.length > 0 ? "Options and fit to confirm" : "Fields and options to confirm"}
               </p>
               <ul className="flex flex-wrap gap-2">
                 {optionsToConfirm.map((specification) => (
-                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification)}</SpecTag></li>
+                  <li key={specification} className="flex max-w-full"><SpecTag>{cleanListItem(specification).replace(/^[^:]+:\s*/, "")}</SpecTag></li>
                 ))}
               </ul>
             </div>
@@ -98,32 +97,32 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" data-product-primary-actions="true">
             <SourcingRequestLink
               href={requestLinks[0].href}
-              className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+              className="col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
             >
               Request quote
             </SourcingRequestLink>
             <SourcingRequestLink
               href={requestLinks[2].href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Request sample
             </SourcingRequestLink>
             <SourcingRequestLink
               href={requestLinks[1].href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               Review equivalent
             </SourcingRequestLink>
           </div>
           <details className="group border border-bioaxis-line bg-bioaxis-black">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold  text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
               <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
             <div className="grid gap-2 border-t border-bioaxis-line p-3 sm:grid-cols-3">
               <SourcingRequestLink
                 href={requestLinks[3].href}
-                className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 Ask for documents
               </SourcingRequestLink>
@@ -140,7 +139,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                 productTitle={productItem.name}
                 className="min-h-11 px-3 text-xs"
               />
-              <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+              <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-center text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                 Back to family
               </Link>
             </div>
@@ -164,8 +163,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8">
-          <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Sourcing template details</p>
-          <h2 className="text-3xl font-bold uppercase text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
+          <p className="mb-3 text-sm font-semibold  text-bioaxis-accent">Sourcing template details</p>
+          <h2 className="text-3xl font-semibold  text-bioaxis-text sm:text-4xl">Open only the detail you need.</h2>
         </div>
         <div className="grid gap-3">
           <InfoPanel title="Sourcing context" items={productItem.details} />
@@ -182,8 +181,8 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-[1fr_0.8fr] lg:px-10">
         {relatedConfigurations.length > 0 ? (
           <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-            <p className="mb-3 text-sm font-semibold uppercase text-bioaxis-accent">Related product paths</p>
-            <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Other configured items in this family</h2>
+            <p className="mb-3 text-sm font-semibold  text-bioaxis-accent">Related product paths</p>
+            <h2 className="text-2xl font-semibold  text-bioaxis-text">Other configured items in this family</h2>
             <div className="mt-5 grid gap-3">
               {relatedConfigurations.map((item) => (
                 <Link
@@ -191,7 +190,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                   href={getProductItemHref(segment.slug, category.slug, family.slug, item.slug)}
                   className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent"
                 >
-                  <span className="text-sm font-bold text-bioaxis-text">{item.name}</span>
+                  <span className="text-sm font-semibold text-bioaxis-text">{item.name}</span>
                   <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">{item.shortDescription}</span>
                 </Link>
               ))}
@@ -199,15 +198,15 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
           </section>
         ) : null}
         <section className="border border-bioaxis-line bg-bioaxis-black p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Back to catalog context</h2>
+          <h2 className="text-2xl font-semibold  text-bioaxis-text">Back to catalog context</h2>
           <div className="mt-5 grid gap-3">
-            <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href={`/products/${segment.slug}/${category.slug}/${family.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               View {family.title}
             </Link>
-            <Link href={`/products/${segment.slug}/${category.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href={`/products/${segment.slug}/${category.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               View {category.title}
             </Link>
-            <Link href={`/products/${segment.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+            <Link href={`/products/${segment.slug}`} className="border border-bioaxis-line px-4 py-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
               View {segment.title}
             </Link>
           </div>
@@ -223,7 +222,7 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
 
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold  text-bioaxis-text">
         <span>{title}</span>
         <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
@@ -240,7 +239,7 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
             <SourcingRequestLink
               key={request.label}
               href={request.href}
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
             >
               {request.label}
             </SourcingRequestLink>

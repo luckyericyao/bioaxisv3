@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { PerformanceMetrics } from "@/components/layout/PerformanceMetrics";
 import { SourcingListProvider } from "@/components/sourcing/SourcingListProvider";
 import { JsonLd } from "@/components/seo/StructuredData";
 import { siteStructuredData } from "@/lib/structuredData";
@@ -14,6 +16,8 @@ const headerProductSegments = productTaxonomy.map((segment) => ({
   index: String(segment.index).padStart(2, "0"),
   label: segment.name
 }));
+
+const inter = localFont({ src: "../../public/fonts/InterVariable.woff2", display: "swap", variable: "--font-inter", weight: "100 900", fallback: ["Arial", "Helvetica", "sans-serif"] });
 
 export const metadata: Metadata = {
   title: "BioAxis | One-Stop Life Science Consumables Sourcing",
@@ -58,8 +62,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body>
+        <PerformanceMetrics />
         <JsonLd data={siteStructuredData} />
         <SourcingListProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>

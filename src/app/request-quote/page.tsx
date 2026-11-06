@@ -8,6 +8,7 @@ import { getFamilyBySlug as getCatalogFamilyBySlug, getProductBySlug as getCatal
 import { workflows } from "@/data/workflows";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 import { createRouteMetadata } from "@/lib/siteMetadata";
+import { hasMeaningfulNeedText } from "@/lib/sourcingNeed";
 
 export const metadata: Metadata = createRouteMetadata({
   title: "Request Quote | BioAxis Consumables Sourcing",
@@ -378,7 +379,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const usesStoredInput = first(params?.storedInput) === "1" || source === "sourcing-list" || source === "homepage-hero";
   const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query || supportPathLabel);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
-  const productList =
+  const candidateProductList =
     explicitProductList ??
     (usesStoredInput ? "" :
     (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
@@ -387,6 +388,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
       defaultProductListFromNeed(need, requestType) ||
       defaultProductListFromWorkflow(workflowMatch?.title, requestType) ||
       defaultProductListFromRequestType(requestType, hasRouteContext)));
+  const productList = hasMeaningfulNeedText(candidateProductList) ? candidateProductList : "";
   const supplier = first(params?.supplier) ?? first(params?.currentSupplier) ?? "";
   const catalogNumber = first(params?.catalogNumber) ?? first(params?.catalog) ?? "";
   const quantity = first(params?.quantity) ?? first(params?.qty) ?? "";
@@ -435,17 +437,12 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
     <>
       <PageHero
         eyebrow="Sourcing request"
-        title="Start a sourcing request"
-        subtitle={
-          <>
-            <span className="sm:hidden">Email is the only required field.</span>
-            <span className="hidden sm:inline">Email is the only required field. Add a product, catalog number, supplier line, or list when useful.</span>
-          </>
-        }
+        title="Request sourcing"
+        subtitle="Share a product, reference or list."
         compact
         tight
       />
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-6 sm:px-8 lg:px-10">
+      <section className="page-container pb-16 pt-6">
         <QuoteRequestForm
           initialValues={{
             requestType: requestType ?? "quote",

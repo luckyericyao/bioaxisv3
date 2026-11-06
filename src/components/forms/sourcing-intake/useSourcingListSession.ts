@@ -1,4 +1,5 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useSourcingList } from "@/components/sourcing/SourcingListProvider";
 import type { IntakeState, SourcingListSummaryItem } from "./types";
 
 const sourcingListStorageKey = "bioaxis:sourcing-list";
@@ -28,6 +29,8 @@ export function clearStoredSourcingSubmission() {
 export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeState>>) {
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListSummaryItem[]>([]);
   const [restoredSessionInput, setRestoredSessionInput] = useState(false);
+  const { items } = useSourcingList();
+  const usingLiveList = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -37,11 +40,18 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
     const sessionProductList = window.sessionStorage.getItem(sourcingListSubmissionStorageKey)?.trim() ?? "";
 
     setSourcingListItems(sessionItems.length > 0 ? sessionItems : localItems);
-    if (sessionProductList) {
+    if (sessionProductList && sessionItems.length === 0) {
       setRestoredSessionInput(true);
       setState((current) => (current.productInput.trim() ? current : { ...current, productInput: sessionProductList }));
     }
   }, [setState]);
+
+  useEffect(() => {
+    if (items.length || usingLiveList.current) {
+      usingLiveList.current = true;
+      setSourcingListItems(items);
+    }
+  }, [items]);
 
   return { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput };
 }

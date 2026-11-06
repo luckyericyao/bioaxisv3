@@ -106,24 +106,24 @@ function ContextActions({
       <SourcingRequestLink
         href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
         className={compactActions
-          ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
-          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
+          ? "col-span-2 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"}
       >
         Request quote
       </SourcingRequestLink>
       <SourcingRequestLink
         href={catalogEquivalentHref(segment, category, family, product)}
         className={compactActions
-          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
+          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Review equivalent
       </SourcingRequestLink>
       <SourcingRequestLink
         href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
         className={compactActions
-          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
-          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
+          ? "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+          : "inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"}
       >
         Request sample
       </SourcingRequestLink>
@@ -143,7 +143,7 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
       <PageHero eyebrow={`Product segment ${segment.index}`} title={segment.name} subtitle={segment.heroDescription}>
         <div className="grid gap-4">
           <ContextActions segment={segment} />
-          <Link href="/products" className="text-sm font-semibold uppercase text-bioaxis-steel transition hover:text-bioaxis-accent">
+          <Link href="/products" className="text-sm font-semibold  text-bioaxis-steel transition hover:text-bioaxis-accent">
             Back to products
           </Link>
         </div>
@@ -152,8 +152,8 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Next layer</p>
-            <h2 className="mt-3 text-3xl font-bold text-bioaxis-text sm:text-5xl">Choose a {segment.name} category.</h2>
+            <p className="text-sm font-semibold  text-bioaxis-accent">Next layer</p>
+            <h2 className="mt-3 text-3xl font-semibold text-bioaxis-text sm:text-5xl">Choose a {segment.name} category.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Category pages expose product families, buyer filters, product-list previews, and RFQ context without dumping item-level detail here.
@@ -166,15 +166,15 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
               href={productCatalogHref(segment.slug, category.slug)}
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
-              <p className="text-xs font-bold uppercase text-bioaxis-dim">{segment.index} / Category</p>
-              <h3 className="mt-3 text-xl font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{category.name}</h3>
+              <p className="text-xs font-semibold  text-bioaxis-dim">{segment.index} / Category</p>
+              <h3 className="mt-3 text-xl font-semibold text-bioaxis-text transition group-hover:text-bioaxis-accent">{category.name}</h3>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{category.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {category.tags.slice(0, 4).map((tag) => (
                   <SpecTag key={tag}>{tag}</SpecTag>
                 ))}
               </div>
-              <span className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">View category</span>
+              <span className="mt-5 inline-flex text-xs font-semibold  text-bioaxis-accent">View category</span>
             </Link>
           ))}
         </div>
@@ -182,13 +182,13 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-3 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Browse by buying need</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Browse by buying need</p>
           <div className="mt-5 flex flex-wrap gap-2">
             {buyerNeeds.map((need) => (
               <Link
                 key={need}
                 href={catalogRequestHref({ requestType: "quote", segment, need: need.toLowerCase().replace(/[^a-z0-9]+/g, "-") })}
-                className="inline-flex min-h-11 items-center border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="inline-flex min-h-11 items-center border border-white/[0.12] bg-bioaxis-black px-3 py-2 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 {need}
               </Link>
@@ -196,26 +196,26 @@ export function CatalogSegmentPage({ segment }: { segment: ProductCatalogSegment
           </div>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Segment overview</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">What BioAxis reviews</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Segment overview</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">What BioAxis reviews</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{segment.shortDescription}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {["Specifications", "Equivalent path", "Samples / docs"].map((item) => (
-              <div key={item} className="border border-bioaxis-line bg-bioaxis-black p-3 text-xs font-semibold uppercase text-bioaxis-steel">
+              <div key={item} className="border border-bioaxis-line bg-bioaxis-black p-3 text-xs font-semibold  text-bioaxis-steel">
                 {item}
               </div>
             ))}
           </div>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Common buyer questions</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Common buyer questions</p>
           <div className="mt-5 grid gap-3">
             {[
               "Can BioAxis compare a current supplier or catalog number?",
               "Which documents should be requested before purchasing?",
               "Should samples be reviewed before switching?"
             ].map((question) => (
-              <div key={question} className="border border-bioaxis-line bg-bioaxis-black p-3 text-xs font-semibold uppercase leading-5 text-bioaxis-steel">
+              <div key={question} className="border border-bioaxis-line bg-bioaxis-black p-3 text-xs font-semibold  leading-5 text-bioaxis-steel">
                 {question}
               </div>
             ))}
@@ -258,7 +258,7 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
       <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-category-families="true">
         <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <h2 className="text-2xl font-bold text-bioaxis-text">Choose a product family.</h2>
+            <h2 className="text-2xl font-semibold text-bioaxis-text">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Family pages show sourcing configuration templates, buyer checklists, documentation requests, and sourcing-list actions.
@@ -272,14 +272,14 @@ export function CatalogCategoryPage({ segment, category }: { segment: ProductCat
               preserveProductQuery
               className="group border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
-              <h3 className="text-lg font-bold text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
+              <h3 className="text-lg font-semibold text-bioaxis-text transition group-hover:text-bioaxis-accent">{family.name}</h3>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{family.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {family.typicalSpecs.slice(0, 4).map((spec) => (
                   <SpecTag key={spec}>{spec}</SpecTag>
                 ))}
               </div>
-              <span className="mt-5 inline-flex text-xs font-bold uppercase text-bioaxis-accent">View family</span>
+              <span className="mt-5 inline-flex text-xs font-semibold  text-bioaxis-accent">View family</span>
             </SourcingRequestLink>
           ))}
         </div>
@@ -365,7 +365,7 @@ export function CatalogFamilyPage({
       <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-family-configurations="true">
         <div className="mb-5">
           <p className="mb-2 text-xs font-semibold text-bioaxis-accent">Sourcing configuration templates</p>
-          <h2 className="text-2xl font-bold text-bioaxis-text">Configurations for review</h2>
+          <h2 className="text-2xl font-semibold text-bioaxis-text">Configurations for review</h2>
           <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
             Specifications and availability need confirmation.
           </p>
@@ -430,12 +430,11 @@ export function CatalogProductPage({
       />
       <PageHero title={product.name} subtitle={product.description} compact tight align="start">
         <div className="grid gap-3" data-product-decision-summary="true">
-          <p role="note" className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-l-2 border-bioaxis-accent/70 pl-3 text-xs leading-5 text-bioaxis-muted">
-            <span className="font-bold uppercase text-bioaxis-accent">Sourcing template</span>
-            <span>No supplier SKU or availability is verified; confirm specifications and fit.</span>
+          <p role="note" className="helper-text border-l-2 border-bioaxis-accent/70 pl-3 text-bioaxis-muted">
+            Sourcing template: confirm supplier specifications and availability.
           </p>
           <div data-product-specification-group="options">
-            <p className="mb-2 text-[11px] font-bold uppercase text-bioaxis-dim">Fields and options to confirm</p>
+            <p className="helper-text mb-2 text-bioaxis-dim">Fields and options to confirm</p>
             <ul className="flex flex-wrap gap-2">
               {[...new Set(product.tags)].slice(0, 5).map((tag) => (
                 <li key={tag} className="flex max-w-full"><SpecTag>{tag}</SpecTag></li>
@@ -444,7 +443,7 @@ export function CatalogProductPage({
           </div>
           <ContextActions segment={segment} category={category} family={family} product={product} />
           <details className="group border border-bioaxis-line bg-bioaxis-black">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-bold uppercase text-bioaxis-steel [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold  text-bioaxis-steel [&::-webkit-details-marker]:hidden">
               <span>More sourcing actions</span>
               <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
             </summary>
@@ -475,8 +474,8 @@ export function CatalogProductPage({
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Documentation to request</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Confirm document status before purchase.</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Documentation to request</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Confirm document status before purchase.</h2>
           <div className="mt-5 grid gap-3">
             {documentLabels.map(([key, label]) => {
               const status = product.documents[key];
@@ -485,27 +484,27 @@ export function CatalogProductPage({
 
               return (
                 <div key={key} className="flex items-center justify-between gap-4 border border-bioaxis-line bg-bioaxis-black px-4 py-3">
-                  <span className="text-xs font-bold uppercase text-bioaxis-steel">{label}</span>
-                  <span className="text-xs font-bold uppercase text-bioaxis-accent">{statusLabels[status]}</span>
+                  <span className="text-xs font-semibold  text-bioaxis-steel">{label}</span>
+                  <span className="text-xs font-semibold  text-bioaxis-accent">{statusLabels[status]}</span>
                 </div>
               );
             })}
           </div>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "documentation", segment, category, family, product, need: "documents" })}
-            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request documents
           </SourcingRequestLink>
         </section>
 
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Template fields to confirm</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Confirm values against supplier documentation.</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Template fields to confirm</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Confirm values against supplier documentation.</h2>
           <dl className="mt-5 grid gap-3 md:grid-cols-2">
             {Object.entries(product.specs).map(([key, value]) => (
               <div key={key} className="border border-bioaxis-line bg-bioaxis-black p-4">
-                <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{key}</dt>
+                <dt className="text-sm font-semibold  text-bioaxis-dim">{key}</dt>
                 <dd className="mt-2 text-sm leading-6 text-bioaxis-steel">{Array.isArray(value) ? value.join(", ") : value}</dd>
               </div>
             ))}
@@ -515,47 +514,47 @@ export function CatalogProductPage({
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 pb-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Equivalent review notes</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Compare before switching.</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Equivalent review notes</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Compare before switching.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help compare supplier, catalog number, critical specs, documentation, sample needs, and workflow fit. Buyer-side technical review remains required before substitution.
           </p>
           <SourcingRequestLink
             href={catalogEquivalentHref(segment, category, family, product)}
-            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
           >
             Start equivalent review
           </SourcingRequestLink>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sample-first evaluation</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Review before larger-volume sourcing.</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Sample-first evaluation</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Review before larger-volume sourcing.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis can help organize sample requests, documentation requirements, packaging preferences, and recurring usage details before preparing RFQ follow-up.
           </p>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "sample", segment, category, family, product, need: "sample" })}
-            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request sample path
           </SourcingRequestLink>
         </section>
         <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Recurring supply considerations</p>
-          <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Plan repeat use after specs are clear.</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Recurring supply considerations</p>
+          <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Plan repeat use after specs are clear.</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             Share monthly or annual usage, shipping region, preferred packaging, and documentation requirements so BioAxis can organize recurring supply review without implying live inventory.
           </p>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "recurring-supply", segment, category, family, product, need: "recurring-supply" })}
-            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="mt-5 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Review recurring supply
           </SourcingRequestLink>
         </section>
         {relatedProducts.length > 0 ? (
           <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Related configured paths</p>
+            <p className="text-sm font-semibold  text-bioaxis-accent">Related configured paths</p>
             <div className="mt-5 grid gap-3">
               {relatedProducts.map((related) => (
                 <SourcingRequestLink
@@ -564,7 +563,7 @@ export function CatalogProductPage({
                   preserveProductQuery
                   className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
                 >
-                  <span className="text-sm font-bold text-bioaxis-text">{related.name}</span>
+                  <span className="text-sm font-semibold text-bioaxis-text">{related.name}</span>
                   <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
                 </SourcingRequestLink>
               ))}
@@ -577,7 +576,7 @@ export function CatalogProductPage({
 
       <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Product fit note</p>
+          <p className="text-xs font-semibold  text-bioaxis-accent">Product fit note</p>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
             Product fit, documentation, equivalent suitability, and sample acceptance should be reviewed by the buyer for the intended protocol, instrument, quality system, and market requirements.
           </p>
@@ -604,8 +603,8 @@ function CatalogCTA({
     <section className="border-y border-bioaxis-line bg-bioaxis-panel/70">
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-10">
         <div>
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">RFQ sourcing workflow</p>
-          <h2 className="mt-3 max-w-3xl text-3xl font-bold text-bioaxis-text sm:text-5xl">{title}</h2>
+          <p className="text-sm font-semibold  text-bioaxis-accent">RFQ sourcing workflow</p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-semibold text-bioaxis-text sm:text-5xl">{title}</h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-bioaxis-muted">
             BioAxis will include this catalog context automatically. Add supplier, catalog number, quantity, samples, or documentation requirements only if useful.
           </p>
@@ -613,13 +612,13 @@ function CatalogCTA({
         <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "quote", segment, category, family, product, need: "quote" })}
-            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-bold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-6 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Request quote
           </SourcingRequestLink>
           <SourcingRequestLink
             href={catalogRequestHref({ requestType: "product-list-review", segment, category, family, product, need: "product-list" })}
-            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-12 items-center justify-center border border-bioaxis-line px-6 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request quote with list
           </SourcingRequestLink>
@@ -632,7 +631,7 @@ function CatalogCTA({
 function Disclosure({ title, items }: { title: string; items: string[] }) {
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-bold uppercase text-bioaxis-text">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold  text-bioaxis-text">
         <span>{title}</span>
         <span aria-hidden="true" className="text-bioaxis-accent transition group-open:rotate-45">+</span>
       </summary>
@@ -650,7 +649,7 @@ function Disclosure({ title, items }: { title: string; items: string[] }) {
 function EmptyCatalogPanel({ title, body }: { title: string; body: string }) {
   return (
     <section className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <p className="text-sm font-semibold uppercase text-bioaxis-accent">{title}</p>
+      <p className="text-sm font-semibold  text-bioaxis-accent">{title}</p>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{body}</p>
     </section>
   );

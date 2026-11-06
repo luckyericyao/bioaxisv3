@@ -76,7 +76,7 @@ export function FamilyPageTemplate({ segment, category, family }: FamilyPageTemp
 
       <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Compliance disclaimer</p>
+          <p className="text-xs font-semibold  text-bioaxis-accent">Compliance disclaimer</p>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
             Product fit, equivalent suitability, documentation, and sample acceptance should be reviewed and validated by the buyer for the intended protocol, instrument, quality system, and application.
           </p>

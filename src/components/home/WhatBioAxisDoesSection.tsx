@@ -25,8 +25,8 @@ export function WhatBioAxisDoesSection() {
     <section className="bg-[#111827] text-white">
       <div className="mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <div className="max-w-4xl">
-          <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-ice">Structured sourcing workflow</p>
-          <h2 className="text-3xl font-bold uppercase leading-tight text-white sm:text-5xl">Turn scattered product inputs into a buyer-ready sourcing brief</h2>
+          <p className="mb-4 text-sm font-semibold  text-bioaxis-ice">Structured sourcing workflow</p>
+          <h2 className="text-3xl font-semibold  leading-tight text-white sm:text-5xl">Turn scattered product inputs into a buyer-ready sourcing brief</h2>
           <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg">
             BioAxis maps product context, equivalent criteria, document needs, sample paths, and quote details into one structured sourcing workflow.
           </p>
@@ -45,7 +45,7 @@ export function WhatBioAxisDoesSection() {
           <div className="grid gap-4 md:grid-cols-2">
             {cards.map((card) => (
               <article key={card.title} className="border border-white/10 bg-white/[0.06] p-6 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur transition hover:border-bioaxis-ice/70 hover:bg-white/[0.09]">
-                <h3 className="text-xl font-bold uppercase text-white">{card.title}</h3>
+                <h3 className="text-xl font-semibold  text-white">{card.title}</h3>
                 <p className="mt-4 text-sm leading-6 text-slate-300">{card.body}</p>
               </article>
             ))}

@@ -33,7 +33,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       category={initialValues.productCategory || productContext?.productCategory}
       family={productContext?.productFamily}
       product={productContext?.productName}
-      title="Paste what you have."
+      title="What do you need?"
       defaultMessage={defaultMessage}
       initialDetails={{
         currentSupplier: initialValues.supplier ?? "",
@@ -45,7 +45,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       compact
       contextLocked={Boolean(productContext)}
       productContext={productContext}
-      handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Paste it below; only your email is required." : undefined}
+      handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Add it below to continue." : undefined}
       submitLabel="Send sourcing request"
     />
   );

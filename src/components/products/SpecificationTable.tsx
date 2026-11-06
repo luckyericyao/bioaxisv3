@@ -13,11 +13,11 @@ export function SpecificationTable({ title = "Selection criteria", specification
   return (
     <section className="overflow-hidden border border-bioaxis-line bg-bioaxis-panel">
       <div className="border-b border-bioaxis-line p-5">
-        <h2 className="text-2xl font-bold text-bioaxis-text">{title}</h2>
+        <h2 className="text-2xl font-semibold text-bioaxis-text">{title}</h2>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-[720px] w-full border-collapse text-left">
-          <thead className="bg-bioaxis-black text-xs uppercase text-bioaxis-dim">
+          <thead className="bg-bioaxis-black text-xs  text-bioaxis-dim">
             <tr>
               <th className="border-b border-bioaxis-line px-4 py-3">Specification</th>
               <th className="border-b border-bioaxis-line px-4 py-3">Buyer check</th>

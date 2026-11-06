@@ -48,7 +48,7 @@ export function AddToSourcingListButton({
       }}
       ref={buttonRef}
       className={[
-        "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black",
+        "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black",
         className
       ].join(" ")}
     >

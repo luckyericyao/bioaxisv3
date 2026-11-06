@@ -37,8 +37,8 @@ export default function ReadySupplyPage() {
       <section className="border-b border-bioaxis-line px-5 py-12 sm:px-8 sm:py-14 lg:px-10 lg:py-12">
         <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(400px,0.82fr)] lg:items-start">
           <div className="order-1 lg:order-1">
-            <p className="mb-5 text-sm font-semibold uppercase text-bioaxis-accent">Availability check</p>
-            <h1 className="max-w-5xl text-4xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
+            <p className="mb-5 text-sm font-semibold  text-bioaxis-accent">Availability check</p>
+            <h1 className="max-w-5xl text-4xl font-semibold  leading-[0.95] text-bioaxis-text sm:text-5xl lg:text-5xl">
               Check current supply evidence before procurement.
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-7 text-bioaxis-muted sm:text-lg">
@@ -53,7 +53,7 @@ export default function ReadySupplyPage() {
 
           <div className="order-2 grid gap-3 lg:order-2">
             <aside className="border border-bioaxis-line bg-bioaxis-black p-4">
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">BioAxis availability check</p>
+              <p className="text-xs font-semibold  text-bioaxis-accent">BioAxis availability check</p>
               <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                 Selected-line status is checked per request; this is not a live inventory feed.
               </p>
@@ -65,16 +65,16 @@ export default function ReadySupplyPage() {
                   ["Replenishment", "Usage and packaging review for recurring demand"]
                 ].map(([label, value]) => (
                   <div key={label} className="grid gap-1 border-t border-white/[0.12] pt-2 sm:grid-cols-[0.38fr_0.62fr] sm:gap-3">
-                    <dt className="text-[0.68rem] font-bold uppercase text-bioaxis-dim">{label}</dt>
+                    <dt className="text-sm font-semibold  text-bioaxis-dim">{label}</dt>
                     <dd className="text-xs leading-5 text-bioaxis-steel">{value}</dd>
                   </div>
                 ))}
               </dl>
             </aside>
             <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold  text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
                 <span>Open availability request</span>
-                <span className="text-xs font-semibold text-bioaxis-accent">Email only to start <span aria-hidden="true">· +</span></span>
+                <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
               </summary>
               <div className="border-t border-bioaxis-line p-4 sm:p-5">
                 <CompactSourcingIntake
@@ -102,9 +102,9 @@ export default function ReadySupplyPage() {
                 key={step.title}
                 className="grid gap-4 border border-bioaxis-line bg-bioaxis-black p-5 sm:grid-cols-[72px_1fr] sm:items-start"
               >
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">{String(index + 1).padStart(2, "0")}</p>
+                <p className="text-xs font-semibold  text-bioaxis-accent">{String(index + 1).padStart(2, "0")}</p>
                 <div>
-                  <h2 className="text-base font-bold uppercase text-bioaxis-text">{step.title}</h2>
+                  <h2 className="text-base font-semibold  text-bioaxis-text">{step.title}</h2>
                   <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{step.body}</p>
                 </div>
               </article>
@@ -115,7 +115,7 @@ export default function ReadySupplyPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-6 sm:p-8">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Typical request coverage</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Typical request coverage</p>
           <p className="mt-4 max-w-4xl text-base leading-7 text-bioaxis-muted">
             Availability requests can cover pipette tips, PCR plastics, tubes, plates, filtration, cell culture consumables, and private-label sourcing discussions.
           </p>
@@ -132,7 +132,7 @@ export default function ReadySupplyPage() {
             <div className="mt-5 grid gap-3">
               {selectedLineRegistry.map((record) => (
                 <article key={record.line} className="border border-bioaxis-line bg-bioaxis-black p-5">
-                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{record.line}</h3>
+                  <h3 className="text-sm font-semibold  text-bioaxis-text">{record.line}</h3>
                   <dl className="mt-4 grid gap-3 sm:grid-cols-2">
                     {[
                       ["Supply mode", record.supplyMode],
@@ -143,7 +143,7 @@ export default function ReadySupplyPage() {
                       ["Buyer responsibility", record.buyerResponsibility]
                     ].map(([label, value]) => (
                       <div key={label} className="border border-white/[0.1] bg-bioaxis-panel px-3 py-2">
-                        <dt className="text-[11px] font-bold uppercase text-bioaxis-dim">{label}</dt>
+                        <dt className="text-sm font-semibold  text-bioaxis-dim">{label}</dt>
                         <dd className="mt-1 text-sm leading-5 text-bioaxis-steel">{value}</dd>
                       </div>
                     ))}
@@ -155,7 +155,7 @@ export default function ReadySupplyPage() {
           <div className="mt-8 grid gap-3">
             {readySupplyEvidenceRows.map((row) => (
               <article key={row.label} className="grid gap-3 border border-bioaxis-line bg-bioaxis-black p-4 sm:grid-cols-[0.7fr_1fr_1fr_1fr] sm:items-start">
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">{row.label}</p>
+                <p className="text-xs font-semibold  text-bioaxis-accent">{row.label}</p>
                 <p className="text-sm leading-6 text-bioaxis-text">{row.status}</p>
                 <p className="text-sm leading-6 text-bioaxis-steel">{row.confirmation}</p>
                 <p className="text-sm leading-6 text-bioaxis-muted">{row.boundary}</p>

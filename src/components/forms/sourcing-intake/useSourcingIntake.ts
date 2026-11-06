@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 import { getBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
 import { requestErrorMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
+import { hasSourcingNeed, sourcingNeedError } from "@/lib/sourcingNeed";
 import { apiRequestType, createInitialIntakeState, hasValidEmail, initialProductContext } from "./intakeState";
 import type { IntakeState, SourcingIntakeFormProps, SubmitState } from "./types";
 import { clearStoredSourcingSubmission, useSourcingListSession } from "./useSourcingListSession";
@@ -25,6 +26,7 @@ export function useSourcingIntake({
   const startedAtRef = useRef(Date.now());
   const requestIdRef = useRef(getBioAxisRequestId());
   const intakeStartedRef = useRef(false);
+  const submittingRef = useRef(false);
   const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage, initialDetails));
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
@@ -59,6 +61,7 @@ export function useSourcingIntake({
       resolvedProductContext.productSegment
   );
   const { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput } = useSourcingListSession(setState);
+  const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
 
   const trackIntakeStart = useCallback(() => {
     if (intakeStartedRef.current) {
@@ -105,6 +108,7 @@ export function useSourcingIntake({
   }
 
   function validate() {
+    if (!hasSourcingNeed({ productList: state.productInput, catalogNumber: state.catalogNumber, message: state.notes, productContext: resolvedProductContext, sourcingListItems })) return sourcingNeedError;
     if (!hasValidEmail(state.email)) return emailErrorMessage;
     if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
     return "";
@@ -129,6 +133,7 @@ export function useSourcingIntake({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
     const validationError = validate();
 
     if (validationError) {
@@ -142,11 +147,16 @@ export function useSourcingIntake({
         const emailInput = event.currentTarget.elements.namedItem("email");
         if (emailInput instanceof HTMLElement) emailInput.focus();
       }
+      if (validationError === sourcingNeedError) {
+        const needInput = event.currentTarget.elements.namedItem("sourcing-product-input");
+        if (needInput instanceof HTMLElement) needInput.focus();
+      }
       return;
     }
 
     setError("");
     setRetryReferenceReady(false);
+    submittingRef.current = true;
     setSubmitting(true);
     trackBioAxisEvent("rfq_submit", { requestId: requestIdRef.current, requestType: state.requestType, stage: "client_submit" });
 
@@ -165,7 +175,7 @@ export function useSourcingIntake({
         productSegment: resolvedProductContext.productSegment,
         productCategory: resolvedProductContext.productCategory,
         productFamily: resolvedProductContext.productFamily,
-        productName: resolvedProductContext.productName || product || (state.requestType === "contact" ? "Contact request" : ""),
+        productName: resolvedProductContext.productName || product || "",
         productList: state.productInput,
         catalogNumber: state.catalogNumber,
         currentSupplier: state.currentSupplier,
@@ -217,6 +227,7 @@ export function useSourcingIntake({
       setError(requestErrorMessage);
       setSubmitted(null);
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   }
@@ -241,6 +252,8 @@ export function useSourcingIntake({
     restoredSessionInput,
     error,
     emailInvalid: error === emailErrorMessage,
+    needInvalid: error === sourcingNeedError,
+    hasSelectedNeed,
     submitted,
     submitting,
     requestReferenceConflict,

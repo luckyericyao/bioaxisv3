@@ -4,6 +4,7 @@ import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 import { checkRfqQueueConnection, enqueueRfq, RfqIdempotencyConflictError, rfqQueueConfigured } from "@/lib/server/rfqQueue";
 import { PayloadTooLargeError, readLimitedJsonBody } from "@/lib/server/readLimitedJsonBody";
+import { hasSourcingNeed, sourcingNeedError } from "@/lib/sourcingNeed";
 
 export const dynamic = "force-dynamic";
 
@@ -304,6 +305,8 @@ function validateRequest(request: NormalizedRfq) {
   if (!request.email || !isValidEmail(request.email)) {
     return "Please enter an email so BioAxis can follow up.";
   }
+
+  if (!hasSourcingNeed(request)) return sourcingNeedError;
 
   return "";
 }

@@ -101,7 +101,7 @@ function FilterButton({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        "inline-flex min-h-11 min-w-11 items-center justify-center border px-2.5 py-1.5 text-[11px] font-semibold uppercase transition",
+        "inline-flex min-h-11 min-w-11 items-center justify-center border px-2.5 py-1.5 text-sm font-semibold  transition",
         active
           ? "border-bioaxis-accent bg-bioaxis-accent text-bioaxis-black"
           : "border-bioaxis-line bg-bioaxis-black text-bioaxis-steel hover:border-bioaxis-accent hover:text-bioaxis-accent"
@@ -121,7 +121,7 @@ function DocsSummary({ product }: { product: ProductCatalogItem }) {
         if (!status) return null;
 
         return (
-          <span key={key} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold text-bioaxis-steel">
+          <span key={key} className="border border-white/[0.12] px-2 py-1 text-sm font-semibold text-bioaxis-steel">
             {label}: <span className="text-bioaxis-accent">{statusLabels[status]}</span>
           </span>
         );
@@ -169,13 +169,13 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
     <section className="border border-bioaxis-line bg-bioaxis-panel p-5 sm:p-6">
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="lg:border-r lg:border-bioaxis-line lg:pr-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Filter templates</p>
-          <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">{heading}</h2>
+          <p className="text-xs font-semibold  text-bioaxis-accent">Filter templates</p>
+          <h2 className="mt-2 text-2xl font-semibold text-bioaxis-text">{heading}</h2>
           <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
             Review template-level RFQ fields, documentation needs, equivalent notes, and next actions before sending a sourcing request.
           </p>
           <label className="mt-5 block">
-            <span className="mb-2 block text-xs font-bold uppercase text-bioaxis-steel">Search within list</span>
+            <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">Search within list</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -196,7 +196,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
         <div className="min-w-0">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p role="status" aria-atomic="true" className="text-xs font-bold uppercase text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching templates</p>
+              <p role="status" aria-atomic="true" className="text-xs font-semibold  text-bioaxis-dim">Showing {visibleRows.length} of {filteredRows.length} matching templates</p>
               {compact && filteredRows.length > visibleRows.length ? (
                 <p className="mt-1 text-xs leading-5 text-bioaxis-muted">Preview list capped here. Open the family or product page for the full context.</p>
               ) : null}
@@ -206,7 +206,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
           <div className="hidden overflow-x-auto lg:block">
             <table className="min-w-full border-separate border-spacing-0 text-left">
               <thead>
-                <tr className="text-[11px] font-bold uppercase text-bioaxis-dim">
+                <tr className="text-sm font-semibold  text-bioaxis-dim">
                   <th className="border-y border-l border-bioaxis-line bg-bioaxis-black px-3 py-3">Configuration type</th>
                   <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Typical RFQ fields</th>
                   <th className="border-y border-bioaxis-line bg-bioaxis-black px-3 py-3">Documentation to request</th>
@@ -218,7 +218,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
                 {visibleRows.map((row) => (
                   <tr key={row.product.id} className="align-top" data-family-template-kind={templateKind}>
                     <td className="border-b border-l border-bioaxis-line px-3 py-4">
-                      <SourcingRequestLink href={row.href} preserveProductQuery className="text-sm font-bold text-bioaxis-text transition hover:text-bioaxis-accent">
+                      <SourcingRequestLink href={row.href} preserveProductQuery className="text-sm font-semibold text-bioaxis-text transition hover:text-bioaxis-accent">
                         {row.product.name}
                       </SourcingRequestLink>
                       <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.familyTitle}</p>
@@ -226,7 +226,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
                     <td className="border-b border-bioaxis-line px-3 py-4">
                       <div className="flex flex-wrap gap-1.5">
                         {row.product.tags.slice(0, 4).map((tag) => (
-                          <span key={tag} className="border border-white/[0.12] px-2 py-1 text-[10px] font-semibold text-bioaxis-steel">
+                          <span key={tag} className="border border-white/[0.12] px-2 py-1 text-sm font-semibold text-bioaxis-steel">
                             {tag}
                           </span>
                         ))}
@@ -251,7 +251,7 @@ export function CatalogProductBrowser({ rows, heading = "Sourcing template previ
             {visibleRows.map((row) => (
               <article key={row.product.id} className="border border-bioaxis-line bg-bioaxis-black p-4" data-family-template-kind={templateKind}>
                 <div>
-                  <SourcingRequestLink href={row.href} preserveProductQuery className="text-base font-bold text-bioaxis-text">
+                  <SourcingRequestLink href={row.href} preserveProductQuery className="text-base font-semibold text-bioaxis-text">
                     {row.product.name}
                   </SourcingRequestLink>
                   <p className="mt-2 text-xs leading-5 text-bioaxis-muted">{row.segmentTitle} / {row.categoryTitle} / {row.familyTitle}</p>
@@ -301,7 +301,7 @@ function FilterGroup({
 
   return (
     <fieldset className="mt-5 min-w-0">
-      <legend className="mb-2 text-xs font-bold uppercase text-bioaxis-steel">{title}</legend>
+      <legend className="mb-2 text-xs font-semibold  text-bioaxis-steel">{title}</legend>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => (
           <FilterButton key={value} label={value} active={active.includes(value)} onClick={() => onToggle(value)} />
@@ -317,25 +317,25 @@ function RowActions({ row }: { row: CatalogProductRow }) {
       <SourcingRequestLink
         href={row.href}
         preserveProductQuery
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Details
       </SourcingRequestLink>
       <SourcingRequestLink
         href={requestHref(row, "quote", "quote")}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-[11px] font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-sm font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
       >
         Request quote
       </SourcingRequestLink>
       <SourcingRequestLink
         href={equivalentHref(row)}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Equivalent
       </SourcingRequestLink>
       <SourcingRequestLink
         href={requestHref(row, "documentation", "documents")}
-        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-[11px] font-bold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+        className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
       >
         Documents
       </SourcingRequestLink>
@@ -353,7 +353,7 @@ function RowActions({ row }: { row: CatalogProductRow }) {
         label="Add to list"
         addedLabel="Added"
         requestedAction="Quote"
-        className="min-h-11 px-3 text-[11px]"
+        className="min-h-11 px-3 text-sm"
       />
     </div>
   );

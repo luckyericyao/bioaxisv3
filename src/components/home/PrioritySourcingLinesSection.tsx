@@ -1,95 +1,39 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SectionHeader } from "@/components/ui/SectionHeader";
-import { pageVisuals, segmentVisuals } from "@/data/visualAssets";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import photoCredits from "../../../public/images/redesign/attribution.json";
+
+function photograph(id: string) {
+  const asset = photoCredits.assets.find((image) => image.id === id);
+  if (!asset) throw new Error(`Missing category photograph: ${id}`);
+  return { src: asset.path, alt: asset.alt };
+}
 
 const priorityLines = [
-  {
-    title: "Liquid Handling",
-    description: "Pipette tips, reservoirs, robotic tips, sterile formats.",
-    href: "/products/liquid-handling",
-    cta: "Explore liquid handling",
-    image: segmentVisuals["liquid-handling"]
-  },
-  {
-    title: "Cell Culture",
-    description: "Vessels, media-related consumables, passaging support.",
-    href: "/products/cell-culture",
-    cta: "Explore cell culture",
-    image: segmentVisuals["cell-culture"]
-  },
-  {
-    title: "Filtration",
-    description: "Syringe filters, membranes, bottle-top filters, sterile formats.",
-    href: "/products/sample-prep-filtration",
-    cta: "Explore filtration",
-    image: segmentVisuals["sample-prep-filtration"]
-  },
-  {
-    title: "Tubes, Plates & Storage",
-    description: "Tubes, plates, cryovials, seals, racks.",
-    href: "/products/storage-cryopreservation",
-    cta: "Explore storage",
-    image: segmentVisuals["storage-cryopreservation"]
-  },
-  {
-    title: "PCR / qPCR",
-    description: "PCR plates, tubes, strips, optical seals.",
-    href: "/products/molecular-biology-pcr",
-    cta: "Explore PCR",
-    image: segmentVisuals["molecular-biology-pcr"]
-  },
-  {
-    title: "Private Label / OEM",
-    description: "Neutral-label options for recurring consumables demand.",
-    href: "/private-label-oem",
-    cta: "Discuss private label",
-    image: pageVisuals.privateLabelOem
-  }
+  { title: "Liquid handling", description: "Tips & pipettes", href: "/products/liquid-handling", image: photograph("liquid-handling") },
+  { title: "Cell culture", description: "Culture vessels", href: "/products/cell-culture", image: photograph("cell-culture") },
+  { title: "Filtration", description: "Filters & prep", href: "/products/sample-prep-filtration", image: photograph("filtration") },
+  { title: "Tubes, plates & storage", description: "Sample storage", href: "/products/lab-plasticware", image: photograph("tubes-storage") },
+  { title: "PCR / qPCR", description: "Plates & tubes", href: "/products/molecular-biology-pcr", image: photograph("pcr") }
 ];
 
 export function PrioritySourcingLinesSection() {
   return (
-    <section className="border-b border-bioaxis-line bg-[radial-gradient(circle_at_8%_12%,rgba(56,189,248,0.13),transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)]">
-      <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
-        <div className="max-w-4xl">
-          <SectionHeader
-            title="Priority sourcing lines"
-            subtitle="Start with consumables where buyers often need equivalent review, samples, documentation checks, and recurring demand planning."
-          />
+    <section className="section-space bg-bioaxis-panelSoft" aria-labelledby="home-products-title">
+      <div className="page-container">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 id="home-products-title">Products</h2>
+          <Link href="/products" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-bioaxis-accent">View all<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
         </div>
-
-        <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid gap-x-8 md:grid-cols-2 xl:grid-cols-3">
           {priorityLines.map((line) => (
-            <article
-              key={line.title}
-              className="group flex h-full flex-col overflow-hidden border border-white/80 bg-white/[0.82] shadow-[0_20px_70px_rgba(15,76,129,0.10)] backdrop-blur transition hover:border-bioaxis-ice hover:bg-white"
-            >
-              <div className="relative aspect-[16/9] border-b border-bioaxis-line bg-bioaxis-panelSoft">
-                <Image
-                  src={line.image.src}
-                  alt={line.image.alt}
-                  fill
-                  sizes="(min-width: 1280px) 392px, (min-width: 1024px) calc(50vw - 46px), (min-width: 768px) calc(50vw - 38px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
-                  className="object-cover grayscale-[8%] saturate-[0.82] transition duration-500 group-hover:scale-[1.03] group-hover:saturate-100"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,252,0.12)_0%,rgba(15,76,129,0.10)_100%)]" aria-hidden="true" />
+            <Link key={line.title} href={line.href} data-home-product-entry="true" className="group grid min-w-0 grid-cols-[96px_minmax(0,1fr)_16px] items-center gap-4 border-b border-bioaxis-line py-5 transition hover:text-bioaxis-accent">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-white">
+                <Image src={line.image.src} alt={line.image.alt} fill sizes="96px" className="object-cover" />
               </div>
-              <div className="flex flex-1 flex-col p-5">
-                <h2 className="text-lg font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
-                  {line.title}
-                </h2>
-                <p className="mt-3 flex-1 text-sm leading-6 text-bioaxis-muted">{line.description}</p>
-                <div className="mt-5">
-                  <Link
-                    href={line.href}
-                    className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-3 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-white"
-                  >
-                    {line.cta}
-                  </Link>
-                </div>
-              </div>
-            </article>
+              <div className="min-w-0"><h3>{line.title}</h3><p className="mt-1 text-bioaxis-muted">{line.description}</p></div>
+              <ChevronRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
           ))}
         </div>
       </div>

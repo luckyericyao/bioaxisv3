@@ -25,7 +25,7 @@ Module._load = function load(request, parent, isMain) {
   if (request === "react" && parent?.filename === headerFilename) {
     return { ...React, useState: (initial) => [headerState[headerStateCursor++] ?? initial, () => {}] };
   }
-  if (request === "@/components/sourcing/SourcingListProvider" && parent?.filename === headerFilename) {
+  if (request === "@/components/sourcing/SourcingListProvider") {
     return { useSourcingList: () => ({ items: [], openDrawer: () => {} }) };
   }
   if (request === "next/navigation") return { useRouter: () => ({ push: () => {} }), usePathname: () => "/" };
@@ -71,14 +71,14 @@ try {
   const { productNavigationSegments } = require("../src/data/productNavigation.ts");
   // Render each disclosure state with real SSR hooks except the injected state.
   // Effects, focus movement, and hydration still require browser acceptance.
-  for (const state of [[false, false, false], [false, true, false], [true, false, false], [true, false, true]]) {
+  for (const state of [[null, false, null], ["products", false, null], [null, true, null], [null, true, "products"], ["support", false, null], [null, true, "support"]]) {
     headerState = state;
     headerStateCursor = 0;
-    const [menuOpen, productsOpen, mobileProductsOpen] = state;
+    const [openMenu, menuOpen, mobileOpen] = state;
     const html = renderToStaticMarkup(React.createElement(Header, { productNavigationSegments }));
     checkReferences(html);
     assert.deepEqual(headerNavigationFailures(html, menuOpen), []);
-    for (const [id, expanded] of [["mobile-primary-navigation", menuOpen], ["products-segment-dropdown", productsOpen], ["mobile-products-navigation", mobileProductsOpen]]) {
+    for (const [id, expanded] of [["mobile-primary-navigation", menuOpen], ["products-segment-dropdown", openMenu === "products"], ["mobile-products-navigation", mobileOpen === "products"], ["sourcing-support-dropdown", openMenu === "support"], ["mobile-support-navigation", mobileOpen === "support"]]) {
       assert.equal(html.includes(`id="${id}"`), expanded, `${id}: panel must follow its disclosure state`);
       assert.equal(html.includes(`aria-controls="${id}"`), expanded, `${id}: controls must follow the rendered panel`);
     }
@@ -86,7 +86,7 @@ try {
     if (menuOpen) {
       assert.ok(headerNavigationFailures(html.replace('id="mobile-primary-navigation"', ""), true).length > 0, "Smoke must reject a missing controlled panel");
     } else {
-      const dangling = html.replace('aria-expanded="false"', 'aria-expanded="false" aria-controls="mobile-primary-navigation"');
+      const dangling = html.replace('aria-label="Menu"', 'aria-label="Menu" aria-controls="missing-mobile-panel"');
       assert.ok(headerNavigationFailures(dangling).length > 0, "Smoke must reject dangling aria-controls on a closed Menu");
     }
   }
@@ -153,9 +153,9 @@ try {
   assert.ok(contrast(palette.ice, "#111827") >= 3);
   const css = readFileSync("src/app/globals.css", "utf8");
   assert.match(css, /\.field-focus:focus\s*\{[^}]*outline: 2px solid #0f4c81/);
-  assert.match(css, /footer :where\(a, button\):focus-visible\s*\{\s*outline-color: #38bdf8/);
+  assert.match(css, /footer :where\(a, button\):focus-visible\s*\{\s*outline-color: #245b78/);
   assert.match(css, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/);
-  console.log(`Static accessibility regression passed: four Header disclosure states/smoke contracts, form labels/ARIA, named errors, search help, filter state, ${disclosures} native disclosures, palette contrast, and focus CSS.`);
+  console.log(`Static accessibility regression passed: six Header disclosure states/smoke contracts, form labels/ARIA, named errors, search help, filter state, ${disclosures} native disclosures, palette contrast, and focus CSS.`);
 } finally {
   Module._resolveFilename = originalResolve;
   Module._load = originalLoad;

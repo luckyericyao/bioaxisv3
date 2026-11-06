@@ -82,6 +82,7 @@ async function evaluateGet({ release = sha, includeRelease = true, queueConfigur
     exports: localModule.exports,
     process: { env: environment },
     require: (name) => {
+      if (name === "@/lib/sourcingNeed") return { hasSourcingNeed: () => false, sourcingNeedError: "Missing need" };
       if (name === "next/server") return { NextResponse: { json: (body, init) => Response.json(body, init) } };
       if (name === "node:crypto") return { randomUUID: () => assert.fail("GET must not generate an RFQ") };
       if (name === "@/lib/server/rfqQueue") {

@@ -155,7 +155,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
         className="border border-bioaxis-line bg-bioaxis-black p-4"
         data-turnstile-widget={configFailed ? "unavailable" : "loading"}
       >
-        <p className="text-xs font-bold uppercase text-bioaxis-dim">
+        <p className="text-xs font-semibold  text-bioaxis-dim">
           {configFailed ? "Verification unavailable" : "Loading verification"}
         </p>
         {configFailed ? (
@@ -182,7 +182,7 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
         }}
       />
       <div className="mb-2">
-        <p className="text-xs font-bold uppercase text-bioaxis-dim">Verification</p>
+        <p className="text-xs font-semibold  text-bioaxis-dim">Verification</p>
         {!compact ? <p className="mt-2 text-xs leading-5 text-bioaxis-muted">This check protects the request form from spam. It should take only a moment.</p> : null}
       </div>
       <div ref={containerRef} className="cf-turnstile min-h-[58px]" />

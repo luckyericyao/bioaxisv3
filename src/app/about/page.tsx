@@ -70,13 +70,13 @@ export default function AboutPage() {
 
       <section className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-10">
         <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">How BioAxis helps</h2>
+          <h2 className="text-2xl font-semibold  text-bioaxis-text">How BioAxis helps</h2>
           <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
             BioAxis helps teams prepare sourcing requests, compare equivalent candidates, request samples before switching, organize documentation requirements, and plan recurring supply conversations. The platform is built for procurement clarity without unsupported inventory counts, price guarantees, or final product-validation claims.
           </p>
         </article>
         <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-          <h2 className="text-2xl font-bold uppercase text-bioaxis-text">What BioAxis does not claim</h2>
+          <h2 className="text-2xl font-semibold  text-bioaxis-text">What BioAxis does not claim</h2>
           <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
             <li className="border-l border-bioaxis-accent/40 pl-3">BioAxis does not claim to manufacture every product it helps source.</li>
             <li className="border-l border-bioaxis-accent/40 pl-3">BioAxis does not guarantee that an alternative is the same product as a named brand.</li>
@@ -101,7 +101,7 @@ export default function AboutPage() {
 function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
-      <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{title}</h2>
+      <h2 className="text-2xl font-semibold  text-bioaxis-text">{title}</h2>
       <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
         {items.map((item) => (
           <li key={item} className="border-l border-bioaxis-accent/40 pl-3">

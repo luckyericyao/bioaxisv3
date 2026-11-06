@@ -16,7 +16,7 @@ type SourcingRequestButtonGroupProps = {
 };
 
 const baseClass =
-  "inline-flex items-center justify-center border text-center font-semibold uppercase transition";
+  "inline-flex items-center justify-center border text-center font-semibold  transition";
 
 const sizeClass = {
   sm: "min-h-11 px-3 text-xs",

@@ -1,6 +1,8 @@
 import { getBioAxisRequestId } from "./clientRequestId";
 
 export type BioAxisEventName =
+  | "homepage_view"
+  | "web_vital"
   | "search"
   | "search_no_result"
   | "search_submit"

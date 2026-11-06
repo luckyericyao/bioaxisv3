@@ -92,8 +92,8 @@ export default function SupplierQualificationPage() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="grid gap-6 border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <p className="text-sm font-semibold uppercase text-bioaxis-accent">Supplier review request</p>
-            <h2 className="mt-4 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">
+            <p className="text-sm font-semibold  text-bioaxis-accent">Supplier review request</p>
+            <h2 className="mt-4 text-2xl font-semibold  text-bioaxis-text sm:text-3xl">
               Send supplier context before committing to a switch.
             </h2>
             <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
@@ -113,7 +113,7 @@ export default function SupplierQualificationPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {qualificationAreas.map((area) => (
             <article key={area.title} className="border border-bioaxis-line bg-bioaxis-panel p-6">
-              <h2 className="text-xl font-bold uppercase text-bioaxis-text">{area.title}</h2>
+              <h2 className="text-xl font-semibold  text-bioaxis-text">{area.title}</h2>
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{area.body}</p>
             </article>
           ))}

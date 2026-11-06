@@ -9,6 +9,8 @@ const analyticsRateWindowMs = 60_000;
 const analyticsRateLimit = 120;
 const analyticsRateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const allowedEvents = new Set([
+  "homepage_view",
+  "web_vital",
   "search",
   "search_no_result",
   "search_submit",

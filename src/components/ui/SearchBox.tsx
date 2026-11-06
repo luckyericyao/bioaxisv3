@@ -101,7 +101,7 @@ export function SearchBox({
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center whitespace-normal border border-bioaxis-text bg-bioaxis-text px-6 text-center text-sm font-bold uppercase text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center whitespace-normal border border-bioaxis-text bg-bioaxis-text px-6 text-center text-sm font-semibold  text-white transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text sm:px-7"
         >
           {submitLabel}
         </button>

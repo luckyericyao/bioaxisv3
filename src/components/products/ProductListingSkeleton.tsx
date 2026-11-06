@@ -11,14 +11,14 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
   return (
     <section className="overflow-hidden border border-bioaxis-line bg-bioaxis-panel">
       <div className="border-b border-bioaxis-line p-5">
-        <h2 className="text-2xl font-bold uppercase text-bioaxis-text">Sourcing options preview</h2>
+        <h2 className="text-2xl font-semibold  text-bioaxis-text">Sourcing options preview</h2>
         <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
           Representative sourcing rows only. Availability, documentation, and pricing are confirmed through sourcing review.
         </p>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-[920px] w-full border-collapse text-left">
-          <thead className="bg-bioaxis-black text-xs uppercase text-bioaxis-dim">
+          <thead className="bg-bioaxis-black text-xs  text-bioaxis-dim">
             <tr>
               <th className="border-b border-bioaxis-line px-4 py-3">Compare</th>
               <th className="border-b border-bioaxis-line px-4 py-3">Product family</th>
@@ -48,13 +48,13 @@ export function ProductListingSkeleton({ segmentSlug, subcategory }: ProductList
                   <td className="px-4 py-4 align-top text-sm text-bioaxis-muted">{family.documentationNeeds.slice(0, 2).join(", ")}</td>
                   <td className="px-4 py-4 align-top">
                     <div className="flex flex-wrap gap-2">
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "quote" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "quote" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Quote
                       </Link>
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "equivalent" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "equivalent" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Equivalent
                       </Link>
-                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "sample" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+                      <Link href={buildRequestHref({ segment: segmentSlug, category: subcategory.slug, family: family.slug, requestType: "sample" })} className="inline-flex min-h-11 min-w-11 items-center justify-center border border-bioaxis-line px-3 py-1 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
                         Sample
                       </Link>
                     </div>

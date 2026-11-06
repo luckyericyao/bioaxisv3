@@ -27,8 +27,8 @@ export function RequestTypeSelector({ requestTypes, selectedId, onSelect }: Requ
               aria-label={`${shortLabel}. ${selected ? "Selected." : "Not selected."} ${shortDescription}`}
             >
               <span className="flex items-start justify-between gap-3">
-                <span className="text-sm font-bold uppercase leading-tight text-bioaxis-text">{shortLabel}</span>
-                {selected ? <span className="text-[11px] font-bold uppercase text-bioaxis-accent">Selected</span> : null}
+                <span className="text-sm font-semibold  leading-tight text-bioaxis-text">{shortLabel}</span>
+                {selected ? <span className="text-sm font-semibold  text-bioaxis-accent">Selected</span> : null}
               </span>
               <span className="mt-3 block text-xs leading-5 text-bioaxis-muted">{shortDescription}</span>
             </button>

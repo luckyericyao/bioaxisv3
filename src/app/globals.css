@@ -4,12 +4,13 @@
 
 :root {
   color-scheme: light;
-  --background: #f8fafc;
-  --foreground: #111827;
+  --background: #ffffff;
+  --foreground: #18212b;
 }
 
 * {
   box-sizing: border-box;
+  letter-spacing: 0;
 }
 
 html {
@@ -20,25 +21,73 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(56, 189, 248, 0.18), transparent 30rem),
-    radial-gradient(circle at 88% 14%, rgba(16, 185, 129, 0.12), transparent 26rem),
-    linear-gradient(180deg, #f8fafc 0%, #eef3f8 48%, #f8fafc 100%);
+  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 25px;
 }
 
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  content: "";
-  background-image:
-    linear-gradient(rgba(15, 76, 129, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 76, 129, 0.035) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 78%);
+.page-container {
+  width: 100%;
+  max-width: 1264px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+.section-space { padding-block: 48px; }
+.home-hero-photo { mask-image: linear-gradient(to right, transparent, #000 96px); }
+main h1, main h1[class] { font-size: 32px; line-height: 40px; font-weight: 500; }
+main h2, main h2[class] { font-size: 28px; line-height: 36px; font-weight: 600; }
+main h3, main h3[class], main article h2[class] { font-size: 18px; line-height: 26px; font-weight: 500; }
+main h1.home-brand { font-size: 48px; line-height: 52px; font-weight: 600; }
+main p[class] { font-size: 16px; line-height: 25px; font-weight: 400; }
+main p.home-purpose { font-size: 20px; line-height: 28px; }
+main .helper-text { font-size: 14px; line-height: 21px; }
+main h2.tool-heading { font-size: 20px; line-height: 28px; font-weight: 500; }
+.action-primary, .action-secondary {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid #245b78;
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.action-primary { color: #ffffff; background: #245b78; }
+.action-primary:hover { background: #1b4358; }
+.action-secondary { color: #245b78; background: #ffffff; }
+.action-secondary:hover { background: #f7fafb; }
+.action-primary:disabled { cursor: wait; opacity: 0.7; }
+.nav-dropdown-link {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+.nav-dropdown-link:hover { color: #245b78; background: #f7fafb; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea { border-color: #75889a; }
+@media (min-width: 640px) {
+  .page-container { padding-inline: 32px; }
+}
+@media (min-width: 1024px) {
+  .section-space { padding-block: 64px; }
+  main h1, main h1[class] { font-size: 48px; line-height: 58px; }
+  main h2, main h2[class] { font-size: 32px; line-height: 40px; }
+  main h3, main h3[class], main article h2[class] { font-size: 20px; line-height: 28px; }
+  main h1.home-brand { font-size: 72px; line-height: 76px; }
+  main p.home-purpose { font-size: 24px; line-height: 34px; }
 }
 
 a {
@@ -97,7 +146,7 @@ textarea {
 }
 
 footer :where(a, button):focus-visible {
-  outline-color: #38bdf8;
+  outline-color: #245b78;
 }
 
 @media (pointer: coarse) {

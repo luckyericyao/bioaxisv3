@@ -41,7 +41,7 @@ export function CategoryPageTemplate({ segment, category }: CategoryPageTemplate
       <section className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-12 lg:px-10" data-category-families="true">
         <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_0.75fr] lg:items-end">
           <div>
-            <h2 className="text-2xl font-bold text-bioaxis-text">Choose a product family.</h2>
+            <h2 className="text-2xl font-semibold text-bioaxis-text">Choose a product family.</h2>
           </div>
           <p className="text-sm leading-6 text-bioaxis-muted">
             Family pages show product item cards, buyer checklists, and request context. Detailed specifications live on product item pages.

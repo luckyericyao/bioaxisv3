@@ -15,7 +15,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
     <>
       <JsonLd data={createBreadcrumbStructuredData(items)} />
-      <nav aria-label="Breadcrumb" className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8 lg:px-10">
+      <nav aria-label="Breadcrumb" className="page-container pt-4 sm:pt-8">
         <ol className="flex flex-wrap items-center gap-2 text-xs font-semibold text-bioaxis-dim">
         {items.map((item, index) => (
           <li key={`${item.label}-${index}`} className="flex items-center gap-2">

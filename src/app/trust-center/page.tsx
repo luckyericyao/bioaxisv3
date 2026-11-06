@@ -91,12 +91,12 @@ export default function TrustCenterPage() {
         <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6" data-business-facts-status={publicTrustEvidenceSummary.complete ? "complete" : "incomplete"}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-bioaxis-accent">Operating transparency</p>
-              <h2 className="mt-2 text-2xl font-bold text-bioaxis-text">Business and service information</h2>
+              <p className="text-xs font-semibold  text-bioaxis-accent">Operating transparency</p>
+              <h2 className="mt-2 text-2xl font-semibold text-bioaxis-text">Business and service information</h2>
             </div>
             <Link
               href="/contact#contact-form"
-              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-bold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+              className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
             >
               Contact BioAxis
             </Link>
@@ -109,9 +109,9 @@ export default function TrustCenterPage() {
           <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {publicTrustFacts.map((fact) => (
               <div key={fact.label} className="border border-bioaxis-line bg-bioaxis-panel p-4">
-                <dt className="flex items-center justify-between gap-3 text-xs font-bold uppercase text-bioaxis-accent">
+                <dt className="flex items-center justify-between gap-3 text-xs font-semibold  text-bioaxis-accent">
                   <span>{fact.question} · {fact.label}</span>
-                  <span className={fact.status === "verified" ? "text-[10px] font-bold uppercase text-emerald-700" : "text-[10px] font-bold uppercase text-amber-700"}>
+                  <span className={fact.status === "verified" ? "text-sm font-semibold  text-emerald-700" : "text-sm font-semibold  text-amber-700"}>
                     {fact.status === "verified" ? "Listed" : "Not listed publicly"}
                   </span>
                 </dt>
@@ -138,7 +138,7 @@ export default function TrustCenterPage() {
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {trustAreas.map((area) => (
             <article key={area.title} className="border border-bioaxis-line bg-bioaxis-panel p-6">
-              <h2 className="text-xl font-bold uppercase text-bioaxis-text">{area.title}</h2>
+              <h2 className="text-xl font-semibold  text-bioaxis-text">{area.title}</h2>
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{area.body}</p>
             </article>
           ))}
@@ -158,19 +158,19 @@ export default function TrustCenterPage() {
               </div>
             </div>
             <div className="p-6">
-              <p className="text-sm font-semibold uppercase text-bioaxis-accent">Document package BioAxis can help organize</p>
+              <p className="text-sm font-semibold  text-bioaxis-accent">Document package BioAxis can help organize</p>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">
                 BioAxis can help organize document requirements and request supplier-provided evidence. BioAxis does not certify, release, validate, or approve final product suitability.
               </p>
               <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {documentPackage.map((document) => (
-                  <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                  <li key={document} className="border border-white/[0.12] bg-bioaxis-panel px-3 py-2 text-xs font-semibold  text-bioaxis-steel">
                     {document}
                   </li>
                 ))}
               </ul>
               <div className="mt-5 border border-white/[0.12] bg-bioaxis-panel p-4">
-                <p className="text-xs font-bold uppercase text-bioaxis-accent">Supplier documents and availability</p>
+                <p className="text-xs font-semibold  text-bioaxis-accent">Supplier documents and availability</p>
                 <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                   Line-level stock and certificates are not published on this page. Supplier availability and documents must be confirmed for each request; buyers make the final acceptance decision.
                 </p>
@@ -179,7 +179,7 @@ export default function TrustCenterPage() {
           </div>
         </div>
         <div className="mt-4 border border-bioaxis-line bg-bioaxis-panel p-5">
-          <p className="text-xs font-bold uppercase text-bioaxis-accent">Selected-line evidence</p>
+          <p className="text-xs font-semibold  text-bioaxis-accent">Selected-line evidence</p>
           <p className="mt-3 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             {selectedLineRegistry.length > 0
               ? "Evidence-backed selected-line records are shown below with their supply mode, confirmation owner, date, documents, sample path, and buyer responsibility."
@@ -189,14 +189,14 @@ export default function TrustCenterPage() {
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {selectedLineRegistry.map((record) => (
                 <article key={record.line} className="border border-bioaxis-line bg-bioaxis-black p-4">
-                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{record.line}</h3>
+                  <h3 className="text-sm font-semibold  text-bioaxis-text">{record.line}</h3>
                   <dl className="mt-3 grid gap-2 text-xs leading-5 text-bioaxis-steel sm:grid-cols-2">
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Supply mode</dt><dd>{record.supplyMode}</dd></div>
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Confirmed by</dt><dd>{record.confirmationOwner}</dd></div>
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Last confirmed</dt><dd>{record.lastConfirmed}</dd></div>
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Documents</dt><dd>{record.documents.join(", ")}</dd></div>
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Sample path</dt><dd>{record.samplePath}</dd></div>
-                    <div><dt className="font-bold uppercase text-bioaxis-dim">Buyer responsibility</dt><dd>{record.buyerResponsibility}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Supply mode</dt><dd>{record.supplyMode}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Confirmed by</dt><dd>{record.confirmationOwner}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Last confirmed</dt><dd>{record.lastConfirmed}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Documents</dt><dd>{record.documents.join(", ")}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Sample path</dt><dd>{record.samplePath}</dd></div>
+                    <div><dt className="font-semibold  text-bioaxis-dim">Buyer responsibility</dt><dd>{record.buyerResponsibility}</dd></div>
                   </dl>
                 </article>
               ))}
@@ -214,7 +214,7 @@ export default function TrustCenterPage() {
         >
           <table className="min-w-full border-separate border-spacing-0 text-left">
             <thead>
-              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
+              <tr className="text-xs font-semibold  text-bioaxis-dim">
                 <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Area</th>
                 <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">What BioAxis helps organize</th>
                 <th className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">What remains buyer-side</th>
@@ -223,7 +223,7 @@ export default function TrustCenterPage() {
             <tbody>
               {trustMatrix.map((row) => (
                 <tr key={row.area} className="align-top">
-                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-bold uppercase text-bioaxis-text">
+                  <td className="border-b border-bioaxis-line px-4 py-4 text-sm font-semibold  text-bioaxis-text">
                     {row.area}{" "}
                   </td>
                   <td className="border-b border-bioaxis-line px-4 py-4 text-sm leading-6 text-bioaxis-steel">
@@ -239,7 +239,7 @@ export default function TrustCenterPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">What BioAxis does not claim</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">What BioAxis does not claim</p>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-bioaxis-muted">
             BioAxis does not claim live inventory for every listed product, automatic interchangeability, replacement of customer-side validation, or final regulatory or quality release decisions.
           </p>

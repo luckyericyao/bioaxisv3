@@ -405,7 +405,8 @@ async function checkSourcingListDrawerFocus() {
   await email.waitFor({ state: "visible", timeout: 5_000 });
   const emailRect = await email.boundingBox();
   check(Boolean(emailRect && emailRect.y >= 64 && emailRect.y + emailRect.height <= 844), "sourcing-list RFQ handoff pushes Email below the mobile first viewport");
-  check((await page.locator("#sourcing-product-input").inputValue()).includes("Filtered 200 µL Pipette Tips"), "sourcing-list handoff loses its product list");
+  check((await page.locator('[data-sourcing-list-summary="true"]').textContent()).includes("Filtered 200 µL Pipette Tips"), "sourcing-list handoff loses its product list");
+  check((await page.locator("#sourcing-product-input").inputValue()) === "", "selected sourcing list should not require duplicate typing");
   const storedItems = await page.evaluate(() => JSON.parse(window.sessionStorage.getItem("bioaxis:sourcing-list-items") || "[]"));
   check(storedItems.length === 1 && storedItems[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses drawer details");
 
@@ -570,17 +571,17 @@ async function checkMobileSearchFunnel() {
 
   await openRoute(page, "/");
   const hero = page.locator("main > section").first();
-  const homeIntake = hero.locator('details[data-home-primary-intake="true"]');
-  const homeIntakeSummary = homeIntake.locator("summary").first();
-  check((await homeIntake.count()) === 1, "homepage does not have exactly one primary sourcing-intake disclosure");
-  check((await hero.locator('a[href^="/request-quote"]').count()) === 0, "homepage hero still duplicates the primary intake with a direct RFQ link");
-  await homeIntakeSummary.focus();
-  await homeIntakeSummary.press("Enter");
-  check((await homeIntake.getAttribute("open")) !== null, "keyboard activation does not open the primary homepage intake");
-  await page.getByLabel("Email *", { exact: true }).waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
-  check(await page.getByLabel("Email *", { exact: true }).isVisible().catch(() => false), "homepage primary intake does not reveal the email field");
+  check((await hero.locator("form, input, textarea").count()) === 0, "homepage still expands a procurement form");
+  const requestSourcing = hero.getByRole("link", { name: "Request sourcing", exact: true });
+  check((await hero.locator("a").count()) === 2, "homepage hero must expose exactly two actions");
+  await requestSourcing.focus();
+  await requestSourcing.press("Enter");
+  await page.waitForURL((url) => url.pathname === "/request-quote");
+  const intakeOrder = await page.locator("form textarea, form input[type='email']").evaluateAll((fields) => fields.map((field) => field.id));
+  check(intakeOrder[0] === "sourcing-product-input" && intakeOrder[1] === "sourcing-email", "RFQ must collect the need before email");
+  await openRoute(page, "/");
 
-  const menuButton = page.getByRole("button", { name: "Menu", exact: true });
+  const menuButton = page.getByRole("button", { name: /^(Menu|Close menu)$/ });
   await menuButton.click();
   check((await menuButton.getAttribute("aria-expanded")) === "true", "mobile menu does not expose its open state");
 

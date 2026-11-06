@@ -61,11 +61,11 @@ export default function SuppliersPage() {
         <div className="grid gap-4 md:grid-cols-3">
           {supplierReviewPaths.map((item) => (
             <article key={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-6 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft">
-              <h2 className="text-xl font-bold uppercase text-bioaxis-text">{item.title}</h2>
+              <h2 className="text-xl font-semibold  text-bioaxis-text">{item.title}</h2>
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{item.body}</p>
               <Link
                 href={item.href}
-                className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                className="mt-6 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
               >
                 {item.cta}
               </Link>
@@ -73,7 +73,7 @@ export default function SuppliersPage() {
           ))}
         </div>
         <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Useful input</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Useful input</p>
           <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted md:grid-cols-3">
             {["Supplier or brand", "Catalog reference", "Product description", "Required documents", "Quantity and timing", "Equivalent or sample need"].map((item) => (
               <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
@@ -90,7 +90,7 @@ export default function SuppliersPage() {
           { title: "Documentation review", body: "Organize CoA, SDS, sterility, material, lot-level, and supplier specification requirements." }
         ].map((item) => (
           <article key={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-6">
-            <h2 className="text-xl font-bold uppercase text-bioaxis-text">{item.title}</h2>
+            <h2 className="text-xl font-semibold  text-bioaxis-text">{item.title}</h2>
             <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{item.body}</p>
           </article>
         ))}

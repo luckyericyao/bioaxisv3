@@ -1,32 +1,23 @@
-export type NavigationItem = {
-  label: string;
-  href: string;
-};
+export type NavigationItem = { label: string; href: string; children?: { label: string; href: string }[] };
 
 export const navigationItems: NavigationItem[] = [
-  { label: "Availability Check", href: "/ready-supply" },
   { label: "Products", href: "/products" },
-  { label: "Equivalent Review", href: "/equivalent-finder" },
-  { label: "Private Label / OEM", href: "/private-label-oem" },
-  { label: "Trust Center", href: "/trust-center" },
-  { label: "Resources", href: "/resources" },
-  { label: "Request Quote", href: "/request-quote" }
+  { label: "Sourcing support", href: "/ready-supply", children: [
+    { label: "Availability check", href: "/ready-supply" },
+    { label: "Equivalent review", href: "/equivalent-finder" },
+    { label: "Private label / OEM", href: "/private-label-oem" }
+  ] },
+  { label: "Quality & trust", href: "/trust-center" },
+  { label: "Contact", href: "/contact" },
+  { label: "Request quote", href: "/request-quote" }
 ];
 
 export const footerNavigationItems: NavigationItem[] = [
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Availability Check", href: "/ready-supply" },
-  { label: "Private Label / OEM", href: "/private-label-oem" },
-  { label: "Products", href: "/products" },
-  { label: "Request Quote", href: "/request-quote" },
-  { label: "Equivalent Review", href: "/equivalent-finder" },
-  { label: "Workflows", href: "/workflows" },
-  { label: "Samples", href: "/samples" },
-  { label: "Quality", href: "/quality" },
-  { label: "Supplier Qualification", href: "/supplier-qualification" },
-  { label: "Trust Center", href: "/trust-center" },
-  { label: "Resources", href: "/resources" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Terms", href: "/terms" }
+  { label: "About", href: "/about" }, { label: "Contact", href: "/contact" },
+  { label: "Availability check", href: "/ready-supply" }, { label: "Private label / OEM", href: "/private-label-oem" },
+  { label: "Products", href: "/products" }, { label: "Request quote", href: "/request-quote" },
+  { label: "Equivalent review", href: "/equivalent-finder" }, { label: "Workflows", href: "/workflows" },
+  { label: "Samples", href: "/samples" }, { label: "Quality", href: "/quality" },
+  { label: "Supplier qualification", href: "/supplier-qualification" }, { label: "Quality & trust", href: "/trust-center" },
+  { label: "Resources", href: "/resources" }, { label: "Privacy", href: "/privacy" }, { label: "Terms", href: "/terms" }
 ];

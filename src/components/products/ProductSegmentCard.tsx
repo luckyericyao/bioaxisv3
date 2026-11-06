@@ -16,8 +16,8 @@ export function ProductSegmentCard({ segment, index, mode = "preview" }: Product
   return (
     <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-5 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft sm:p-6">
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-xl font-bold leading-tight text-bioaxis-text">{segment.title}</h3>
-        <span className="shrink-0 text-sm font-bold text-bioaxis-dim">{String(segment.index || index + 1).padStart(2, "0")}</span>
+        <h3 className="text-xl font-semibold leading-tight text-bioaxis-text">{segment.title}</h3>
+        <span className="shrink-0 text-sm font-semibold text-bioaxis-dim">{String(segment.index || index + 1).padStart(2, "0")}</span>
       </div>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{segment.description}</p>
 
@@ -35,7 +35,7 @@ export function ProductSegmentCard({ segment, index, mode = "preview" }: Product
       </div>
 
       <div className="mt-6 grid gap-2 border-t border-bioaxis-line pt-5">
-        <Link href={`/products/${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        <Link href={`/products/${segment.slug}`} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           View segment
         </Link>
         <SourcingRequestButtonGroup segment={segment.slug} />

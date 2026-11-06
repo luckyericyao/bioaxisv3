@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { BuyerTriggerSection } from "@/components/home/BuyerTriggerSection";
-import { FinalCTASection } from "@/components/home/FinalCTASection";
 import { HeroSearchSection } from "@/components/home/HeroSearchSection";
 import { PrioritySourcingLinesSection } from "@/components/home/PrioritySourcingLinesSection";
-import { WhatBioAxisDoesSection } from "@/components/home/WhatBioAxisDoesSection";
+import { SourcingSupportSection } from "@/components/home/SourcingSupportSection";
 import { createRouteMetadata } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = createRouteMetadata({
@@ -17,10 +15,8 @@ export default function Home() {
   return (
     <>
       <HeroSearchSection />
-      <BuyerTriggerSection />
       <PrioritySourcingLinesSection />
-      <WhatBioAxisDoesSection />
-      <FinalCTASection />
+      <SourcingSupportSection />
     </>
   );
 }

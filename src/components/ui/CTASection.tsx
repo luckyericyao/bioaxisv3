@@ -23,8 +23,8 @@ export function CTASection({
     <section className="border-y border-bioaxis-line bg-bioaxis-panel/60">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
         <div>
-          {eyebrow ? <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">{eyebrow}</p> : null}
-          <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">{title}</h2>
+          {eyebrow ? <p className="mb-4 text-sm font-semibold  text-bioaxis-accent">{eyebrow}</p> : null}
+          <h2 className="max-w-4xl text-3xl font-semibold  text-bioaxis-text sm:text-5xl">{title}</h2>
           <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">{body}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">

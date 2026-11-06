@@ -21,8 +21,8 @@ const actions = [
 export function ResourceConversionCTA() {
   return (
     <section className="mt-12 border border-bioaxis-line bg-bioaxis-panel p-6">
-      <p className="text-sm font-semibold uppercase text-bioaxis-accent">Sourcing next step</p>
-      <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text">Need sourcing help for this category?</h2>
+      <p className="text-sm font-semibold  text-bioaxis-accent">Sourcing next step</p>
+      <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text">Need sourcing help for this category?</h2>
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">
         Send the current supplier line, catalog reference, or product list. BioAxis can help structure equivalent options, documents, samples, and quote next steps.
       </p>
@@ -32,7 +32,7 @@ export function ResourceConversionCTA() {
             key={action.label}
             href={action.href}
             className={[
-              "inline-flex min-h-11 items-center justify-center border px-4 text-xs font-semibold uppercase transition",
+              "inline-flex min-h-11 items-center justify-center border px-4 text-xs font-semibold  transition",
               action.primary
                 ? "border-bioaxis-accent bg-bioaxis-accent text-bioaxis-black hover:bg-transparent hover:text-bioaxis-accent"
                 : "border-bioaxis-line text-bioaxis-steel hover:border-bioaxis-accent hover:text-bioaxis-accent"

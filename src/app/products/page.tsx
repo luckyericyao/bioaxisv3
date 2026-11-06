@@ -59,9 +59,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         ) : (
           <div className="grid gap-3 border-b border-bioaxis-line pb-4 pt-0 sm:gap-5 sm:pb-8 sm:pt-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-end lg:gap-8 lg:pb-12 lg:pt-10">
             <div>
-              <p className="mb-1 text-[10px] font-semibold uppercase text-bioaxis-accent sm:mb-5 sm:text-sm">One stop for life science consumables</p>
-              <h1 className="max-w-5xl text-3xl font-bold uppercase leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
-              <p className="mt-2 max-w-3xl text-[11px] leading-4 text-bioaxis-muted sm:mt-6 sm:text-lg sm:leading-7">
+              <p className="mb-1 text-sm font-semibold  text-bioaxis-accent sm:mb-5 sm:text-sm">One stop for life science consumables</p>
+              <h1 className="max-w-5xl text-3xl font-semibold  leading-[0.95] text-bioaxis-text sm:text-7xl lg:text-8xl">Products</h1>
+              <p className="mt-2 max-w-3xl text-sm leading-4 text-bioaxis-muted sm:mt-6 sm:text-lg sm:leading-7">
                 <span className="sm:hidden">Search or browse 12 product segments.</span>
                 <span className="hidden sm:inline">Explore 12 product segments. Search a reference or browse the product families buyers source most.</span>
               </p>
@@ -76,7 +76,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {(!query || hasSearchResults) ? <section id="product-categories" className="mx-auto w-full max-w-7xl scroll-mt-24 px-5 pb-16 sm:px-8 lg:px-10">
         <div className="mb-3 grid gap-3 sm:mb-8 sm:gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <h2 className={query ? "text-xl font-bold uppercase text-bioaxis-text sm:text-3xl" : "text-xl font-bold uppercase text-bioaxis-text sm:text-5xl"}>
+            <h2 className={query ? "text-xl font-semibold  text-bioaxis-text sm:text-3xl" : "text-xl font-semibold  text-bioaxis-text sm:text-5xl"}>
               {query ? "Browse all product lines" : "Browse BioAxis product lines"}
             </h2>
             <p className="mt-3 hidden max-w-3xl text-sm leading-6 text-bioaxis-muted sm:block">
@@ -88,14 +88,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </div>
         {query ? (
           <details className="border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-bold uppercase tracking-wide text-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Browse all product lines</span>
               <span className="text-bioaxis-dim">Optional directory</span>
             </summary>
             <div className="grid gap-3 border-t border-bioaxis-line p-4 sm:grid-cols-2 lg:grid-cols-4">
               {productTaxonomy.map((segment) => (
                 <Link key={segment.slug} href={`/products/${segment.slug}`} className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft">
-                  <h3 className="text-sm font-bold uppercase text-bioaxis-text">{segment.name}</h3>
+                  <h3 className="text-sm font-semibold  text-bioaxis-text">{segment.name}</h3>
                   <p className="mt-3 text-xs leading-5 text-bioaxis-muted">{segment.shortDescription}</p>
                 </Link>
               ))}

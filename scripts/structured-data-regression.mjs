@@ -20,6 +20,7 @@ Module._resolveFilename = function resolveFilename(request, parent, isMain, opti
   return originalResolveFilename.call(this, request.startsWith("@/") ? path.resolve("src", request.slice(2)) : request, parent, isMain, options);
 };
 Module._load = function load(request, parent, isMain) {
+  if (request === "next/font/local") return { __esModule: true, default: () => ({ variable: "inter-test-font" }) };
   if (request === "next/link") return function Link({ href, children, ...props }) { return React.createElement("a", { href, ...props }, children); };
   if (request === "next/navigation") return {
     usePathname: () => currentUrl.pathname,

@@ -49,12 +49,12 @@ export function BuyerTriggerSection() {
                 trigger.title.includes("Documents") ? "border-bioaxis-trust/30 hover:border-bioaxis-trust" : "border-white/70 hover:border-bioaxis-ice"
               ].join(" ")}
             >
-              <span className="text-xs font-bold text-bioaxis-dim">{String(index + 1).padStart(2, "0")}</span>
-              <h2 className="mt-4 text-lg font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
+              <span className="text-xs font-semibold text-bioaxis-dim">{String(index + 1).padStart(2, "0")}</span>
+              <h2 className="mt-4 text-lg font-semibold  leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
                 {trigger.title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-bioaxis-muted">{trigger.body}</p>
-              <span className={["mt-5 inline-flex text-xs font-bold uppercase", trigger.title.includes("Documents") ? "text-emerald-700" : "text-bioaxis-accent"].join(" ")}>{trigger.cta}</span>
+              <span className={["mt-5 inline-flex text-xs font-semibold ", trigger.title.includes("Documents") ? "text-emerald-700" : "text-bioaxis-accent"].join(" ")}>{trigger.cta}</span>
             </Link>
           ))}
         </div>

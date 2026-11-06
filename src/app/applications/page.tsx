@@ -97,24 +97,24 @@ export default function ApplicationsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {applications.map((application) => (
             <article key={application.id} id={application.id} className="scroll-mt-24 border border-bioaxis-line bg-bioaxis-panel p-6">
-              <h2 className="text-xl font-bold uppercase text-bioaxis-text">{application.title}</h2>
+              <h2 className="text-xl font-semibold  text-bioaxis-text">{application.title}</h2>
               <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{application.description}</p>
               <div className="mt-6 grid gap-2">
                 <Link
                   href={application.href}
-                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black"
                 >
                   View product lines
                 </Link>
                 <Link
                   href={application.requestHref}
-                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                 >
                   Map sourcing request
                 </Link>
                 <Link
                   href={application.equivalentHref}
-                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+                  className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
                 >
                   Review equivalent
                 </Link>
@@ -126,7 +126,7 @@ export default function ApplicationsPage() {
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6">
-          <p className="text-sm font-semibold uppercase text-bioaxis-accent">Useful workflow context</p>
+          <p className="text-sm font-semibold  text-bioaxis-accent">Useful workflow context</p>
           <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted md:grid-cols-4">
             {usefulContext.map((item) => (
               <li key={item} className="border-l border-bioaxis-accent/40 pl-3">

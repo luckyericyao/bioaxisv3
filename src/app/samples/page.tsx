@@ -35,12 +35,12 @@ export default function SamplesPage() {
               "Confirm automation, workflow, or packaging fit",
               "Plan pilot evaluation before recurring supply"
             ].map((item) => (
-              <div key={item} className="border border-bioaxis-line bg-bioaxis-panel p-4 text-sm font-semibold uppercase text-bioaxis-steel">
+              <div key={item} className="border border-bioaxis-line bg-bioaxis-panel p-4 text-sm font-semibold  text-bioaxis-steel">
                 {item}
               </div>
             ))}
           </div>
-          <Link href="/equivalent-finder?requestType=equivalent" className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+          <Link href="/equivalent-finder?requestType=equivalent" className="mt-8 inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
             Review equivalent first
           </Link>
         </div>

@@ -2,295 +2,78 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { brand } from "@/data/brand";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { navigationItems } from "@/data/navigation";
 import type { ProductNavigationSegment } from "@/data/productNavigation";
 import { useSourcingList } from "@/components/sourcing/SourcingListProvider";
 
 export type HeaderProductSegment = Pick<ProductNavigationSegment, "slug" | "href" | "index" | "label">;
+type OpenMenu = "products" | "support" | null;
 
 export function Header({ productNavigationSegments }: { productNavigationSegments: HeaderProductSegment[] }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
-  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const pathname = usePathname();
-  const productsMenuRef = useRef<HTMLDivElement>(null);
-  const productsTriggerRef = useRef<HTMLAnchorElement>(null);
-  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
-  const suppressProductsFocusOpenRef = useRef(false);
-  const { items: sourcingListItems, openDrawer } = useSourcingList();
+  const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState<OpenMenu>(null);
+  const root = useRef<HTMLElement>(null);
+  const productsTrigger = useRef<HTMLAnchorElement>(null);
+  const supportTrigger = useRef<HTMLButtonElement>(null);
+  const mobileMenu = useRef<HTMLButtonElement>(null);
+  const suppressFocus = useRef(false);
+  const { items, openDrawer } = useSourcingList();
 
+  const closeAll = useCallback(() => { setOpenMenu(null); setMenuOpen(false); setMobileOpen(null); }, []);
+  useEffect(() => { setOpenMenu(null); setMenuOpen(false); setMobileOpen(null); }, [pathname]);
   useEffect(() => {
-    setMenuOpen(false);
-    setProductsOpen(false);
-    setMobileProductsOpen(false);
-  }, [pathname]);
+    const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) closeAll(); };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (openMenu) {
+        suppressFocus.current = true;
+        (openMenu === "products" ? productsTrigger.current : supportTrigger.current)?.focus();
+        setOpenMenu(null);
+        requestAnimationFrame(() => { suppressFocus.current = false; });
+      } else if (menuOpen) { closeAll(); mobileMenu.current?.focus(); }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
+  }, [openMenu, menuOpen, closeAll]);
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        const focusIsInDesktopProducts =
-          productsOpen && !menuOpen && productsMenuRef.current?.contains(document.activeElement);
-
-        if (focusIsInDesktopProducts) {
-          event.preventDefault();
-          suppressProductsFocusOpenRef.current = true;
-          setProductsOpen(false);
-          requestAnimationFrame(() => {
-            productsTriggerRef.current?.focus();
-            requestAnimationFrame(() => {
-              suppressProductsFocusOpenRef.current = false;
-            });
-          });
-          return;
-        }
-
-        setProductsOpen(false);
-        setMobileProductsOpen(false);
-        if (menuOpen) {
-          setMenuOpen(false);
-          requestAnimationFrame(() => mobileMenuButtonRef.current?.focus());
-        }
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [menuOpen, productsOpen]);
-
-  useEffect(() => {
-    function handlePointerDown(event: PointerEvent) {
-      if (!productsOpen) {
-        return;
-      }
-
-      const target = event.target;
-      if (target instanceof Node && productsMenuRef.current?.contains(target)) {
-        return;
-      }
-
-      setProductsOpen(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [productsOpen]);
-
-  function closeMobileMenu() {
-    setMenuOpen(false);
-    setMobileProductsOpen(false);
-  }
+  const supportItems = navigationItems.find((item) => item.children)?.children ?? [];
+  const productLinks = <><Link href="/products" onClick={closeAll} className="nav-dropdown-link font-medium">Search all products<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+    {productNavigationSegments.map((segment) => <Link key={segment.slug} href={segment.href} onClick={closeAll} className="nav-dropdown-link"><span>{segment.label}</span><ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" /></Link>)}</>;
+  const supportLinks = <>{supportItems.map((item) => <Link key={item.href} href={item.href} onClick={closeAll} className="nav-dropdown-link">{item.label}<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>)}</>;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-bioaxis-line bg-white/[0.86] shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 items-center text-base font-bold uppercase text-bioaxis-text transition hover:text-bioaxis-accent"
-          aria-label="BioAxis home"
-          onClick={closeMobileMenu}
-        >
-          {brand.name.toUpperCase()}
-        </Link>
-
-        <div className="flex items-center gap-2 lg:hidden">
-          <button
-            ref={mobileMenuButtonRef}
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-3 text-xs font-semibold uppercase text-bioaxis-text"
-            aria-expanded={menuOpen}
-            aria-controls={menuOpen ? "mobile-primary-navigation" : undefined}
-            onClick={() => setMenuOpen((current) => !current)}
-          >
-            Menu
-          </button>
-        </div>
-
-        <nav id="primary-navigation" aria-label="Primary navigation" className="hidden items-center justify-end gap-1 lg:flex xl:gap-2">
-          {navigationItems.map((item) =>
-            item.label === "Products" ? (
-              <div
-                key={item.label}
-                ref={productsMenuRef}
-                className="relative flex min-h-16 items-center"
-                onMouseEnter={() => setProductsOpen(true)}
-                onMouseLeave={(event) => {
-                  if (!event.currentTarget.contains(document.activeElement)) {
-                    setProductsOpen(false);
-                  }
-                }}
-                onFocus={() => {
-                  if (!suppressProductsFocusOpenRef.current) {
-                    setProductsOpen(true);
-                  }
-                }}
-                onBlur={(event) => {
-                  const nextTarget = event.relatedTarget;
-                  if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-                    setProductsOpen(false);
-                  }
-                }}
-              >
-                <Link
-                  ref={productsTriggerRef}
-                  href={item.href}
-                  onClick={() => setProductsOpen(false)}
-                  aria-expanded={productsOpen}
-                  aria-controls={productsOpen ? "products-segment-dropdown" : undefined}
-                  className="inline-flex min-h-16 items-center px-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
-                >
-                  {item.label}
-                </Link>
-                {productsOpen ? (
-                  <ProductSegmentDropdown
-                    segments={productNavigationSegments}
-                    onNavigate={() => setProductsOpen(false)}
-                  />
-                ) : null}
-              </div>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={() => setProductsOpen(false)}
-                className={
-                  item.label === "Request Quote"
-                    ? "ml-1 inline-flex min-h-11 items-center justify-center border border-bioaxis-text bg-bioaxis-text px-4 text-xs font-bold uppercase text-white shadow-sm transition hover:border-bioaxis-ice hover:bg-bioaxis-ice hover:text-bioaxis-text"
-                    : "inline-flex min-h-11 items-center px-2 py-2 text-xs font-semibold uppercase text-bioaxis-muted transition hover:text-bioaxis-text xl:px-3"
-                }
-              >
-                {item.label}
-              </Link>
-            )
-          )}
+    <header ref={root} className="sticky top-0 z-50 border-b border-bioaxis-line bg-white">
+      <div className="page-container flex h-16 items-center justify-between gap-6 lg:h-[72px]">
+        <Link href="/" aria-label="BioAxis home" className="inline-flex min-h-11 items-center text-2xl font-semibold">BioAxis</Link>
+        <button ref={mobileMenu} type="button" aria-label={menuOpen ? "Close menu" : "Menu"} title={menuOpen ? "Close menu" : "Menu"} aria-expanded={menuOpen} aria-controls={menuOpen ? "mobile-primary-navigation" : undefined} onClick={() => { setMenuOpen(!menuOpen); setMobileOpen(null); }} className="flex h-11 w-11 items-center justify-center rounded border border-bioaxis-line lg:hidden">{menuOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}</button>
+        <nav aria-label="Primary navigation" id="primary-navigation" className="hidden h-full items-center gap-6 lg:flex">
+          {navigationItems.map((item) => {
+            const kind = item.label === "Products" ? "products" : item.children ? "support" : null;
+            if (!kind) return <Link key={item.href} href={item.href} onClick={closeAll} className={item.href === "/request-quote" ? "action-primary" : "inline-flex min-h-11 items-center text-sm font-medium text-bioaxis-text"}>{item.label}</Link>;
+            const id = kind === "products" ? "products-segment-dropdown" : "sourcing-support-dropdown";
+            return <div key={kind} className="relative flex h-full items-center" onMouseEnter={() => setOpenMenu(kind)} onMouseLeave={() => { if (!root.current?.querySelector(`#${id}`)?.contains(document.activeElement)) setOpenMenu(null); }} onFocus={() => { if (!suppressFocus.current) setOpenMenu(kind); }} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpenMenu(null); }}>
+              {kind === "products" ? <Link ref={productsTrigger} href={item.href} aria-expanded={openMenu === kind} aria-controls={openMenu === kind ? id : undefined} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">{item.label}<ChevronDown aria-hidden="true" size={16} /></Link> :
+                <button ref={supportTrigger} type="button" aria-expanded={openMenu === kind} aria-controls={openMenu === kind ? id : undefined} onClick={() => setOpenMenu(kind)} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">{item.label}<ChevronDown aria-hidden="true" size={16} /></button>}
+              {openMenu === kind ? <div id={id} className="absolute left-0 top-full z-50 max-h-[70vh] w-[340px] overflow-y-auto border border-bioaxis-line bg-white p-2 shadow-lg">{kind === "products" ? productLinks : supportLinks}</div> : null}
+            </div>;
+          })}
         </nav>
       </div>
-
-      {menuOpen ? (
-        <nav id="mobile-primary-navigation" aria-label="Mobile navigation" className="max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain border-t border-bioaxis-line bg-white/[0.96] px-5 py-4 shadow-lg lg:hidden">
-          <div className="grid gap-2">
-            {navigationItems.map((item) =>
-              item.label === "Products" ? (
-                <div key={item.label} className="border border-bioaxis-line">
-                  <button
-                    type="button"
-                    aria-expanded={mobileProductsOpen}
-                    aria-controls={mobileProductsOpen ? "mobile-products-navigation" : undefined}
-                    onClick={() => setMobileProductsOpen((current) => !current)}
-                    className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold uppercase text-bioaxis-muted"
-                  >
-                    <span>{item.label}</span>
-                    <span className="text-bioaxis-accent">{mobileProductsOpen ? "Close" : "Open"}</span>
-                  </button>
-                  {mobileProductsOpen ? (
-                    <MobileProductsAccordion segments={productNavigationSegments} onNavigate={closeMobileMenu} />
-                  ) : null}
-                </div>
-              ) : (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={closeMobileMenu}
-                  className={
-                    item.label === "Request Quote"
-                      ? "border border-bioaxis-text bg-bioaxis-text px-4 py-3 text-sm font-semibold uppercase text-white"
-                      : "border border-bioaxis-line bg-white/[0.72] px-4 py-3 text-sm font-semibold uppercase text-bioaxis-muted"
-                  }
-                >
-                  {item.label}
-                </Link>
-              )
-            )}
-            {sourcingListItems.length > 0 ? (
-              <button
-                type="button"
-                aria-haspopup="dialog"
-                onClick={() => {
-                  openDrawer(mobileMenuButtonRef.current);
-                  closeMobileMenu();
-                }}
-                className="border border-bioaxis-accent bg-bioaxis-accent/10 px-4 py-3 text-left text-sm font-semibold uppercase text-bioaxis-accent"
-              >
-                Review sourcing list ({sourcingListItems.length})
-              </button>
-            ) : null}
-          </div>
-        </nav>
-      ) : null}
+      {menuOpen ? <nav aria-label="Mobile navigation" id="mobile-primary-navigation" className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-bioaxis-line bg-white px-5 py-4 lg:hidden">
+        {navigationItems.map((item) => {
+          const kind = item.label === "Products" ? "products" : item.children ? "support" : null;
+          if (!kind) return <Link key={item.href} href={item.href} onClick={closeAll} className={item.href === "/request-quote" ? "action-primary mt-3 w-full" : "nav-dropdown-link"}>{item.label}</Link>;
+          const id = kind === "products" ? "mobile-products-navigation" : "mobile-support-navigation";
+          return <div key={kind}><button type="button" aria-expanded={mobileOpen === kind} aria-controls={mobileOpen === kind ? id : undefined} onClick={() => setMobileOpen(mobileOpen === kind ? null : kind)} className="nav-dropdown-link w-full text-left">{item.label}<ChevronDown aria-hidden="true" className={mobileOpen === kind ? "h-4 w-4 rotate-180" : "h-4 w-4"} /></button>
+            {mobileOpen === kind ? <div id={id} className="mb-2 border-l border-bioaxis-line pl-3">{kind === "products" ? productLinks : supportLinks}</div> : null}</div>;
+        })}
+        {items.length ? <button type="button" className="nav-dropdown-link mt-2 w-full" aria-haspopup="dialog" onClick={() => { closeAll(); openDrawer(mobileMenu.current); }}>Review sourcing list ({items.length})</button> : null}
+      </nav> : null}
     </header>
-  );
-}
-
-function ProductSegmentDropdown({
-  segments,
-  onNavigate
-}: {
-  segments: HeaderProductSegment[];
-  onNavigate: () => void;
-}) {
-  return (
-    <div
-      id="products-segment-dropdown"
-      className="absolute left-0 top-16 z-[90] hidden w-[340px] overflow-hidden border border-bioaxis-line bg-white shadow-2xl shadow-slate-900/18 lg:block"
-    >
-      <div className="max-h-[70vh] overflow-y-auto p-2">
-        <p className="px-3 pb-2 pt-2 text-[11px] font-bold uppercase text-bioaxis-accent">Product segments</p>
-        <Link
-          href="/products"
-          onClick={onNavigate}
-          className="mb-2 flex min-h-11 items-center justify-between border border-bioaxis-accent bg-bioaxis-accent/10 px-3 text-sm font-bold uppercase text-bioaxis-accent"
-        >
-          <span>Search all products</span>
-          <span aria-hidden="true">→</span>
-        </Link>
-        {segments.map((segment) => (
-          <Link
-            key={segment.slug}
-            href={segment.href}
-            onClick={onNavigate}
-            className="group flex min-h-11 items-center justify-between gap-3 border border-transparent px-3 py-3 transition hover:border-bioaxis-line hover:bg-bioaxis-panelSoft focus:border-bioaxis-accent focus:bg-bioaxis-panelSoft"
-          >
-            <span className="flex min-w-0 items-start gap-3">
-              <span className="mt-0.5 w-5 text-[11px] font-bold text-bioaxis-dim">{segment.index}</span>
-              <span className="min-w-0 text-sm font-bold uppercase leading-tight text-bioaxis-text transition group-hover:text-bioaxis-accent">
-                {segment.label}
-              </span>
-            </span>
-            <span className="shrink-0 text-bioaxis-accent transition group-hover:translate-x-1" aria-hidden="true">
-              →
-            </span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MobileProductsAccordion({ segments, onNavigate }: { segments: HeaderProductSegment[]; onNavigate: () => void }) {
-  return (
-    <div id="mobile-products-navigation" className="border-t border-bioaxis-line bg-bioaxis-panelSoft p-3">
-      <div className="grid gap-2">
-        <Link
-          href="/products"
-          onClick={onNavigate}
-          className="flex min-h-12 items-center justify-between gap-3 border border-bioaxis-accent bg-bioaxis-accent/10 px-3 py-3 text-sm font-bold uppercase text-bioaxis-accent"
-        >
-          <span>Search all products</span>
-          <span aria-hidden="true">→</span>
-        </Link>
-        {segments.map((segment) => (
-          <Link
-            key={segment.slug}
-            href={segment.href}
-            onClick={onNavigate}
-            className="flex items-center justify-between gap-3 border border-bioaxis-line bg-white px-3 py-3 text-sm font-bold uppercase text-bioaxis-text shadow-sm"
-          >
-            <span>{segment.index} {segment.label}</span>
-            <span className="text-bioaxis-accent" aria-hidden="true">→</span>
-          </Link>
-        ))}
-      </div>
-    </div>
   );
 }

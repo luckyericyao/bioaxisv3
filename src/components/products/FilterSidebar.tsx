@@ -18,14 +18,14 @@ export function FilterSidebar({ subcategory }: FilterSidebarProps) {
 
   return (
     <aside className="border border-bioaxis-line bg-bioaxis-panel p-5">
-      <h2 className="text-lg font-bold uppercase text-bioaxis-text">Filter sourcing options</h2>
+      <h2 className="text-lg font-semibold  text-bioaxis-text">Filter sourcing options</h2>
       <p className="mt-3 text-xs leading-5 text-bioaxis-muted">
         Use these sourcing filters to frame the request. BioAxis confirms exact options through sourcing review.
       </p>
       <div className="mt-6 grid gap-6">
         {filterGroups.map((group) => (
           <fieldset key={group.title} className="min-w-0">
-            <legend className="mb-3 text-xs font-semibold uppercase text-bioaxis-dim">{group.title}</legend>
+            <legend className="mb-3 text-xs font-semibold  text-bioaxis-dim">{group.title}</legend>
             <div className="grid gap-2">
               {group.values.slice(0, 5).map((value) => (
                 <FilterChip key={value} name={group.title} label={value} />

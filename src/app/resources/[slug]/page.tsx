@@ -50,7 +50,7 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
         <div className="grid gap-10">
           {article.sections.map((section) => (
             <section key={section.heading}>
-              <h2 className="text-2xl font-bold uppercase text-bioaxis-text">{section.heading}</h2>
+              <h2 className="text-2xl font-semibold  text-bioaxis-text">{section.heading}</h2>
               <div className="mt-5 grid gap-5 text-base leading-8 text-bioaxis-muted">
                 {section.body.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
@@ -62,25 +62,25 @@ export default async function ResourceArticlePage({ params }: ResourceArticlePag
         <div className="mt-12 grid gap-3 border-t border-bioaxis-line pt-8 sm:grid-cols-2 lg:grid-cols-4">
           <Link
             href={article.productHref}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Related products
           </Link>
           <Link
             href={article.equivalentHref}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Review equivalent
           </Link>
           <Link
             href={article.sampleHref}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request sample
           </Link>
           <Link
             href={article.rfqHref}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold uppercase text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent"
           >
             Prepare RFQ
           </Link>

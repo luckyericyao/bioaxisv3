@@ -27,7 +27,7 @@ export function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold  text-bioaxis-steel">
         {label}
         {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
@@ -65,7 +65,7 @@ export function SelectField({
   const visibleOptions = value && !options.includes(value) ? [value, ...options] : options;
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold  text-bioaxis-steel">
         {label}
       </label>
       <select
@@ -93,6 +93,8 @@ export function TextArea({
   rows = 5,
   required = false,
   helperText,
+  invalid = false,
+  describedBy,
   placeholder,
   onChange
 }: {
@@ -102,6 +104,8 @@ export function TextArea({
   rows?: number;
   required?: boolean;
   helperText?: string;
+  invalid?: boolean;
+  describedBy?: string;
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
@@ -109,7 +113,7 @@ export function TextArea({
 
   return (
     <div className="md:col-span-2">
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold uppercase text-bioaxis-steel">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold  text-bioaxis-steel">
         {label}
         {required ? <span className="text-bioaxis-accent"> *</span> : null}
       </label>
@@ -120,7 +124,8 @@ export function TextArea({
         rows={rows}
         placeholder={placeholder}
         required={required}
-        aria-describedby={helperId}
+        aria-invalid={invalid || undefined}
+        aria-describedby={[helperId, describedBy].filter(Boolean).join(" ") || undefined}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base leading-7 text-bioaxis-text placeholder:text-bioaxis-dim"
       />

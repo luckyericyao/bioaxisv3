@@ -12,10 +12,10 @@ export function ResourceCard({ guide }: ResourceCardProps) {
   return (
     <article className="flex h-full flex-col border border-bioaxis-line bg-bioaxis-panel p-6 transition hover:border-bioaxis-accent/70 hover:bg-bioaxis-panelSoft">
       <div className="flex items-start justify-between gap-4">
-        <h2 className="text-xl font-bold leading-tight text-bioaxis-text">{guide.title}</h2>
+        <h2 className="text-xl font-semibold leading-tight text-bioaxis-text">{guide.title}</h2>
       </div>
       <p className="mt-4 flex-1 text-sm leading-6 text-bioaxis-muted">{guide.summary}</p>
-      <ul className="mt-6 grid gap-2 text-xs font-semibold uppercase leading-5 text-bioaxis-muted sm:grid-cols-2">
+      <ul className="mt-6 grid gap-2 text-xs font-semibold  leading-5 text-bioaxis-muted sm:grid-cols-2">
         {[...guide.relatedSegments, ...guide.relatedWorkflows].slice(0, 5).map((tag) => (
           <li key={tag} className="border-l border-bioaxis-accent/40 pl-3">
             {tag}
@@ -23,10 +23,10 @@ export function ResourceCard({ guide }: ResourceCardProps) {
         ))}
       </ul>
       <div className="mt-6 grid gap-2">
-        <Link href={sourcePage} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
+        <Link href={sourcePage} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent">
           {guide.ctaCopy}
         </Link>
-        <Link href={requestHref} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold uppercase text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
+        <Link href={requestHref} className="inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-4 text-xs font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black">
           Use as request starter
         </Link>
       </div>

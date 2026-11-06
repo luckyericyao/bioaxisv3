@@ -31,7 +31,7 @@ export default function WorkflowsPage() {
             Send product list
           </CTAButton>
         </div>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-bioaxis-dim">
+        <p className="mt-5 text-xs font-semibold   text-bioaxis-dim">
           Built for discovery, screening, preclinical, early CMC, and analytical teams.
         </p>
       </PageHero>
@@ -40,8 +40,8 @@ export default function WorkflowsPage() {
         <div className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
           <div className="mb-8 grid gap-4 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-bioaxis-accent">Workflow navigator</p>
-              <h2 className="mt-3 text-2xl font-bold uppercase text-bioaxis-text sm:text-3xl">
+              <p className="text-xs font-semibold   text-bioaxis-accent">Workflow navigator</p>
+              <h2 className="mt-3 text-2xl font-semibold  text-bioaxis-text sm:text-3xl">
                 Follow the sourcing path from discovery to QC.
               </h2>
             </div>
@@ -57,19 +57,19 @@ export default function WorkflowsPage() {
                 href={`#${workflow.slug}`}
                 className="group relative flex min-h-[17rem] flex-col border border-bioaxis-line bg-bioaxis-black/70 p-5 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
               >
-                <span className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
+                <span className="text-sm font-semibold   text-bioaxis-accent">
                   {workflow.stage}
                 </span>
-                <span className="absolute right-4 top-4 text-3xl font-bold text-bioaxis-line">
+                <span className="absolute right-4 top-4 text-3xl font-semibold text-bioaxis-line">
                   {(index + 1).toString().padStart(2, "0")}
                 </span>
-                <span className="mt-4 block pr-9 text-sm font-semibold uppercase leading-snug text-bioaxis-text">
+                <span className="mt-4 block pr-9 text-sm font-semibold  leading-snug text-bioaxis-text">
                   {workflow.title}
                 </span>
                 <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{workflow.shortDescription}</span>
                 <span className="mt-auto flex flex-wrap gap-2 pt-5">
                   {workflow.productFamilies.map((family) => (
-                    <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-[11px] font-semibold uppercase text-bioaxis-steel">
+                    <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-sm font-semibold  text-bioaxis-steel">
                       {family}
                     </span>
                   ))}
@@ -114,12 +114,12 @@ export default function WorkflowsPage() {
                 key={item.workflow}
                 className="grid gap-4 border border-bioaxis-line bg-bioaxis-black p-5 sm:grid-cols-[0.34fr_1fr] sm:items-center"
               >
-                <h3 className="border-l-2 border-bioaxis-accent pl-4 text-sm font-bold uppercase text-bioaxis-text">
+                <h3 className="border-l-2 border-bioaxis-accent pl-4 text-sm font-semibold  text-bioaxis-text">
                   {item.workflow}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {item.families.map((family) => (
-                    <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold uppercase text-bioaxis-steel">
+                    <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-3 py-2 text-xs font-semibold  text-bioaxis-steel">
                       {family}
                     </span>
                   ))}
@@ -139,10 +139,10 @@ export default function WorkflowsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             {workflowUseCases.map((useCase, index) => (
               <div key={useCase} className="border border-bioaxis-line bg-bioaxis-panel p-5">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-bioaxis-accent">
+                <p className="text-sm font-semibold   text-bioaxis-accent">
                   Use case {(index + 1).toString().padStart(2, "0")}
                 </p>
-                <p className="mt-3 text-sm font-semibold uppercase leading-6 text-bioaxis-steel">
+                <p className="mt-3 text-sm font-semibold  leading-6 text-bioaxis-steel">
                   {useCase}
                 </p>
               </div>
@@ -154,8 +154,8 @@ export default function WorkflowsPage() {
       <section className="border-t border-bioaxis-line bg-bioaxis-panel/70">
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end lg:px-10">
           <div>
-            <p className="mb-4 text-sm font-semibold uppercase text-bioaxis-accent">Workflow mapping</p>
-            <h2 className="max-w-4xl text-3xl font-bold uppercase text-bioaxis-text sm:text-5xl">
+            <p className="mb-4 text-sm font-semibold  text-bioaxis-accent">Workflow mapping</p>
+            <h2 className="max-w-4xl text-3xl font-semibold  text-bioaxis-text sm:text-5xl">
               Send us your workflow. We will map the consumables.
             </h2>
             <p className="mt-5 max-w-3xl text-base leading-7 text-bioaxis-muted">

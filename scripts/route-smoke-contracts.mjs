@@ -26,7 +26,7 @@ export function noResultSearchFailures(html, expectedLabel, query, baseUrl) {
 export function headerNavigationFailures(html, menuOpen = false) {
   const header = renderedContent(html).match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0] ?? "";
   const menus = [...header.matchAll(/(<button\b[^>]*>)([\s\S]*?)<\/button>/g)]
-    .filter((match) => label(match[2]) === "Menu");
+    .filter((match) => /aria-label="(?:Menu|Close menu)"/.test(match[1]) || label(match[2]) === "Menu");
   const failures = [];
   if (menus.length !== 1 || !menus[0][1].includes(`aria-expanded="${menuOpen}"`)) {
     failures.push(`expected one Menu button with aria-expanded="${menuOpen}"`);

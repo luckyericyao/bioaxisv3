@@ -148,9 +148,9 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
       >
         <div className="grid gap-3">
           <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-bold uppercase text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold  text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
               <span>Start review</span>
-              <span className="text-xs font-semibold text-bioaxis-accent">Email only to start <span aria-hidden="true">· +</span></span>
+              <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
             </summary>
             <div className="border-t border-bioaxis-line p-4 sm:p-5">
               <CompactSourcingIntake
@@ -167,7 +167,7 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
           </details>
           <Link
             href="/request-quote?type=sample&requestType=sample"
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:justify-self-start"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:justify-self-start"
           >
             Request sample first
           </Link>
@@ -177,11 +177,11 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <h2 className="text-3xl font-bold text-bioaxis-text sm:text-4xl">Choose a product type</h2>
+            <h2 className="text-3xl font-semibold text-bioaxis-text sm:text-4xl">Choose a product type</h2>
           </div>
           <Link
             href={requestHref()}
-            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold uppercase text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
+            className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-5 text-sm font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent"
           >
             Request review
           </Link>
@@ -193,8 +193,8 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
               href={requestHref(request)}
               className="group border border-bioaxis-line bg-bioaxis-panel p-4 transition hover:border-bioaxis-accent hover:bg-bioaxis-panelSoft"
             >
-              <h3 className="text-sm font-bold leading-6 text-bioaxis-text transition group-hover:text-bioaxis-accent">{request}</h3>
-              <span className="mt-4 block text-xs font-bold uppercase text-bioaxis-accent">Request review</span>
+              <h3 className="text-sm font-semibold leading-6 text-bioaxis-text transition group-hover:text-bioaxis-accent">{request}</h3>
+              <span className="mt-4 block text-xs font-semibold  text-bioaxis-accent">Request review</span>
             </Link>
           ))}
         </div>
@@ -202,12 +202,12 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
 
       <section className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
         <div className="mb-8">
-          <h2 id="comparison-heading" className="text-3xl font-bold text-bioaxis-text sm:text-4xl">Compare requirements</h2>
+          <h2 id="comparison-heading" className="text-3xl font-semibold text-bioaxis-text sm:text-4xl">Compare requirements</h2>
         </div>
         <div className="overflow-x-auto border border-bioaxis-line bg-bioaxis-panel">
           <table aria-labelledby="comparison-heading" className="min-w-full border-separate border-spacing-0 text-left">
             <thead>
-              <tr className="text-xs font-bold uppercase text-bioaxis-dim">
+              <tr className="text-xs font-semibold  text-bioaxis-dim">
                 <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review area</th>
                 <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Candidate details to check</th>
                 <th scope="col" className="border-b border-bioaxis-line bg-bioaxis-black px-4 py-4">Review notes</th>
