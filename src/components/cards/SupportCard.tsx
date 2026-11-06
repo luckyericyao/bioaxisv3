@@ -12,7 +12,7 @@ export function SupportCard({ supportType }: SupportCardProps) {
       <p className="mt-4 text-sm leading-6 text-bioaxis-muted">{supportType.description}</p>
       <div className="mt-5">
         <p className="mb-3 text-xs font-semibold  text-bioaxis-dim">What to send</p>
-        <ul className="grid gap-2 text-sm text-bioaxis-steel">
+        <ul className="body-copy grid gap-2 text-base text-bioaxis-steel">
           {supportType.whatToSend.map((item) => (
             <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
               {item}

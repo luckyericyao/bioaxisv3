@@ -73,7 +73,7 @@ export default function QualityPage() {
             title="Documentation support"
             subtitle="BioAxis helps request and organize supplier documentation where available. Product documentation remains tied to the relevant supplier and product record."
           />
-          <ul className="mt-8 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+          <ul className="body-copy mt-8 grid gap-2 text-base leading-[25px] text-bioaxis-muted sm:grid-cols-2">
             {documentationExamples.map((item) => (
               <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
                 {item}
@@ -101,7 +101,7 @@ export default function QualityPage() {
               BioAxis can organize the request around supplier-provided evidence, specification review, sample-first evaluation, and recurring supply context without presenting documentation as BioAxis-issued certification.
             </p>
           </div>
-          <ul className="grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+          <ul className="body-copy grid gap-2 text-base leading-[25px] text-bioaxis-muted sm:grid-cols-2">
             {packageInputs.map((item) => (
               <li key={item} className="border border-white/[0.12] px-3 py-2">
                 {item}

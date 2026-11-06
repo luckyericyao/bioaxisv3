@@ -44,6 +44,9 @@ main h1.home-brand { font-size: 48px; line-height: 52px; font-weight: 600; }
 main p[class] { font-size: 16px; line-height: 25px; font-weight: 400; }
 main p.home-purpose { font-size: 20px; line-height: 28px; }
 main .helper-text { font-size: 14px; line-height: 21px; }
+main .body-copy { font-size: 16px; line-height: 25px; font-weight: 400; }
+main .body-copy li { font-size: inherit; line-height: inherit; font-weight: inherit; }
+main td[class] { font-size: 16px; line-height: 25px; font-weight: 400; }
 main h2.tool-heading { font-size: 20px; line-height: 28px; font-weight: 500; }
 .action-primary, .action-secondary {
   display: inline-flex;

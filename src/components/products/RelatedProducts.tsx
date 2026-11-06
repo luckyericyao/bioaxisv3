@@ -20,7 +20,7 @@ export function RelatedProducts({ links }: RelatedProductsProps) {
         {links.map((link) => (
           <Link key={link.href} href={link.href} className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent">
             <span className="text-sm font-semibold text-bioaxis-text">{link.label}</span>
-            {link.description ? <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">{link.description}</span> : null}
+            {link.description ? <span className="body-copy mt-2 block text-base leading-[25px] text-bioaxis-muted">{link.description}</span> : null}
           </Link>
         ))}
       </div>

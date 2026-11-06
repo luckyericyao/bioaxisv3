@@ -127,7 +127,7 @@ export default function ApplicationsPage() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
         <div className="border border-bioaxis-line bg-bioaxis-black p-5 sm:p-6">
           <p className="text-sm font-semibold  text-bioaxis-accent">Useful workflow context</p>
-          <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted md:grid-cols-4">
+          <ul className="body-copy mt-4 grid gap-2 text-base leading-[25px] text-bioaxis-muted md:grid-cols-4">
             {usefulContext.map((item) => (
               <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
                 {item}

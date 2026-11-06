@@ -74,7 +74,7 @@ export default function SuppliersPage() {
         </div>
         <div className="mt-6 border border-bioaxis-line bg-bioaxis-black p-5">
           <p className="text-sm font-semibold  text-bioaxis-accent">Useful input</p>
-          <ul className="mt-4 grid gap-2 text-sm leading-6 text-bioaxis-muted md:grid-cols-3">
+          <ul className="body-copy mt-4 grid gap-2 text-base leading-[25px] text-bioaxis-muted md:grid-cols-3">
             {["Supplier or brand", "Catalog reference", "Product description", "Required documents", "Quantity and timing", "Equivalent or sample need"].map((item) => (
               <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
                 {item}

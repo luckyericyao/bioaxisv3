@@ -39,6 +39,8 @@ Post-fix browser evidence covers:
 - 500ms first-session motion and reduced-motion static rendering.
 - Browser runtime-error capture plus a direct CUA console warning/error check (empty). Axe semantics and color checks on six critical routes.
 
+Follow-up typography check: prose lists, descriptive spans and table data had retained some legacy 14px sizing outside the paragraph rule. These now use 16px/25px/400 body styles. The expanded browser suite passed 15 routes at four widths (60 checks), and a direct 390x844 quality-page screenshot/computed-style inspection confirmed readable lists without horizontal overflow. Homepage structure/assets are unchanged; the paired visual comparisons above remain applicable. The full accessibility suite passed again after the fix.
+
 ## Findings
 
 No actionable P0/P1/P2 visual implementation findings remain within this comparison scope.

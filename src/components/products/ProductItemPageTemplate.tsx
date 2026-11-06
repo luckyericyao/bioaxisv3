@@ -191,7 +191,7 @@ export function ProductItemPageTemplate({ segment, category, family, productItem
                   className="border border-bioaxis-line bg-bioaxis-black p-4 transition hover:border-bioaxis-accent"
                 >
                   <span className="text-sm font-semibold text-bioaxis-text">{item.name}</span>
-                  <span className="mt-2 block text-sm leading-6 text-bioaxis-muted">{item.shortDescription}</span>
+                  <span className="body-copy mt-2 block text-base leading-[25px] text-bioaxis-muted">{item.shortDescription}</span>
                 </Link>
               ))}
             </div>
@@ -228,7 +228,7 @@ function InfoPanel({ title, items, links = [] }: { title: string; items: string[
       </summary>
       <ul className="grid gap-3 border-t border-bioaxis-line p-5">
         {items.map((item) => (
-          <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-sm leading-6 text-bioaxis-steel">
+          <li key={item} className="body-copy border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-base leading-[25px] text-bioaxis-steel">
             {cleanListItem(item)}
           </li>
         ))}

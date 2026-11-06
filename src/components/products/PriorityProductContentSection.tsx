@@ -36,7 +36,7 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
       <h3 className="text-xl font-semibold text-bioaxis-text">{title}</h3>
-      <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
+      <ul className="body-copy mt-5 grid gap-3 text-base leading-[25px] text-bioaxis-muted">
         {items.map((item) => (
           <li key={item} className="border border-white/[0.1] bg-bioaxis-black px-4 py-3 text-bioaxis-steel">
             {cleanListItem(item)}

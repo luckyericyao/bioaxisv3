@@ -77,7 +77,7 @@ export default function AboutPage() {
         </article>
         <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
           <h2 className="text-2xl font-semibold  text-bioaxis-text">What BioAxis does not claim</h2>
-          <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
+          <ul className="body-copy mt-5 grid gap-3 text-base leading-[25px] text-bioaxis-muted">
             <li className="border-l border-bioaxis-accent/40 pl-3">BioAxis does not claim to manufacture every product it helps source.</li>
             <li className="border-l border-bioaxis-accent/40 pl-3">BioAxis does not guarantee that an alternative is the same product as a named brand.</li>
             <li className="border-l border-bioaxis-accent/40 pl-3">BioAxis does not claim FDA, GMP, ISO, or other certification status unless tied to a verified supplier or product document.</li>
@@ -102,7 +102,7 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
   return (
     <article className="border border-bioaxis-line bg-bioaxis-panel p-6">
       <h2 className="text-2xl font-semibold  text-bioaxis-text">{title}</h2>
-      <ul className="mt-5 grid gap-3 text-sm leading-6 text-bioaxis-muted">
+      <ul className="body-copy mt-5 grid gap-3 text-base leading-[25px] text-bioaxis-muted">
         {items.map((item) => (
           <li key={item} className="border-l border-bioaxis-accent/40 pl-3">
             {item}

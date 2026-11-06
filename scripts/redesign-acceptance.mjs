@@ -22,7 +22,7 @@ try {
         return animate.call(this, frames, options);
       };
     });
-    for (const route of ["/", "/products", "/request-quote", "/equivalent-finder", "/private-label-oem", "/trust-center", "/contact"]) {
+    for (const route of ["/", "/products", "/request-quote", "/equivalent-finder", "/private-label-oem", "/trust-center", "/contact", "/quality", "/supplier-qualification", "/suppliers", "/support", "/about", "/applications", "/workflows", "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips"]) {
       const response = await page.goto(new URL(route, baseUrl).toString(), { waitUntil: "networkidle" });
       assert.equal(response.status(), 200, route);
       await page.evaluate(() => document.fonts.ready);
@@ -34,6 +34,10 @@ try {
           overflow: document.documentElement.scrollWidth > innerWidth + 1,
           family: getComputedStyle(document.body).fontFamily,
           smallText: leaves.filter((node) => parseFloat(getComputedStyle(node).fontSize) < 14).map((node) => node.textContent.slice(0, 60)),
+          bodyTypeFailures: [...document.querySelectorAll("main .body-copy, main td")].filter(visible).filter((node) => {
+            const style = getComputedStyle(node);
+            return style.fontSize !== "16px" || style.lineHeight !== "25px" || style.fontWeight !== "400";
+          }).map((node) => node.textContent.trim().slice(0, 70)),
           uppercase: leaves.filter((node) => getComputedStyle(node).textTransform === "uppercase").map((node) => node.textContent.slice(0, 60)),
           brokenImages: [...document.images].filter((node) => visible(node) && (!node.complete || !node.naturalWidth)).map((node) => node.src),
           hero: hero ? {
@@ -47,6 +51,7 @@ try {
       assert.equal(state.overflow, false, `${viewport.width} ${route}: horizontal overflow`);
       assert.match(state.family, /inter/i);
       assert.deepEqual(state.smallText, [], `${viewport.width} ${route}: text below 14px`);
+      assert.deepEqual(state.bodyTypeFailures, [], `${viewport.width} ${route}: prose must be 16/25 at weight 400`);
       assert.deepEqual(state.uppercase, [], `${viewport.width} ${route}: forced uppercase`);
       assert.deepEqual(state.brokenImages, [], `${viewport.width} ${route}: missing image`);
       if (state.hero) {

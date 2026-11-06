@@ -505,7 +505,7 @@ export function CatalogProductPage({
             {Object.entries(product.specs).map(([key, value]) => (
               <div key={key} className="border border-bioaxis-line bg-bioaxis-black p-4">
                 <dt className="text-sm font-semibold  text-bioaxis-dim">{key}</dt>
-                <dd className="mt-2 text-sm leading-6 text-bioaxis-steel">{Array.isArray(value) ? value.join(", ") : value}</dd>
+                <dd className="body-copy mt-2 text-base leading-[25px] text-bioaxis-steel">{Array.isArray(value) ? value.join(", ") : value}</dd>
               </div>
             ))}
           </dl>
@@ -564,7 +564,7 @@ export function CatalogProductPage({
                   className="border border-bioaxis-line bg-bioaxis-black px-4 py-3 transition hover:border-bioaxis-accent"
                 >
                   <span className="text-sm font-semibold text-bioaxis-text">{related.name}</span>
-                  <span className="mt-1 block text-xs leading-5 text-bioaxis-muted">{related.description}</span>
+                  <span className="body-copy mt-1 block text-base text-bioaxis-muted">{related.description}</span>
                 </SourcingRequestLink>
               ))}
             </div>

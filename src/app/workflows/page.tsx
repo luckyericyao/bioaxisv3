@@ -66,7 +66,7 @@ export default function WorkflowsPage() {
                 <span className="mt-4 block pr-9 text-sm font-semibold  leading-snug text-bioaxis-text">
                   {workflow.title}
                 </span>
-                <span className="mt-3 block text-sm leading-6 text-bioaxis-muted">{workflow.shortDescription}</span>
+                <span className="body-copy mt-3 block text-base leading-[25px] text-bioaxis-muted">{workflow.shortDescription}</span>
                 <span className="mt-auto flex flex-wrap gap-2 pt-5">
                   {workflow.productFamilies.map((family) => (
                     <span key={family} className="border border-bioaxis-line bg-bioaxis-panel px-2.5 py-1.5 text-sm font-semibold  text-bioaxis-steel">

@@ -73,7 +73,7 @@ export default function SupplierQualificationPage() {
             title="What evidence buyers may request"
             subtitle="Documentation availability depends on the supplier, product family, and use case. BioAxis helps organize requests without making unsupported claims or replacing buyer-side qualification."
           />
-          <ul className="mt-8 grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+          <ul className="body-copy mt-8 grid gap-2 text-base leading-[25px] text-bioaxis-muted sm:grid-cols-2">
             {documents.map((document) => (
               <li key={document} className="border-l border-bioaxis-accent/40 pl-3">
                 {document}
@@ -100,7 +100,7 @@ export default function SupplierQualificationPage() {
               BioAxis can help organize the supplier, product, document, sample, and recurring supply context so your team can review evidence with fewer loose threads.
             </p>
           </div>
-          <ul className="grid gap-2 text-sm leading-6 text-bioaxis-muted sm:grid-cols-2">
+          <ul className="body-copy grid gap-2 text-base leading-[25px] text-bioaxis-muted sm:grid-cols-2">
             {buyerInputs.map((item) => (
               <li key={item} className="border border-white/[0.12] px-3 py-2">
                 {item}

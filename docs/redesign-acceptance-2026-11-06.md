@@ -22,7 +22,7 @@ Specification: `BioAxis_改版实施方案_2026-11-05.md`, adopted as the execut
 | G2, ten-second task selection | Pending real participants. Same test kit, separately scored tasks. |
 | G3, concise first viewport | Browser captures at 1440x900, 1366x768, 390x844 and 320px. One brand/purpose/two-action hero; Products begins in the first viewport. |
 | G4, nonblocking motion | 500 ms calls, session reload without replay, reduced-motion static capture; no overlay or entrance gate. |
-| G5, common type | Seven key routes across four viewports: Inter, no forced uppercase, no visible information text below 14px. Body is 16/25, helper text 14/21, page/section/card scales follow shared tokens. |
+| G5, common type | Fifteen routes across four viewports (60 checks): Inter, no forced uppercase, no visible information text below 14px. Explicit prose lists, descriptive spans and table cells are asserted at 16px/25px/400; helper text remains 14/21. Page/section/card scales follow shared tokens. |
 | G6, compact RFQ | Need before Email; context/list retained; optional details closed; one submit. Shared need and client submission regression cases cover blank and selected-product paths. |
 | G7, responsive/keyboard | Accessibility regression checks mobile, 320px, 200%/400% zoom-equivalent reflow, text spacing, menu keyboard/Escape, drawer focus lock/restoration and unobscured actions. |
 | G8, reliable states | Local queue tests and browser simulations cover validation, network/503/429 errors, fresh verification, preserved payloads, repeated submit events, 409 reference recovery and server-confirmed success. Test fixtures remain local. |
@@ -61,3 +61,11 @@ Observe comparable device/source cohorts for about fourteen days; extend if traf
 | Field performance | Group `web_vital` by metric, entryPath and mobile/desktop. Library document-level metrics are not SPA route timings. Calculate p75 only after collecting sufficient real samples. |
 
 The existing server event sink logs events and uses PostHog only if already configured. Production collection and the observation window must be checked independently of local browser fixtures. This register does not mark G1/G2/G10 or the business observation period as passed.
+
+## Typography follow-up, 2026-11-06
+
+Review found that the paragraph rule did not cover prose rendered as lists, descriptive spans or table cells. Scoped `body-copy` markers now cover those components, with shared 16px/25px/400 rules for prose and table data. Navigation, buttons and compact specification labels retain their separate scales. No taxonomy, routes, copy or intake behavior changed.
+
+Passed after this fix: lint, production build (1,027 generated pages), full offline `npm test`, route smoke, expanded 60-view redesign acceptance and the browser accessibility checklist. The latter retains product context, three-action mobile product headers, drawer focus, keyboard navigation, error/retry states, zoom/text-spacing and six-route axe coverage. A direct in-app-browser check also confirmed readable quality-page lists at 390x844 and computed 16px/25px/400 styles.
+
+G1/G2 remain pending: the owner will provide real participant results later. No participant or field-performance outcome is inferred from these automated checks.
