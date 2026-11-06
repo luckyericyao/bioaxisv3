@@ -14,6 +14,7 @@ const navigationAttempts = ["localhost", "127.0.0.1"].includes(new URL(baseUrl).
 const criticalRoutes = [
   { label: "home", path: "/" },
   { label: "search", path: "/products?q=filtered%20200%20%C2%B5L%20tips" },
+  { label: "sourcing configuration filters", path: "/products?view=configurations&segment=liquid-handling&category=pipette-tips" },
   { label: "product family", path: "/products/liquid-handling/pipette-tips/filtered-pipette-tips" },
   {
     label: "product template",

@@ -4,6 +4,7 @@ import { productTaxonomy } from "@/data/productTaxonomy";
 import { buildRequestHref } from "@/lib/productRequestHref";
 import { filterSourcingConfigurations, getSourcingConfigurations, sourcingFilterBrief, type SourcingTargetFilters, type SourcingConfiguration } from "@/lib/server/sourcingConfigurations";
 import { SourcingFiltersDisclosure } from "./SourcingFiltersDisclosure";
+import { SourcingScopeFields } from "./SourcingScopeFields";
 
 function uniqueOptions(values: readonly string[]) {
   const seen = new Set<string>();
@@ -46,9 +47,8 @@ export function SourcingConfigurationBrowser({ filters }: { filters: SourcingTar
     <div className="mt-8 grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
       <SourcingFiltersDisclosure><form action="/products" method="get" className="pb-5 pt-3" aria-label="Filter sourcing targets">
         <input type="hidden" name="view" value="configurations" />
-        {filters.category ? <input type="hidden" name="category" value={filters.category} /> : null}
         <label className="block text-sm font-medium">Product or reference<input type="search" name="q" defaultValue={filters.q} className="field-focus mt-2 block min-h-11 w-full border bg-white px-3" /></label>
-        <label className="mt-5 block text-sm font-medium">Product line<select name="segment" defaultValue={filters.segment ?? ""} className="field-focus mt-2 block min-h-11 w-full border bg-white px-2"><option value="">All lines</option>{productTaxonomy.map((segment) => <option key={segment.slug} value={segment.slug}>{segment.title}</option>)}</select></label>
+        <SourcingScopeFields segment={filters.segment} category={filters.category} options={productTaxonomy.map((segment) => ({ slug: segment.slug, title: segment.title, categories: segment.subcategories.map((category) => ({ slug: category.slug, title: category.title })) }))} />
         {([{ name: "volume", label: "Volume target", keys: ["nominal volume", "volume"], requirements: [] }, { name: "barrier", label: "Barrier target", keys: ["filter barrier"], requirements: ["Filtered", "Non-filtered"] }, { name: "sterility", label: "Sterility target", keys: ["sterility"], requirements: ["Sterile", "Non-sterile"] }, { name: "packaging", label: "Packaging target", keys: ["packaging"], requirements: ["Racked", "Reload", "Bulk"] }] as const).map((filter) => <label key={filter.name} className="mt-5 block text-sm font-medium">{filter.label}<select name={filter.name} defaultValue={filters[filter.name] ?? ""} className="field-focus mt-2 block min-h-11 w-full border bg-white px-2"><option value="">Any / not specified</option>{uniqueOptions([...(filters[filter.name] ? [filters[filter.name]!] : []), ...filter.requirements, ...valuesFor([...filter.keys])]).map((value) => <option key={value} value={value}>{value}</option>)}</select></label>)}
         <p className="helper-text mt-4 text-bioaxis-muted">Filters describe your requirement, not confirmed supply.</p>
         <label className="mt-5 flex min-h-11 items-start gap-3 text-sm"><input type="checkbox" name="includeUnconfirmed" value="1" defaultChecked={filters.includeUnconfirmed} className="mt-1" /><span>Also show targets whose selected fields need confirmation</span></label>

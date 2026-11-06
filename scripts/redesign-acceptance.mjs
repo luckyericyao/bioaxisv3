@@ -79,8 +79,9 @@ try {
           assert.equal(await page.getByRole("link", { name: "Ask for documents", exact: true }).isVisible(), false);
           const fields = page.getByText("Configuration fields to confirm", { exact: true });
           await fields.click();
-          assert.match(await fields.locator("..").innerText(), /racked, reload, or bulk/);
+          assert.match(await fields.locator("xpath=ancestor::details[1]").innerText(), /racked, reload, or bulk/);
           await fields.click();
+          await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
         }
         await page.screenshot({ path: path.join(output, `configuration-${viewport.width}.png`) });
       }
@@ -159,6 +160,10 @@ try {
   await legacyContext.goto(new URL("/request-quote?segment=cell-culture&category=cell-culture-media-buffers&family=classical-media&product=dmem-high-glucose", baseUrl).toString(), { waitUntil: "networkidle" });
   await legacyContext.locator('[data-product-context-summary="true"] summary').click();
   assert.match(await legacyContext.getByRole("list", { name: "All source specifications" }).innerText(), /Format: Liquid \/ powder option/);
+  await legacyContext.goto(new URL("/request-quote?segment=liquid-handling&category=pipette-tips&family=universal-pipette-tips&product=sterile-filtered-universal-pipette-tips", baseUrl).toString(), { waitUntil: "networkidle" });
+  await legacyContext.locator('[data-product-context-summary="true"] summary').click();
+  assert.match(await legacyContext.getByRole("list", { name: "All source specifications" }).innerText(), /Sterility: Sterile/);
+  assert.match(await legacyContext.getByRole("list", { name: "All source specifications" }).innerText(), /Format: Racked/);
   await legacyContext.close();
   const targets = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await targets.goto(new URL('/products?view=configurations&volume=200+%C2%B5L&barrier=Filtered', baseUrl).toString(), { waitUntil: 'networkidle' });
@@ -179,6 +184,15 @@ try {
   const sendRequirement = targets.locator('main a[href^="/request-quote"]');
   assert.equal(await sendRequirement.count(), 1, 'An exact no-match offers one main requirement handoff');
   assert.match(new URL(await sendRequirement.getAttribute('href'), baseUrl).searchParams.get('productList'), /Requested sterility: Non-sterile/);
+  await targets.goto(new URL('/products?view=configurations&segment=liquid-handling&category=pipette-tips', baseUrl).toString(), { waitUntil: 'networkidle' });
+  await targets.getByText('Filter sourcing targets', { exact: true }).click();
+  const filters = targets.getByRole('form', { name: 'Filter sourcing targets' });
+  assert.equal(await filters.getByRole('combobox', { name: 'Category', exact: true }).inputValue(), 'pipette-tips');
+  await filters.getByRole('combobox', { name: 'Product line', exact: true }).selectOption('cell-culture');
+  assert.equal(await filters.getByRole('combobox', { name: 'Category', exact: true }).inputValue(), '', 'Changing line must clear a stale category constraint');
+  await filters.getByRole('button', { name: 'Apply filters', exact: true }).click();
+  await targets.waitForURL(url => url.searchParams.get('segment') === 'cell-culture');
+  assert.equal(new URL(targets.url()).searchParams.get('category'), '');
   await targets.close();
   assert.deepEqual(errors, [], "Browser runtime errors");
   await writeFile(path.join(output, "acceptance.json"), JSON.stringify({ evidence, errors, reducedMotion: "passed", clientNeedValidation: "passed", concurrentSubmitGuard: "passed", selectedProductWithoutRetyping: "passed", mobileEmailWithContextAndList: "passed", legacyStructuredSpecifications: "passed", localMockSubmissions: submissions.length + listSubmissions.length }, null, 2));

@@ -67,3 +67,24 @@ Browser fixtures intercept only local test requests. They do not weaken producti
 - [ ] Real target-user recognition/entry testing and post-release conversion observation: remain external observations, not technical pass claims.
 
 The last two items are intentionally not fabricated and do not prevent shipping the implemented design. No new notification provider, account, cart, payment or inventory system was introduced.
+
+## Local Continuation Review
+
+The approved direction is appropriate: brand opening and procurement value are separate from product selection, while configuration targets remain distinct from supplier evidence. More new content or another visual direction is not the next priority. The current risk is whether that design survives real context, long fields, mobile layouts and retries.
+
+| Priority / goal | Why first | Acceptance |
+| --- | --- | --- |
+| P0: stabilize the existing WIP | A render or HTTP 200 does not establish working interactions | Lint, TypeScript, production build, offline regressions and route smoke pass on the same worktree |
+| P0: preserve a usable context-to-RFQ path | With both product context and a saved list, Email was below the 390x844 first viewport | Email remains fully visible at 390/320px, selected product and original fields remain accessible, mock submission retains list quantity and specifications, no production submission |
+| P1: make configuration comparison honest and reversible | Pending values can look specific; a hidden category could remain after changing product line | Unknown/multi-option fields are not exact targets, conflicting targets stay excluded, changing product line clears category, filters follow into RFQ |
+| P1: responsive and accessibility regression | Shared template changes affect many deep routes | 1440/1366/390/320 viewport checks, no horizontal overflow, three mobile configuration actions, complete fields in disclosures, keyboard/drawer/focus and axe checks |
+
+Corrections in this local round:
+
+- Email now precedes context/list summaries; the product input still precedes Email and optional procurement details remain collapsed.
+- Legacy product-level specifications and document notes take precedence over generic family context. Structured source fields, rather than tags alone, reach RFQ.
+- Empty, pending, TBD/TBC, unknown and array-valued alternatives are marked for confirmation. Field whitespace is normalized; explicit Sterile/Non-sterile matching remains exact.
+- Category is an explicit filter, cleared when product line changes, instead of a hidden persistent constraint. Full taxonomy content remains server-side.
+- Added context-plus-list mobile and legacy-context browser regressions; the configuration offline regression is now part of `npm test`.
+
+This continuation began as local validation. The approved systematic design was subsequently committed and pushed as `a762a47`; production readiness verified that exact release. Scope/context corrections require the same release checks before inclusion. This note does not authorize production environment or secret changes. Owner-approved company evidence and real-user observations remain outside this technical round.

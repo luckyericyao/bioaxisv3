@@ -420,15 +420,14 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           sourcePageUrl: requestSourcePage,
           relevantSpecs:
             productMatch?.productItem.commonSpecifications.slice(0, 8) ??
+            (catalogProductMatch ? Object.entries(catalogProductMatch.product.specs).slice(0, 8).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`) : undefined) ??
             familyMatch?.family.keySpecifications.slice(0, 8) ??
-            (catalogProductMatch ? Object.entries(catalogProductMatch.product.specs).slice(0, 8).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`) :
-            catalogFamilyMatch ? catalogFamilyMatch.family.typicalSpecs.slice(0, 8) :
-            []),
+            catalogFamilyMatch?.family.typicalSpecs.slice(0, 8) ?? [],
           documentationNotes:
             productMatch?.productItem.documentationNeeds.slice(0, 8) ??
+            (catalogProductMatch ? Object.entries(catalogProductMatch.product.documents).map(([key, value]) => `${key}: ${value}`) : undefined) ??
             familyMatch?.family.documentationChecklist.slice(0, 8) ??
-            (catalogProductMatch ? Object.entries(catalogProductMatch.product.documents).map(([key, value]) => `${key}: ${value}`) :
-            []),
+            [],
           timestamp: new Date().toISOString()
         }
       : undefined;
