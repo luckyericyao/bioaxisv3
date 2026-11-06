@@ -10,7 +10,7 @@ const report: Reporter = (metric) => {
   if (!["LCP", "INP", "CLS"].includes(metric.name)) return;
   const navigation = performance.getEntriesByType("navigation")[0];
   trackBioAxisEvent("web_vital", {
-    metric: metric.name, value: Math.round(metric.value * 1000) / 1000, rating: metric.rating,
+    metric: metric.name, metricId: metric.id, value: Math.round(metric.value * 1000) / 1000, rating: metric.rating,
     entryPath: navigation ? new URL(navigation.name).pathname : location.pathname,
     device: innerWidth < 1024 ? "mobile" : "desktop"
   });

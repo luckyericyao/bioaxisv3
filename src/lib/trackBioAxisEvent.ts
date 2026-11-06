@@ -28,6 +28,7 @@ export function trackBioAxisEvent(name: BioAxisEventName, properties: EventPrope
   }
 
   const enrichedProperties = {
+    device: window.innerWidth < 1024 ? "mobile" : "desktop",
     requestId: properties.requestId ?? getBioAxisRequestId(),
     ...properties
   };

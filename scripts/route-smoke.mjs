@@ -1708,8 +1708,8 @@ if (!["BIOAXIS_INTERNAL_API_KEY", "timingSafeEqual", "readQueuedRfq", "listQueue
   failures.push("src/app/api/rfq/internal/route.ts: missing authenticated internal lookup markers");
 }
 
-if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes("rfq_delivery") || !analyticsRouteSource.includes("recordBioAxisEvent")) {
-  failures.push("src/app/api/analytics/route.ts: missing funnel event allowlist");
+if (!analyticsRouteSource.includes("search_no_result") || !analyticsRouteSource.includes("turnstile_failure") || !analyticsRouteSource.includes('path, "browser"') || !rfqRouteSource.includes('recordBioAxisEvent("rfq_delivery"')) {
+  failures.push("Analytics/RFQ routes: missing browser funnel events, forced browser attribution or server delivery instrumentation");
 }
 
 if (!requestQuoteRouteSource.includes('export { POST } from "../rfq/route"')) {
@@ -2228,6 +2228,15 @@ if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(baseUrl)) {
   const analyticsPayload = await analyticsResponse.json();
   if (!analyticsResponse.ok || analyticsPayload?.ok !== true) {
     failures.push(`/api/analytics: expected accepted event, got ${analyticsResponse.status}`);
+  }
+
+  for (const name of ["rfq_delivery", "rfq_queue_write_succeeded", "rfq_queue_write_failed"]) {
+    const reservedResponse = await fetch(new URL("/api/analytics", baseUrl), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, properties: { eventOrigin: "server", qa: true } })
+    });
+    if (reservedResponse.status !== 400) failures.push(`/api/analytics: reserved event ${name} accepted (${reservedResponse.status})`);
   }
 
   const legacyResponse = await fetch(new URL("/api/request-quote", baseUrl), {

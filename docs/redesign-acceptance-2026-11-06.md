@@ -55,12 +55,14 @@ Observe comparable device/source cohorts for about fourteen days; extend if traf
 | --- | --- |
 | Home to product entry | `cta_click` with `cta=homepage_navigation` and a Products destination, relative to `homepage_view`; deduplicate by request/session reference. |
 | First useful action | First homepage navigation event, `msSinceHomeInteractive`. This measures from interactive home mount, not network navigation start; retain that definition in comparisons. |
-| RFQ completion | Server-confirmed `rfq_success` relative to first-focus `rfq_start`, grouped by request reference and device/source where available. |
+| RFQ completion | Server-origin `rfq_queue_write_succeeded` matched to first-focus `rfq_start` by request reference; group by device where available. Browser `rfq_success` is a UI signal, not the authoritative stored-request count. |
 | Meaningful requests | Valid contact plus meaningful product/reference/category/list, enforced by shared validation; do not treat email count alone as success. |
 | Errors | Distinguish client validation, Turnstile, network/rate-limit and queue errors. Retry attempts are not distinct leads. |
 | Field performance | Group `web_vital` by metric, entryPath and mobile/desktop. Library document-level metrics are not SPA route timings. Calculate p75 only after collecting sufficient real samples. |
 
 The existing server event sink logs events and uses PostHog only if already configured. Production collection and the observation window must be checked independently of local browser fixtures. This register does not mark G1/G2/G10 or the business observation period as passed.
+
+The repeatable export/measurement protocol and private local report command are in `docs/redesign-observation.md`. Web Vitals carry a measurement ID so repeated INP/CLS updates can be deduplicated. Events receive an origin assigned by the server; the public endpoint rejects queue-only events and cannot assign a server origin through submitted properties. Device class is included on client funnel events. The report counts stored requests from server queue confirmations, not client success labels, and publishes no request IDs or customer input. It cannot establish missing log retention or substitute for real traffic.
 
 ## Typography follow-up, 2026-11-06
 

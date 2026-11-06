@@ -23,10 +23,7 @@ const allowedEvents = new Set([
   "rfq_validation_failed",
   "rfq_success",
   "rfq_error",
-  "turnstile_failure",
-  "rfq_delivery",
-  "rfq_queue_write_succeeded",
-  "rfq_queue_write_failed"
+  "turnstile_failure"
 ]);
 
 function clean(value: unknown, limit: number) {
@@ -68,7 +65,7 @@ export async function POST(request: Request) {
     const path = clean(payload?.path, 180) || "/";
     const properties = payload?.properties && typeof payload.properties === "object" ? payload.properties : {};
 
-    const result = await recordBioAxisEvent(name as BioAxisEventName, properties, path);
+    const result = await recordBioAxisEvent(name as BioAxisEventName, properties, path, "browser");
 
     return NextResponse.json({ ok: true, mode: result.mode });
   } catch {

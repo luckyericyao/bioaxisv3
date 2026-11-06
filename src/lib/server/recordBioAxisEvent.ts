@@ -11,9 +11,10 @@ function safeProperties(properties: EventProperties) {
   );
 }
 
-export async function recordBioAxisEvent(name: BioAxisEventName, properties: EventProperties, path: string) {
+export async function recordBioAxisEvent(name: BioAxisEventName, properties: EventProperties, path: string, eventOrigin: "server" | "browser" = "server") {
   const sanitizedProperties = {
     ...safeProperties(properties),
+    eventOrigin,
     path: path.slice(0, 180),
     source: "bioaxis"
   };
