@@ -3,30 +3,8 @@
 import Link from "next/link";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-
-export type SourcingListItem = {
-  id: string;
-  title: string;
-  href: string;
-  segmentSlug?: string;
-  categorySlug?: string;
-  familySlug?: string;
-  productSlug?: string;
-  segmentTitle?: string;
-  categoryTitle?: string;
-  familyTitle?: string;
-  productTitle?: string;
-  quantity: string;
-  currentSupplier: string;
-  catalogNumber: string;
-  requestedAction: string;
-  equivalentNeeded: boolean;
-  sampleNeeded: boolean;
-  documentationNeeded: boolean;
-  notes: string;
-  sourcePageUrl: string;
-  addedAt: string;
-};
+import { parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems, sourcingListSubmissionHeader, type SourcingListItem } from "@/lib/sourcingListStorage";
+export type { SourcingListItem } from "@/lib/sourcingListStorage";
 
 type SourcingListInput = Omit<
   SourcingListItem,
@@ -47,6 +25,7 @@ type SourcingListInput = Omit<
 
 type SourcingListContextValue = {
   items: SourcingListItem[];
+  storageNotice: string;
   addItem: (item: SourcingListInput, restoreFocusTo?: HTMLElement | null) => void;
   updateItem: (id: string, patch: Partial<SourcingListItem>) => void;
   removeItem: (id: string) => void;
@@ -80,21 +59,7 @@ function emptyFields(item: SourcingListInput): SourcingListItem {
   };
 }
 
-function readStoredItems() {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    return raw ? (JSON.parse(raw) as SourcingListItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 function formatSubmission(items: SourcingListItem[]) {
-  const header = "Product / family | Path | Requested action | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
   const rows = items.map((item) => {
     const path = [item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ");
 
@@ -114,17 +79,54 @@ function formatSubmission(items: SourcingListItem[]) {
     ].join(" | ");
   });
 
-  return [header, ...rows].join("\n");
+  return [sourcingListSubmissionHeader, ...rows].join("\n");
 }
 
 export function SourcingListProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [items, setItems] = useState<SourcingListItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [memoryOnly, setMemoryOnly] = useState(false);
+  const [needsReview, setNeedsReview] = useState(false);
+  const storageNotice = memoryOnly
+    ? "Your list is available in this tab only. Keep it open until you send your request."
+    : needsReview ? "Some saved items could not be restored. Review your list before sending." : "";
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
+  const listRef = useRef<{ items: SourcingListItem[]; savedValue: string | null | undefined; unsaved: boolean }>({
+    items: [], savedValue: undefined, unsaved: false
+  });
+
+  const syncSavedList = useCallback((stored = readBrowserStorage("localStorage", storageKey)) => {
+    const current = listRef.current;
+    if (current.unsaved) return;
+    setMemoryOnly(!stored.available);
+    if (!stored.available || stored.value === current.savedValue) return;
+
+    const restored = parseSourcingList(stored.value);
+    listRef.current = { items: restored.items, savedValue: stored.value, unsaved: false };
+    setItems(restored.items);
+    setNeedsReview(restored.needsReview);
+  }, []);
+
+  const changeList = useCallback((update: (current: SourcingListItem[]) => SourcingListItem[]) => {
+    const stored = readBrowserStorage("localStorage", storageKey);
+    syncSavedList(stored);
+    const current = listRef.current;
+    const next = update(current.items);
+    if (next === current.items) return;
+
+    // After a failed write, don't publish a tab-only draft over a changed shared list.
+    const maySave = stored.available && (!current.unsaved || stored.value === current.savedValue);
+    const nextValue = next.length ? JSON.stringify(next) : null;
+    const saved = maySave && (nextValue === null
+      ? removeBrowserStorage("localStorage", storageKey)
+      : writeBrowserStorage("localStorage", storageKey, nextValue));
+    listRef.current = { items: next, savedValue: saved ? nextValue : current.savedValue, unsaved: !saved };
+    setItems(next);
+    setMemoryOnly(!saved);
+  }, [syncSavedList]);
 
   const rememberActiveElement = useCallback(() => {
     const activeElement = document.activeElement;
@@ -151,33 +153,34 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setItems(readStoredItems());
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) {
-      window.localStorage.setItem(storageKey, JSON.stringify(items));
+    syncSavedList();
+    function handleStorage(event: StorageEvent) {
+      if (event.key === storageKey || event.key === null) syncSavedList();
     }
-  }, [hydrated, items]);
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [syncSavedList]);
 
   useEffect(() => {
-    function handleSubmissionComplete() {
-      setItems([]);
+    function handleSubmissionComplete(event: Event) {
+      const submitted = (event as CustomEvent<SourcingListItem[]>).detail;
+      if (!Array.isArray(submitted) || !submitted.length) return;
+      changeList((current) => retainUnsubmittedSourcingItems(current, submitted));
       setDrawerOpen(false);
-      window.localStorage.removeItem(storageKey);
     }
 
     window.addEventListener(submissionCompleteEvent, handleSubmissionComplete);
     return () => window.removeEventListener(submissionCompleteEvent, handleSubmissionComplete);
-  }, []);
+  }, [changeList]);
+
+  useEffect(() => {
+    if (drawerOpen && !dialogRef.current?.contains(document.activeElement)) closeButtonRef.current?.focus();
+  }, [drawerOpen, items]);
 
   useEffect(() => {
     if (!drawerOpen) {
       return;
     }
-
-    closeButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -225,9 +228,10 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SourcingListContextValue>(
     () => ({
       items,
+      storageNotice,
       addItem: (input, restoreFocusTo) => {
         openDrawer(restoreFocusTo);
-        setItems((current) => {
+        changeList((current) => {
           const id = itemKey(input);
           if (current.some((item) => item.id === id)) {
             return current;
@@ -237,20 +241,25 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
         });
       },
       updateItem: (id, patch) => {
-        setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+        changeList((current) => current.some((item) => item.id === id)
+          ? current.map((item) => (item.id === id ? { ...item, ...patch } : item))
+          : current);
       },
       removeItem: (id) => {
-        setItems((current) => current.filter((item) => item.id !== id));
+        changeList((current) => current.some((item) => item.id === id) ? current.filter((item) => item.id !== id) : current);
       },
       openDrawer
     }),
-    [items, openDrawer]
+    [changeList, items, openDrawer, storageNotice]
   );
 
   function submitSourcingList() {
-    const productList = formatSubmission(items);
-    window.sessionStorage.setItem(submissionStorageKey, productList);
-    window.sessionStorage.setItem(submissionItemsStorageKey, JSON.stringify(items));
+    syncSavedList();
+    const currentItems = listRef.current.items;
+    if (!currentItems.length) return;
+    const productList = formatSubmission(currentItems);
+    writeBrowserStorage("sessionStorage", submissionStorageKey, productList);
+    writeBrowserStorage("sessionStorage", submissionItemsStorageKey, JSON.stringify(currentItems));
     const params = new URLSearchParams({
       requestType: "product-list-review",
       source: "sourcing-list",
@@ -311,6 +320,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-5">
+              {storageNotice ? <p role="status" className="mb-4 text-sm text-bioaxis-muted">{storageNotice}</p> : null}
               {items.length === 0 ? (
                 <p role="status" className="text-sm leading-6 text-bioaxis-muted">
                   Your sourcing list is empty. Close this panel to add items.
@@ -325,13 +335,13 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                         <p className="mt-2 text-xs leading-5 text-bioaxis-muted">
                           {[item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ")}
                         </p>
-                        <Link
+                        {item.href ? <Link
                           href={item.href}
                           onClick={closeDrawer}
                           className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold  text-bioaxis-accent"
                         >
                           View page
-                        </Link>
+                        </Link> : null}
                       </div>
                       <button
                         type="button"

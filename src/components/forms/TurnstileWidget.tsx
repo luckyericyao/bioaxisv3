@@ -1,5 +1,6 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
@@ -39,28 +40,25 @@ type TurnstileConfigResponse = {
 
 type TurnstileConfigState = "loading" | "ready" | "disabled" | "error";
 
-const buildTimeSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
-
 export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure, compact = false, resetKey = 0 }: TurnstileWidgetProps) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [siteKey, setSiteKey] = useState(buildTimeSiteKey);
-  const [configState, setConfigState] = useState<TurnstileConfigState>(buildTimeSiteKey ? "ready" : "loading");
+  const [siteKey, setSiteKey] = useState("");
+  const [configState, setConfigState] = useState<TurnstileConfigState>("loading");
+  const [configAttempt, setConfigAttempt] = useState(0);
   const [scriptReady, setScriptReady] = useState(false);
   const [widgetIssue, setWidgetIssue] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
 
   useEffect(() => {
-    if (buildTimeSiteKey) {
-      onAvailabilityChange?.(true);
-      return;
-    }
-
     let ignore = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 5000);
 
     async function loadRuntimeConfig() {
       try {
-        const response = await fetch("/api/turnstile/config", { cache: "no-store" });
+        const response = await fetch("/api/turnstile/config", { cache: "no-store", signal: controller.signal });
 
         if (!response.ok) {
           throw new Error("Turnstile configuration unavailable");
@@ -69,14 +67,16 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
         const config = (await response.json()) as TurnstileConfigResponse;
 
         if (!ignore) {
-          if (config.enabled && config.siteKey) {
+          if (config.enabled === true && typeof config.siteKey === "string" && config.siteKey.trim()) {
             setSiteKey(config.siteKey);
             setConfigState("ready");
             onAvailabilityChange?.(true);
-          } else {
+          } else if (config.enabled === false && !config.siteKey) {
             setSiteKey("");
             setConfigState("disabled");
             onAvailabilityChange?.(false);
+          } else {
+            throw new Error("Invalid Turnstile configuration");
           }
         }
       } catch {
@@ -86,6 +86,8 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
           onAvailabilityChange?.(true);
           onFailure?.("config_error");
         }
+      } finally {
+        window.clearTimeout(timeout);
       }
     }
 
@@ -93,8 +95,10 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
 
     return () => {
       ignore = true;
+      window.clearTimeout(timeout);
+      controller.abort();
     };
-  }, [onAvailabilityChange, onFailure]);
+  }, [configAttempt, onAvailabilityChange, onFailure]);
 
   useEffect(() => {
     if (!siteKey || !scriptReady || !containerRef.current || !window.turnstile || widgetIdRef.current) {
@@ -152,23 +156,41 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
 
     return (
       <div
+        ref={panelRef}
+        role="group"
+        aria-label="Verification"
+        tabIndex={-1}
         className="border border-bioaxis-line bg-bioaxis-black p-4"
         data-turnstile-widget={configFailed ? "unavailable" : "loading"}
       >
-        <p className="text-xs font-semibold  text-bioaxis-dim">
+        <p role="status" className="text-xs font-semibold  text-bioaxis-dim">
           {configFailed ? "Verification unavailable" : "Loading verification"}
         </p>
         {configFailed ? (
-          <p role="alert" className="mt-2 text-xs font-semibold leading-5 text-bioaxis-accent">
-            Verification could not load. Your entries remain in the form; keep this page open and retry when the check is available.
-          </p>
+          <>
+            <p role="alert" className="mt-2 text-xs font-semibold leading-5 text-bioaxis-accent">
+              Verification could not load. Your entries remain in the form.
+            </p>
+            <button
+              type="button"
+              className="action-secondary mt-3 min-h-[44px] gap-2"
+              onClick={() => {
+                panelRef.current?.focus({ preventScroll: true });
+                setConfigState("loading");
+                setConfigAttempt((attempt) => attempt + 1);
+              }}
+            >
+              <RefreshCw aria-hidden="true" className="size-4 shrink-0" />
+              Retry verification
+            </button>
+          </>
         ) : null}
       </div>
     );
   }
 
   return (
-    <div className="border border-bioaxis-line bg-bioaxis-black p-3 sm:p-4" data-turnstile-widget="true">
+    <div ref={panelRef} role="group" aria-label="Verification" tabIndex={-1} className="border border-bioaxis-line bg-bioaxis-black p-3 sm:p-4" data-turnstile-widget="true">
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"

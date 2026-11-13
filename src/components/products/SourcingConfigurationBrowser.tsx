@@ -45,7 +45,7 @@ export function SourcingConfigurationBrowser({ filters }: { filters: SourcingTar
     <h1 className="mt-4">Find a sourcing configuration.</h1>
     <p className="mt-4 max-w-2xl text-bioaxis-muted">Compare buyer targets, not live supplier listings. Specifications, compatibility and availability are confirmed per request.</p>
     <div className="mt-8 grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
-      <SourcingFiltersDisclosure><form action="/products" method="get" className="pb-5 pt-3" aria-label="Filter sourcing targets">
+      <SourcingFiltersDisclosure><form key={sourceParams.toString()} action="/products" method="get" className="pb-5 pt-3" aria-label="Filter sourcing targets">
         <input type="hidden" name="view" value="configurations" />
         <label className="block text-sm font-medium">Product or reference<input type="search" name="q" defaultValue={filters.q} className="field-focus mt-2 block min-h-11 w-full border bg-white px-3" /></label>
         <SourcingScopeFields segment={filters.segment} category={filters.category} options={productTaxonomy.map((segment) => ({ slug: segment.slug, title: segment.title, categories: segment.subcategories.map((category) => ({ slug: category.slug, title: category.title })) }))} />

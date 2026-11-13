@@ -12,24 +12,7 @@ export type SourcingIntakeRequestType =
   | "product-list"
   | "product-list-review";
 
-export type SourcingListSummaryItem = {
-  id?: string;
-  title?: string;
-  href?: string;
-  segmentTitle?: string;
-  categoryTitle?: string;
-  familyTitle?: string;
-  productTitle?: string;
-  quantity?: string;
-  currentSupplier?: string;
-  catalogNumber?: string;
-  equivalentNeeded?: boolean;
-  sampleNeeded?: boolean;
-  documentationNeeded?: boolean;
-  notes?: string;
-  sourcePageUrl?: string;
-  addedAt?: string;
-};
+export type SourcingHandoffMode = "text" | "list" | "legacy";
 
 export type SourcingIntakeFormProps = {
   requestType?: SourcingIntakeRequestType | string;
@@ -45,6 +28,7 @@ export type SourcingIntakeFormProps = {
   contextLocked?: boolean;
   productContext?: BioAxisProductContext;
   handoffNotice?: string;
+  handoffMode?: SourcingHandoffMode;
   productFieldLabel?: string;
   submitLabel?: string;
   successTitle?: string;

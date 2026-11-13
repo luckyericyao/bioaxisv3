@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
-import { getBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
-import { requestErrorMessage, submitBioAxisRequest } from "@/lib/submitBioAxisRequest";
+import { getBioAxisRequestId, retireBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
+import { requestErrorMessage, submitBioAxisRequest, type BioAxisRequestPayload } from "@/lib/submitBioAxisRequest";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 import { hasSourcingNeed, sourcingNeedError } from "@/lib/sourcingNeed";
+import { rfqInputLimitError } from "@/lib/rfqInputLimits";
+import { retainUnsubmittedSourcingItems } from "@/lib/sourcingListStorage";
 import { apiRequestType, createInitialIntakeState, hasValidEmail, initialProductContext } from "./intakeState";
 import type { IntakeState, SourcingIntakeFormProps, SubmitState } from "./types";
 import { clearStoredSourcingSubmission, useSourcingListSession } from "./useSourcingListSession";
@@ -20,11 +22,12 @@ export function useSourcingIntake({
   defaultMessage = "",
   initialDetails,
   contextLocked = false,
-  productContext
+  productContext,
+  handoffMode
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
-  const requestIdRef = useRef(getBioAxisRequestId());
+  const requestIdRef = useRef<string | null>(null);
   const intakeStartedRef = useRef(false);
   const submittingRef = useRef(false);
   const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage, initialDetails));
@@ -60,7 +63,7 @@ export function useSourcingIntake({
       resolvedProductContext.productCategory ||
       resolvedProductContext.productSegment
   );
-  const { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput } = useSourcingListSession(setState);
+  const { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, handoffSnapshot } = useSourcingListSession(setState, handoffMode);
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
 
   const trackIntakeStart = useCallback(() => {
@@ -70,14 +73,14 @@ export function useSourcingIntake({
 
     intakeStartedRef.current = true;
     trackBioAxisEvent("rfq_start", {
-      requestId: requestIdRef.current,
+      requestId: requestIdRef.current ?? getBioAxisRequestId(),
       requestType: normalizedRequestType,
       hasContext: hasPageContext
     });
   }, [hasPageContext, normalizedRequestType]);
 
   const handleTurnstileFailure = useCallback((reason: string) => {
-    trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current, reason });
+    trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current ?? getBioAxisRequestId(), reason });
   }, []);
 
   function updateField<K extends keyof IntakeState>(field: K, value: IntakeState[K]) {
@@ -107,7 +110,9 @@ export function useSourcingIntake({
     setError("");
   }
 
-  function validate() {
+  function validate(request: BioAxisRequestPayload) {
+    const inputLimitError = rfqInputLimitError(request);
+    if (inputLimitError) return inputLimitError;
     if (!hasSourcingNeed({ productList: state.productInput, catalogNumber: state.catalogNumber, message: state.notes, productContext: resolvedProductContext, sourcingListItems })) return sourcingNeedError;
     if (!hasValidEmail(state.email)) return emailErrorMessage;
     if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
@@ -122,9 +127,9 @@ export function useSourcingIntake({
     setTurnstileToken("");
     setTurnstileResetKey(0);
     setRestoredSessionInput(false);
-    setSourcingListItems([]);
     startedAtRef.current = Date.now();
-    requestIdRef.current = rotateBioAxisRequestId();
+    requestIdRef.current = null;
+    intakeStartedRef.current = false;
     setState((current) => ({
       ...createInitialIntakeState(current.requestType),
       email: current.email
@@ -134,12 +139,47 @@ export function useSourcingIntake({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submittingRef.current) return;
-    const validationError = validate();
+    const requestId = requestIdRef.current ?? getBioAxisRequestId();
+    const detailChipText = state.detailChips.length ? `Selected review details: ${state.detailChips.join(", ")}` : "";
+    const privateLabelNote = requestType === "private-label" ? "Original request mode: private-label / OEM sourcing discussion." : "";
+    const request: BioAxisRequestPayload = {
+      requestId,
+      email: state.email,
+      name: state.name,
+      company: state.company,
+      organization: state.company,
+      phone: state.phone,
+      roleTitle: state.roleTitle,
+      requestType: state.requestType,
+      productSegment: resolvedProductContext.productSegment,
+      productCategory: resolvedProductContext.productCategory,
+      productFamily: resolvedProductContext.productFamily,
+      productName: resolvedProductContext.productName || product || "",
+      productList: state.productInput,
+      catalogNumber: state.catalogNumber,
+      currentSupplier: state.currentSupplier,
+      supplier: state.currentSupplier,
+      quantity: state.quantity,
+      timeline: state.timeline,
+      shippingRegion: state.shippingRegion,
+      documentationNeeds: [state.requiredDocuments, detailChipText].filter(Boolean).join("\n"),
+      equivalentNeeded: state.requestType === "equivalent" || state.detailChips.includes("Equivalent review"),
+      sampleNeeded: state.requestType === "sample" || state.detailChips.includes("Sample before switching"),
+      recurringSupplyNeeded: state.requestType === "recurring-supply" || state.requestType === "recurring",
+      sourcingListItems,
+      sourcePageUrl: resolvedProductContext.sourcePageUrl || resolvedProductContext.productUrl || sourcePage,
+      productContext: resolvedProductContext,
+      website: state.website,
+      startedAt: startedAtRef.current,
+      turnstileToken,
+      message: [state.notes, privateLabelNote, detailChipText].filter(Boolean).join("\n\n")
+    };
+    const validationError = validate(request);
 
     if (validationError) {
-      trackBioAxisEvent("rfq_validation_failed", { requestId: requestIdRef.current, reason: "validation", requestType: state.requestType });
+      trackBioAxisEvent("rfq_validation_failed", { requestId, reason: "validation", requestType: state.requestType });
       if (turnstileAvailable && !turnstileToken) {
-        trackBioAxisEvent("turnstile_failure", { requestId: requestIdRef.current, reason: "missing_token" });
+        trackBioAxisEvent("turnstile_failure", { requestId, reason: "missing_token" });
       }
       setError(validationError);
       setSubmitted(null);
@@ -156,49 +196,18 @@ export function useSourcingIntake({
 
     setError("");
     setRetryReferenceReady(false);
+    const storedSubmission = handoffSnapshot.current;
+    requestIdRef.current = requestId;
     submittingRef.current = true;
     setSubmitting(true);
-    trackBioAxisEvent("rfq_submit", { requestId: requestIdRef.current, requestType: state.requestType, stage: "client_submit" });
+    trackBioAxisEvent("rfq_submit", { requestId, requestType: state.requestType, stage: "client_submit" });
 
     try {
-      const detailChipText = state.detailChips.length ? `Selected review details: ${state.detailChips.join(", ")}` : "";
-      const privateLabelNote = requestType === "private-label" ? "Original request mode: private-label / OEM sourcing discussion." : "";
-      const payload = await submitBioAxisRequest({
-        requestId: requestIdRef.current,
-        email: state.email,
-        name: state.name,
-        company: state.company,
-        organization: state.company,
-        phone: state.phone,
-        roleTitle: state.roleTitle,
-        requestType: state.requestType,
-        productSegment: resolvedProductContext.productSegment,
-        productCategory: resolvedProductContext.productCategory,
-        productFamily: resolvedProductContext.productFamily,
-        productName: resolvedProductContext.productName || product || "",
-        productList: state.productInput,
-        catalogNumber: state.catalogNumber,
-        currentSupplier: state.currentSupplier,
-        supplier: state.currentSupplier,
-        quantity: state.quantity,
-        timeline: state.timeline,
-        shippingRegion: state.shippingRegion,
-        documentationNeeds: [state.requiredDocuments, detailChipText].filter(Boolean).join("\n"),
-        equivalentNeeded: state.requestType === "equivalent" || state.detailChips.includes("Equivalent review"),
-        sampleNeeded: state.requestType === "sample" || state.detailChips.includes("Sample before switching"),
-        recurringSupplyNeeded: state.requestType === "recurring-supply" || state.requestType === "recurring",
-        sourcingListItems,
-        sourcePageUrl: resolvedProductContext.sourcePageUrl || resolvedProductContext.productUrl || sourcePage,
-        productContext: resolvedProductContext,
-        website: state.website,
-        startedAt: startedAtRef.current,
-        turnstileToken,
-        message: [state.notes, privateLabelNote, detailChipText].filter(Boolean).join("\n\n")
-      });
+      const payload = await submitBioAxisRequest(request);
 
       if (!payload.ok) {
         refreshVerification();
-        trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "api", requestType: state.requestType });
+        trackBioAxisEvent("rfq_error", { requestId, reason: "api", requestType: state.requestType });
         const hasConflict = payload.httpStatus === 409;
         setRequestReferenceConflict(hasConflict);
         setError(hasConflict
@@ -211,19 +220,18 @@ export function useSourcingIntake({
       setRequestReferenceConflict(false);
       setRetryReferenceReady(false);
       setSubmitted({
-        message:
-          payload.message ??
-          "Request received. BioAxis will follow up by email if specs, documents, samples, or quantity need clarification.",
+        message: payload.message,
         referenceId: payload.referenceId
       });
-      trackBioAxisEvent("rfq_success", { requestId: payload.requestId ?? payload.referenceId ?? requestIdRef.current, requestType: state.requestType });
-      clearStoredSourcingSubmission();
+      trackBioAxisEvent("rfq_success", { requestId: payload.referenceId, requestType: state.requestType });
+      retireBioAxisRequestId(requestId);
+      clearStoredSourcingSubmission(storedSubmission, sourcingListItems);
       setRestoredSessionInput(false);
-      setSourcingListItems([]);
+      setSourcingListItems((current) => retainUnsubmittedSourcingItems(current, sourcingListItems));
     } catch {
       refreshVerification();
       setRequestReferenceConflict(false);
-      trackBioAxisEvent("rfq_error", { requestId: requestIdRef.current, reason: "network", requestType: state.requestType });
+      trackBioAxisEvent("rfq_error", { requestId, reason: "network", requestType: state.requestType });
       setError(requestErrorMessage);
       setSubmitted(null);
     } finally {

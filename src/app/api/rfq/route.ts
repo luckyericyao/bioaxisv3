@@ -4,7 +4,9 @@ import { alertBioAxisFailure } from "@/lib/server/alertBioAxisFailure";
 import { recordBioAxisEvent } from "@/lib/server/recordBioAxisEvent";
 import { checkRfqQueueConnection, enqueueRfq, RfqIdempotencyConflictError, rfqQueueConfigured } from "@/lib/server/rfqQueue";
 import { PayloadTooLargeError, readLimitedJsonBody } from "@/lib/server/readLimitedJsonBody";
-import { hasSourcingNeed, sourcingNeedError } from "@/lib/sourcingNeed";
+import { getRfqTurnstileConfig, verificationUnavailableMessage } from "@/lib/server/rfqTurnstileConfig";
+import { hasSourcingNeed, sourcingNeedError, maxSourcingListItems } from "@/lib/sourcingNeed";
+import { rfqInputLimitError, trimRfqText } from "@/lib/rfqInputLimits";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +46,6 @@ type RfqPayload = {
   turnstileToken?: unknown;
 };
 
-type TurnstileVerificationResponse = {
-  success?: boolean;
-  "error-codes"?: string[];
-};
-
 type NormalizedRfq = {
   requestId: string;
   name: string;
@@ -83,6 +80,7 @@ type NormalizedRfq = {
 type SourcingListEmailItem = {
   title: string;
   path: string;
+  requestedAction?: string;
   quantity: string;
   currentSupplier: string;
   catalogNumber: string;
@@ -108,14 +106,14 @@ type ProductContextEmail = {
 };
 
 const maxPayloadBytes = 160_000;
-const maxProductListLength = 12_000;
-const maxMessageLength = 8_000;
 const maxFieldLength = 800;
-const maxSourcingListItems = 30;
 const minimumSubmitDelayMs = 700;
 const rfqRateWindowMs = 60_000;
 const rfqRateLimit = 20;
+const maxTrackedRfqClients = 4_096;
 const rfqRateLimitStore = new Map<string, { count: number; resetAt: number }>();
+const rfqRateOverflow = { count: 0, resetAt: 0 };
+let nextRateCleanupAt = 0;
 
 const verificationErrorMessage = "Please complete the verification and try again.";
 const requestTypeAliases: Record<string, string> = {
@@ -133,6 +131,7 @@ const requestTypeAliases: Record<string, string> = {
   docs: "documentation",
   documents: "documentation",
   "recurring supply request": "recurring-supply",
+  "recurring supply": "recurring-supply",
   "contact request": "contact",
   contact: "contact",
   "product list review": "product-list-review",
@@ -165,7 +164,7 @@ function isValidEmail(value: string) {
 }
 
 function clean(value: unknown, limit = maxFieldLength) {
-  return typeof value === "string" ? value.trim().slice(0, limit) : "";
+  return trimRfqText(value).slice(0, limit);
 }
 
 function cleanBoolean(value: unknown) {
@@ -210,6 +209,7 @@ function normalizeSourcingListItems(value: unknown): SourcingListEmailItem[] {
 
   return value.slice(0, maxSourcingListItems).map((item) => {
     const record = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    const requestedAction = normalizeSupportedRequestType(record.requestedAction);
     const path = [
       clean(record.segmentTitle, 140),
       clean(record.categoryTitle, 140),
@@ -222,13 +222,15 @@ function normalizeSourcingListItems(value: unknown): SourcingListEmailItem[] {
     return {
       title: clean(record.title, 240),
       path: path || clean(record.href, 500),
-      quantity: clean(record.quantity, 120),
-      currentSupplier: clean(record.currentSupplier, 180),
-      catalogNumber: clean(record.catalogNumber, 180),
-      equivalentNeeded: cleanBoolean(record.equivalentNeeded),
-      sampleNeeded: cleanBoolean(record.sampleNeeded),
-      documentationNeeded: cleanBoolean(record.documentationNeeded),
-      notes: clean(record.notes, 1200),
+      // Retain the legacy default shape so unchanged quote retries remain idempotent.
+      ...(requestedAction !== "quote" ? { requestedAction } : {}),
+      quantity: trimRfqText(record.quantity),
+      currentSupplier: trimRfqText(record.currentSupplier),
+      catalogNumber: trimRfqText(record.catalogNumber),
+      equivalentNeeded: requestedAction === "equivalent" ? "Yes" : cleanBoolean(record.equivalentNeeded),
+      sampleNeeded: requestedAction === "sample" ? "Yes" : cleanBoolean(record.sampleNeeded),
+      documentationNeeded: requestedAction === "documentation" ? "Yes" : cleanBoolean(record.documentationNeeded),
+      notes: trimRfqText(record.notes),
       sourcePageUrl: clean(record.sourcePageUrl || record.href, 1000),
       addedAt: clean(record.addedAt, 80)
     };
@@ -263,7 +265,7 @@ function normalizeProductContext(value: unknown, requestType: string): ProductCo
 
 function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq {
   const requestType = normalizeSupportedRequestType(payload.requestType);
-  const organization = clean(payload.organization || payload.company, 240);
+  const organization = trimRfqText(payload.organization || payload.company);
   const sourcePageUrl = clean(payload.sourcePageUrl, 1000);
   const referrer = clean(payload.referrer, 1000) || clean(request.headers.get("referer"), 1000);
   const productContext = normalizeProductContext(payload.productContext, requestType);
@@ -271,29 +273,29 @@ function normalizePayload(payload: RfqPayload, request: Request): NormalizedRfq 
 
   return {
     requestId: normalizeRequestId(payload.requestId),
-    name: clean(payload.name, 180),
-    email: clean(payload.email, 240),
+    name: trimRfqText(payload.name),
+    email: trimRfqText(payload.email),
     organization,
-    phone: clean(payload.phone, 80),
-    roleTitle: clean(payload.roleTitle, 160),
+    phone: trimRfqText(payload.phone),
+    roleTitle: trimRfqText(payload.roleTitle),
     requestType,
     productCategory: clean(payload.productCategory || payload.productSegment || productContext.productCategory, 240),
     productSegment: clean(payload.productSegment || productContext.productSegment, 180),
     productFamily: clean(payload.productFamily || productContext.productFamily, 220),
     productName: clean(payload.productName || productContext.productName, 260),
-    catalogNumber: clean(payload.catalogNumber, 180),
-    currentSupplier: clean(payload.currentSupplier || payload.supplier, 220),
-    quantity: clean(payload.quantity, 120),
-    timeline: clean(payload.timeline, 160),
-    shippingRegion: clean(payload.shippingRegion, 180),
-    documentationNeeds: clean(payload.documentationNeeds, 1200),
-    sterileStatus: clean(payload.sterileStatus, 120),
+    catalogNumber: trimRfqText(payload.catalogNumber),
+    currentSupplier: trimRfqText(payload.currentSupplier || payload.supplier),
+    quantity: trimRfqText(payload.quantity),
+    timeline: trimRfqText(payload.timeline),
+    shippingRegion: trimRfqText(payload.shippingRegion),
+    documentationNeeds: trimRfqText(payload.documentationNeeds),
+    sterileStatus: trimRfqText(payload.sterileStatus),
     equivalentNeeded: cleanBoolean(payload.equivalentNeeded),
     sampleNeeded: cleanBoolean(payload.sampleNeeded),
     recurringSupplyNeeded: cleanBoolean(payload.recurringSupplyNeeded),
-    productList: clean(payload.productList, maxProductListLength),
+    productList: trimRfqText(payload.productList),
     sourcingListItems: normalizeSourcingListItems(payload.sourcingListItems),
-    message: clean(payload.message, maxMessageLength),
+    message: trimRfqText(payload.message),
     sourcePageUrl: resolvedSourcePageUrl,
     referrer,
     utm: normalizeUtm(payload.utm),
@@ -311,19 +313,10 @@ function validateRequest(request: NormalizedRfq) {
   return "";
 }
 
-function turnstileSiteKey() {
-  return (
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
-    process.env.TURNSTILE_SITE_KEY ||
-    process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ||
-    ""
-  );
-}
-
 async function rfqDeliveryReadiness() {
   const queueConfigured = rfqQueueConfigured();
   const queueReachable = queueConfigured ? await checkRfqQueueConnection() : false;
-  const antiSpam = Boolean(process.env.TURNSTILE_SECRET_KEY && turnstileSiteKey());
+  const antiSpam = getRfqTurnstileConfig().status === "ready";
   const internalLookup = Boolean(process.env.BIOAXIS_INTERNAL_API_KEY);
 
   return {
@@ -348,16 +341,8 @@ function remoteIpFromRequest(request: Request) {
   );
 }
 
-async function validateTurnstileToken(token: string, request: Request) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-
-  if (!secret || !turnstileSiteKey()) {
-    return "";
-  }
-
-  if (!token) {
-    return verificationErrorMessage;
-  }
+async function verifyTurnstileToken(token: string, secret: string, request: Request): Promise<"verified" | "invalid" | "unavailable"> {
+  if (!token) return "invalid";
 
   const formData = new FormData();
   formData.append("secret", secret);
@@ -371,28 +356,45 @@ async function validateTurnstileToken(token: string, request: Request) {
   try {
     const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
-      body: formData
+      body: formData,
+      signal: AbortSignal.timeout(5000)
     });
-    const result = (await response.json()) as TurnstileVerificationResponse;
-
-    return result.success ? "" : verificationErrorMessage;
+    if (!response.ok) return "unavailable";
+    const result = (await response.json()) as { success?: unknown } | null;
+    if (result?.success === true) return "verified";
+    return result?.success === false ? "invalid" : "unavailable";
   } catch {
-    return verificationErrorMessage;
+    return "unavailable";
   }
 }
 
-function isRfqRateLimited(request: Request) {
-  const key = remoteIpFromRequest(request) || "anonymous";
+function rfqRetryAfter(request: Request) {
+  const key = remoteIpFromRequest(request).trim().slice(0, 96) || "anonymous";
   const now = Date.now();
-  const current = rfqRateLimitStore.get(key);
-
-  if (!current || current.resetAt <= now) {
-    rfqRateLimitStore.set(key, { count: 1, resetAt: now + rfqRateWindowMs });
-    return false;
+  if (now >= nextRateCleanupAt) {
+    for (const [client, bucket] of rfqRateLimitStore) {
+      if (bucket.resetAt <= now) rfqRateLimitStore.delete(client);
+    }
+    nextRateCleanupAt = now + rfqRateWindowMs;
   }
 
-  current.count += 1;
-  return current.count > rfqRateLimit;
+  let bucket = rfqRateLimitStore.get(key);
+  if (!bucket) {
+    if (rfqRateLimitStore.size >= maxTrackedRfqClients) {
+      bucket = rfqRateOverflow;
+    } else {
+      bucket = { count: 0, resetAt: 0 };
+      rfqRateLimitStore.set(key, bucket);
+    }
+  }
+  if (bucket.resetAt <= now) {
+    bucket.count = 0;
+    bucket.resetAt = now + rfqRateWindowMs;
+  }
+  if (bucket.count >= rfqRateLimit) return Math.ceil((bucket.resetAt - now) / 1000);
+
+  bucket.count += 1;
+  return 0;
 }
 
 export async function GET() {
@@ -421,8 +423,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Request payload is too large." }, { status: 413 });
   }
 
-  if (isRfqRateLimited(request)) {
-    return NextResponse.json({ error: "Too many requests. Please wait a moment and try again." }, { status: 429 });
+  const retryAfter = rfqRetryAfter(request);
+  if (retryAfter > 0) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
   }
 
   let payload: RfqPayload;
@@ -458,13 +464,29 @@ export async function POST(request: Request) {
     });
   }
 
-  const verificationError = await validateTurnstileToken(clean(payload.turnstileToken, 4096), request);
-
-  if (verificationError) {
+  const inputLimitError = rfqInputLimitError(payload);
+  if (inputLimitError) {
     const requestId = normalizeRequestId(payload.requestId);
-    void recordBioAxisEvent("turnstile_failure", { requestId, reason: "server_validation" }, "/api/rfq");
-    void alertBioAxisFailure({ requestId, stage: "turnstile", detail: "Server-side verification rejected the request." });
-    return NextResponse.json({ error: verificationError }, { status: 400 });
+    void recordBioAxisEvent("rfq_error", { requestId, reason: "validation" }, "/api/rfq");
+    return NextResponse.json({ error: inputLimitError, requestId }, { status: 400 });
+  }
+
+  const verification = getRfqTurnstileConfig();
+  if (verification.status === "unavailable") {
+    const requestId = normalizeRequestId(payload.requestId);
+    void recordBioAxisEvent("turnstile_failure", { requestId, reason: "config_error" }, "/api/rfq");
+    return NextResponse.json({ error: verificationUnavailableMessage, requestId }, { status: 503 });
+  }
+
+  const verificationResult = verification.status === "ready"
+    ? await verifyTurnstileToken(clean(payload.turnstileToken, 4096), verification.secret, request)
+    : "verified";
+  if (verificationResult !== "verified") {
+    const requestId = normalizeRequestId(payload.requestId);
+    const unavailable = verificationResult === "unavailable";
+    void recordBioAxisEvent("turnstile_failure", { requestId, reason: unavailable ? "provider_unavailable" : "server_validation" }, "/api/rfq");
+    void alertBioAxisFailure({ requestId, stage: "turnstile", detail: unavailable ? "Server-side verification is unavailable." : "Server-side verification rejected the request." });
+    return NextResponse.json({ error: unavailable ? verificationUnavailableMessage : verificationErrorMessage, requestId }, { status: unavailable ? 503 : 400 });
   }
 
   const normalized = normalizePayload(payload, request);
@@ -514,10 +536,10 @@ export async function POST(request: Request) {
 
     console.error("[BioAxis RFQ queue] submission failed", { requestId: referenceId, error });
     void recordBioAxisEvent("rfq_queue_write_failed", { requestId: referenceId, deliveryMode: "durable-queue", stage: "queue_write", outcome: "error" }, "/api/rfq");
-    void alertBioAxisFailure({ requestId: referenceId, stage: "queue_write", detail: "The durable RFQ queue rejected or failed to store the request." });
+    void alertBioAxisFailure({ requestId: referenceId, stage: "queue_write", detail: "Could not confirm that the durable RFQ queue stored the request." });
     return NextResponse.json(
       {
-        error: "Your request was not stored. Your form is still intact—keep this page open and retry using this reference.",
+        error: "We couldn't confirm that your request was saved. Keep this form open and retry using this reference.",
         referenceId,
         requestId: referenceId
       },

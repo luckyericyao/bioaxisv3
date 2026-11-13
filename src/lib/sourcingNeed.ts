@@ -17,6 +17,8 @@ type NeedInput = NeedContext & {
 const serviceLabel = /^(?:contact request|availability check(?: request| current SKU review)?|availability and replenishment review|supplier-confirmed consumables availability|support path:.*|support routing|BioAxis support|product matching|equivalent review|sample path|documentation review|RFQ preparation|recurring supply planning|automation compatibility review|private-label \/ OEM .*review|private-label \/ OEM sourcing discussion|equivalent review request|sample request|product list review|documentation request|recurring supply review|workflow (?:documentation|mapping) request)$/i;
 
 export const sourcingNeedError = "Add a product, catalog reference or sourcing need, or select an item from the catalog.";
+export const maxSourcingListItems = 30;
+export const sourcingListLimitError = `This request supports up to ${maxSourcingListItems} sourcing-list items. Reduce the list before sending; nothing has been submitted.`;
 
 export function hasMeaningfulNeedText(value: string | undefined) {
   return Boolean(value?.split("\n").some((line) => {

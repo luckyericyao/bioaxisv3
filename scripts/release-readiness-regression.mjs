@@ -21,6 +21,7 @@ function compile(filename) {
 
 const configSource = compile("next.config.ts");
 const routeSource = compile("src/app/api/rfq/route.ts");
+const verificationSource = compile("src/lib/server/rfqTurnstileConfig.ts");
 const readinessSource = readFileSync("scripts/deployment-readiness.mjs", "utf8");
 
 function evaluateConfig(environment, gitResult = otherSha) {
@@ -74,15 +75,23 @@ async function evaluateGet({ release = sha, includeRelease = true, queueConfigur
   const environment = {
     SECRET_TOKEN: privateValue,
     ...(includeRelease ? { BIOAXIS_RELEASE_SHA: release } : {}),
+    ...(queueConfigured ? { BLOB_READ_WRITE_TOKEN: privateValue } : {}),
     ...(antiSpam ? { TURNSTILE_SECRET_KEY: privateValue, TURNSTILE_SITE_KEY: privateValue } : {}),
     ...(internalLookup ? { BIOAXIS_INTERNAL_API_KEY: privateValue } : {})
   };
+  const verificationModule = { exports: {} };
+  vm.runInNewContext(verificationSource, {
+    exports: verificationModule.exports,
+    process: { env: environment }
+  }, { filename: "src/lib/server/rfqTurnstileConfig.ts" });
   vm.runInNewContext(routeSource, {
     module: localModule,
     exports: localModule.exports,
     process: { env: environment },
     require: (name) => {
       if (name === "@/lib/sourcingNeed") return { hasSourcingNeed: () => false, sourcingNeedError: "Missing need" };
+      if (name === "@/lib/rfqInputLimits") return { rfqInputLimitError: () => assert.fail("GET must not validate a submission") };
+      if (name === "@/lib/server/rfqTurnstileConfig") return verificationModule.exports;
       if (name === "next/server") return { NextResponse: { json: (body, init) => Response.json(body, init) } };
       if (name === "node:crypto") return { randomUUID: () => assert.fail("GET must not generate an RFQ") };
       if (name === "@/lib/server/rfqQueue") {

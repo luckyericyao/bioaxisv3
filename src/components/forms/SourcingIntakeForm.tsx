@@ -30,21 +30,25 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
     handleSubmit, rotateRequestReference } = intake;
-  const { openDrawer } = useSourcingList();
+  const { openDrawer, storageNotice } = useSourcingList();
   const chips = optionalChips ?? (state.requestType === "equivalent" ? defaultEquivalentChips : []);
   const waitingForVerification = turnstileAvailable && !turnstileToken;
   const formRef = useRef<HTMLFormElement>(null);
+  const confirmationRef = useRef<HTMLElement>(null);
   const nextRequestRef = useRef<HTMLButtonElement>(null);
   const hadSubmittedRef = useRef(false);
 
   useEffect(() => {
-    if (submitted) nextRequestRef.current?.focus();
+    if (submitted) {
+      confirmationRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+      nextRequestRef.current?.focus();
+    }
     else if (hadSubmittedRef.current) formRef.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
     hadSubmittedRef.current = Boolean(submitted);
   }, [submitted]);
 
   if (submitted) return (
-    <section className="max-w-3xl rounded border border-bioaxis-line bg-bioaxis-panelSoft p-6 sm:p-8">
+    <section ref={confirmationRef} className="max-w-3xl scroll-mt-24 rounded border border-bioaxis-line bg-bioaxis-panelSoft p-6 sm:p-8">
       <div role="status" aria-live="polite" aria-atomic="true">
         <h2>{successTitle}</h2>
         <p className="mt-4 text-bioaxis-muted">{submitted.message}</p>
@@ -86,6 +90,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
         {sourcingListItems.length ? <SourcingListSummary items={sourcingListItems}
           onEdit={(target) => openDrawer(target)} /> : null}
+        {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>
 
       <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip}>

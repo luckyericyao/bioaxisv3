@@ -28,6 +28,21 @@ function queuePath(referenceId: string) {
   return `${queuePrefix}/${safeReferenceId}.json`;
 }
 
+function retryContent(request: unknown) {
+  if (!request || typeof request !== "object" || Array.isArray(request)) return request;
+
+  // These two fields can be regenerated without a change to the buyer's request.
+  const content = { ...request } as Record<string, unknown>;
+  delete content.referrer;
+  const context = content.productContext;
+  if (context && typeof context === "object" && !Array.isArray(context)) {
+    const productContext = { ...context } as Record<string, unknown>;
+    delete productContext.timestamp;
+    content.productContext = productContext;
+  }
+  return content;
+}
+
 export function rfqQueueConfigured() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
@@ -79,7 +94,7 @@ export async function enqueueRfq(referenceId: string, request: unknown) {
     const existing = await readQueuedRfq(referenceId).catch(() => null);
 
     if (existing) {
-      if (!isDeepStrictEqual(existing.request, request)) {
+      if (!isDeepStrictEqual(retryContent(existing.request), retryContent(request))) {
         throw new RfqIdempotencyConflictError();
       }
 

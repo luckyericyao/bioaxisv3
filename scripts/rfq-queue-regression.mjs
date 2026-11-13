@@ -38,6 +38,8 @@ function synchronizeWrites(prefix) {
 
 globalThis.fetch = async () => { throw new Error("Network access is forbidden in the RFQ queue regression."); };
 Module._load = function load(request, parent, isMain) {
+  if (request === "@/lib/server/recordBioAxisEvent") return { recordBioAxisEvent: async () => {} };
+  if (request === "@/lib/server/alertBioAxisFailure") return { alertBioAxisFailure: async () => {} };
   if (request.startsWith("@/")) {
     return originalLoad.call(this, path.resolve("src", `${request.slice(2)}.ts`), parent, isMain);
   }
@@ -129,6 +131,7 @@ const { NextRequest } = require("next/server");
 const { enqueueRfq, listQueuedRfqs, readQueuedRfq, RfqIdempotencyConflictError } = require(path.resolve("src/lib/server/rfqQueue.ts"));
 const { appendRfqWorkflowEvent, canTransitionRfqWorkflow, getRfqWorkflow, RfqWorkflowUpdateError } = require(path.resolve("src/lib/server/rfqWorkflow.ts"));
 const { GET, PATCH } = require(path.resolve("src/app/api/rfq/internal/route.ts"));
+const { POST } = require(path.resolve("src/app/api/rfq/route.ts"));
 
 async function internal(method, query = "", payload, key = qaKey) {
   const request = new NextRequest(`http://rfq-regression.invalid/api/rfq/internal?${query}`, {
@@ -526,6 +529,74 @@ try {
   failStorage = false;
   console.error = originalConsoleError;
 }
+
+// Reopening the same product context can regenerate the time and HTTP referrer.
+// Neither should change the first saved buyer request or require a duplicate RFQ.
+const receiptId = "BIOAXIS-QA-LOST-INTAKE-RECEIPT";
+const receiptPath = `rfq/by-id/${receiptId}.json`;
+process.env.TURNSTILE_SECRET_KEY = "qa-intake-secret";
+process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = "qa-intake-site-key";
+let receiptVerificationCalls = 0;
+globalThis.fetch = async (url, options) => {
+  assert.equal(url, "https://challenges.cloudflare.com/turnstile/v0/siteverify");
+  assert.equal(options.body.get("secret"), "qa-intake-secret");
+  assert.equal(options.body.get("response"), "qa-intake-token");
+  receiptVerificationCalls += 1;
+  return Response.json({ success: true });
+};
+const originalIntake = {
+  requestId: receiptId,
+  email: "receipt@example.test",
+  requestType: "quote",
+  turnstileToken: "qa-intake-token",
+  sourcePageUrl: "/products/qa-plate",
+  productContext: { productName: "QA plate", relevantSpecs: ["96 wells"], timestamp: "2026-01-01T00:00:00.000Z" },
+  sourcingListItems: [{ title: "QA plate", quantity: "2 racks", notes: "QA original note" }]
+};
+async function submitIntake(payload, referer) {
+  const response = await POST(new NextRequest("http://rfq-regression.invalid/api/rfq", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-forwarded-for": "qa-intake-receipt", referer },
+    body: JSON.stringify(payload)
+  }));
+  return { status: response.status, body: await response.json() };
+}
+
+const originalReferrer = "http://rfq-regression.invalid/products/qa-plate";
+let uncertainReceipt;
+failAfterWrite = receiptPath;
+failReadAfterWrite = receiptPath;
+console.error = () => {};
+try {
+  uncertainReceipt = await submitIntake(originalIntake, originalReferrer);
+} finally {
+  console.error = originalConsoleError;
+}
+assert.equal(uncertainReceipt.status, 503);
+assert.equal(uncertainReceipt.body.referenceId, receiptId);
+const firstBytes = blobs.get(receiptPath);
+assert.ok(firstBytes, "the test must lose the receipt after actually storing the intake");
+const retriedIntake = { ...originalIntake, productContext: { ...originalIntake.productContext, timestamp: "2026-01-02T00:00:00.000Z" } };
+const retryReferrer = "http://rfq-regression.invalid/request-quote";
+const recoveredReceipt = await submitIntake(retriedIntake, retryReferrer);
+assert.equal(recoveredReceipt.status, 200, "attempt-only metadata must not conflict with the saved intake");
+assert.equal(recoveredReceipt.body.replayed, true);
+assert.equal(recoveredReceipt.body.referenceId, receiptId);
+assert.match(uncertainReceipt.body.error, /couldn't confirm/i, "an uncertain write must not be reported as definitely lost");
+assert.equal(JSON.parse(firstBytes).request.referrer, originalReferrer);
+assert.equal(JSON.parse(firstBytes).request.productContext.timestamp, originalIntake.productContext.timestamp);
+for (const changes of [
+  { email: "another@example.test" },
+  { sourcePageUrl: "/products/qa-other-plate" },
+  { productContext: { ...retriedIntake.productContext, relevantSpecs: ["384 wells"] } },
+  { sourcingListItems: [{ ...originalIntake.sourcingListItems[0], notes: "QA revised note" }] }
+]) {
+  const conflict = await submitIntake({ ...retriedIntake, ...changes }, retryReferrer);
+  assert.equal(conflict.status, 409, `changes to ${Object.keys(changes).join(", ")} must still conflict`);
+  assert.equal(conflict.body.referenceId, receiptId);
+}
+assert.equal(blobs.get(receiptPath), firstBytes);
+assert.equal(receiptVerificationCalls, 6, "Intake retries and conflicts still require server-side verification");
 
 for (const [pathname, bytes] of immutableBytes) assert.equal(blobs.get(pathname), bytes, `record was mutated: ${pathname}`);
 assert.ok(writes.some(({ pathname }) => pathname.endsWith("/revisions/000000000001.json")));

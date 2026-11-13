@@ -88,3 +88,20 @@ Corrections in this local round:
 - Added context-plus-list mobile and legacy-context browser regressions; the configuration offline regression is now part of `npm test`.
 
 This continuation began as local validation. The approved systematic design was subsequently committed and pushed as `a762a47`; production readiness verified that exact release. Scope/context corrections require the same release checks before inclusion. This note does not authorize production environment or secret changes. Owner-approved company evidence and real-user observations remain outside this technical round.
+
+### Local-Only Validation Follow-Up
+
+The preceding release note belongs to the concurrent repository history; this verification pass did not issue commit, push, merge or deployment commands. It did not change production environment variables or secrets. The repository advanced externally to local commit `c578491` while checks ran; those changes were preserved, not reset.
+
+- `npm run lint`: passed, zero warnings.
+- `tsc --noEmit --incremental false`: passed.
+- `npm run build`: passed; 1,027 static pages generated and existing dynamic routes retained.
+- `npm test`: passed, including configuration parsing/filtering, 328 families, 81 categories, ranked search, RFQ queue/retry contracts and client boundaries.
+- `npm run smoke` on the local production build: passed; external durable writes deliberately not enabled.
+- `npm run test:redesign`: passed, 60 route/viewport checks at 1440/1366/390/320px, zero browser runtime errors. Additional cases covered Email with product context plus list, original specifications, legacy product-before-family context, category reset and filter-to-RFQ handoff. All four submission fixtures were locally intercepted.
+- `npm run test:a11y-checklist`: passed; keyboard/Escape, drawer focus containment/restoration, RFQ retry and verification failure, reflow/text spacing, and axe WCAG A/AA on seven routes.
+- `git diff --check`: passed.
+
+Fresh screenshots and machine results: `artifacts/systematic-2026-11-07/final/` (ignored test artifacts). Browser evidence above uses repo-local headless Playwright because the native browser access host was unavailable. A stalled old local server was replaced for the final run; its timeout was not treated as a page defect. The test server was stopped after validation.
+
+Stop point: independently executable code and regression work for this round is complete. Company evidence and real target-user observations remain owner-side inputs; no business identity, legal terms or evidence was fabricated.

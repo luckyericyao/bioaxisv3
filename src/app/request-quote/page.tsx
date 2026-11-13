@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { createHash } from "node:crypto";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { normalizeRequestType } from "@/data/requestTypes";
@@ -376,9 +377,13 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const readySupplyContext = readySupplyRequestContext({ sourcePage, source, intent });
   const supportPath = first(params?.supportPath) ?? first(params?.support);
   const supportPathLabel = labelFromSupportPath(supportPath);
-  const usesStoredInput = first(params?.storedInput) === "1" || source === "sourcing-list" || source === "homepage-hero";
+  const restoreStoredInput = first(params?.storedInput) === "1";
+  const usesStoredInput = restoreStoredInput || source === "sourcing-list" || source === "homepage-hero";
   const hasRouteContext = Boolean(segment || subcategory || family || product || productNameParam || workflowMatch || sourcePage || query || supportPathLabel);
   const explicitProductList = first(params?.productList) ?? first(params?.list);
+  const handoffMode = restoreStoredInput && !manualHandoff && explicitProductList === undefined
+    ? source === "homepage-hero" ? "text" : source === "sourcing-list" ? "list" : "legacy"
+    : undefined;
   const candidateProductList =
     explicitProductList ??
     (usesStoredInput ? "" :
@@ -431,6 +436,21 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           timestamp: new Date().toISOString()
         }
       : undefined;
+  const initialValues = {
+    requestType: requestType ?? "quote",
+    productList,
+    supplier,
+    catalogNumber,
+    quantity,
+    timeline,
+    productCategory,
+    requiredDocuments,
+    needs: need ? [labelize(need)] : []
+  };
+  // Search parameters can change without remounting the route's client form.
+  const draftKey = createHash("sha256")
+    .update(JSON.stringify([initialValues, { ...productContext, timestamp: undefined }, handoffMode, manualHandoff]))
+    .digest("hex");
 
   return (
     <>
@@ -443,19 +463,11 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
       />
       <section className="page-container pb-16 pt-6">
         <QuoteRequestForm
-          initialValues={{
-            requestType: requestType ?? "quote",
-            productList,
-            supplier,
-            catalogNumber,
-            quantity,
-            timeline,
-            productCategory,
-            requiredDocuments,
-            needs: need ? [labelize(need)] : []
-          }}
+          key={draftKey}
+          initialValues={initialValues}
           productContext={productContext}
           handoffNotice={manualHandoff}
+          handoffMode={handoffMode}
         />
       </section>
     </>

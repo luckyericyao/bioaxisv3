@@ -1,4 +1,5 @@
 import { SourcingIntakeForm } from "@/components/forms/SourcingIntakeForm";
+import type { SourcingHandoffMode } from "./sourcing-intake/types";
 import { normalizeRequestType } from "@/data/requestTypes";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 
@@ -18,9 +19,10 @@ type QuoteRequestFormProps = {
   initialValues?: QuoteRequestInitialValues;
   productContext?: BioAxisProductContext;
   handoffNotice?: boolean;
+  handoffMode?: SourcingHandoffMode;
 };
 
-export function QuoteRequestForm({ initialValues = {}, productContext, handoffNotice = false }: QuoteRequestFormProps) {
+export function QuoteRequestForm({ initialValues = {}, productContext, handoffNotice = false, handoffMode }: QuoteRequestFormProps) {
   const requestType = normalizeRequestType(initialValues.requestType);
   const defaultMessage = initialValues.productList ?? "";
   const sourcePage = productContext?.sourcePageUrl ?? productContext?.productUrl ?? "";
@@ -45,6 +47,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       compact
       contextLocked={Boolean(productContext)}
       productContext={productContext}
+      handoffMode={handoffMode}
       handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Add it below to continue." : undefined}
       submitLabel="Send sourcing request"
     />

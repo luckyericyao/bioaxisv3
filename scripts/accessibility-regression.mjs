@@ -416,20 +416,38 @@ async function checkSourcingListDrawerFocus() {
 
 async function checkTurnstileFailClosed() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const screenshots = process.env.RFQ_VERIFICATION_SCREENSHOT_DIR;
+  const submissions = [];
+  let configRequests = 0;
   await page.route("**/api/turnstile/config", async (route) => {
+    configRequests += 1;
+    const reply = configRequests === 1 ? { enabled: false } : configRequests === 2 ? { enabled: true } : { enabled: true, siteKey: "qa-widget-key" };
+    await route.fulfill({ status: configRequests === 1 ? 503 : 200, json: reply });
+  });
+  await page.route("https://challenges.cloudflare.com/turnstile/v0/api.js*", (route) => route.fulfill({
+    contentType: "application/javascript",
+    body: `window.turnstile = {
+      render(container, options) { setTimeout(() => options.callback('qa-recovered-token'), 10); return 'qa-widget-recovery'; },
+      remove() {}, reset() {}
+    };`
+  }));
+  await page.route("**/api/rfq", async (route) => {
+    const payload = route.request().postDataJSON();
+    submissions.push(payload);
     await route.fulfill({
-      status: 503,
-      contentType: "application/json",
-      body: JSON.stringify({ enabled: false })
+      json: { ok: true, mode: "durable-queue", referenceId: payload.requestId }
     });
   });
 
   await openRoute(page, "/request-quote?requestType=quote");
   const email = page.getByLabel("Email *", { exact: true });
+  const need = page.locator("#sourcing-product-input");
   const submit = page.getByRole("button", { name: "Complete verification to send", exact: true });
   const configAlert = page.getByRole("alert").filter({ hasText: "Verification could not load" });
+  const retry = page.getByRole("button", { name: "Retry verification", exact: true });
 
   await email.fill("turnstile-fail-closed@example.com");
+  await need.fill("QA verification recovery: PCR plates");
   await configAlert.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
   check(await configAlert.isVisible().catch(() => false), "Turnstile configuration failure is not announced as an alert");
   check(!(await submit.isEnabled().catch(() => true)), "Turnstile configuration failure enables an unverified RFQ submit");
@@ -437,6 +455,34 @@ async function checkTurnstileFailClosed() {
     (await email.inputValue()) === "turnstile-fail-closed@example.com",
     "Turnstile configuration failure clears the customer email"
   );
+  await retry.waitFor({ state: "visible", timeout: 5_000 });
+  const retryBounds = await retry.boundingBox();
+  check(Boolean(retryBounds && retryBounds.height >= 44), "mobile verification retry target is under 44px");
+  if (screenshots) {
+    await mkdir(screenshots, { recursive: true });
+    await retry.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: join(screenshots, "390-verification-unavailable.png") });
+  }
+  const nextConfig = () => page.waitForResponse((response) => new URL(response.url()).pathname === "/api/turnstile/config", { timeout: 5_000 });
+  let configResponse = nextConfig();
+  await retry.press("Enter");
+  await configResponse;
+  await configAlert.waitFor({ state: "visible", timeout: 5_000 });
+  check(!(await submit.isEnabled()), "malformed verification config enables an unverified RFQ submit");
+  check(submissions.length === 0, "RFQ was sent before verification was restored");
+
+  configResponse = nextConfig();
+  await retry.press("Enter");
+  await configResponse;
+  const readySubmit = page.getByRole("button", { name: "Send sourcing request", exact: true });
+  await readySubmit.waitFor({ state: "visible", timeout: 5_000 });
+  const panel = page.getByRole("group", { name: "Verification", exact: true });
+  check(await panel.evaluate((node) => node === document.activeElement), "keyboard retry loses focus instead of leaving it on the verification panel");
+  check((await email.inputValue()) === "turnstile-fail-closed@example.com", "verification retry clears the email");
+  check((await need.inputValue()) === "QA verification recovery: PCR plates", "verification retry clears the product details");
+  await readySubmit.click();
+  await page.getByRole("heading", { name: "Request received", exact: true }).waitFor({ state: "visible", timeout: 5_000 });
+  check(configRequests === 3 && submissions.length === 1 && submissions[0].turnstileToken === "qa-recovered-token", "recovered verification does not send exactly one verified RFQ");
 
   await page.close();
 }
@@ -950,7 +996,7 @@ console.log("- keyboard focus, Products menu, and Escape behavior");
 console.log("- 44px mobile controls, hidden source path, and 320px wrapping");
 if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
   console.log("- simulated RFQ network/503/non-JSON 429/409 recovery, fresh verification tokens, and preserved product/search/list payloads");
-  console.log("- simulated fail-closed Turnstile configuration state with preserved input");
+  console.log("- simulated fail-closed Turnstile configuration, keyboard retry, and recovery without losing input");
 } else {
   console.log("- RFQ failure and Turnstile simulations: skipped on deployed URLs; live challenge completion is a separate gate");
 }

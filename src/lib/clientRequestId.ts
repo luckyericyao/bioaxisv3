@@ -1,4 +1,11 @@
+import { readBrowserStorage, removeBrowserStorage, writeBrowserStorage } from "./sourcingListStorage";
+
 const requestIdStorageKey = "bioaxis:sourcing-request-id";
+let browserRequestId: string | undefined;
+
+export function isBioAxisRequestId(value: unknown): value is string {
+  return typeof value === "string" && /^[a-zA-Z0-9_-]{1,100}$/.test(value);
+}
 
 function createRequestId() {
   const randomPart = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2);
@@ -10,30 +17,28 @@ export function getBioAxisRequestId() {
     return createRequestId();
   }
 
-  try {
-    const existing = window.sessionStorage.getItem(requestIdStorageKey);
-    if (existing) {
-      return existing;
-    }
-
-    const requestId = createRequestId();
-    window.sessionStorage.setItem(requestIdStorageKey, requestId);
-    return requestId;
-  } catch {
-    return createRequestId();
-  }
+  if (browserRequestId) return browserRequestId;
+  const stored = readBrowserStorage("sessionStorage", requestIdStorageKey).value;
+  if (!isBioAxisRequestId(stored)) return rotateBioAxisRequestId();
+  browserRequestId = stored;
+  return browserRequestId;
 }
 
 export function rotateBioAxisRequestId() {
   const requestId = createRequestId();
 
   if (typeof window !== "undefined") {
-    try {
-      window.sessionStorage.setItem(requestIdStorageKey, requestId);
-    } catch {
-      // Session storage can be unavailable in privacy-restricted browsers.
+    browserRequestId = requestId;
+    if (!writeBrowserStorage("sessionStorage", requestIdStorageKey, requestId)) {
+      removeBrowserStorage("sessionStorage", requestIdStorageKey);
     }
   }
 
   return requestId;
+}
+
+export function retireBioAxisRequestId(requestId: string) {
+  if (typeof window !== "undefined" && getBioAxisRequestId() === requestId) {
+    rotateBioAxisRequestId();
+  }
 }

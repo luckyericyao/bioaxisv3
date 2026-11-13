@@ -1,3 +1,5 @@
+import { isBioAxisRequestId } from "./clientRequestId";
+
 export type BioAxisProductContext = {
   requestType?: string;
   productName?: string;
@@ -47,18 +49,12 @@ export type BioAxisRequestPayload = {
   turnstileToken?: string;
 };
 
-export type BioAxisRequestResponse = {
-  ok: boolean;
-  httpStatus?: number;
-  mode?: "durable-queue" | "honeypot";
-  message?: string;
-  referenceId?: string;
-  requestId?: string;
-  error?: string;
-};
+export type BioAxisRequestResponse =
+  | { ok: true; mode: "durable-queue"; message: string; referenceId: string }
+  | { ok: false; httpStatus: number; error: string };
 
 export const requestSuccessMessage = "Request received and stored for BioAxis review.";
-export const requestErrorMessage = "Your request was not stored. Your form is still intact—keep this page open and retry.";
+export const requestErrorMessage = "We couldn't confirm that your request was saved. Your entries are still here. Retry using this reference.";
 
 function utmFromLocation() {
   if (typeof window === "undefined") {
@@ -94,20 +90,25 @@ export async function submitBioAxisRequest(payload: BioAxisRequestPayload): Prom
   });
   const parsed: unknown = await response.json().catch(() => null);
   const body = parsed && typeof parsed === "object" && !Array.isArray(parsed)
-    ? parsed as BioAxisRequestResponse
+    ? parsed as Record<string, unknown>
     : null;
 
-  if (!response.ok || body?.ok !== true) {
+  if (response.ok && body?.ok === true && body.mode === "durable-queue" && isBioAxisRequestId(body.referenceId)) {
     return {
-      ok: false,
-      httpStatus: response.status,
-      error: typeof body?.error === "string" ? body.error : response.status === 429
-        ? "Too many requests. Please wait a moment and try again; your entries are still here."
-        : requestErrorMessage,
-      referenceId: body?.referenceId ?? payload.requestId,
-      requestId: body?.requestId ?? payload.requestId
+      ok: true,
+      mode: "durable-queue",
+      referenceId: body.referenceId,
+      message: typeof body.message === "string" && body.message.trim() ? body.message : requestSuccessMessage
     };
   }
 
-  return body;
+  return {
+    ok: false,
+    httpStatus: response.status,
+    error: !response.ok && typeof body?.error === "string" && body.error.trim()
+      ? body.error
+      : response.status === 429
+        ? "Too many requests. Please wait a moment and try again; your entries are still here."
+        : requestErrorMessage
+  };
 }

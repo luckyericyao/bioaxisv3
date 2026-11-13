@@ -1,28 +1,15 @@
 import { NextResponse } from "next/server";
+import { getRfqTurnstileConfig, verificationUnavailableMessage } from "@/lib/server/rfqTurnstileConfig";
 
 export const dynamic = "force-dynamic";
 
-function turnstileSiteKey() {
-  return (
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
-    process.env.TURNSTILE_SITE_KEY ||
-    process.env.CLOUDFLARE_TURNSTILE_SITE_KEY ||
-    ""
-  );
-}
-
 export async function GET() {
-  const siteKey = turnstileSiteKey();
+  const config = getRfqTurnstileConfig();
+  const headers = { "Cache-Control": "no-store, max-age=0" };
 
-  return NextResponse.json(
-    {
-      enabled: Boolean(siteKey),
-      siteKey
-    },
-    {
-      headers: {
-        "Cache-Control": "no-store, max-age=0"
-      }
-    }
-  );
+  if (config.status === "unavailable") {
+    return NextResponse.json({ error: verificationUnavailableMessage }, { status: 503, headers });
+  }
+
+  return NextResponse.json({ enabled: config.status === "ready", siteKey: config.siteKey ?? "" }, { headers });
 }

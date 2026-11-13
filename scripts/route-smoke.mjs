@@ -1623,6 +1623,7 @@ if (![307, 308].includes(equivalentsResponse.status) || !equivalentsLocation.inc
 const rfqRouteSource = await readRequiredProjectFile("src/app/api/rfq/route.ts");
 const analyticsRouteSource = await readRequiredProjectFile("src/app/api/analytics/route.ts");
 const turnstileConfigRouteSource = await readRequiredProjectFile("src/app/api/turnstile/config/route.ts");
+const turnstileServerConfigSource = await readRequiredProjectFile("src/lib/server/rfqTurnstileConfig.ts");
 const requestQuoteRouteSource = await readRequiredProjectFile("src/app/api/request-quote/route.ts");
 const requestQuotePageSource = await readRequiredProjectFile("src/app/request-quote/page.tsx");
 const contactPageSource = await readRequiredProjectFile("src/app/contact/page.tsx");
@@ -1730,9 +1731,10 @@ if (rfqRouteSource.includes("RESEND_API_KEY") || submitHelperSource.includes("RE
 }
 
 [
-  ["RFQ route", rfqRouteSource, ["TURNSTILE_SECRET_KEY", "TURNSTILE_SITE_KEY", "turnstileToken", "siteverify", "enqueueRfq", "queue_write"]],
-  ["Turnstile config route", turnstileConfigRouteSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "no-store"]],
-  ["Turnstile widget", turnstileWidgetSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "Your entries remain in the form", "This check protects the request form from spam"]],
+  ["RFQ route", rfqRouteSource, ["getRfqTurnstileConfig", "turnstileToken", "siteverify", "enqueueRfq", "queue_write"]],
+  ["Turnstile config route", turnstileConfigRouteSource, ["getRfqTurnstileConfig", "siteKey", "no-store"]],
+  ["Turnstile server config", turnstileServerConfigSource, ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SITE_KEY", "CLOUDFLARE_TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY", "unavailable"]],
+  ["Turnstile widget", turnstileWidgetSource, ["/api/turnstile/config", "cf-turnstile", "challenges.cloudflare.com/turnstile/v0/api.js", "Verification could not load", "Your entries remain in the form", "This check protects the request form from spam"]],
   ["SourcingIntakeForm", sourcingIntakeFormSource, ["TurnstileWidget", "turnstileToken", "verificationErrorMessage", "turnstileAvailable", "waitingForVerification", "Complete verification to send"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
@@ -1905,9 +1907,9 @@ if (!sourcingIntakeFormSource.includes("onFocusCapture={trackIntakeStart}") || s
 
 [
   ["SearchBox", searchBoxSource, ["bioaxis:sourcing-list-submission", "window.sessionStorage.setItem", 'params.set("storedInput", "1")', 'params.set("source", "homepage-hero")', 'params.set("handoff", "manual")', 'action={formAction}', "data-native-sourcing-fallback", "product-list-review"]],
-  ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", "bioaxis:sourcing-list-submitted", "handleSubmissionComplete", "window.localStorage.removeItem", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review", "Review items before sending.", "Send list for review", "aria-labelledby", "closeButtonRef", "event.key === \"Escape\""]],
+  ["SourcingListProvider", sourcingListProviderSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-items", "bioaxis:sourcing-list-submitted", "handleSubmissionComplete", "removeBrowserStorage", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review", "Review items before sending.", "Send list for review", "aria-labelledby", "closeButtonRef", "event.key === \"Escape\""]],
   ["Request quote page", requestQuotePageSource, ["usesStoredInput", 'source === "sourcing-list"', 'source === "homepage-hero"', 'first(params?.storedInput) === "1"', 'usesStoredInput ? ""']],
-  ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-submitted", "window.dispatchEvent", "setSourcingListItems([])", "sessionProductList", "window.sessionStorage.getItem", "productInput: sessionProductList", "restoredSessionInput", "clearStoredSourcingSubmission"]]
+  ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-submitted", "window.dispatchEvent", "retainUnsubmittedSourcingItems", "sessionProductList", "readBrowserStorage", "productInput: sessionProductList", "restoredSessionInput", "clearStoredSourcingSubmission"]]
 ].forEach(([label, source, required]) => {
   for (const needle of required) {
     if (!source.includes(needle)) {
@@ -1947,7 +1949,7 @@ if (!sourcingIntakeFormSource.includes("submitting") || !sourcingIntakeFormSourc
   failures.push("SourcingIntakeForm: missing idle/submitting/success/error state wiring");
 }
 
-["createInitialIntakeState", "startAnotherRequest", "setState((current) =>", "email: current.email", "setSourcingListItems([])"].forEach((label) => {
+["createInitialIntakeState", "startAnotherRequest", "setState((current) =>", "email: current.email", "retainUnsubmittedSourcingItems"].forEach((label) => {
   if (!sourcingIntakeFormSource.includes(label)) {
     failures.push(`SourcingIntakeForm: missing clean follow-up request reset behavior ${label}`);
   }
@@ -1965,7 +1967,7 @@ for (const [label, source] of [
 
 [
   "Request received and stored for BioAxis review.",
-  "Your request was not stored. Your form is still intact—keep this page open and retry."
+  "We couldn't confirm that your request was saved. Your entries are still here. Retry using this reference."
 ].forEach((message) => {
   if (!submitHelperSource.includes(message)) {
     failures.push(`src/lib/submitBioAxisRequest.ts: missing UI state message "${message}"`);

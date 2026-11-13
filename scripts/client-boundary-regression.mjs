@@ -33,6 +33,7 @@ assert.ok(clientRoots.length > 0, "Discover real client entry points");
 function visit(filename, parents = []) {
   const chain = [...parents, relative(filename)];
   assert.ok(!forbidden.test(relative(filename)), `Full catalog/content data reached the client:\n${chain.join(" -> ")}`);
+  assert.ok(!relative(filename).startsWith("src/lib/server/"), `Server-only code reached the client:\n${chain.join(" -> ")}`);
   if (visited.has(filename)) return;
   visited.add(filename);
 

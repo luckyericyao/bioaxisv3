@@ -1,5 +1,5 @@
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
-import type { SourcingListSummaryItem } from "./types";
+import type { SourcingListItem } from "@/lib/sourcingListStorage";
 import { sourcingSpecifications } from "@/lib/sourcingSpecifications";
 
 function sourceLabel(value: string | undefined) {
@@ -45,7 +45,7 @@ export function RequestContextCard({ productContext }: {
 }
 
 export function SourcingListSummary({ items, onEdit }: {
-  items: SourcingListSummaryItem[];
+  items: SourcingListItem[];
   onEdit?: (target: HTMLButtonElement) => void;
 }) {
   return (
@@ -58,7 +58,7 @@ export function SourcingListSummary({ items, onEdit }: {
       <details>
         <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">Review selected items</summary>
         <ul className="grid gap-2 border-t border-bioaxis-line pt-3 text-sm">
-          {items.map((item, index) => <li key={item.id ?? index} className="break-words">{item.title || item.productTitle || item.familyTitle}</li>)}
+          {items.map((item) => <li key={item.id} className="break-words">{item.title}</li>)}
         </ul>
       </details>
     </section>

@@ -77,7 +77,7 @@ The `/request-quote` page resolves the following inputs. When repeated values ar
 | Product label | `productName` with `product_name` fallback |
 | Search and origin | `query` with `q` fallback, `sourcePage` with `sourcePageUrl` fallback, plus `source` |
 | Review routing | `workflow`, `need`, `intent`, `supportPath` with `support` fallback, `handoff=manual` |
-| Product-list text | `productList` with `list` fallback. `storedInput=1`, `source=sourcing-list` or `source=homepage-hero` activates stored-input handoff behavior. |
+| Product-list text | `productList` with `list` fallback takes priority. Session handoff requires `storedInput=1` without `handoff=manual` or an explicit list. `source=homepage-hero` selects text; `source=sourcing-list` selects the structured list. |
 | Supplier and SKU | `supplier` with `currentSupplier` fallback, `catalogNumber` with `catalog` fallback |
 | Other prefills | `quantity` with `qty` fallback, `timeline`, `requiredDocuments` with `docs` fallback, `productCategory` |
 
@@ -85,9 +85,9 @@ The `/request-quote` page resolves the following inputs. When repeated values ar
 
 The page resolves taxonomy or catalog labels, specifications and document notes into `BioAxisProductContext`, then passes the result through `QuoteRequestForm` to `SourcingIntakeForm`. The form implementation is split between `sourcing-intake/intakeState.ts`, `useSourcingIntake.ts`, field components and context cards. `SimpleRequestForm`, `ContactForm` and compact intake wrappers reuse this implementation.
 
-`SourcingListProvider` persists list items in local storage under `bioaxis:sourcing-list`. List submission saves text and item snapshots in session storage under `bioaxis:sourcing-list-submission` and `bioaxis:sourcing-list-items`, then opens the product-list review intake. The intake restores session snapshots with local-list fallback for items. A successful form response clears the stored handoff and emits an event that clears the shared list. Form fields otherwise live in React state while the page stays open.
+`SourcingListProvider` persists list items in local storage under `bioaxis:sourcing-list`. Open tabs observe saved changes and apply each edit to the latest readable list. If writes fail, the draft stays in the tab and cannot replace a changed shared baseline. List handoff saves text and item snapshots in session storage under `bioaxis:sourcing-list-submission` and `bioaxis:sourcing-list-items`. The intake reads only the requested handoff, with the live saved list available separately. On a durable confirmation, cleanup removes only the submitted item versions and unchanged handoff snapshots used by that form. Form fields otherwise live in React state while the page stays open. Browser synchronization is not atomic concurrent editing or cross-device storage.
 
-`clientRequestId.ts` provides the session request reference. `submitBioAxisRequest.ts` adds source URL, referrer and `utm_*` context before posting JSON. The shared form retains values on API/network failure, refreshes consumed Turnstile verification for retry and offers reference rotation after a conflicting submission.
+`clientRequestId.ts` provides the session request reference. `submitBioAxisRequest.ts` adds source URL, referrer and `utm_*` context before posting JSON. The shared form requires a durable-queue receipt with a valid reference before showing success or rotating the session reference. It retains values on API/network failure, refreshes consumed Turnstile verification for retry and offers reference rotation after a conflicting submission.
 
 ## RFQ API and persistence
 
@@ -98,20 +98,20 @@ The page resolves taxonomy or catalog labels, specifications and document notes 
 | `POST /api/request-quote` | Compatibility alias that re-exports the RFQ POST handler. |
 | `GET /api/rfq/internal` | Bearer-authenticated queue listing or lookup by `requestId`, including workflow state. Successful responses use private, no-store caching. |
 | `PATCH /api/rfq/internal?requestId=...` | Bearer-authenticated owner-review event append with operation ID, transition and revision checks. |
-| `GET /api/turnstile/config` | Returns public widget configuration. |
+| `GET /api/turnstile/config` | Returns the public widget key only when both keys are configured. Incomplete required configuration returns HTTP 503 without credentials. Unconfigured local development without a queue reports verification disabled. Responses are not cached. |
 | `POST /api/analytics` | Accepts supported funnel events for server logging and optional PostHog capture. |
 
 The RFQ POST handler performs these steps in order.
 
 1. Enforce the 160,000-byte body limit and per-process IP window of 20 requests per minute, then parse bounded JSON.
 2. Handle the website honeypot and submissions with a supplied start time less than 700 ms old. These return `mode: honeypot`.
-3. Verify the Turnstile token when the secret and public site key are configured, then normalize fields and require a valid email.
+3. Reject over-limit editable fields or more than 30 list items rather than truncating them. Require successful server-side Turnstile verification when either key or the queue is configured, or in a Vercel production/preview environment. Return HTTP 503 on unavailable verification. Then normalize fields and require a valid email and sourcing need or selected context.
 4. Use the supplied normalized request ID or generate a reference, then write through `lib/server/rfqQueue.ts`.
-5. Return `mode: durable-queue`, the reference ID and replay status on acceptance. A changed payload under an existing reference returns HTTP 409. Queue failure returns HTTP 503 with the reference.
+5. Return `mode: durable-queue`, the reference ID and replay status on acceptance. Changed request details under an existing reference return HTTP 409. An unconfirmed write returns HTTP 503 with the reference for retry.
 
-The application limiter uses an in-memory map in each server process. Provider edge enforcement has its own URL-dependent probe. Public readiness checks configuration and queue connectivity. An accepted durable response and authenticated readback provide the storage evidence for a live QA submission.
+The application limiter uses up to 4,096 tracked client buckets per server process, expires old windows and shares a bounded overflow bucket among additional sources. HTTP 429 includes `Retry-After`. This is not cross-instance edge enforcement. Public readiness checks configuration and queue connectivity. An accepted durable response and authenticated readback provide the storage evidence for a live QA submission.
 
-Queue records are private JSON blobs under `rfq/by-id/<referenceId>.json`, created with a deterministic name and overwrite disabled. The first saved request is immutable. An identical normalized payload replay returns the original record. Workflow events live separately under `rfq/workflow/by-id/<requestId>/`, with new events using sequential revision paths. Workflow reads support legacy events and map legacy `queued` and `reviewing` statuses to `stored` and `in-review`.
+Queue records are private JSON blobs under `rfq/by-id/<referenceId>.json`, created with a deterministic name and overwrite disabled. The first saved request is immutable. A replay with identical normalized content returns the original record; only the generated product-context timestamp and browser referrer are excluded from the comparison. Workflow events live separately under `rfq/workflow/by-id/<requestId>/`, with new events using sequential revision paths. Workflow reads support legacy events and map legacy `queued` and `reviewing` statuses to `stored` and `in-review`.
 
 The workflow starts at `stored` and permits validated transitions among `in-review`, `needs-info`, `supplier-confirmed`, `responded` and `closed`. Each update supplies an operation ID and owner. State-specific validation, operation replay checks and server-assigned immutable revision slots protect retries and concurrent updates. The operations guide documents the transition table and actual owner-review recording. [RFQ operations](rfq-operations.md)
 

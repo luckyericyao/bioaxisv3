@@ -32,7 +32,7 @@ A real response can be recorded before supplier confirmation, for example when t
 
 ## Immutable records and retries
 
-The original `rfq/by-id/<requestId>.json` intake record retains `status: "queued"` and its submitted context for its lifetime. Use `workflow.status` in a detail lookup or `requests[].status` in a queue listing for the current lifecycle state. An intake retry with identical content returns the first record. Reusing the same request ID with different content returns a conflict.
+The original `rfq/by-id/<requestId>.json` intake record retains `status: "queued"` and its submitted context for its lifetime. Use `workflow.status` in a detail lookup or `requests[].status` in a queue listing for the current lifecycle state. An intake retry with the same content returns the first record. The browser referrer and generated product-context timestamp may change on a retry; the first record retains their original values. All other normalized fields must match. A conflict means this reference already belongs to different details. A 503 means the write could not be confirmed; retry the same details using the same reference.
 
 Historical schema-v1 workflow events remain immutable. Derived workflow status maps legacy `queued` to `stored` and `reviewing` to `in-review`. The internal PATCH endpoint accepts `reviewing` as a compatibility alias for `in-review`. The current API exposes canonical statuses for schema-v2 events and preserves schema-v1 event content in `workflow.events`.
 
