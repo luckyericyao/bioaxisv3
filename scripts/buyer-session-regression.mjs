@@ -6,7 +6,7 @@ import { chromium } from "playwright";
 const baseUrl = process.argv[2] ?? "http://127.0.0.1:3014";
 assert.ok(["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname), "Fault injection is local-only");
 const output = path.resolve(process.env.BUYER_SESSION_QA_DIR ?? "artifacts/buyer-session-qa");
-const browser = await chromium.launch();
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined });
 const failures = [];
 const evidence = [];
 const productPath = "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips";

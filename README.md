@@ -29,19 +29,15 @@ The detailed guide covers route resolution, breadcrumbs, data ownership, RFQ que
 
 ## Local verification
 
+To verify the exact tree intended for a commit, stage the reviewed files first, then run:
+
 ```bash
-npm run lint
-node node_modules/typescript/bin/tsc --noEmit --incremental false
-npm test
-node scripts/accessibility-static-regression.mjs
-node scripts/client-boundary-regression.mjs
-npm run test:rfq-roundtrip-phases
-npm run build
+npm run verify:local
 ```
 
-`npm test` runs 12 offline regressions. The next three commands complete the 15-script offline set. These checks use local fixtures and mocks. The regression guide lists every `scripts/*-regression.mjs` file, its individual command and its prerequisites. [Regression checks](docs/regression-checks.md)
+The preflight uses a separate build of the staged tree and an owned loopback preview. It runs lint, build, TypeScript, the offline suite and local HTTP/browser checks without copying `.env` files or inheriting service credentials. It needs existing dependencies and Chromium on macOS or Linux. Check the result and per-check logs in `artifacts/local-preflight/`. It does not stage, commit, push or deploy anything. [Regression checks](docs/regression-checks.md)
 
-For HTTP checks, start the production build in another terminal and pass a local URL explicitly.
+For an individual HTTP check, run `npm run build`, start the local build in another terminal and pass its URL explicitly.
 
 ```bash
 npm run start -- --hostname 127.0.0.1

@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.argv[2] ?? "http://127.0.0.1:3012";
 const output = path.resolve(process.env.REDESIGN_QA_DIR ?? "artifacts/redesign-qa");
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined });
 const evidence = [];
 const errors = [];
 await mkdir(output, { recursive: true });
