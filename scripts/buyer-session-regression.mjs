@@ -390,7 +390,55 @@ try {
       await other.close();
     }
   });
+  for (const [index, phase] of ["headers", "body"].entries()) {
+    await scenario(`${18 + index}-stalled-rfq-${phase}`, seedTwoSourcingItems, async (page, submissions) => {
+      await page.goto(new URL("/request-quote", baseUrl).toString(), { waitUntil: "networkidle" });
+      await page.clock.install();
+      await page.evaluate((phase) => {
+        const fetch = window.fetch.bind(window);
+        window.fetch = (input, options) => {
+          if (input !== "/api/rfq" || window.__qaStalledRequest) return fetch(input, options);
+          window.__qaStalledRequest = JSON.parse(options.body);
+          const onAbort = (fail) => options.signal?.addEventListener("abort", () => {
+            window.__qaStalledRequestAborted = true;
+            fail(options.signal.reason);
+          }, { once: true });
+          if (phase === "headers") return new Promise((_, reject) => onAbort(reject));
+          return Promise.resolve(new Response(new ReadableStream({ start: (stream) => onAbort((error) => stream.error(error)) }), {
+            headers: { "Content-Type": "application/json" }
+          }));
+        };
+      }, phase);
+
+      const email = page.locator("#sourcing-email");
+      const input = page.locator("#sourcing-product-input");
+      const submit = page.getByRole("button", { name: "Send sourcing request", exact: true });
+      await email.fill("qa@example.test");
+      await input.fill("QA fixture: preserve this product list during a delayed receipt");
+      const savedItems = await readSavedRows(page);
+      await submit.click();
+      await page.waitForFunction(() => Boolean(window.__qaStalledRequest));
+      assert.ok(await page.getByRole("button", { name: "Sending...", exact: true }).isDisabled());
+      await page.clock.fastForward(31_000);
+
+      const alert = page.locator("form").getByRole("alert");
+      await alert.waitFor();
+      assert.match(await alert.innerText(), /couldn't confirm.*retry using this reference/i);
+      assert.equal(await page.evaluate(() => window.__qaStalledRequestAborted), true);
+      assert.equal(await email.inputValue(), "qa@example.test");
+      assert.match(await input.inputValue(), /preserve this product list/);
+      assert.deepEqual(await readSavedRows(page), savedItems, "Unconfirmed submissions must not clear saved items");
+      assert.equal(await page.getByRole("heading", { name: "Request received", exact: true }).count(), 0);
+      const first = await page.evaluate(() => window.__qaStalledRequest);
+      await submit.click();
+      await page.getByText(`Reference: ${first.requestId}`, { exact: true }).waitFor();
+      assert.equal(submissions.length, 1);
+      assert.equal(submissions[0].requestId, first.requestId, "Retry must reuse the original reference after the deadline");
+      assert.equal(submissions[0].productList, first.productList);
+      assert.deepEqual(submissions[0].sourcingListItems, first.sourcingListItems);
+    }, ([retry]) => ({ ...confirmedReceipt, referenceId: retry.requestId }));
+  }
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
-  console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history and overflow protection. Evidence: ${output}`);
+  console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);
 } finally { await browser.close(); }

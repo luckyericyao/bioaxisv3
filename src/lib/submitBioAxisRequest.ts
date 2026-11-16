@@ -55,6 +55,7 @@ export type BioAxisRequestResponse =
 
 export const requestSuccessMessage = "Request received and stored for BioAxis review.";
 export const requestErrorMessage = "We couldn't confirm that your request was saved. Your entries are still here. Retry using this reference.";
+const confirmationTimeoutMs = 30_000;
 
 function utmFromLocation() {
   if (typeof window === "undefined") {
@@ -81,34 +82,44 @@ export async function submitBioAxisRequest(payload: BioAxisRequestPayload): Prom
     utm: payload.utm ?? utmFromLocation()
   };
 
-  const response = await fetch("/api/rfq", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(enrichedPayload)
-  });
-  const parsed: unknown = await response.json().catch(() => null);
-  const body = parsed && typeof parsed === "object" && !Array.isArray(parsed)
-    ? parsed as Record<string, unknown>
-    : null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), confirmationTimeoutMs);
+  try {
+    const response = await fetch("/api/rfq", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(enrichedPayload),
+      signal: controller.signal
+    });
+    const parsed: unknown = await response.json().catch((error) => {
+      if (controller.signal.aborted) throw error;
+      return null;
+    });
+    const body = parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : null;
 
-  if (response.ok && body?.ok === true && body.mode === "durable-queue" && isBioAxisRequestId(body.referenceId)) {
+    if (response.ok && body?.ok === true && body.mode === "durable-queue" && isBioAxisRequestId(body.referenceId)) {
+      return {
+        ok: true,
+        mode: "durable-queue",
+        referenceId: body.referenceId,
+        message: typeof body.message === "string" && body.message.trim() ? body.message : requestSuccessMessage
+      };
+    }
+
     return {
-      ok: true,
-      mode: "durable-queue",
-      referenceId: body.referenceId,
-      message: typeof body.message === "string" && body.message.trim() ? body.message : requestSuccessMessage
+      ok: false,
+      httpStatus: response.status,
+      error: !response.ok && typeof body?.error === "string" && body.error.trim()
+        ? body.error
+        : response.status === 429
+          ? "Too many requests. Please wait a moment and try again; your entries are still here."
+          : requestErrorMessage
     };
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return {
-    ok: false,
-    httpStatus: response.status,
-    error: !response.ok && typeof body?.error === "string" && body.error.trim()
-      ? body.error
-      : response.status === 429
-        ? "Too many requests. Please wait a moment and try again; your entries are still here."
-        : requestErrorMessage
-  };
 }
