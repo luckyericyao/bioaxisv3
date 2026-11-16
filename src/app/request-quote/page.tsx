@@ -8,7 +8,7 @@ import { getProductItemBySlug } from "@/data/productItems";
 import { getFamilyBySlug as getCatalogFamilyBySlug, getProductBySlug as getCatalogProductBySlug } from "@/data/productCatalog";
 import { workflows } from "@/data/workflows";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
-import { createRouteMetadata } from "@/lib/siteMetadata";
+import { bioAxisSiteUrl, createRouteMetadata } from "@/lib/siteMetadata";
 import { hasMeaningfulNeedText } from "@/lib/sourcingNeed";
 
 export const metadata: Metadata = createRouteMetadata({
@@ -50,22 +50,32 @@ function requestTypeFromNeed(value: string | undefined) {
   return undefined;
 }
 
+function serviceEntryPath(sourcePage: string, source: string) {
+  for (const value of [sourcePage, source]) {
+    try {
+      const url = new URL(value, bioAxisSiteUrl);
+      const path = url.pathname.replace(/\/+$/, "").toLowerCase();
+      if (url.origin === bioAxisSiteUrl && (path === "/ready-supply" || path === "/private-label-oem")) return path;
+    } catch {
+      // An invalid source does not select a service-specific template.
+    }
+  }
+  return "";
+}
+
 function defaultProductListFromContext({
-  sourcePage,
-  source,
+  entryPath,
   intent,
   need
 }: {
-  sourcePage?: string;
-  source?: string;
+  entryPath: string;
   intent?: string;
   need?: string;
 }) {
-  const normalizedSource = `${sourcePage ?? ""} ${source ?? ""}`.toLowerCase();
   const normalizedIntent = intent?.toLowerCase() ?? "";
   const normalizedNeed = need?.toLowerCase() ?? "";
 
-  if (normalizedSource.includes("ready-supply")) {
+  if (entryPath === "/ready-supply") {
     if (normalizedIntent.includes("current-sku")) {
       return [
         "Availability Check current SKU review",
@@ -85,7 +95,7 @@ function defaultProductListFromContext({
     ].join("\n");
   }
 
-  if (normalizedSource.includes("private-label-oem")) {
+  if (entryPath === "/private-label-oem") {
     if (normalizedNeed.includes("pipette")) {
       return [
         "Private-label / OEM pipette tips review",
@@ -132,22 +142,12 @@ function defaultProductListFromContext({
   return "";
 }
 
-function readySupplyRequestContext({
-  sourcePage,
-  source,
-  intent
-}: {
-  sourcePage?: string;
-  source?: string;
-  intent?: string;
-}) {
-  const normalizedSource = `${sourcePage ?? ""} ${source ?? ""}`.toLowerCase();
-
-  if (!normalizedSource.includes("ready-supply")) {
+function readySupplyRequestContext(entryPath: string, intent: string) {
+  if (entryPath !== "/ready-supply") {
     return null;
   }
 
-  const productName = intent?.toLowerCase().includes("current-sku")
+  const productName = intent.toLowerCase().includes("current-sku")
     ? "Availability Check current SKU review"
     : "Availability Check request";
 
@@ -374,7 +374,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const source = first(params?.source) ?? "";
   const intent = first(params?.intent) ?? "";
   const manualHandoff = first(params?.handoff) === "manual";
-  const readySupplyContext = readySupplyRequestContext({ sourcePage, source, intent });
+  const entryPath = serviceEntryPath(sourcePage, source);
+  const readySupplyContext = readySupplyRequestContext(entryPath, intent);
   const supportPath = first(params?.supportPath) ?? first(params?.support);
   const supportPathLabel = labelFromSupportPath(supportPath);
   const restoreStoredInput = first(params?.storedInput) === "1";
@@ -387,7 +388,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const candidateProductList =
     explicitProductList ??
     (usesStoredInput ? "" :
-    (defaultProductListFromContext({ sourcePage, source, intent, need }) ||
+    (defaultProductListFromContext({ entryPath, intent, need }) ||
       defaultProductListFromSupportPath(supportPath) ||
       defaultProductListFromSearch(query, requestType) ||
       defaultProductListFromNeed(need, requestType) ||

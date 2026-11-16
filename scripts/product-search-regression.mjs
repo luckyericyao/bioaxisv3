@@ -23,6 +23,7 @@ let pendingEffects = [];
 let dirty = false;
 let loadMore;
 let formProps;
+let compactIntakeProps;
 
 const searchReact = {
   ...React,
@@ -70,7 +71,9 @@ Module._load = function load(request, parent, isMain) {
     };
   }
   if (request === "next/navigation") return { useRouter: () => ({ push: () => {} }) };
-  if (request === "@/components/forms/CompactSourcingIntake") return { CompactSourcingIntake: () => null };
+  if (request === "@/components/forms/CompactSourcingIntake") {
+    return { CompactSourcingIntake: (props) => { compactIntakeProps = props; return null; } };
+  }
   if (request === "@/components/forms/QuoteRequestForm") {
     return { QuoteRequestForm: (props) => { formProps = props; return null; } };
   }
@@ -373,6 +376,41 @@ const nextQueryResults = getProductSearchResults("PCR tubes");
 assert.ok(nextQueryResults.length > 18, "Reset coverage needs a new query with more than eighteen results");
 assert.equal(cards(renderSearch("PCR tubes", false)).length, 18, "A new query must reset the expanded result limit");
 
+for (const query of ["", "cell"]) {
+  const form = one(renderSearch(query), "form", 'class="w-full"');
+  assert.match(form.opening, /\baction="\/products"/);
+  assert.match(form.opening, /\bmethod="get"/i);
+  assert.match(form.body, /<input\b[^>]*\bname="q"/, "SSR must offer a native search when JavaScript is unavailable");
+}
+
+const literalQuery = "filtered 200 uL tips + / & #?";
+const literalHtml = renderSearch(literalQuery);
+assert.ok(cards(literalHtml).length > 0, "Literal handoff fixture must have ranked matches");
+assert.equal(compactIntakeProps.defaultMessage, literalQuery, "Presentational unit formatting must not rewrite the buyer's draft");
+assert.equal(compactIntakeProps.product, "filtered 200 µL tips + / & #?", "The product summary still formats scientific units");
+const nextSteps = elements(literalHtml, "details").find(({ body }) => body.includes("Sourcing next steps"));
+assert.ok(nextSteps);
+for (const { url } of links(nextSteps.html)) {
+  const source = new URL(url.searchParams.get("sourcePage"), origin);
+  assert.equal(url.searchParams.get("query"), literalQuery);
+  assert.equal(source.pathname, "/products");
+  assert.deepEqual([...source.searchParams], [["q", literalQuery]], "Nested source URL must preserve reserved characters");
+}
+
+for (const query of ["Ready-supply prep tips", "private-label-oem & tips + tubes #?"]) {
+  const sourcePage = `/products?${new URLSearchParams({ q: query })}`;
+  renderToStaticMarkup(await requestRoute.default({ searchParams: Promise.resolve({ requestType: "quote", query, sourcePage }) }));
+  assert.equal(formProps.productContext.productName, query, "Query text must not select an unrelated service template");
+  assert.equal(formProps.productContext.sourcePageUrl, sourcePage);
+  assert.ok(formProps.initialValues.productList.includes(`Search term: ${query}`));
+}
+
+for (const sourcePage of ["ready-supply", "/ready-supply", "https://bioaxisv3.vercel.app/ready-supply/?from=header"]) {
+  renderToStaticMarkup(await requestRoute.default({ searchParams: Promise.resolve({ sourcePage, intent: "current-sku" }) }));
+  assert.equal(formProps.productContext.productName, "Availability Check current SKU review", "Keep genuine availability handoffs");
+  assert.equal(formProps.productContext.productUrl, "/ready-supply");
+}
+
 for (const query of ["cell", "filtered 200 µL tips + / & #?", workflows[0].title, resourceGuides[0].title]) {
   const results = getProductSearchResults(query);
   assert.ok(results.length > 0, `${query}: expected results for UI coverage`);
@@ -408,6 +446,7 @@ for (const query of ["430641", "AB-430641", "D8537", "0000-1234", "zzzxqnotfound
   assert.equal(params.get("q"), query);
   assert.equal(params.get("type"), "product-list");
   assert.equal(params.get("requestType"), "product-list-review");
+  assert.equal(new URL(params.get("sourcePage"), origin).searchParams.get("q"), query);
   formProps = undefined;
   renderToStaticMarkup(await requestRoute.default({ searchParams: Promise.resolve(Object.fromEntries(params)) }));
   assert.equal(formProps.initialValues.requestType, "product-list-review");

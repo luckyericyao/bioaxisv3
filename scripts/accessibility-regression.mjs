@@ -964,6 +964,23 @@ try {
   await checkSourcingListDrawerFocus();
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
+  const noScriptSearch = await browser.newPage({ javascriptEnabled: false, viewport: { width: 390, height: 844 } });
+  try {
+    await openRoute(noScriptSearch, "/products");
+    const input = noScriptSearch.locator("#product-search");
+    await input.fill("cell");
+    await input.press("Enter");
+    await noScriptSearch.waitForURL((url) => url.pathname === "/products" && url.searchParams.get("q") === "cell");
+    const first = noScriptSearch.locator('[data-search-result-card="true"]').first();
+    check(await first.getAttribute("data-search-result-title") === "Cell Culture", "native search must render the first ranked result without JavaScript");
+    await input.fill("430641");
+    await noScriptSearch.getByRole("button", { name: "Search", exact: true }).click();
+    await noScriptSearch.waitForURL((url) => url.searchParams.get("q") === "430641");
+    const handoff = await noScriptSearch.getByRole("link", { name: "Send this reference", exact: true }).getAttribute("href");
+    check(new URL(handoff, baseUrl).searchParams.get("query") === "430641", "native search must keep the unresolved reference in its RFQ link");
+  } finally {
+    await noScriptSearch.close();
+  }
   await checkFamilyDecisionPages();
   await checkProductDecisionPages();
 
@@ -1003,6 +1020,7 @@ if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
 console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
+console.log("- native search navigation and unresolved-reference handoff without JavaScript");
 console.log("- family-specific configurations first, collapsed general templates, three visible actions, and preserved family/item/RFQ context");
 console.log("- canonical and legacy product-detail specs and all quote/sample/equivalent handoffs with exact product hierarchy");
 console.log(`- axe-core WCAG A/AA semantics and color contrast on ${criticalRoutes.length} critical routes`);

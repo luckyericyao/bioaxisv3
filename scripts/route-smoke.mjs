@@ -442,7 +442,11 @@ for (const route of routes) {
   }
 
   if (route === "/" || route === "/products" || route.startsWith("/products?") || route === "/resources" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote") || route.startsWith("/resources/")) {
-    checkForbiddenVisibleStrings(route, pageText);
+    // A search can be copied verbatim into the editable sourcing draft. It is not BioAxis copy.
+    const copyText = route.startsWith("/products?q=")
+      ? textOnly(html.replace(/<textarea\b[^>]*\bid="sourcing-product-input"[^>]*>[\s\S]*?<\/textarea>/g, ""))
+      : pageText;
+    checkForbiddenVisibleStrings(route, copyText);
   }
 
   const shouldHaveCompactIntake =

@@ -109,26 +109,31 @@ function sourcePageFromResult(result: ProductSearchResult) {
   return result.type === "workflow" || result.type === "resource" ? result.href : result.href.split("?")[0];
 }
 
+function searchPath(query: string) {
+  return query ? `/products?q=${encodeURIComponent(query)}` : "/products";
+}
+
 function requestHref(result: ProductSearchResult, requestType: "quote" | "equivalent", query: string) {
   const context = {
     segment: result.segmentSlug,
     category: result.categorySlug,
     family: result.familySlug,
     product: result.productSlug,
-    sourcePage: result.segmentSlug ? `/products?q=${encodeURIComponent(query)}` : sourcePageFromResult(result),
+    sourcePage: result.segmentSlug ? searchPath(query) : sourcePageFromResult(result),
     query
   };
 
   return buildRequestHref({ ...context, requestType });
 }
 
-function searchRequestHref(requestType: "quote" | "equivalent" | "sample" | "documentation", query: string) {
+function searchRequestHref(requestType: "quote" | "equivalent" | "sample" | "documentation" | "product-list-review", query: string) {
   const params = new URLSearchParams({
     requestType,
     query,
     q: query,
-    sourcePage: `/products?q=${query}`
+    sourcePage: searchPath(query)
   });
+  if (requestType === "product-list-review") params.set("type", "product-list");
 
   return `/request-quote?${params.toString()}`;
 }
@@ -371,7 +376,7 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
   const topSegments = topCounts(results.map((result) => result.segmentTitle ?? resultTypeLabel(result.type)), 5);
   const matchedFields = topCounts(results.flatMap((result) => result.matchedFields ?? []), 6);
   const intakeRequestType = /\n|,|\t|\|/.test(activeQuery) ? "product-list-review" : "quote";
-  const productListSearchHref = `/request-quote?type=product-list&requestType=product-list-review&query=${encodeURIComponent(activeQuery)}&q=${encodeURIComponent(activeQuery)}`;
+  const productListSearchHref = searchRequestHref("product-list-review", activeQuery);
 
   useEffect(() => {
     if (!initialQuery.trim()) {
@@ -399,18 +404,19 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     trackBioAxisEvent("search_submit", { queryLength: draftQuery.length, source: "products-directory" });
-    router.push(draftQuery ? `/products?q=${encodeURIComponent(draftQuery)}` : "/products");
+    router.push(searchPath(draftQuery));
   }
 
   function searchForm(compact = false) {
     return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form action="/products" method="get" onSubmit={handleSubmit} className="w-full">
       <label htmlFor="product-search" className="sr-only">
         Search BioAxis products
       </label>
       <div className={["flex w-full border border-white/70 bg-white/[0.82] shadow-search backdrop-blur-md transition focus-within:border-bioaxis-ice", compact ? "flex-row items-center gap-2 p-2 sm:gap-3 sm:p-3" : "flex-col gap-3 p-3 sm:flex-row sm:items-center"].join(" ")}>
         <input
           id="product-search"
+          name="q"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={compact ? "Refine results" : "Search product name, catalog reference, supplier line, or consumable type"}
@@ -575,9 +581,9 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
             <div className="border-t border-bioaxis-line p-4 sm:p-5">
               <CompactSourcingIntake
                 requestType={intakeRequestType}
-                sourcePage={`/products?q=${encodeURIComponent(activeQuery)}`}
+                sourcePage={searchPath(activeQuery)}
                 product={displayedQuery}
-                defaultMessage={displayedQuery}
+                defaultMessage={activeQuery}
                 title="Send the search context."
                 productFieldLabel="SKU, catalog number, supplier line, or product list"
                 submitLabel="Send sourcing request"
