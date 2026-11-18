@@ -36,6 +36,8 @@ The original `rfq/by-id/<requestId>.json` intake record retains `status: "queued
 
 The form waits up to 30 seconds for the HTTP response and complete receipt. A timeout means confirmation was not received, not that storage failed. The form retains the draft and sourcing list and reuses the same reference on retry. Verification is refreshed when required.
 
+If verification configuration or the client widget cannot load, the form stays blocked and offers an in-place retry. This does not change the verification requirement or discard the draft. A new submission still needs a valid token wherever verification is configured.
+
 Historical schema-v1 workflow events remain immutable. Derived workflow status maps legacy `queued` to `stored` and `reviewing` to `in-review`. The internal PATCH endpoint accepts `reviewing` as a compatibility alias for `in-review`. The current API exposes canonical statuses for schema-v2 events and preserves schema-v1 event content in `workflow.events`.
 
 Workflow changes are separate private, append-only schema-v2 events in consecutive revision slots under `rfq/workflow/by-id/<requestId>/revisions/`. The derived `revision` starts at zero for a request with only historical events and advances with each schema-v2 event. Schema-v2 events retain revision order even with equal or backwards timestamps. Schema-v1 events sort by `recordedAt`, then `operationId`, and merge into that stream by time. A v1 event precedes the first v2 revision whose timestamp is at least its own, or follows all revisions if its timestamp is later. This also applies to revisions recovered directly from storage after an incomplete listing. Thus a later v1 update during rollback can become the current state, and upgrading again resumes the next v2 revision.

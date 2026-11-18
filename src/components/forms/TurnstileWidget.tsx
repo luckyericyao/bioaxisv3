@@ -1,7 +1,6 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
-import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
 type TurnstileRenderOptions = {
@@ -14,6 +13,7 @@ type TurnstileRenderOptions = {
 };
 
 type TurnstileApi = {
+  ready?: (callback: () => void) => void;
   render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
   remove: (widgetId: string) => void;
   reset: (widgetId: string) => void;
@@ -23,6 +23,52 @@ declare global {
   interface Window {
     turnstile?: TurnstileApi;
   }
+}
+
+let pendingTurnstileScript: Promise<TurnstileApi> | undefined;
+
+function loadTurnstileApi() {
+  if (pendingTurnstileScript) return pendingTurnstileScript;
+
+  // Share one SDK request across forms, but do not cache a failed load.
+  pendingTurnstileScript = new Promise<TurnstileApi>((resolve, reject) => {
+    const script = typeof window.turnstile?.render === "function" ? null : document.createElement("script");
+    let finished = false;
+    const finish = (api?: TurnstileApi) => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(timeout);
+      if (script) script.onload = script.onerror = null;
+      if (api) resolve(api);
+      else {
+        script?.remove();
+        reject(new Error("Verification script unavailable"));
+      }
+    };
+    const timeout = window.setTimeout(() => finish(), 8000);
+    function afterLoad() {
+      const api = window.turnstile;
+      if (typeof api?.render !== "function") return finish();
+      try {
+        if (api.ready) api.ready(() => finish(api));
+        else finish(api);
+      } catch {
+        finish();
+      }
+    }
+
+    if (script) {
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = afterLoad;
+      script.onerror = () => finish();
+      document.head.appendChild(script);
+    } else {
+      afterLoad();
+    }
+  }).finally(() => { pendingTurnstileScript = undefined; });
+
+  return pendingTurnstileScript;
 }
 
 type TurnstileWidgetProps = {
@@ -47,7 +93,8 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
   const [siteKey, setSiteKey] = useState("");
   const [configState, setConfigState] = useState<TurnstileConfigState>("loading");
   const [configAttempt, setConfigAttempt] = useState(0);
-  const [scriptReady, setScriptReady] = useState(false);
+  const [widgetAttempt, setWidgetAttempt] = useState(0);
+  const [widgetLoading, setWidgetLoading] = useState(true);
   const [widgetIssue, setWidgetIssue] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
 
@@ -101,40 +148,56 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
   }, [configAttempt, onAvailabilityChange, onFailure]);
 
   useEffect(() => {
-    if (!siteKey || !scriptReady || !containerRef.current || !window.turnstile || widgetIdRef.current) {
-      return;
+    const container = containerRef.current;
+    if (!siteKey || !container) return;
+
+    let active = true;
+    let sdk: TurnstileApi | undefined;
+    function handleFailure(reason: string, message: string) {
+      if (!active) return;
+      onTokenChange("");
+      setVerificationStatus("");
+      setWidgetLoading(false);
+      setWidgetIssue(message);
+      onFailure?.(reason);
     }
 
-    widgetIdRef.current = window.turnstile.render(containerRef.current, {
-      sitekey: siteKey,
-      theme: "light",
-      size: compact ? "compact" : "normal",
-      callback: (token) => {
-        onTokenChange(token);
-        setWidgetIssue("");
-        setVerificationStatus("Verification complete. The request can now be submitted.");
-      },
-      "expired-callback": () => {
-        onTokenChange("");
-        setVerificationStatus("");
-        onFailure?.("expired");
-        setWidgetIssue("Verification expired. Please complete the check again before submitting.");
-      },
-      "error-callback": () => {
-        onTokenChange("");
-        setVerificationStatus("");
-        onFailure?.("widget_error");
-        setWidgetIssue("Verification could not complete. Your entries remain in the form; try the check again.");
-      }
+    void loadTurnstileApi().then((api) => {
+      if (!active) return;
+      sdk = api;
+      widgetIdRef.current = api.render(container, {
+        sitekey: siteKey,
+        theme: "light",
+        size: compact ? "compact" : "normal",
+        callback: (token) => {
+          if (!active) return;
+          onTokenChange(token);
+          setWidgetIssue("");
+          setVerificationStatus("Verification complete. The request can now be submitted.");
+        },
+        "expired-callback": () => handleFailure("expired", "Verification expired. Please complete the check again before submitting."),
+        "error-callback": () => handleFailure("widget_error", "Verification could not complete. Your entries remain in the form.")
+      });
+      setWidgetLoading(false);
+    }).catch(() => {
+      handleFailure(sdk ? "widget_error" : "script_error", sdk
+        ? "Verification could not start. Your entries remain in the form."
+        : "Verification could not load. Your entries remain in the form.");
     });
 
     return () => {
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
+      active = false;
+      const widgetId = widgetIdRef.current;
+      widgetIdRef.current = null;
+      try {
+        if (widgetId) sdk?.remove(widgetId);
+      } catch {
+        // A stale provider widget must not prevent an in-place retry.
+      } finally {
+        container.replaceChildren();
       }
     };
-  }, [compact, onFailure, onTokenChange, scriptReady, siteKey]);
+  }, [compact, onFailure, onTokenChange, siteKey, widgetAttempt]);
 
   useEffect(() => {
     if (!resetKey) return;
@@ -143,9 +206,26 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
     setVerificationStatus("");
     setWidgetIssue("");
     if (widgetIdRef.current && window.turnstile) {
-      window.turnstile.reset(widgetIdRef.current);
+      try {
+        window.turnstile.reset(widgetIdRef.current);
+      } catch {
+        onFailure?.("widget_error");
+        setWidgetIssue("Verification could not restart. Your entries remain in the form.");
+      }
     }
-  }, [onTokenChange, resetKey]);
+  }, [onFailure, onTokenChange, resetKey]);
+
+  function retryButton(retry: () => void) {
+    return (
+      <button type="button" className="action-secondary mt-3 min-h-[44px] gap-2" onClick={() => {
+        panelRef.current?.focus({ preventScroll: true });
+        retry();
+      }}>
+        <RefreshCw aria-hidden="true" className="size-4 shrink-0" />
+        Retry verification
+      </button>
+    );
+  }
 
   if (!siteKey) {
     if (configState === "disabled") {
@@ -171,18 +251,10 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
             <p role="alert" className="mt-2 text-xs font-semibold leading-5 text-bioaxis-accent">
               Verification could not load. Your entries remain in the form.
             </p>
-            <button
-              type="button"
-              className="action-secondary mt-3 min-h-[44px] gap-2"
-              onClick={() => {
-                panelRef.current?.focus({ preventScroll: true });
-                setConfigState("loading");
-                setConfigAttempt((attempt) => attempt + 1);
-              }}
-            >
-              <RefreshCw aria-hidden="true" className="size-4 shrink-0" />
-              Retry verification
-            </button>
+            {retryButton(() => {
+              setConfigState("loading");
+              setConfigAttempt((attempt) => attempt + 1);
+            })}
           </>
         ) : null}
       </div>
@@ -191,27 +263,23 @@ export function TurnstileWidget({ onTokenChange, onAvailabilityChange, onFailure
 
   return (
     <div ref={panelRef} role="group" aria-label="Verification" tabIndex={-1} className="border border-bioaxis-line bg-bioaxis-black p-3 sm:p-4" data-turnstile-widget="true">
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        strategy="afterInteractive"
-        onReady={() => {
-          setWidgetIssue("");
-          setScriptReady(true);
-        }}
-        onError={() => {
-          onFailure?.("script_error");
-          setWidgetIssue("Verification could not load. Your entries remain in the form; keep this page open and retry when the check is available.");
-        }}
-      />
       <div className="mb-2">
         <p className="text-xs font-semibold  text-bioaxis-dim">Verification</p>
         {!compact ? <p className="mt-2 text-xs leading-5 text-bioaxis-muted">This check protects the request form from spam. It should take only a moment.</p> : null}
       </div>
       <div ref={containerRef} className="cf-turnstile min-h-[58px]" />
+      {widgetLoading ? <p role="status" className="text-xs text-bioaxis-dim">Loading verification</p> : null}
       {widgetIssue ? (
-        <p role="alert" className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent">
-          {widgetIssue}
-        </p>
+        <>
+          <p role="alert" className="mt-3 text-xs font-semibold leading-5 text-bioaxis-accent">{widgetIssue}</p>
+          {retryButton(() => {
+            onTokenChange("");
+            setVerificationStatus("");
+            setWidgetIssue("");
+            setWidgetLoading(true);
+            setWidgetAttempt((attempt) => attempt + 1);
+          })}
+        </>
       ) : null}
       {verificationStatus ? (
         <p role="status" aria-live="polite" className="mt-3 text-xs font-semibold leading-5 text-emerald-700">
