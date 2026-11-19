@@ -63,7 +63,9 @@ export function useSourcingIntake({
       resolvedProductContext.productCategory ||
       resolvedProductContext.productSegment
   );
-  const { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, handoffSnapshot } = useSourcingListSession(setState, handoffMode);
+  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, handoffSnapshot } = useSourcingListSession(setState, handoffMode);
+  const [includeSavedList, setIncludeSavedList] = useState(handoffMode === "list");
+  const sourcingListItems = includeSavedList ? availableSourcingItems : [];
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
 
   const trackIntakeStart = useCallback(() => {
@@ -121,6 +123,7 @@ export function useSourcingIntake({
 
   function startAnotherRequest() {
     setSubmitted(null);
+    setIncludeSavedList(false);
     setError("");
     setRequestReferenceConflict(false);
     setRetryReferenceReady(false);
@@ -196,7 +199,9 @@ export function useSourcingIntake({
 
     setError("");
     setRetryReferenceReady(false);
-    const storedSubmission = handoffSnapshot.current;
+    const storedSubmission = handoffMode === "list" && availableSourcingItems.length && !includeSavedList
+      ? { productList: null, items: null }
+      : handoffSnapshot.current;
     requestIdRef.current = requestId;
     submittingRef.current = true;
     setSubmitting(true);
@@ -256,7 +261,9 @@ export function useSourcingIntake({
 
   return {
     state,
-    sourcingListItems,
+    availableSourcingItems,
+    includeSavedList,
+    setIncludeSavedList,
     restoredSessionInput,
     error,
     emailInvalid: error === emailErrorMessage,

@@ -255,6 +255,7 @@ async function checkRfqStateAnnouncements() {
   const email = page.getByLabel("Email *", { exact: true });
   const productInput = page.locator("#sourcing-product-input");
   const submit = page.getByRole("button", { name: "Send sourcing request" });
+  await page.getByRole("checkbox", { name: "Include saved sourcing list", exact: true }).check();
   await email.fill("a11y-regression@example.com");
   const originalInput = await productInput.inputValue();
   check(originalInput.includes("filtered 200 µL tips"), "RFQ retry test loses its incoming search query");

@@ -25,7 +25,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const { title = "What do you need?", compact = false, handoffNotice, productFieldLabel, submitLabel,
     successTitle = "Request received", optionalChips } = props;
   const intake = useSourcingIntake(props);
-  const { state, sourcingListItems, error, emailInvalid, needInvalid, hasSelectedNeed, submitted, submitting,
+  const { state, availableSourcingItems, includeSavedList, setIncludeSavedList, error, emailInvalid, needInvalid, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
@@ -88,7 +88,8 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
           autoComplete="email" inputMode="email" placeholder="you@organization.com"
           onChange={(value) => updateField("email", value)} />
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
-        {sourcingListItems.length ? <SourcingListSummary items={sourcingListItems}
+        {availableSourcingItems.length ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
+          submitting={submitting} onIncludeChange={setIncludeSavedList}
           onEdit={(target) => openDrawer(target)} /> : null}
         {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>

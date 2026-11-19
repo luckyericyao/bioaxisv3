@@ -148,6 +148,9 @@ try {
     assert.match(await context.innerText(), /Filtered 200 µL Pipette Tips/);
     assert.match(await context.innerText(), /Sterility: To confirm/);
     assert.equal(await contextPage.locator("#sourcing-product-input").getAttribute("required"), null);
+    const includeList = contextPage.getByRole("checkbox", { name: "Include saved sourcing list", exact: true });
+    assert.equal(await includeList.isChecked(), false, `${width}: a product inquiry must not attach the saved list by default`);
+    await includeList.check();
     await contextPage.screenshot({ path: path.join(output, `rfq-context-list-${width}.png`) });
     await contextPage.locator("#sourcing-email").fill("qa@example.test");
     await contextPage.getByRole("button", { name: "Send sourcing request", exact: true }).click();

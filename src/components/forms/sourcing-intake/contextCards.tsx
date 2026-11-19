@@ -46,19 +46,27 @@ export function RequestContextCard({ productContext }: {
   );
 }
 
-export function SourcingListSummary({ items, onEdit }: {
+export function SourcingListSummary({ items, included, submitting, onIncludeChange, onEdit }: {
   items: SourcingListItem[];
+  included: boolean;
+  submitting: boolean;
+  onIncludeChange: (included: boolean) => void;
   onEdit?: (target: HTMLButtonElement) => void;
 }) {
   return (
     <section data-sourcing-list-summary="true" data-sourcing-list-context="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft px-4 py-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">Sourcing list: {items.length} {items.length === 1 ? "item" : "items"} included</span>
+        <span className="text-sm font-medium">Sourcing list: {items.length} {items.length === 1 ? "item" : "items"} {included ? "included" : "saved"}</span>
         {onEdit ? <button type="button" aria-haspopup="dialog" onClick={(event) => onEdit(event.currentTarget)}
           className="min-h-11 shrink-0 px-2 text-sm font-medium text-bioaxis-accent">Edit list</button> : null}
       </div>
+      <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+        <input type="checkbox" checked={included} disabled={submitting}
+          onChange={(event) => onIncludeChange(event.target.checked)} className="field-focus size-4 accent-bioaxis-accent" />
+        Include saved sourcing list
+      </label>
       <details>
-        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">Review selected items</summary>
+        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">Review saved items</summary>
         <ul className="grid gap-2 border-t border-bioaxis-line pt-3 text-sm">
           {items.map((item) => <li key={item.id} className="break-words">{item.title}</li>)}
         </ul>
