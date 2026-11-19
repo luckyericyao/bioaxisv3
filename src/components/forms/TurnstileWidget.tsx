@@ -13,7 +13,6 @@ type TurnstileRenderOptions = {
 };
 
 type TurnstileApi = {
-  ready?: (callback: () => void) => void;
   render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
   remove: (widgetId: string) => void;
   reset: (widgetId: string) => void;
@@ -47,14 +46,9 @@ function loadTurnstileApi() {
     };
     const timeout = window.setTimeout(() => finish(), 8000);
     function afterLoad() {
+      // The async SDK exposes render after load; ready can throw in this mode.
       const api = window.turnstile;
-      if (typeof api?.render !== "function") return finish();
-      try {
-        if (api.ready) api.ready(() => finish(api));
-        else finish(api);
-      } catch {
-        finish();
-      }
+      finish(typeof api?.render === "function" ? api : undefined);
     }
 
     if (script) {

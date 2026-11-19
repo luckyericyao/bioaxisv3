@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
+import { SourcingIntakeDisclosure } from "@/components/forms/SourcingIntakeDisclosure";
 import { CTAButton } from "@/components/ui/CTAButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { readySupplyEvidenceRows, selectedLineRegistry } from "@/data/readySupplyEvidence";
@@ -30,6 +30,7 @@ const readySupplySteps = [
     body: "The response states confirmed details, the check date, unresolved questions, and buyer-side review items."
   }
 ];
+const availabilityRequestHref = "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=availability-check";
 
 export default function ReadySupplyPage() {
   return (
@@ -45,7 +46,7 @@ export default function ReadySupplyPage() {
               Send a SKU, supplier line, or specification to request an availability, document, sample, dispatch, or replenishment check.
             </p>
             <div className="mt-8">
-              <CTAButton href="/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=availability-check">
+              <CTAButton href={availabilityRequestHref}>
                 Request availability check
               </CTAButton>
             </div>
@@ -71,21 +72,21 @@ export default function ReadySupplyPage() {
                 ))}
               </dl>
             </aside>
-            <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold  text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-                <span>Open availability request</span>
-                <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
-              </summary>
-              <div className="border-t border-bioaxis-line p-4 sm:p-5">
-                <CompactSourcingIntake
-                  requestType="quote"
-                  sourcePage="/ready-supply"
-                  title="Send the current supply need."
-                  productFieldLabel="SKU, catalog number, supplier line, or product list"
-                  submitLabel="Request availability"
-                />
-              </div>
-            </details>
+            <SourcingIntakeDisclosure
+              className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]"
+              summaryClassName="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden"
+              fallbackHref={availabilityRequestHref}
+              intake={{
+                requestType: "quote",
+                sourcePage: "/ready-supply",
+                title: "Send the current supply need.",
+                productFieldLabel: "SKU, catalog number, supplier line, or product list",
+                submitLabel: "Request availability"
+              }}
+            >
+              <span>Open availability request</span>
+              <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
+            </SourcingIntakeDisclosure>
           </div>
         </div>
       </section>

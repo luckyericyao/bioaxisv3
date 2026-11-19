@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
+import { SourcingIntakeDisclosure } from "@/components/forms/SourcingIntakeDisclosure";
 import { PageHero } from "@/components/ui/PageHero";
 import { buildRequestHref } from "@/data/productTaxonomy";
 import { createRouteMetadata } from "@/lib/siteMetadata";
@@ -130,6 +130,11 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
   const initialQuery = first(params?.catalog) ?? first(params?.query) ?? first(params?.product) ?? "";
   const initialSupplier = first(params?.supplier) ?? "";
   const initialNeed = first(params?.need) ?? "";
+  const sourcePage = initialQuery ? `/equivalent-finder?query=${encodeURIComponent(initialQuery)}` : "/equivalent-finder";
+  const requestParams = new URLSearchParams({ requestType: "equivalent", sourcePage });
+  if (initialQuery) requestParams.set("query", initialQuery);
+  if (initialSupplier) requestParams.set("supplier", initialSupplier);
+  if (initialNeed) requestParams.set("need", initialNeed);
   const defaultMessage = defaultEquivalentMessage({
     query: initialQuery,
     supplier: initialSupplier,
@@ -147,24 +152,24 @@ export default async function EquivalentFinderPage({ searchParams }: EquivalentF
         align="start"
       >
         <div className="grid gap-3">
-          <details className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold  text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-              <span>Start review</span>
-              <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
-            </summary>
-            <div className="border-t border-bioaxis-line p-4 sm:p-5">
-              <CompactSourcingIntake
-                requestType="equivalent"
-                sourcePage={initialQuery ? `/equivalent-finder?query=${encodeURIComponent(initialQuery)}` : "/equivalent-finder"}
-                product={initialQuery}
-                title="Send the current product."
-                defaultMessage={defaultMessage}
-                productFieldLabel="Current product, catalog number, or supplier line"
-                submitLabel="Send review request"
-                optionalChips={intakePriorities}
-              />
-            </div>
-          </details>
+          <SourcingIntakeDisclosure
+            className="border border-bioaxis-line bg-white shadow-[0_18px_55px_rgba(15,76,129,0.08)]"
+            summaryClassName="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm font-semibold text-bioaxis-text outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden"
+            fallbackHref={`/request-quote?${requestParams}`}
+            intake={{
+              requestType: "equivalent",
+              sourcePage,
+              product: initialQuery,
+              title: "Send the current product.",
+              defaultMessage,
+              productFieldLabel: "Current product, catalog number, or supplier line",
+              submitLabel: "Send review request",
+              optionalChips: intakePriorities
+            }}
+          >
+            <span>Start review</span>
+            <span className="text-xs font-medium text-bioaxis-accent">Add your requirement <span aria-hidden="true">· +</span></span>
+          </SourcingIntakeDisclosure>
           <Link
             href="/request-quote?type=sample&requestType=sample"
             className="inline-flex min-h-11 items-center justify-center border border-bioaxis-line px-4 text-xs font-semibold  text-bioaxis-steel transition hover:border-bioaxis-accent hover:text-bioaxis-accent sm:justify-self-start"

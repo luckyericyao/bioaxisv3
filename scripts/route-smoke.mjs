@@ -136,8 +136,7 @@ const equivalentFinderContent = [
   "Review consumable alternatives",
   "does not automatically return verified alternatives",
   "Start review",
-  "Send the current product.",
-  "Complete verification to send",
+  "Open request form",
   "Choose a product type",
   "Compare requirements",
   "Final suitability depends on supplier documentation, sample testing, and customer-side validation"
@@ -442,26 +441,25 @@ for (const route of routes) {
   }
 
   if (route === "/" || route === "/products" || route.startsWith("/products?") || route === "/resources" || route === "/equivalent-finder" || route.startsWith("/products/") || route.startsWith("/request-quote") || route.startsWith("/resources/")) {
-    // A search can be copied verbatim into the editable sourcing draft. It is not BioAxis copy.
-    const copyText = route.startsWith("/products?q=")
-      ? textOnly(html.replace(/<textarea\b[^>]*\bid="sourcing-product-input"[^>]*>[\s\S]*?<\/textarea>/g, ""))
-      : pageText;
-    checkForbiddenVisibleStrings(route, copyText);
+    checkForbiddenVisibleStrings(route, pageText);
   }
 
-  const shouldHaveCompactIntake =
-    route.startsWith("/products?") ||
+  const shouldHaveIntakeDisclosure =
+    route.startsWith("/products?q=") ||
     route.startsWith("/equivalent-finder") ||
     route === "/ready-supply";
 
   const isUnresolvedSearch = route.startsWith("/products?") && (pageText.includes("Reference not verified") || pageText.includes("No direct product path match"));
 
-  if (shouldHaveCompactIntake && !isUnresolvedSearch) {
-    ["data-sourcing-intake=\"compact\"", "data-submit-actions=\"true\"", "type=\"email\""].forEach((marker) => {
+  if (shouldHaveIntakeDisclosure && !isUnresolvedSearch) {
+    ['data-sourcing-intake-disclosure="true"', 'data-sourcing-intake-fallback="true"'].forEach((marker) => {
       if (!html.includes(marker)) {
-        failures.push(`${route}: shared compact intake is missing ${marker}`);
+        failures.push(`${route}: on-demand intake is missing ${marker}`);
       }
     });
+    if (html.includes('data-sourcing-intake="compact"')) {
+      failures.push(`${route}: collapsed sourcing intake must not mount before activation`);
+    }
   }
 
   if (route in productSearchExpectations) {
@@ -763,16 +761,12 @@ for (const route of routes) {
     }
   }
 
-  if (route === "/equivalent-finder?catalog=D8537" && !pageText.includes("D8537")) {
-    failures.push(`${route}: catalog query did not prefill equivalent intake`);
+  if (route === "/equivalent-finder?catalog=D8537" && !hasHrefWithParams(html, "/request-quote", { requestType: "equivalent", query: "D8537" })) {
+    failures.push(`${route}: catalog reference is missing from the equivalent handoff`);
   }
 
-  if (route === "/equivalent-finder?need=compatible-equivalent") {
-    ["Need compatible equivalent review", "Current product or catalog number", "Workflow or instrument constraints", "Documents or sample needed"].forEach((label) => {
-      if (!pageText.includes(label)) {
-        failures.push(`${route}: missing compatible-equivalent starter ${label}`);
-      }
-    });
+  if (route === "/equivalent-finder?need=compatible-equivalent" && !hasHrefWithParams(html, "/request-quote", { requestType: "equivalent", need: "compatible-equivalent" })) {
+    failures.push(`${route}: compatible-equivalent need is missing from the handoff`);
   }
 
   if (route.startsWith("/request-quote")) {

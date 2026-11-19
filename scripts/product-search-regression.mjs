@@ -24,6 +24,7 @@ let dirty = false;
 let loadMore;
 let formProps;
 let compactIntakeProps;
+let toggleIntake;
 
 const searchReact = {
   ...React,
@@ -49,6 +50,7 @@ const searchReact = {
 function captureElement(factory) {
   return (type, props, ...rest) => {
     if (props?.["data-search-load-more"] === "true") loadMore = props.onClick;
+    if (props?.["data-sourcing-intake-disclosure"] === "true") toggleIntake = props.onToggle;
     return factory(type, props, ...rest);
   };
 }
@@ -71,7 +73,7 @@ Module._load = function load(request, parent, isMain) {
     };
   }
   if (request === "next/navigation") return { useRouter: () => ({ push: () => {} }) };
-  if (request === "@/components/forms/CompactSourcingIntake") {
+  if (request === "./CompactSourcingIntake") {
     return { CompactSourcingIntake: (props) => { compactIntakeProps = props; return null; } };
   }
   if (request === "@/components/forms/QuoteRequestForm") {
@@ -271,6 +273,8 @@ function renderSearch(query, reset = true) {
     effectCursor = 0;
     pendingEffects = [];
     loadMore = undefined;
+    compactIntakeProps = undefined;
+    toggleIntake = undefined;
     dirty = false;
     html = renderToStaticMarkup(React.createElement(ProductSearch, {
       initialQuery: query,
@@ -386,8 +390,20 @@ for (const query of ["", "cell"]) {
 const literalQuery = "filtered 200 uL tips + / & #?";
 const literalHtml = renderSearch(literalQuery);
 assert.ok(cards(literalHtml).length > 0, "Literal handoff fixture must have ranked matches");
+const closedIntake = one(literalHtml, "details", 'data-sourcing-intake-disclosure="true"');
+assert.doesNotMatch(closedIntake.opening, /\sopen(?:[\s=>])/);
+assert.equal(compactIntakeProps, undefined, "A closed search disclosure must not render the form");
+const fallback = links(closedIntake.html)[0].url;
+assert.equal(fallback.pathname, "/request-quote");
+assert.equal(fallback.searchParams.get("query"), literalQuery);
+assert.equal(new URL(fallback.searchParams.get("sourcePage"), origin).searchParams.get("q"), literalQuery);
+toggleIntake({ currentTarget: { open: true } });
+renderSearch(literalQuery, false);
 assert.equal(compactIntakeProps.defaultMessage, literalQuery, "Presentational unit formatting must not rewrite the buyer's draft");
 assert.equal(compactIntakeProps.product, "filtered 200 µL tips + / & #?", "The product summary still formats scientific units");
+toggleIntake({ currentTarget: { open: false } });
+renderSearch(literalQuery, false);
+assert.equal(compactIntakeProps.defaultMessage, literalQuery, "Closing the disclosure must not unmount an active draft");
 const nextSteps = elements(literalHtml, "details").find(({ body }) => body.includes("Sourcing next steps"));
 assert.ok(nextSteps);
 for (const { url } of links(nextSteps.html)) {

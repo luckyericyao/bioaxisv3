@@ -433,7 +433,7 @@ async function checkTurnstileFailClosed() {
       body: `(() => {
         let attempts = 0;
         window.turnstile = {
-          ready(callback) { callback(); },
+          ready() { throw new Error('Synthetic async SDK rejects ready()'); },
           render(container, options) {
             if (++attempts === 1) throw new Error('Synthetic widget initialization failure');
             setTimeout(() => options.callback('qa-recovered-token'), 10);
@@ -505,6 +505,73 @@ async function checkTurnstileFailClosed() {
   check(submissions.length === 1 && submissions[0].turnstileToken === "qa-recovered-token", "recovered verification does not send exactly one verified RFQ");
 
   await page.close();
+}
+
+async function checkDeferredSourcingIntake() {
+  const query = "filtered 200 uL tips";
+  const equivalentParams = new URLSearchParams({ query: "AB-430641", supplier: "QA supplier + reference" });
+  const cases = [
+    { path: `/products?${new URLSearchParams({ q: query })}`, type: "quote", query, initial: query },
+    { path: `/equivalent-finder?${equivalentParams}`, type: "equivalent", query: "AB-430641", initial: "QA supplier + reference AB-430641" },
+    { path: "/ready-supply", type: "quote", query: null, initial: "" }
+  ];
+
+  for (const fixture of cases) {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+    let configRequests = 0;
+    let submissions = 0;
+    try {
+      await page.route("**/api/turnstile/config", (route) => {
+        configRequests += 1;
+        return route.fulfill({ json: { enabled: false } });
+      });
+      await page.route("**/api/rfq", (route) => { submissions += 1; return route.abort(); });
+      await openRoute(page, fixture.path);
+      await page.waitForLoadState("networkidle");
+      const disclosure = page.locator('[data-sourcing-intake-disclosure="true"]');
+      const summary = disclosure.locator(":scope > summary");
+      const form = disclosure.locator('[data-sourcing-intake="compact"]');
+      check(await form.count() === 0 && configRequests === 0, `${fixture.path}: closed intake initializes a form or verification`);
+      const fallback = new URL(await disclosure.locator('[data-sourcing-intake-fallback="true"]').getAttribute("href"), baseUrl);
+      check(fallback.pathname === "/request-quote" && fallback.searchParams.get("requestType") === fixture.type && fallback.searchParams.get("query") === fixture.query,
+        `${fixture.path}: native RFQ route loses request type or query`);
+      if (fixture.type === "equivalent") {
+        check(fallback.searchParams.get("supplier") === equivalentParams.get("supplier"), `${fixture.path}: native RFQ loses supplier context`);
+      }
+
+      await summary.press("Enter");
+      await form.waitFor({ state: "visible", timeout: 5_000 });
+      await page.waitForLoadState("networkidle");
+      const email = form.locator("#sourcing-email");
+      const need = form.locator("#sourcing-product-input");
+      check(configRequests === 1, `${fixture.path}: verification must be initialized exactly once on opening`);
+      check(await need.inputValue() === fixture.initial, `${fixture.path}: lazy intake loses the original prefill`);
+      check(await summary.evaluate((element) => element === document.activeElement), `${fixture.path}: opening shifts keyboard focus`);
+      await email.fill("qa-disclosure@example.test");
+      await need.fill("QA disclosure draft");
+      await summary.press("Enter");
+      await form.waitFor({ state: "hidden", timeout: 5_000 });
+      await summary.press("Enter");
+      await form.waitFor({ state: "visible", timeout: 5_000 });
+      check(await email.inputValue() === "qa-disclosure@example.test" && await need.inputValue() === "QA disclosure draft",
+        `${fixture.path}: closing and reopening discards the draft`);
+      check(configRequests === 1 && submissions === 0, `${fixture.path}: reopening sends a duplicate verification or RFQ request`);
+    } finally {
+      await page.close();
+    }
+  }
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  try {
+    await page.route("**/api/turnstile/config", (route) => route.fulfill({ json: { enabled: false } }));
+    await openRoute(page, "/equivalent-finder?need=compatible-equivalent");
+    await page.locator('[data-sourcing-intake-disclosure="true"] summary').press("Enter");
+    const starter = await page.locator("#sourcing-product-input").inputValue();
+    for (const text of ["Need compatible equivalent review", "Current product or catalog number", "Workflow or instrument constraints", "Documents or sample needed"]) {
+      check(starter.includes(text), `deferred equivalent intake loses starter text: ${text}`);
+    }
+  } finally {
+    await page.close();
+  }
 }
 
 async function checkPrivacyContactHandoff() {
@@ -984,6 +1051,7 @@ try {
   await checkSourcingListDrawerFocus();
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
+  await checkDeferredSourcingIntake();
   const noScriptSearch = await browser.newPage({ javascriptEnabled: false, viewport: { width: 390, height: 844 } });
   try {
     await openRoute(noScriptSearch, "/products");
@@ -998,6 +1066,12 @@ try {
     await noScriptSearch.waitForURL((url) => url.searchParams.get("q") === "430641");
     const handoff = await noScriptSearch.getByRole("link", { name: "Send this reference", exact: true }).getAttribute("href");
     check(new URL(handoff, baseUrl).searchParams.get("query") === "430641", "native search must keep the unresolved reference in its RFQ link");
+    await openRoute(noScriptSearch, "/equivalent-finder?query=AB-430641");
+    const disclosure = noScriptSearch.locator('[data-sourcing-intake-disclosure="true"]');
+    await disclosure.locator("summary").press("Enter");
+    await disclosure.getByRole("link", { name: "Open request form", exact: true }).click();
+    await noScriptSearch.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.get("requestType") === "equivalent");
+    check((await noScriptSearch.locator("#sourcing-product-input").inputValue()).includes("AB-430641"), "native sourcing fallback must carry the original equivalent reference");
   } finally {
     await noScriptSearch.close();
   }
@@ -1041,6 +1115,7 @@ console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus res
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- native search navigation and unresolved-reference handoff without JavaScript");
+console.log("- on-demand verification for search, equivalent and availability intake, retained drafts, native RFQ fallback");
 console.log("- family-specific configurations first, collapsed general templates, three visible actions, and preserved family/item/RFQ context");
 console.log("- canonical and legacy product-detail specs and all quote/sample/equivalent handoffs with exact product hierarchy");
 console.log(`- axe-core WCAG A/AA semantics and color contrast on ${criticalRoutes.length} critical routes`);

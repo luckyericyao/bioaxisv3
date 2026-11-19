@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompactSourcingIntake } from "@/components/forms/CompactSourcingIntake";
+import { SourcingIntakeDisclosure } from "@/components/forms/SourcingIntakeDisclosure";
 import type { ProductSearchResult } from "@/data/productTaxonomy";
 import { buildRequestHref } from "@/lib/productRequestHref";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
@@ -573,23 +573,23 @@ export function ProductSearch({ initialQuery = "", results, indexedPathCount, re
             ) : null}
           </div>
 
-          <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
-              <span>Send this search context</span>
-              <span className="text-bioaxis-dim">Add request details</span>
-            </summary>
-            <div className="border-t border-bioaxis-line p-4 sm:p-5">
-              <CompactSourcingIntake
-                requestType={intakeRequestType}
-                sourcePage={searchPath(activeQuery)}
-                product={displayedQuery}
-                defaultMessage={activeQuery}
-                title="Send the search context."
-                productFieldLabel="SKU, catalog number, supplier line, or product list"
-                submitLabel="Send sourcing request"
-              />
-            </div>
-          </details>
+          <SourcingIntakeDisclosure
+            className="mt-8 border border-bioaxis-line bg-bioaxis-panel"
+            summaryClassName="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden"
+            fallbackHref={searchRequestHref(intakeRequestType, activeQuery)}
+            intake={{
+              requestType: intakeRequestType,
+              sourcePage: searchPath(activeQuery),
+              product: displayedQuery,
+              defaultMessage: activeQuery,
+              title: "Send the search context.",
+              productFieldLabel: "SKU, catalog number, supplier line, or product list",
+              submitLabel: "Send sourcing request"
+            }}
+          >
+            <span>Send this search context</span>
+            <span className="text-bioaxis-dim">Add request details</span>
+          </SourcingIntakeDisclosure>
 
           <details className="mt-8 border border-bioaxis-line bg-bioaxis-panel">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xs font-semibold   text-bioaxis-accent outline-none transition hover:bg-bioaxis-panelSoft focus-visible:ring-2 focus-visible:ring-bioaxis-accent [&::-webkit-details-marker]:hidden">
