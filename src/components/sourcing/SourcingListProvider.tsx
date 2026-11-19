@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems, sourcingListSubmissionHeader, type SourcingListItem } from "@/lib/sourcingListStorage";
+import { beginSourcingListHandoff, parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems, type SourcingListItem } from "@/lib/sourcingListStorage";
 export type { SourcingListItem } from "@/lib/sourcingListStorage";
 
 type SourcingListInput = Omit<
@@ -33,8 +33,6 @@ type SourcingListContextValue = {
 };
 
 const storageKey = "bioaxis:sourcing-list";
-const submissionStorageKey = "bioaxis:sourcing-list-submission";
-const submissionItemsStorageKey = "bioaxis:sourcing-list-items";
 const submissionCompleteEvent = "bioaxis:sourcing-list-submitted";
 const SourcingListContext = createContext<SourcingListContextValue | null>(null);
 
@@ -57,29 +55,6 @@ function emptyFields(item: SourcingListInput): SourcingListItem {
     sourcePageUrl: typeof window !== "undefined" ? window.location.href : item.href,
     addedAt: new Date().toISOString()
   };
-}
-
-function formatSubmission(items: SourcingListItem[]) {
-  const rows = items.map((item) => {
-    const path = [item.segmentTitle, item.categoryTitle, item.familyTitle, item.productTitle].filter(Boolean).join(" / ");
-
-    return [
-      item.title,
-      path || item.href,
-      item.requestedAction || "Quote",
-      item.quantity || "-",
-      item.currentSupplier || "-",
-      item.catalogNumber || "-",
-      item.equivalentNeeded ? "yes" : "no",
-      item.sampleNeeded ? "yes" : "no",
-      item.documentationNeeded ? "yes" : "no",
-      item.notes || "-",
-      item.sourcePageUrl || item.href,
-      item.addedAt || "-"
-    ].join(" | ");
-  });
-
-  return [sourcingListSubmissionHeader, ...rows].join("\n");
 }
 
 export function SourcingListProvider({ children }: { children: ReactNode }) {
@@ -257,13 +232,11 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     syncSavedList();
     const currentItems = listRef.current.items;
     if (!currentItems.length) return;
-    const productList = formatSubmission(currentItems);
-    writeBrowserStorage("sessionStorage", submissionStorageKey, productList);
-    writeBrowserStorage("sessionStorage", submissionItemsStorageKey, JSON.stringify(currentItems));
     const params = new URLSearchParams({
       requestType: "product-list-review",
       source: "sourcing-list",
-      storedInput: "1"
+      storedInput: "1",
+      listHandoff: beginSourcingListHandoff(currentItems)
     });
 
     setDrawerOpen(false);

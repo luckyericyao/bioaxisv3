@@ -411,8 +411,8 @@ async function checkSourcingListDrawerFocus() {
   check(Boolean(emailRect && emailRect.y >= 64 && emailRect.y + emailRect.height <= 844), "sourcing-list RFQ handoff pushes Email below the mobile first viewport");
   check((await page.locator('[data-sourcing-list-summary="true"]').textContent()).includes("Filtered 200 µL Pipette Tips"), "sourcing-list handoff loses its product list");
   check((await page.locator("#sourcing-product-input").inputValue()) === "", "selected sourcing list should not require duplicate typing");
-  const storedItems = await page.evaluate(() => JSON.parse(window.sessionStorage.getItem("bioaxis:sourcing-list-items") || "[]"));
-  check(storedItems.length === 1 && storedItems[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses drawer details");
+  const storedHandoff = await page.evaluate(() => JSON.parse(window.sessionStorage.getItem("bioaxis:sourcing-list-handoff") || "{}"));
+  check(storedHandoff.id === new URL(page.url()).searchParams.get("listHandoff") && storedHandoff.items?.length === 1 && storedHandoff.items[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses the matching draft or drawer details");
 
   await page.close();
 }

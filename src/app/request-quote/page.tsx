@@ -10,6 +10,7 @@ import { workflows } from "@/data/workflows";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 import { bioAxisSiteUrl, createRouteMetadata } from "@/lib/siteMetadata";
 import { hasMeaningfulNeedText } from "@/lib/sourcingNeed";
+import { isSourcingListHandoffId } from "@/lib/sourcingListStorage";
 
 export const metadata: Metadata = createRouteMetadata({
   title: "Request Quote | BioAxis Consumables Sourcing",
@@ -385,6 +386,8 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   const handoffMode = restoreStoredInput && !manualHandoff && explicitProductList === undefined
     ? source === "homepage-hero" ? "text" : source === "sourcing-list" ? "list" : "legacy"
     : undefined;
+  const handoffIdParam = first(params?.listHandoff);
+  const listHandoffId = handoffMode === "list" && isSourcingListHandoffId(handoffIdParam) ? handoffIdParam : undefined;
   const candidateProductList =
     explicitProductList ??
     (usesStoredInput ? "" :
@@ -450,7 +453,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
   };
   // Search parameters can change without remounting the route's client form.
   const draftKey = createHash("sha256")
-    .update(JSON.stringify([initialValues, { ...productContext, timestamp: undefined }, handoffMode, manualHandoff]))
+    .update(JSON.stringify([initialValues, { ...productContext, timestamp: undefined }, handoffMode, listHandoffId, manualHandoff]))
     .digest("hex");
 
   return (
@@ -469,6 +472,7 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
           productContext={productContext}
           handoffNotice={manualHandoff}
           handoffMode={handoffMode}
+          listHandoffId={listHandoffId}
         />
       </section>
     </>

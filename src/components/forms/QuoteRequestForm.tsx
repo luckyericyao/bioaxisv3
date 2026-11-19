@@ -20,9 +20,10 @@ type QuoteRequestFormProps = {
   productContext?: BioAxisProductContext;
   handoffNotice?: boolean;
   handoffMode?: SourcingHandoffMode;
+  listHandoffId?: string;
 };
 
-export function QuoteRequestForm({ initialValues = {}, productContext, handoffNotice = false, handoffMode }: QuoteRequestFormProps) {
+export function QuoteRequestForm({ initialValues = {}, productContext, handoffNotice = false, handoffMode, listHandoffId }: QuoteRequestFormProps) {
   const requestType = normalizeRequestType(initialValues.requestType);
   const defaultMessage = initialValues.productList ?? "";
   const sourcePage = productContext?.sourcePageUrl ?? productContext?.productUrl ?? "";
@@ -48,6 +49,7 @@ export function QuoteRequestForm({ initialValues = {}, productContext, handoffNo
       contextLocked={Boolean(productContext)}
       productContext={productContext}
       handoffMode={handoffMode}
+      listHandoffId={listHandoffId}
       handoffNotice={handoffNotice ? "Your browser could not carry the previous draft automatically. Add it below to continue." : undefined}
       submitLabel="Send sourcing request"
     />

@@ -29,6 +29,7 @@ export type SourcingIntakeFormProps = {
   productContext?: BioAxisProductContext;
   handoffNotice?: string;
   handoffMode?: SourcingHandoffMode;
+  listHandoffId?: string;
   productFieldLabel?: string;
   submitLabel?: string;
   successTitle?: string;

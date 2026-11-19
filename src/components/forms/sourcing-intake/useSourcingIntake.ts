@@ -23,7 +23,8 @@ export function useSourcingIntake({
   initialDetails,
   contextLocked = false,
   productContext,
-  handoffMode
+  handoffMode,
+  listHandoffId
 }: SourcingIntakeFormProps) {
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
@@ -63,8 +64,9 @@ export function useSourcingIntake({
       resolvedProductContext.productCategory ||
       resolvedProductContext.productSegment
   );
-  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, handoffSnapshot } = useSourcingListSession(setState, handoffMode);
-  const [includeSavedList, setIncludeSavedList] = useState(handoffMode === "list");
+  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot } = useSourcingListSession(setState, handoffMode, listHandoffId);
+  const [includeListChoice, setIncludeSavedList] = useState<boolean | null>(null);
+  const includeSavedList = includeListChoice ?? restoredListHandoff;
   const sourcingListItems = includeSavedList ? availableSourcingItems : [];
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
 

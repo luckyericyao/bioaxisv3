@@ -11,7 +11,7 @@ const compiled = new Module(filename);
 compiled._compile(ts.transpileModule(readFileSync(filename, "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
 }).outputText, filename);
-const { parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems } = compiled.exports;
+const { beginSourcingListHandoff, parseSourcingList, readBrowserStorage, restoreSourcingListHandoff, retireSourcingListHandoff, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems } = compiled.exports;
 const previousWindow = globalThis.window;
 
 try {
@@ -51,10 +51,26 @@ try {
   window.localStorage.removeItem = () => { throw new Error("Test-only blocked removal"); };
   assert.equal(removeBrowserStorage("localStorage", "list"), true);
   assert.equal(data.get("list"), "", "Fallback cleanup must not resurrect a submitted list");
+  const handoffs = new Map();
+  window.sessionStorage = { getItem: (key) => handoffs.get(key) ?? null, setItem: (key, value) => handoffs.set(key, value), removeItem: (key) => handoffs.delete(key) };
+  const older = beginSourcingListHandoff([sent]);
+  const latest = beginSourcingListHandoff([editedWhileSending]);
+  assert.notEqual(older, latest);
+  assert.equal(restoreSourcingListHandoff(older), null);
+  assert.equal(restoreSourcingListHandoff(undefined), null);
+  retireSourcingListHandoff(older);
+  assert.deepEqual(restoreSourcingListHandoff(latest)?.items, [editedWhileSending]);
+  assert.equal(JSON.parse(handoffs.get("bioaxis:sourcing-list-handoff")).id, latest);
+  retireSourcingListHandoff(latest);
+  assert.equal(restoreSourcingListHandoff(latest), null);
   Object.defineProperty(window, "sessionStorage", { get() { throw new Error("Test-only blocked storage"); } });
   assert.deepEqual(readBrowserStorage("sessionStorage", "list"), { available: false, value: null });
   assert.equal(writeBrowserStorage("sessionStorage", "list", "[]"), false);
   assert.equal(removeBrowserStorage("sessionStorage", "list"), false);
+  const memoryOnly = beginSourcingListHandoff([sent]);
+  assert.deepEqual(restoreSourcingListHandoff(memoryOnly)?.items, [sent]);
+  retireSourcingListHandoff(memoryOnly);
+  assert.equal(restoreSourcingListHandoff(memoryOnly), null);
   console.log("Sourcing-list storage regression passed: malformed/legacy/mixed data, preserved buyer fields, safe product paths, unique IDs, selective confirmation cleanup and blocked storage; offline only.");
 } finally {
   if (previousWindow === undefined) delete globalThis.window; else globalThis.window = previousWindow;

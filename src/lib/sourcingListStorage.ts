@@ -25,6 +25,44 @@ export type SourcingListItem = {
 type StorageKind = "localStorage" | "sessionStorage";
 const text = (value: unknown) => typeof value === "string" ? value : "";
 export const sourcingListSubmissionHeader = "Product / family | Path | Requested action | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
+const listHandoffKey = "bioaxis:sourcing-list-handoff";
+type ListHandoff = { id: string; items: SourcingListItem[] };
+let activeListHandoff: ListHandoff | null = null;
+
+export function isSourcingListHandoffId(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9a-f]{32}$/.test(value);
+}
+
+function readSavedListHandoff(): ListHandoff | null {
+  const raw = readBrowserStorage("sessionStorage", listHandoffKey).value;
+  if (!raw) return null;
+  try {
+    const record = JSON.parse(raw);
+    if (!isSourcingListHandoffId(record?.id) || !Array.isArray(record.items)) return null;
+    const { items } = parseSourcingList(JSON.stringify(record.items));
+    return items.length ? { id: record.id, items } : null;
+  } catch { return null; }
+}
+
+export function beginSourcingListHandoff(items: SourcingListItem[]) {
+  const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (value) => value.toString(16).padStart(2, "0")).join("");
+  activeListHandoff = { id, items };
+  if (!writeBrowserStorage("sessionStorage", listHandoffKey, JSON.stringify(activeListHandoff))) {
+    removeBrowserStorage("sessionStorage", listHandoffKey);
+  }
+  return id;
+}
+
+export function restoreSourcingListHandoff(id: string | undefined) {
+  if (!isSourcingListHandoffId(id)) return null;
+  const handoff = activeListHandoff ?? readSavedListHandoff();
+  return handoff?.id === id ? handoff : null;
+}
+
+export function retireSourcingListHandoff(id: string) {
+  if (activeListHandoff?.id === id) activeListHandoff = null;
+  if (readSavedListHandoff()?.id === id) removeBrowserStorage("sessionStorage", listHandoffKey);
+}
 
 function productHref(value: unknown) {
   if (typeof value !== "string" || !value.startsWith("/products") || value.includes("\\")) return "";

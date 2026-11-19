@@ -230,11 +230,11 @@ try {
       { id: "qa-sent", title: "QA PCR plates", href: "/products/lab-plasticware", quantity: "2 cases" }
     ]);
     localStorage.setItem("bioaxis:sourcing-list", rows);
-    sessionStorage.setItem("bioaxis:sourcing-list-items", rows);
+    sessionStorage.setItem("bioaxis:sourcing-list-handoff", JSON.stringify({ id: "1".repeat(32), items: JSON.parse(rows) }));
     sessionStorage.setItem("bioaxis:sourcing-list-submission", "Original handoff.");
   }, async (page, submissions) => {
     try {
-      await page.goto(new URL("/request-quote?requestType=product-list-review&source=sourcing-list&storedInput=1", baseUrl).toString(), { waitUntil: "networkidle" });
+      await page.goto(new URL(`/request-quote?requestType=product-list-review&source=sourcing-list&storedInput=1&listHandoff=${"1".repeat(32)}`, baseUrl).toString(), { waitUntil: "networkidle" });
       await page.locator('[data-sourcing-list-summary="true"]').waitFor();
       await page.locator("#sourcing-email").fill("qa@example.test");
       const outgoing = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/rfq" && request.method() === "POST");
@@ -250,7 +250,7 @@ try {
       const remaining = await page.evaluate(() => JSON.parse(localStorage.getItem("bioaxis:sourcing-list") || "[]"));
       assert.deepEqual(remaining.map(({ id, quantity }) => [id, quantity]), [["qa-edit", "24 racks"]]);
       assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-submission")), "A newer handoff.");
-      assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-items")), null);
+      assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null);
       await page.getByRole("button", { name: "Start another request", exact: true }).click();
       await page.getByText("Sourcing list: 1 item saved", { exact: true }).waitFor();
       assert.equal(await includeSavedList(page).isChecked(), false);
@@ -467,11 +467,11 @@ try {
     assert.equal((await readSavedRows(page)).length, 2);
   });
   await scenario("21-excluded-handoff-remains-saved", () => {
-    sessionStorage.setItem("bioaxis:sourcing-list-items", JSON.stringify([
+    sessionStorage.setItem("bioaxis:sourcing-list-handoff", JSON.stringify({ id: "2".repeat(32), items: [
       { id: "qa-session-only", title: "QA session-only items", href: "/products/liquid-handling" }
-    ]));
+    ] }));
   }, async (page, submissions) => {
-    await page.goto(new URL("/request-quote?source=sourcing-list&storedInput=1", baseUrl).href, { waitUntil: "networkidle" });
+    await page.goto(new URL(`/request-quote?source=sourcing-list&storedInput=1&listHandoff=${"2".repeat(32)}`, baseUrl).href, { waitUntil: "networkidle" });
     const include = includeSavedList(page);
     assert.ok(await include.isChecked());
     await include.uncheck();
@@ -480,7 +480,31 @@ try {
     await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
     await checkConfirmation(page);
     assert.deepEqual(submissions[0].sourcingListItems, []);
-    assert.equal(await page.evaluate(() => JSON.parse(sessionStorage.getItem("bioaxis:sourcing-list-items"))[0].id), "qa-session-only");
+    assert.equal(await page.evaluate(() => JSON.parse(sessionStorage.getItem("bioaxis:sourcing-list-handoff")).items[0].id), "qa-session-only");
+  });
+  await scenario("22-only-the-matching-drawer-handoff-is-selected", null, async (page, submissions) => {
+    async function handoff() {
+      await page.goto(new URL(productPath, baseUrl).href, { waitUntil: "domcontentloaded" });
+      await page.getByText("More sourcing actions", { exact: true }).click();
+      const add = page.getByRole("button", { name: "Add to sourcing list", exact: true }).or(page.getByRole("button", { name: "Added to sourcing list", exact: true }));
+      await add.click();
+      await page.getByRole("button", { name: "Send list for review", exact: true }).click();
+      await page.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+      await includeSavedList(page).waitFor();
+      assert.ok(await includeSavedList(page).isChecked());
+      return page.url();
+    }
+    const first = await handoff();
+    await page.reload({ waitUntil: "networkidle" });
+    assert.ok(await includeSavedList(page).isChecked(), "Reload still has the matching drawer snapshot");
+    const latest = await handoff();
+    assert.notEqual(latest, first, "Each drawer handoff needs a distinct identifier");
+    for (const url of [first, new URL("/request-quote?source=sourcing-list&storedInput=1", baseUrl).href, latest]) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      assert.equal(await includeSavedList(page).isChecked(), url === latest);
+      assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), url !== latest);
+    }
+    assert.equal(submissions.length, 0);
   });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
