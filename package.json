@@ -13,6 +13,7 @@
     "test:taxonomy-builders": "node scripts/taxonomy-builders-regression.mjs",
     "test:taxonomy-search": "node scripts/taxonomy-search-regression.mjs",
     "smoke": "node scripts/route-smoke.mjs",
+    "smoke:production-rfq-ui": "node scripts/production-rfq-ui-smoke.mjs",
     "readiness": "node scripts/deployment-readiness.mjs",
     "test:release": "node scripts/release-readiness-regression.mjs",
     "test:units-visual": "node scripts/scientific-units-regression.mjs",

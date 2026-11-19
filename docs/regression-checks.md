@@ -10,6 +10,7 @@ After reviewing and staging the intended files, run `npm run verify:local` on ma
 - Builds without local `.env` files or service credentials. Starts an isolated production build only on `127.0.0.1`, with an operating-system-assigned port. Checks the unconfigured RFQ and verification state before running local smoke, buyer-session, payload, responsive and accessibility checks.
 - Writes `report.json`, per-check logs and screenshots under a new ignored `artifacts/local-preflight/run-*` directory. A failed or interrupted run is nonzero and lists checks that did not run. On normal exit, failure, Ctrl+C or SIGTERM it stops the owned processes and removes its candidate build.
 - A passing report validates its Git tree only. It does not contact the production alias, exercise real submissions or authorize a release. For a production release, compare the deployed commit to the pushed commit with `readiness` and run read-only smoke separately.
+- Run `npm run smoke:production-rfq-ui -- <full-release-sha>` after the production alias switches. It checks the same SHA before and after a 390px Chromium visit, verifies closed sourcing forms make no verification requests, and confirms the official widget mounts on `/request-quote`. The browser blocks write requests; this check does not attempt to solve or submit a challenge. Use the Playwright-managed Chromium or `PLAYWRIGHT_CHROMIUM_EXECUTABLE`.
 
 ## Offline verification
 
