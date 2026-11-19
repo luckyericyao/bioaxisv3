@@ -291,6 +291,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
         <div
           className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
           role="dialog"
+          data-sourcing-list-modal="true"
           aria-modal="true"
           aria-labelledby="sourcing-list-title"
           onClick={(event) => {
@@ -319,7 +320,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5">
+            <div data-sourcing-list-scroll="true" className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5">
               {storageNotice ? <p role="status" className="mb-4 text-sm text-bioaxis-muted">{storageNotice}</p> : null}
               {items.length === 0 ? (
                 <p role="status" className="text-sm leading-6 text-bioaxis-muted">

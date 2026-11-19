@@ -18,6 +18,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html:has([data-sourcing-list-modal]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   min-height: 100vh;
   margin: 0;

@@ -341,6 +341,7 @@ async function checkSourcingListDrawerFocus() {
   });
   check(modalBackground.landmarksInert, "sourcing list drawer leaves page landmarks exposed while modal");
   check(modalBackground.focusInside, "a background action can take focus from the sourcing list drawer");
+  check(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY === "hidden"), "mobile sourcing list drawer leaves background scrolling unlocked");
 
   await page.keyboard.press("Shift+Tab");
   check(
@@ -366,6 +367,7 @@ async function checkSourcingListDrawerFocus() {
     "closing the sourcing list drawer with Escape does not restore focus to its trigger"
   );
   check(await page.locator("main#main-content").evaluate((element) => !element.closest("[inert]")), "closing the sourcing list drawer leaves the page inert");
+  check(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY !== "hidden"), "closing the mobile sourcing list drawer leaves background scrolling locked");
 
   await addedButton.click();
   await dialog.getByRole("button", { name: "Remove Filtered 200 µL Pipette Tips", exact: true }).click();
@@ -413,6 +415,38 @@ async function checkSourcingListDrawerFocus() {
   check(storedItems.length === 1 && storedItems[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses drawer details");
 
   await page.close();
+}
+
+async function checkSourcingListDrawerScroll() {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 850 } });
+  try {
+    await page.addInitScript(() => localStorage.setItem("bioaxis:sourcing-list", JSON.stringify(
+      Array.from({ length: 8 }, (_, index) => ({ id: `qa-scroll-${index}`, title: `QA item ${index + 1}`, href: "/products/liquid-handling" }))
+    )));
+    await openRoute(page, "/products");
+    await page.evaluate(() => window.scrollTo({ top: 250, behavior: "instant" }));
+    const trigger = page.getByRole("button", { name: "Sourcing list (8)", exact: true });
+    const initialY = await page.evaluate(() => window.scrollY);
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "Review items before sending." });
+    const scrollArea = dialog.locator("[data-sourcing-list-scroll]");
+    const area = await scrollArea.boundingBox();
+    await page.mouse.move(area.x + area.width / 2, area.y + area.height / 2);
+    await page.mouse.wheel(0, 430);
+    await page.waitForFunction(() => document.querySelector("[data-sourcing-list-scroll]")?.scrollTop > 0);
+    await page.mouse.move(100, 400);
+    await page.mouse.wheel(0, 650);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    check(await page.evaluate(() => window.scrollY) === initialY, "scrolling the drawer or desktop backdrop moves the background page");
+    await page.keyboard.press("Escape");
+    await dialog.waitFor({ state: "hidden" });
+    await page.waitForFunction(() => document.activeElement?.textContent.trim() === "Sourcing list (8)");
+    check(await page.evaluate(() => window.scrollY) === initialY, "closing the desktop drawer changes the background scroll position");
+    await page.mouse.wheel(0, 350);
+    await page.waitForFunction((position) => window.scrollY > position, initialY);
+  } finally {
+    await page.close();
+  }
 }
 
 async function checkTurnstileFailClosed() {
@@ -1050,6 +1084,7 @@ try {
   }
 
   await checkSourcingListDrawerFocus();
+  await checkSourcingListDrawerScroll();
   await checkPrivacyContactHandoff();
   await checkMobileSearchFunnel();
   await checkDeferredSourcingIntake();
@@ -1112,7 +1147,7 @@ if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
 } else {
   console.log("- RFQ failure and Turnstile simulations: skipped on deployed URLs; live challenge completion is a separate gate");
 }
-console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, focus restoration, and mobile Email handoff");
+console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, scroll lock, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- native search navigation and unresolved-reference handoff without JavaScript");
