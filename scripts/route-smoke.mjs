@@ -96,6 +96,7 @@ const productItemDetailSections = [
 ];
 
 const requiredHomeCtas = ["Explore BioAxis", "Request a quote"];
+const encodedSourceContextRoute = `/request-quote?${new URLSearchParams({ sourcePage: "/products?q=PES+%2B+PVDF" })}`;
 const productSearchExpectations = {
   "/products?q=gene": ["Gene"],
   "/products?q=cell": ["Cell Culture"],
@@ -242,6 +243,7 @@ const routes = [
   "/request-quote?type=recurring",
   "/request-quote?type=unknown",
   "/request-quote?type=rfq&requestType=quote&query=serum-free%20media&q=serum-free%20media",
+  encodedSourceContextRoute,
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=ready-stock",
   "/request-quote?requestType=quote&sourcePage=ready-supply&source=ready-supply&intent=current-sku",
   "/request-quote?requestType=sample&sourcePage=support&supportPath=sample-path",
@@ -793,6 +795,9 @@ for (const route of routes) {
     const incomingQuery = query.get("query") || query.get("q");
     if (incomingQuery && !pageText.includes(incomingQuery)) failures.push(`${route}: search context lost`);
     if (query.get("sourcePage") && !pageText.includes("Request context")) failures.push(`${route}: source context missing`);
+    if (route === encodedSourceContextRoute && !pageText.includes("Source page /products?q=PES + PVDF")) {
+      failures.push(`${route}: source page label must preserve an encoded plus while decoding query spaces`);
+    }
   }
 
   if (route.startsWith("/request-quote?") && route.includes("product=filtered-200ul-pipette-tips")) {

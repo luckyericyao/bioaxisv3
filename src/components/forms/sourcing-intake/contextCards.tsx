@@ -6,8 +6,10 @@ function sourceLabel(value: string | undefined) {
   if (!value) return "";
   try {
     const url = new URL(value, "https://bioaxis.local");
-    return decodeURIComponent(`${url.pathname}${url.search}`)
-      .replace(/\+/g, " ").replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
+    const pathname = decodeURIComponent(url.pathname);
+    const search = decodeURIComponent(url.search.replace(/\+/g, " "));
+    return `${pathname}${search}`
+      .replace(/(\d+(?:\.\d+)?)\s*u[lL]\b/g, "$1 µL")
       .replace(/\bu[lL]\b/g, "µL").replace(/(\d+(?:\.\d+)?)\s*um\b/g, "$1 µm");
   } catch { return "Source page included"; }
 }
