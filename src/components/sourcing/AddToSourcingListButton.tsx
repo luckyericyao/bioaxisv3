@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type SourcingListItem, useSourcingList } from "./SourcingListProvider";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 
@@ -33,11 +33,14 @@ export function AddToSourcingListButton({
 }: AddToSourcingListButtonProps) {
   const { addItem, items } = useSourcingList();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [ready, setReady] = useState(false);
   const alreadyAdded = items.some((existingItem) => existingItem.href === item.href);
+  useEffect(() => setReady(true), []);
 
   return (
     <button
       type="button"
+      disabled={!ready}
       aria-pressed={alreadyAdded}
       aria-haspopup="dialog"
       onClick={() => {
@@ -48,7 +51,7 @@ export function AddToSourcingListButton({
       }}
       ref={buttonRef}
       className={[
-        "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-accent transition hover:bg-bioaxis-accent hover:text-bioaxis-black",
+        "inline-flex min-h-11 items-center justify-center border border-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-accent transition enabled:hover:bg-bioaxis-accent enabled:hover:text-bioaxis-black disabled:cursor-not-allowed disabled:opacity-70",
         className
       ].join(" ")}
     >

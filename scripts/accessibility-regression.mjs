@@ -313,6 +313,33 @@ async function checkRfqStateAnnouncements() {
   await page.close();
 }
 
+async function checkSourcingListBeforeHydration() {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
+  let releaseScripts;
+  const scriptsReady = new Promise((resolve) => { releaseScripts = resolve; });
+  try {
+    const product = new URL("/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips", baseUrl);
+    await page.route("**/*", async (route) => {
+      const request = route.request();
+      if (!["GET", "HEAD"].includes(request.method()) || new URL(request.url()).origin !== product.origin) return route.abort();
+      if (request.resourceType() === "script") await scriptsReady;
+      return route.continue();
+    });
+    const response = await page.goto(product.href, { waitUntil: "commit", timeout: 12_000 });
+    check(response?.status() === 200, "sourcing-list hydration test could not load the product page");
+    await page.getByText("More sourcing actions", { exact: true }).click({ timeout: 7_000 });
+    const add = page.getByRole("button", { name: "Add to sourcing list", exact: true });
+    await add.waitFor({ timeout: 7_000 });
+    check(await add.isDisabled(), "sourcing list promises an interaction before its scripts load");
+    releaseScripts();
+    await add.click({ timeout: 12_000 });
+    await page.getByRole("dialog", { name: "Review items before sending." }).waitFor({ timeout: 7_000 });
+  } finally {
+    releaseScripts();
+    await page.close();
+  }
+}
+
 async function checkSourcingListDrawerFocus() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
   await page.addInitScript(() => window.localStorage.removeItem("bioaxis:sourcing-list"));
@@ -1083,6 +1110,7 @@ try {
     await checkRfqStateAnnouncements();
   }
 
+  await checkSourcingListBeforeHydration();
   await checkSourcingListDrawerFocus();
   await checkSourcingListDrawerScroll();
   await checkPrivacyContactHandoff();
@@ -1147,7 +1175,7 @@ if (["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname)) {
 } else {
   console.log("- RFQ failure and Turnstile simulations: skipped on deployed URLs; live challenge completion is a separate gate");
 }
-console.log("- sourcing-list drawer focus entry, Tab wrapping, Escape, scroll lock, focus restoration, and mobile Email handoff");
+console.log("- sourcing-list pre-hydration control, drawer focus entry, Tab wrapping, Escape, scroll lock, focus restoration, and mobile Email handoff");
 console.log("- privacy-to-contact anchor and mobile form-first ordering");
 console.log("- retained mobile search query, first-viewport result/action, and two-choice menu handoff");
 console.log("- native search navigation and unresolved-reference handoff without JavaScript");
