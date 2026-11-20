@@ -236,7 +236,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       requestType: "product-list-review",
       source: "sourcing-list",
       storedInput: "1",
-      listHandoff: beginSourcingListHandoff(currentItems)
+      listHandoff: beginSourcingListHandoff(currentItems, !listRef.current.unsaved)
     });
 
     setDrawerOpen(false);

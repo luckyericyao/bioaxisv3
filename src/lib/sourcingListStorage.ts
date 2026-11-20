@@ -26,7 +26,7 @@ type StorageKind = "localStorage" | "sessionStorage";
 const text = (value: unknown) => typeof value === "string" ? value : "";
 export const sourcingListSubmissionHeader = "Product / family | Path | Requested action | Qty | Current supplier | Catalog no. | Equivalent | Sample | Docs | Notes | Source | Added";
 const listHandoffKey = "bioaxis:sourcing-list-handoff";
-type ListHandoff = { id: string; items: SourcingListItem[] };
+type ListHandoff = { id: string; items: SourcingListItem[]; followsSavedList: boolean };
 let activeListHandoff: ListHandoff | null = null;
 let pendingListHandoffFocus: string | null = null;
 
@@ -41,13 +41,13 @@ function readSavedListHandoff(): ListHandoff | null {
     const record = JSON.parse(raw);
     if (!isSourcingListHandoffId(record?.id) || !Array.isArray(record.items)) return null;
     const { items } = parseSourcingList(JSON.stringify(record.items));
-    return items.length ? { id: record.id, items } : null;
+    return items.length ? { id: record.id, items, followsSavedList: record.followsSavedList === true } : null;
   } catch { return null; }
 }
 
-export function beginSourcingListHandoff(items: SourcingListItem[]) {
+export function beginSourcingListHandoff(items: SourcingListItem[], followsSavedList = false) {
   const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (value) => value.toString(16).padStart(2, "0")).join("");
-  activeListHandoff = { id, items };
+  activeListHandoff = { id, items, followsSavedList };
   pendingListHandoffFocus = id;
   if (!writeBrowserStorage("sessionStorage", listHandoffKey, JSON.stringify(activeListHandoff))) {
     removeBrowserStorage("sessionStorage", listHandoffKey);

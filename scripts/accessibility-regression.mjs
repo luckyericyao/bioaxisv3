@@ -342,7 +342,6 @@ async function checkSourcingListBeforeHydration() {
 
 async function checkSourcingListDrawerFocus() {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
-  await page.addInitScript(() => window.localStorage.removeItem("bioaxis:sourcing-list"));
   await openRoute(page, "/products/liquid-handling/pipette-tips/filtered-pipette-tips/filtered-200ul-pipette-tips");
 
   await page.locator("summary").filter({ hasText: "More sourcing actions" }).click();

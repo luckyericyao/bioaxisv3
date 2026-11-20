@@ -541,6 +541,29 @@ try {
       assert.equal(await includeSavedList(page).isChecked(), false);
     } finally { await other.close(); }
   });
+  await scenario("24-removed-last-saved-row-does-not-return-on-refresh", null, async (page, submissions) => {
+    await page.goto(new URL(productPath, baseUrl).href, { waitUntil: "domcontentloaded" });
+    await page.getByText("More sourcing actions", { exact: true }).click();
+    await page.getByRole("button", { name: "Add to sourcing list", exact: true }).click();
+    await page.getByRole("button", { name: "Send list for review", exact: true }).click();
+    await page.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+    await page.getByText("Sourcing list: 1 item included", { exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => JSON.parse(sessionStorage.getItem("bioaxis:sourcing-list-handoff")).followsSavedList), true);
+    const other = await page.context().newPage();
+    try {
+      await other.goto(new URL(productPath, baseUrl).href, { waitUntil: "domcontentloaded" });
+      await other.getByText("More sourcing actions", { exact: true }).click();
+      await other.getByRole("button", { name: "Added to sourcing list", exact: true }).click();
+      await other.getByRole("button", { name: "Remove Filtered 200 µL Pipette Tips", exact: true }).click();
+      const list = page.locator("[data-sourcing-list-summary]");
+      await list.waitFor({ state: "hidden" });
+      assert.equal(await page.evaluate(() => localStorage.getItem("bioaxis:sourcing-list")), null);
+      await page.reload({ waitUntil: "networkidle" });
+      assert.equal(await list.count(), 0, "An empty shared list must not restore a deleted reviewed item");
+      assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), true);
+      assert.equal(submissions.length, 0);
+    } finally { await other.close(); }
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

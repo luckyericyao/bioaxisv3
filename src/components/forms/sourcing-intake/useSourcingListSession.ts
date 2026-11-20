@@ -48,7 +48,13 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
     const selectedHandoff = handoffMode === "list" ? restoreSourcingListHandoff(listHandoffId) : null;
     reviewedItemIds.current = selectedHandoff ? new Set(selectedHandoff.items.map((item) => item.id)) : null;
     const sessionItems = selectedHandoff?.items ?? parseSourcingList(handoff.items).items;
-    const localItems = parseSourcingList(readBrowserStorage("localStorage", sourcingListStorageKey).value).items;
+    const savedList = readBrowserStorage("localStorage", sourcingListStorageKey);
+    const { items: localItems, needsReview } = parseSourcingList(savedList.value);
+    const reviewed = reviewedItemIds.current;
+    // A readable empty saved list means the reviewed rows were removed, not that the draft needs recovering.
+    const restoredItems = selectedHandoff?.followsSavedList && savedList.available && !needsReview && reviewed
+      ? localItems.filter((item) => reviewed.has(item.id))
+      : sessionItems.length > 0 ? sessionItems : localItems;
     const listText = handoff.productList?.startsWith(`${sourcingListSubmissionHeader}\n`);
     const sessionProductList = !sessionItems.length ? handoff.productList?.trim() ?? "" : "";
     handoffSnapshot.current = {
@@ -58,7 +64,7 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
     };
 
     setRestoredListHandoff(Boolean(selectedHandoff));
-    setSourcingListItems(sessionItems.length > 0 ? sessionItems : localItems);
+    setSourcingListItems(restoredItems);
     if (sessionProductList) {
       setRestoredSessionInput(true);
       setState((current) => (current.productInput.trim() ? current : { ...current, productInput: sessionProductList }));

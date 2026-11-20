@@ -1910,7 +1910,7 @@ if (!sourcingIntakeFormSource.includes("onFocusCapture={trackIntakeStart}") || s
 
 [
   ["SearchBox", searchBoxSource, ["bioaxis:sourcing-list-submission", "window.sessionStorage.setItem", 'params.set("storedInput", "1")', 'params.set("source", "homepage-hero")', 'params.set("handoff", "manual")', 'action={formAction}', "data-native-sourcing-fallback", "product-list-review"]],
-  ["SourcingListProvider", sourcingListProviderSource, ["listHandoff: beginSourcingListHandoff(currentItems)", "bioaxis:sourcing-list-submitted", "handleSubmissionComplete", "removeBrowserStorage", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review", "Review items before sending.", "Send list for review", "aria-labelledby", "closeButtonRef", "event.key === \"Escape\""]],
+  ["SourcingListProvider", sourcingListProviderSource, ["listHandoff: beginSourcingListHandoff(", "bioaxis:sourcing-list-submitted", "handleSubmissionComplete", "removeBrowserStorage", 'source: "sourcing-list"', 'storedInput: "1"', "product-list-review", "Review items before sending.", "Send list for review", "aria-labelledby", "closeButtonRef", "event.key === \"Escape\""]],
   ["Request quote page", requestQuotePageSource, ["usesStoredInput", 'source === "sourcing-list"', 'source === "homepage-hero"', 'first(params?.storedInput) === "1"', 'usesStoredInput ? ""']],
   ["SourcingIntakeForm", sourcingIntakeFormSource, ["bioaxis:sourcing-list-submission", "bioaxis:sourcing-list-submitted", "window.dispatchEvent", "retainUnsubmittedSourcingItems", "sessionProductList", "readBrowserStorage", "productInput: sessionProductList", "restoredSessionInput", "clearStoredSourcingSubmission"]]
 ].forEach(([label, source, required]) => {
