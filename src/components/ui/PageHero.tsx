@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 type PageHeroProps = {
   eyebrow?: string;
   title: string;
+  focusTitleId?: string;
   subtitle: ReactNode;
   children?: ReactNode;
   compact?: boolean;
@@ -11,7 +12,7 @@ type PageHeroProps = {
   align?: "start" | "end";
 };
 
-export function PageHero({ eyebrow, title, subtitle, children, compact = false, tight = false, mobileContentFirst = false, align = "end" }: PageHeroProps) {
+export function PageHero({ eyebrow, title, focusTitleId, subtitle, children, compact = false, tight = false, mobileContentFirst = false, align = "end" }: PageHeroProps) {
   return (
     <section className={`border-b border-bioaxis-line ${tight ? "py-4 sm:py-6" : compact ? "py-8" : "section-space"}`}>
       <div
@@ -22,7 +23,9 @@ export function PageHero({ eyebrow, title, subtitle, children, compact = false, 
         <div className={mobileContentFirst ? "order-2 lg:order-1" : undefined}>
           {eyebrow ? <p className={`${compact ? "mb-3" : "mb-5"} text-sm font-semibold text-bioaxis-accent`}>{eyebrow}</p> : null}
           <h1
-            className={`max-w-5xl font-semibold text-bioaxis-text ${
+            id={focusTitleId}
+            tabIndex={focusTitleId ? -1 : undefined}
+            className={`max-w-5xl font-semibold text-bioaxis-text ${focusTitleId ? "scroll-mt-24 " : ""}${
               compact
                 ? tight
                   ? "text-3xl leading-tight sm:text-4xl"

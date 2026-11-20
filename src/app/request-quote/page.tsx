@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createHash } from "node:crypto";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
+import { SourcingListHandoffFocus } from "@/components/forms/SourcingListHandoffFocus";
 import { PageHero } from "@/components/ui/PageHero";
 import { normalizeRequestType } from "@/data/requestTypes";
 import { getFamilyBySlug, labelFromProductContext } from "@/data/productTaxonomy";
@@ -461,10 +462,12 @@ export default async function RequestQuotePage({ searchParams }: RequestQuotePag
       <PageHero
         eyebrow="Sourcing request"
         title="Request sourcing"
+        focusTitleId={listHandoffId ? "request-quote-heading" : undefined}
         subtitle="Share a product, reference or list."
         compact
         tight
       />
+      {listHandoffId ? <SourcingListHandoffFocus handoffId={listHandoffId} titleId="request-quote-heading" /> : null}
       <section className="page-container pb-16 pt-6">
         <QuoteRequestForm
           key={draftKey}

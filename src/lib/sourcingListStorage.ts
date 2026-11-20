@@ -28,6 +28,7 @@ export const sourcingListSubmissionHeader = "Product / family | Path | Requested
 const listHandoffKey = "bioaxis:sourcing-list-handoff";
 type ListHandoff = { id: string; items: SourcingListItem[] };
 let activeListHandoff: ListHandoff | null = null;
+let pendingListHandoffFocus: string | null = null;
 
 export function isSourcingListHandoffId(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{32}$/.test(value);
@@ -47,6 +48,7 @@ function readSavedListHandoff(): ListHandoff | null {
 export function beginSourcingListHandoff(items: SourcingListItem[]) {
   const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (value) => value.toString(16).padStart(2, "0")).join("");
   activeListHandoff = { id, items };
+  pendingListHandoffFocus = id;
   if (!writeBrowserStorage("sessionStorage", listHandoffKey, JSON.stringify(activeListHandoff))) {
     removeBrowserStorage("sessionStorage", listHandoffKey);
   }
@@ -61,7 +63,14 @@ export function restoreSourcingListHandoff(id: string | undefined) {
 
 export function retireSourcingListHandoff(id: string) {
   if (activeListHandoff?.id === id) activeListHandoff = null;
+  if (pendingListHandoffFocus === id) pendingListHandoffFocus = null;
   if (readSavedListHandoff()?.id === id) removeBrowserStorage("sessionStorage", listHandoffKey);
+}
+
+export function consumeSourcingListHandoffFocus(id: string) {
+  if (pendingListHandoffFocus !== id) return false;
+  pendingListHandoffFocus = null;
+  return true;
 }
 
 function productHref(value: unknown) {

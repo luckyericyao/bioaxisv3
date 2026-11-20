@@ -11,7 +11,7 @@ const compiled = new Module(filename);
 compiled._compile(ts.transpileModule(readFileSync(filename, "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 }
 }).outputText, filename);
-const { beginSourcingListHandoff, parseSourcingList, readBrowserStorage, restoreSourcingListHandoff, retireSourcingListHandoff, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems } = compiled.exports;
+const { beginSourcingListHandoff, consumeSourcingListHandoffFocus, parseSourcingList, readBrowserStorage, restoreSourcingListHandoff, retireSourcingListHandoff, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems } = compiled.exports;
 const previousWindow = globalThis.window;
 
 try {
@@ -57,6 +57,9 @@ try {
   const latest = beginSourcingListHandoff([editedWhileSending]);
   assert.notEqual(older, latest);
   assert.equal(restoreSourcingListHandoff(older), null);
+  assert.equal(consumeSourcingListHandoffFocus(older), false);
+  assert.equal(consumeSourcingListHandoffFocus(latest), true);
+  assert.equal(consumeSourcingListHandoffFocus(latest), false);
   assert.equal(restoreSourcingListHandoff(undefined), null);
   retireSourcingListHandoff(older);
   assert.deepEqual(restoreSourcingListHandoff(latest)?.items, [editedWhileSending]);

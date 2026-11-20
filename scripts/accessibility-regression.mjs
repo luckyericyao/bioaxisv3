@@ -428,8 +428,13 @@ async function checkSourcingListDrawerFocus() {
 
   await addedButton.click();
   await dialog.getByLabel("Quantity", { exact: true }).fill("QA evaluation pack");
-  await dialog.getByRole("button", { name: "Send list for review", exact: true }).click();
+  await dialog.getByRole("button", { name: "Send list for review", exact: true }).press("Enter");
   await page.waitForURL((url) => url.pathname === "/request-quote", { timeout: 15_000 });
+  await page.waitForFunction(() => document.activeElement?.id === "request-quote-heading", null, { timeout: 5_000 });
+  const headingBounds = await page.getByRole("heading", { name: "Request sourcing", exact: true }).boundingBox();
+  check(Boolean(headingBounds && headingBounds.y >= 64 && headingBounds.y + headingBounds.height <= 844), "sourcing-list handoff focuses a heading outside the visible viewport");
+  await page.keyboard.press("Tab");
+  check(await page.locator("#sourcing-product-input").evaluate((input) => input === document.activeElement), "Tab after sourcing-list handoff returns to the header instead of entering the form");
   check((await dialog.count()) === 0, "sourcing drawer remains open after its RFQ handoff");
   check(await page.locator("main#main-content").evaluate((element) => !element.closest("[inert]")), "sourcing RFQ handoff leaves the page inert");
   const email = page.getByLabel("Email *", { exact: true });
@@ -440,6 +445,10 @@ async function checkSourcingListDrawerFocus() {
   check((await page.locator("#sourcing-product-input").inputValue()) === "", "selected sourcing list should not require duplicate typing");
   const storedHandoff = await page.evaluate(() => JSON.parse(window.sessionStorage.getItem("bioaxis:sourcing-list-handoff") || "{}"));
   check(storedHandoff.id === new URL(page.url()).searchParams.get("listHandoff") && storedHandoff.items?.length === 1 && storedHandoff.items[0].quantity === "QA evaluation pack", "sourcing-list RFQ handoff loses the matching draft or drawer details");
+
+  await page.reload({ waitUntil: "networkidle" });
+  await page.getByText("Sourcing list: 1 item included", { exact: true }).waitFor();
+  check(await page.evaluate(() => document.activeElement?.id !== "request-quote-heading"), "refreshing a sourcing-list draft steals focus back to the heading");
 
   await page.close();
 }
