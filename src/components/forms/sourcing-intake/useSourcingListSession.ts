@@ -10,6 +10,10 @@ const sourcingListSubmittedEvent = "bioaxis:sourcing-list-submitted";
 
 type StoredSourcingSubmission = { productList: string | null; items: string | null; listHandoffId?: string };
 
+function reviewedRowsOnly(items: SourcingListItem[], reviewed: ReadonlyMap<string, string> | null) {
+  return reviewed ? items.filter((item) => reviewed.get(item.id) === item.addedAt) : items;
+}
+
 function readStoredSourcingSubmission(mode: SourcingHandoffMode | undefined): StoredSourcingSubmission {
   if (!mode || mode === "list") return { productList: null, items: null };
   return {
@@ -38,7 +42,7 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
   const [restoredListHandoff, setRestoredListHandoff] = useState(false);
   const { items } = useSourcingList();
   const usingLiveList = useRef(false);
-  const reviewedItemIds = useRef<Set<string> | null>(null);
+  const reviewedRows = useRef<ReadonlyMap<string, string> | null>(null);
   const handoffSnapshot = useRef<StoredSourcingSubmission>({ productList: null, items: null });
 
   useEffect(() => {
@@ -46,14 +50,13 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
 
     const handoff = readStoredSourcingSubmission(handoffMode);
     const selectedHandoff = handoffMode === "list" ? restoreSourcingListHandoff(listHandoffId) : null;
-    reviewedItemIds.current = selectedHandoff ? new Set(selectedHandoff.items.map((item) => item.id)) : null;
+    reviewedRows.current = selectedHandoff ? new Map(selectedHandoff.items.map((item) => [item.id, item.addedAt])) : null;
     const sessionItems = selectedHandoff?.items ?? parseSourcingList(handoff.items).items;
     const savedList = readBrowserStorage("localStorage", sourcingListStorageKey);
     const { items: localItems, needsReview } = parseSourcingList(savedList.value);
-    const reviewed = reviewedItemIds.current;
     // A readable empty saved list means the reviewed rows were removed, not that the draft needs recovering.
-    const restoredItems = selectedHandoff?.followsSavedList && savedList.available && !needsReview && reviewed
-      ? localItems.filter((item) => reviewed.has(item.id))
+    const restoredItems = selectedHandoff?.followsSavedList && savedList.available && !needsReview
+      ? reviewedRowsOnly(localItems, reviewedRows.current)
       : sessionItems.length > 0 ? sessionItems : localItems;
     const listText = handoff.productList?.startsWith(`${sourcingListSubmissionHeader}\n`);
     const sessionProductList = !sessionItems.length ? handoff.productList?.trim() ?? "" : "";
@@ -74,13 +77,12 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
   useEffect(() => {
     if (items.length || usingLiveList.current) {
       usingLiveList.current = true;
-      const reviewed = reviewedItemIds.current;
-      setSourcingListItems(reviewed ? items.filter((item) => reviewed.has(item.id)) : items);
+      setSourcingListItems(reviewedRowsOnly(items, reviewedRows.current));
     }
   }, [items]);
 
   function resetListHandoff() {
-    reviewedItemIds.current = null;
+    reviewedRows.current = null;
     handoffSnapshot.current = { productList: null, items: null };
     setRestoredListHandoff(false);
     setRestoredSessionInput(false);

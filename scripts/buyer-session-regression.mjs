@@ -541,7 +541,7 @@ try {
       assert.equal(await includeSavedList(page).isChecked(), false);
     } finally { await other.close(); }
   });
-  await scenario("24-removed-last-saved-row-does-not-return-on-refresh", null, async (page, submissions) => {
+  await scenario("24-deleted-and-readded-rows-stay-outside-the-original-handoff", null, async (page, submissions) => {
     await page.goto(new URL(productPath, baseUrl).href, { waitUntil: "domcontentloaded" });
     await page.getByText("More sourcing actions", { exact: true }).click();
     await page.getByRole("button", { name: "Add to sourcing list", exact: true }).click();
@@ -561,6 +561,21 @@ try {
       await page.reload({ waitUntil: "networkidle" });
       assert.equal(await list.count(), 0, "An empty shared list must not restore a deleted reviewed item");
       assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), true);
+
+      await other.keyboard.press("Escape");
+      await other.getByRole("button", { name: "Add to sourcing list", exact: true }).click();
+      await other.getByRole("dialog").waitFor();
+      await page.getByRole("button", { name: "Menu", exact: true }).click();
+      await page.getByRole("button", { name: "Review sourcing list (1)", exact: true }).waitFor();
+      await page.getByRole("button", { name: "Close menu", exact: true }).click();
+      assert.equal(await list.count(), 0, "Re-adding the same product must not automatically attach it to the old draft");
+      await page.reload({ waitUntil: "networkidle" });
+      assert.equal(await list.count(), 0, "Reload must not attach a different entry for the same product");
+      assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), true);
+
+      await other.getByRole("button", { name: "Send list for review", exact: true }).click();
+      await other.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+      await other.getByText("Sourcing list: 1 item included", { exact: true }).waitFor();
       assert.equal(submissions.length, 0);
     } finally { await other.close(); }
   });
