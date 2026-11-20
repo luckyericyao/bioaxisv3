@@ -23,7 +23,7 @@ function submitLabelFor(requestType: string, override?: string) {
 
 export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const { title = "What do you need?", compact = false, handoffNotice, productFieldLabel, submitLabel,
-    successTitle = "Request received", optionalChips } = props;
+    successTitle = "Request received", optionalChips, onActivityChange } = props;
   const intake = useSourcingIntake(props);
   const { state, availableSourcingItems, includeSavedList, setIncludeSavedList, error, emailInvalid, needInvalid, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
@@ -37,11 +37,17 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const confirmationRef = useRef<HTMLElement>(null);
   const nextRequestRef = useRef<HTMLButtonElement>(null);
   const hadSubmittedRef = useRef(false);
+  const activity = submitted ? "received" : submitting ? "sending" : error ? "attention" : "idle";
+
+  useEffect(() => { onActivityChange?.(activity); }, [activity, onActivityChange]);
 
   useEffect(() => {
     if (submitted) {
-      confirmationRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
-      nextRequestRef.current?.focus();
+      const confirmation = confirmationRef.current;
+      if (confirmation && !confirmation.closest("details:not([open])")) {
+        confirmation.scrollIntoView({ block: "start", behavior: "instant" });
+        nextRequestRef.current?.focus();
+      }
     }
     else if (hadSubmittedRef.current) formRef.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
     hadSubmittedRef.current = Boolean(submitted);

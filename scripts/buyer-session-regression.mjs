@@ -579,6 +579,42 @@ try {
       assert.equal(submissions.length, 0);
     } finally { await other.close(); }
   });
+  for (const [index, response, finalLabel] of [
+    [25, confirmedReceipt, "Request received"],
+    [26, { ok: false, status: 503, error: "Local QA failure" }, "Request needs attention"]
+  ]) {
+    let finish;
+    const pending = new Promise((resolve) => { finish = resolve; });
+    await scenario(`${index}-collapsed-intake-keeps-request-feedback`, null, async (page, submissions) => {
+      try {
+        await page.goto(new URL("/equivalent-finder", baseUrl).href, { waitUntil: "networkidle" });
+        const disclosure = page.locator("[data-sourcing-intake-disclosure]");
+        const summary = disclosure.locator(":scope > summary");
+        const badge = summary.locator("[data-sourcing-intake-status]");
+        const announcement = page.locator("[data-sourcing-intake-disclosure] + [role='status']");
+        await summary.press("Enter");
+        await page.locator("#sourcing-product-input").fill("Local buyer-session product requirement");
+        await page.locator("#sourcing-email").fill("qa@example.test");
+        await page.getByRole("button", { name: "Send review request", exact: true }).click();
+        await page.getByRole("button", { name: "Sending...", exact: true }).waitFor();
+        await summary.press("Enter");
+        await badge.filter({ hasText: "Sending request..." }).waitFor();
+        finish(response);
+        await badge.filter({ hasText: finalLabel }).waitFor();
+        assert.equal(await announcement.textContent(), finalLabel);
+        assert.equal(await disclosure.getAttribute("open"), null);
+        assert.ok(await summary.evaluate((node) => node === document.activeElement), "Background feedback must not steal focus");
+        assert.equal(submissions.length, 1);
+        await summary.press("Enter");
+        await badge.waitFor({ state: "hidden" });
+        if (response.ok) await page.getByText(`Reference: ${response.referenceId}`, { exact: true }).waitFor();
+        else {
+          await disclosure.getByRole("alert").filter({ hasText: response.error }).waitFor();
+          assert.equal(await page.locator("#sourcing-product-input").inputValue(), "Local buyer-session product requirement");
+        }
+      } finally { finish(response); }
+    }, () => pending);
+  }
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

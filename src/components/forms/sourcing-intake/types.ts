@@ -13,8 +13,10 @@ export type SourcingIntakeRequestType =
   | "product-list-review";
 
 export type SourcingHandoffMode = "text" | "list" | "legacy";
+export type SourcingIntakeActivity = "idle" | "sending" | "received" | "attention";
 
 export type SourcingIntakeFormProps = {
+  onActivityChange?: (activity: SourcingIntakeActivity) => void;
   requestType?: SourcingIntakeRequestType | string;
   sourcePage?: string;
   segment?: string;
