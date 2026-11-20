@@ -506,6 +506,41 @@ try {
     }
     assert.equal(submissions.length, 0);
   });
+  await scenario("23-new-saved-rows-stay-outside-an-existing-handoff", null, async (page, submissions) => {
+    await page.goto(new URL(productPath, baseUrl).href, { waitUntil: "domcontentloaded" });
+    await page.getByText("More sourcing actions", { exact: true }).click();
+    await page.getByRole("button", { name: "Add to sourcing list", exact: true }).click();
+    await page.getByRole("button", { name: "Send list for review", exact: true }).click();
+    await page.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+    await page.getByText("Sourcing list: 1 item included", { exact: true }).waitFor();
+    const other = await page.context().newPage();
+    try {
+      const vialPath = "/products/storage-cryopreservation/cryogenic-vials/sterile-cryovials/sterile-cryogenic-vials";
+      await other.goto(new URL(vialPath, baseUrl).href, { waitUntil: "domcontentloaded" });
+      await other.getByText("More sourcing actions", { exact: true }).click();
+      await other.getByRole("button", { name: "Add to sourcing list", exact: true }).click();
+      const originalRow = other.getByRole("dialog").getByRole("article", { name: "Filtered 200 µL Pipette Tips", exact: true });
+      await originalRow.getByLabel("Quantity", { exact: true }).fill("24 racks");
+      const drawer = await editSavedList(page);
+      const reviewedRow = drawer.getByRole("article", { name: "Filtered 200 µL Pipette Tips", exact: true });
+      await page.waitForFunction(() => document.querySelectorAll("[data-sourcing-list-modal] article").length === 2);
+      await page.waitForFunction((field) => field.value === "24 racks", await reviewedRow.getByLabel("Quantity", { exact: true }).elementHandle());
+      await page.keyboard.press("Escape");
+      assert.ok(await page.getByText("Sourcing list: 1 item included", { exact: true }).isVisible());
+      await page.reload({ waitUntil: "networkidle" });
+      await page.getByText("Sourcing list: 1 item included", { exact: true }).waitFor();
+      await page.locator("#sourcing-email").fill("qa@example.test");
+      await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+      await checkConfirmation(page);
+      assert.equal(submissions[0].sourcingListItems.length, 1);
+      assert.equal(submissions[0].sourcingListItems[0].href, productPath);
+      assert.equal(submissions[0].sourcingListItems[0].quantity, "24 racks");
+      assert.deepEqual((await readSavedRows(page)).map((item) => item.href), [vialPath]);
+      await page.getByRole("button", { name: "Start another request", exact: true }).click();
+      await page.getByText("Sourcing list: 1 item saved", { exact: true }).waitFor();
+      assert.equal(await includeSavedList(page).isChecked(), false);
+    } finally { await other.close(); }
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

@@ -38,6 +38,7 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
   const [restoredListHandoff, setRestoredListHandoff] = useState(false);
   const { items } = useSourcingList();
   const usingLiveList = useRef(false);
+  const reviewedItemIds = useRef<Set<string> | null>(null);
   const handoffSnapshot = useRef<StoredSourcingSubmission>({ productList: null, items: null });
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
 
     const handoff = readStoredSourcingSubmission(handoffMode);
     const selectedHandoff = handoffMode === "list" ? restoreSourcingListHandoff(listHandoffId) : null;
+    reviewedItemIds.current = selectedHandoff ? new Set(selectedHandoff.items.map((item) => item.id)) : null;
     const sessionItems = selectedHandoff?.items ?? parseSourcingList(handoff.items).items;
     const localItems = parseSourcingList(readBrowserStorage("localStorage", sourcingListStorageKey).value).items;
     const listText = handoff.productList?.startsWith(`${sourcingListSubmissionHeader}\n`);
@@ -66,9 +68,18 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
   useEffect(() => {
     if (items.length || usingLiveList.current) {
       usingLiveList.current = true;
-      setSourcingListItems(items);
+      const reviewed = reviewedItemIds.current;
+      setSourcingListItems(reviewed ? items.filter((item) => reviewed.has(item.id)) : items);
     }
   }, [items]);
 
-  return { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot };
+  function resetListHandoff() {
+    reviewedItemIds.current = null;
+    handoffSnapshot.current = { productList: null, items: null };
+    setRestoredListHandoff(false);
+    setRestoredSessionInput(false);
+    setSourcingListItems(items);
+  }
+
+  return { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff };
 }

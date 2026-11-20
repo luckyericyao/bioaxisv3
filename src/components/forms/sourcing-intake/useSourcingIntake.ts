@@ -64,7 +64,7 @@ export function useSourcingIntake({
       resolvedProductContext.productCategory ||
       resolvedProductContext.productSegment
   );
-  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot } = useSourcingListSession(setState, handoffMode, listHandoffId);
+  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
   const [includeListChoice, setIncludeSavedList] = useState<boolean | null>(null);
   const includeSavedList = includeListChoice ?? restoredListHandoff;
   const sourcingListItems = includeSavedList ? availableSourcingItems : [];
@@ -131,7 +131,7 @@ export function useSourcingIntake({
     setRetryReferenceReady(false);
     setTurnstileToken("");
     setTurnstileResetKey(0);
-    setRestoredSessionInput(false);
+    resetListHandoff();
     startedAtRef.current = Date.now();
     requestIdRef.current = null;
     intakeStartedRef.current = false;
