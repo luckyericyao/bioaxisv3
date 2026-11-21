@@ -50,7 +50,7 @@ function evaluateConfig(environment, gitResult = otherSha) {
     assert.equal(options.encoding, "utf8");
     assert.deepEqual(Array.from(options.stdio), ["ignore", "pipe", "ignore"]);
   }
-  return { release: config.env.BIOAXIS_RELEASE_SHA, gitCalls };
+  return { release: config.env.BIOAXIS_RELEASE_SHA, gitCalls, headers: config.headers };
 }
 
 for (const value of [sha, sha.toUpperCase(), sha256]) {
@@ -68,6 +68,20 @@ assert.equal(evaluateConfig({}, `${sha256}\n`).release, sha256);
 for (const gitResult of ["", privateValue, "a".repeat(41), new Error(privateValue)]) {
   assert.equal(evaluateConfig({}, gitResult).release, "unknown", "Unavailable or invalid Git SHA must fail closed");
 }
+
+async function contentSecurityPolicy(environment) {
+  const [route] = await evaluateConfig(environment).headers();
+  return route.headers.find((header) => header.key === "Content-Security-Policy")?.value;
+}
+
+const productionPolicy = await contentSecurityPolicy({ NODE_ENV: "production", VERCEL: "1" });
+const localPolicy = await contentSecurityPolicy({ NODE_ENV: "development" });
+assert.doesNotMatch(productionPolicy, /'unsafe-eval'/);
+assert.match(localPolicy, /script-src [^;]*'unsafe-eval'/);
+assert.equal(localPolicy.replace(" 'unsafe-eval'", ""), productionPolicy, "All other development directives stay identical to production");
+assert.equal(await contentSecurityPolicy({ NODE_ENV: "development", VERCEL: "1" }), productionPolicy);
+assert.equal(await contentSecurityPolicy({ NODE_ENV: "test" }), productionPolicy);
+assert.equal(await contentSecurityPolicy({}), productionPolicy);
 
 async function evaluateGet({ release = sha, includeRelease = true, queueConfigured = true, queueReachable = true, antiSpam = true, internalLookup = true } = {}) {
   const localModule = { exports: {} };
