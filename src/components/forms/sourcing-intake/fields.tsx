@@ -6,6 +6,7 @@ export function Field({
   type = "text",
   required = false,
   invalid = false,
+  inlineError,
   describedBy,
   autoComplete,
   inputMode,
@@ -19,12 +20,14 @@ export function Field({
   type?: "email" | "text";
   required?: boolean;
   invalid?: boolean;
+  inlineError?: string;
   describedBy?: string;
   autoComplete?: string;
   inputMode?: "email" | "text";
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
+  const errorId = inlineError ? `${id}-error` : undefined;
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-semibold  text-bioaxis-steel">
@@ -38,13 +41,14 @@ export function Field({
         value={value}
         placeholder={placeholder}
         required={required}
-        aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
+        aria-invalid={invalid || Boolean(errorId) || undefined}
+        aria-describedby={[errorId, describedBy].filter(Boolean).join(" ") || undefined}
         autoComplete={autoComplete}
         inputMode={inputMode}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text placeholder:text-bioaxis-dim"
       />
+      {inlineError ? <p id={errorId} role="alert" className="mt-2 text-sm text-red-800">{inlineError}</p> : null}
     </div>
   );
 }
@@ -94,6 +98,7 @@ export function TextArea({
   required = false,
   helperText,
   invalid = false,
+  inlineError,
   describedBy,
   placeholder,
   onChange
@@ -105,11 +110,13 @@ export function TextArea({
   required?: boolean;
   helperText?: string;
   invalid?: boolean;
+  inlineError?: string;
   describedBy?: string;
   placeholder?: string;
   onChange: (value: string) => void;
 }) {
   const helperId = helperText ? `${id}-helper` : undefined;
+  const errorId = inlineError ? `${id}-error` : undefined;
 
   return (
     <div className="md:col-span-2">
@@ -124,11 +131,12 @@ export function TextArea({
         rows={rows}
         placeholder={placeholder}
         required={required}
-        aria-invalid={invalid || undefined}
-        aria-describedby={[helperId, describedBy].filter(Boolean).join(" ") || undefined}
+        aria-invalid={invalid || Boolean(errorId) || undefined}
+        aria-describedby={[errorId, helperId, describedBy].filter(Boolean).join(" ") || undefined}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-4 py-3 text-base leading-7 text-bioaxis-text placeholder:text-bioaxis-dim"
       />
+      {inlineError ? <p id={errorId} role="alert" className="mt-2 text-sm text-red-800">{inlineError}</p> : null}
       {helperText ? (
         <p id={helperId} className="mt-2 text-sm leading-6 text-bioaxis-muted">
           {helperText}

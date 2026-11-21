@@ -615,6 +615,36 @@ try {
       } finally { finish(response); }
     }, () => pending);
   }
+  await scenario("27-field-errors-stay-with-the-focused-input", null, async (page, submissions) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(new URL("/request-quote", baseUrl).href, { waitUntil: "networkidle" });
+    const form = page.locator("form[data-api-endpoint]");
+    await form.getByText("Add more details (optional)", { exact: true }).click();
+    const send = form.getByRole("button", { name: "Send sourcing request", exact: true });
+
+    async function checkFieldError(id) {
+      await send.click();
+      const input = form.locator(`#${id}`);
+      const error = form.getByRole("alert");
+      await error.waitFor();
+      assert.equal(await error.getAttribute("id"), `${id}-error`);
+      assert.equal(await input.getAttribute("aria-invalid"), "true");
+      assert.ok((await input.getAttribute("aria-describedby")).split(" ").includes(`${id}-error`));
+      assert.ok(await input.evaluate((element) => element === document.activeElement));
+      const fieldBounds = await input.boundingBox();
+      const errorBounds = await error.boundingBox();
+      assert.ok(fieldBounds && errorBounds && fieldBounds.y >= 64 && errorBounds.y + errorBounds.height <= 844,
+        "The focused input and its error must share the mobile viewport even with optional details open");
+      const gap = errorBounds.y - fieldBounds.y - fieldBounds.height;
+      assert.ok(gap >= 0 && gap < 64, "The error must be directly after the field, not in the submit area");
+    }
+
+    await checkFieldError("sourcing-product-input");
+    await form.locator("#sourcing-product-input").fill("QA product requirement");
+    await form.locator("#sourcing-email").fill("invalid");
+    await checkFieldError("sourcing-email");
+    assert.equal(submissions.length, 0, "Field validation failures must not send requests");
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

@@ -84,13 +84,13 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
         <h2 id="sourcing-intake-title" className="sr-only">{title}</h2>
         {handoffNotice ? <p role="status" className="text-bioaxis-muted">{handoffNotice}</p> : null}
         <TextArea id="sourcing-product-input" label={productFieldLabel ?? "What do you need?"}
-          value={state.productInput} rows={compact ? 3 : 4} required={!hasSelectedNeed} invalid={needInvalid}
-          describedBy={needInvalid ? "sourcing-intake-error" : undefined}
+          value={state.productInput} rows={compact ? 3 : 4} required={!hasSelectedNeed}
+          inlineError={needInvalid ? error : undefined}
           helperText={hasSelectedNeed ? "Your selected product or list is included. Add details only if useful." : "A product name, catalog reference or rough purchasing list is enough."}
           placeholder="Product, catalog reference, list or sourcing need"
           onChange={(value) => updateField("productInput", value)} />
         <Field id="sourcing-email" name="email" label="Email" type="email" value={state.email} required
-          invalid={emailInvalid} describedBy={emailInvalid ? "sourcing-intake-error" : undefined}
+          inlineError={emailInvalid ? error : undefined}
           autoComplete="email" inputMode="email" placeholder="you@organization.com"
           onChange={(value) => updateField("email", value)} />
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
@@ -113,7 +113,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
 
       <TurnstileWidget resetKey={turnstileResetKey} compact={compact}
         onAvailabilityChange={setTurnstileAvailable} onFailure={handleTurnstileFailure} onTokenChange={setTurnstileToken} />
-      {error ? <div><p id="sourcing-intake-error" role="alert" className="text-red-800">{error}</p>
+      {error && !needInvalid && !emailInvalid ? <div><p id="sourcing-intake-error" role="alert" className="text-red-800">{error}</p>
         {requestReferenceConflict ? <button type="button" onClick={rotateRequestReference}
           className="action-secondary mt-3">Use a new request reference</button> : null}</div> : null}
       <div data-submit-actions="true" className="grid justify-items-start gap-3 border-t border-bioaxis-line pt-5">
