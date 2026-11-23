@@ -1,5 +1,7 @@
+import { useId } from "react";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 import type { SourcingListItem } from "@/lib/sourcingListStorage";
+import { maxSourcingListItems } from "@/lib/sourcingNeed";
 import { sourcingSpecifications } from "@/lib/sourcingSpecifications";
 
 function sourceLabel(value: string | undefined) {
@@ -53,18 +55,23 @@ export function SourcingListSummary({ items, included, submitting, onIncludeChan
   onIncludeChange: (included: boolean) => void;
   onEdit?: (target: HTMLButtonElement) => void;
 }) {
+  const limitId = useId();
+  const overLimit = included && items.length > maxSourcingListItems;
   return (
     <section data-sourcing-list-summary="true" data-sourcing-list-context="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft px-4 py-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">Sourcing list: {items.length} {items.length === 1 ? "item" : "items"} {included ? "included" : "saved"}</span>
+        <span className="text-sm font-medium">Sourcing list: {items.length} {items.length === 1 ? "item" : "items"} {overLimit ? "selected" : included ? "included" : "saved"}</span>
         {onEdit ? <button type="button" aria-haspopup="dialog" onClick={(event) => onEdit(event.currentTarget)}
           className="min-h-11 shrink-0 px-2 text-sm font-medium text-bioaxis-accent">Edit list</button> : null}
       </div>
       <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-        <input type="checkbox" checked={included} disabled={submitting}
+        <input type="checkbox" checked={included} disabled={submitting} aria-describedby={overLimit ? limitId : undefined}
           onChange={(event) => onIncludeChange(event.target.checked)} className="field-focus size-4 accent-bioaxis-accent" />
         Include saved sourcing list
       </label>
+      {overLimit ? <p id={limitId} role="status" className="mb-2 text-sm text-red-800">
+        Up to {maxSourcingListItems} sourcing-list items per request. Your saved list has not changed.
+      </p> : null}
       <details>
         <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">Review saved items</summary>
         <ul className="grid gap-2 border-t border-bioaxis-line pt-3 text-sm">

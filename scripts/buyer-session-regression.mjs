@@ -156,12 +156,28 @@ try {
     localStorage.setItem("bioaxis:sourcing-list", JSON.stringify(Array.from({ length: 31 }, (_, index) => ({ id: `qa-item-${index}`, title: `QA sourcing item ${index + 1}`, href: "/products/liquid-handling", quantity: `${index + 1} racks` }))));
   }, async (page, submissions) => {
     await page.goto(new URL("/request-quote", baseUrl).toString(), { waitUntil: "networkidle" });
-    await includeSavedList(page).check();
+    const include = includeSavedList(page);
+    const warning = page.locator("[data-sourcing-list-summary]").getByRole("status");
+    assert.equal(await warning.count(), 0, "A saved list that is not attached must not block an unrelated inquiry");
+    await include.check();
+    assert.match(await warning.innerText(), /up to 30 sourcing-list items/i);
+    assert.equal(await include.getAttribute("aria-describedby"), await warning.getAttribute("id"));
+    assert.equal(submissions.length, 0, "The attachment limit must be visible before a submission attempt");
     await page.locator("#sourcing-email").fill("qa@example.test");
     await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
     assert.match(await page.locator("form").getByRole("alert").innerText(), /up to 30 sourcing-list items/);
     assert.equal(submissions.length, 0);
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("bioaxis:sourcing-list")).length), 31);
+
+    await include.uncheck();
+    await warning.waitFor({ state: "hidden" });
+    assert.equal(await page.locator("form").getByRole("alert").count(), 0, "Removing the attachment clears its validation error");
+    await page.locator("#sourcing-product-input").fill("QA separate consumables request");
+    await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.deepEqual(submissions[0].sourcingListItems, []);
+    assert.equal((await readSavedRows(page)).length, 31, "Sending separately must not discard any saved items");
   });
   await scenario("08-unconfirmed-receipt-retains-draft", () => {
     localStorage.setItem("bioaxis:sourcing-list", JSON.stringify([{ id: "qa-preserve", title: "QA pipette tips", href: "/products/liquid-handling", quantity: "12 racks" }]));

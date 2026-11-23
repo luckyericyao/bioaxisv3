@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 import { getBioAxisRequestId, retireBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
 import { requestErrorMessage, submitBioAxisRequest, type BioAxisRequestPayload } from "@/lib/submitBioAxisRequest";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
-import { hasSourcingNeed, sourcingNeedError } from "@/lib/sourcingNeed";
+import { hasSourcingNeed, sourcingListLimitError, sourcingNeedError } from "@/lib/sourcingNeed";
 import { rfqInputLimitError } from "@/lib/rfqInputLimits";
 import { retainUnsubmittedSourcingItems } from "@/lib/sourcingListStorage";
 import { apiRequestType, createInitialIntakeState, hasValidEmail, initialProductContext } from "./intakeState";
@@ -65,10 +65,15 @@ export function useSourcingIntake({
       resolvedProductContext.productSegment
   );
   const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
-  const [includeListChoice, setIncludeSavedList] = useState<boolean | null>(null);
+  const [includeListChoice, setIncludeListChoice] = useState<boolean | null>(null);
   const includeSavedList = includeListChoice ?? restoredListHandoff;
   const sourcingListItems = includeSavedList ? availableSourcingItems : [];
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
+
+  function setIncludeSavedList(included: boolean) {
+    setIncludeListChoice(included);
+    if (!included) setError((current) => current === sourcingListLimitError ? "" : current);
+  }
 
   const trackIntakeStart = useCallback(() => {
     if (intakeStartedRef.current) {
