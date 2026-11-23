@@ -420,13 +420,18 @@ try {
 
       const email = page.locator("#sourcing-email");
       const input = page.locator("#sourcing-product-input");
+      const notes = page.locator("#sourcing-notes");
       const submit = page.getByRole("button", { name: "Send sourcing request", exact: true });
       await email.fill("qa@example.test");
       await input.fill("QA fixture: preserve this product list during a delayed receipt");
+      await page.getByText("Add more details (optional)", { exact: true }).click();
+      await notes.fill("QA notes included before sending");
       const savedItems = await readSavedRows(page);
       await submit.click();
       await page.waitForFunction(() => Boolean(window.__qaStalledRequest));
       assert.ok(await page.getByRole("button", { name: "Sending...", exact: true }).isDisabled());
+      for (const field of [email, input, notes]) assert.ok(await field.isDisabled(), "Fields already sent must not accept edits while awaiting the receipt");
+      assert.ok(await page.getByRole("button", { name: "Edit list", exact: true }).isEnabled(), "The independent saved list remains editable");
       await page.clock.fastForward(31_000);
 
       const alert = page.locator("form").getByRole("alert");
@@ -435,6 +440,8 @@ try {
       assert.equal(await page.evaluate(() => window.__qaStalledRequestAborted), true);
       assert.equal(await email.inputValue(), "qa@example.test");
       assert.match(await input.inputValue(), /preserve this product list/);
+      assert.equal(await notes.inputValue(), "QA notes included before sending");
+      for (const field of [email, input, notes]) assert.ok(await field.isEnabled(), "After a deadline the preserved draft must be editable again");
       assert.deepEqual(await readSavedRows(page), savedItems, "Unconfirmed submissions must not clear saved items");
       assert.equal(await page.getByRole("heading", { name: "Request received", exact: true }).count(), 0);
       const first = await page.evaluate(() => window.__qaStalledRequest);

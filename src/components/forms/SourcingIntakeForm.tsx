@@ -83,16 +83,19 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
       <section className="grid gap-5">
         <h2 id="sourcing-intake-title" className="sr-only">{title}</h2>
         {handoffNotice ? <p role="status" className="text-bioaxis-muted">{handoffNotice}</p> : null}
-        <TextArea id="sourcing-product-input" label={productFieldLabel ?? "What do you need?"}
-          value={state.productInput} rows={compact ? 3 : 4} required={!hasSelectedNeed}
-          inlineError={needInvalid ? error : undefined}
-          helperText={hasSelectedNeed ? "Your selected product or list is included. Add details only if useful." : "A product name, catalog reference or rough purchasing list is enough."}
-          placeholder="Product, catalog reference, list or sourcing need"
-          onChange={(value) => updateField("productInput", value)} />
-        <Field id="sourcing-email" name="email" label="Email" type="email" value={state.email} required
-          inlineError={emailInvalid ? error : undefined}
-          autoComplete="email" inputMode="email" placeholder="you@organization.com"
-          onChange={(value) => updateField("email", value)} />
+        <fieldset disabled={submitting} className="grid min-w-0 gap-5">
+          <legend className="sr-only">Request details</legend>
+          <TextArea id="sourcing-product-input" label={productFieldLabel ?? "What do you need?"}
+            value={state.productInput} rows={compact ? 3 : 4} required={!hasSelectedNeed}
+            inlineError={needInvalid ? error : undefined}
+            helperText={hasSelectedNeed ? "Your selected product or list is included. Add details only if useful." : "A product name, catalog reference or rough purchasing list is enough."}
+            placeholder="Product, catalog reference, list or sourcing need"
+            onChange={(value) => updateField("productInput", value)} />
+          <Field id="sourcing-email" name="email" label="Email" type="email" value={state.email} required
+            inlineError={emailInvalid ? error : undefined}
+            autoComplete="email" inputMode="email" placeholder="you@organization.com"
+            onChange={(value) => updateField("email", value)} />
+        </fieldset>
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
         {availableSourcingItems.length ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
           submitting={submitting} onIncludeChange={setIncludeSavedList}
@@ -100,16 +103,19 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
         {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>
 
-      <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip}>
-        <details data-request-starters="true" className="border-t border-bioaxis-line pt-4 md:col-span-2">
-          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">Use a request starter</summary>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {requestStarterTemplates.map((starter) => <button key={starter.label} type="button"
-              onClick={() => applyStarterTemplate(starter.value)} className="action-secondary"
-              aria-label={`Use ${starter.label} request starter`}>{starter.label}</button>)}
-          </div>
-        </details>
-      </SourcingDetailFields>
+      <fieldset disabled={submitting} className="min-w-0">
+        <legend className="sr-only">Optional request details</legend>
+        <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip}>
+          <details data-request-starters="true" className="border-t border-bioaxis-line pt-4 md:col-span-2">
+            <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">Use a request starter</summary>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {requestStarterTemplates.map((starter) => <button key={starter.label} type="button"
+                onClick={() => applyStarterTemplate(starter.value)} className="action-secondary"
+                aria-label={`Use ${starter.label} request starter`}>{starter.label}</button>)}
+            </div>
+          </details>
+        </SourcingDetailFields>
+      </fieldset>
 
       <TurnstileWidget resetKey={turnstileResetKey} compact={compact}
         onAvailabilityChange={setTurnstileAvailable} onFailure={handleTurnstileFailure} onTokenChange={setTurnstileToken} />
