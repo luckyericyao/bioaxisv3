@@ -1,6 +1,7 @@
 import { maxSourcingListItems, sourcingListLimitError } from "./sourcingNeed";
 
 type TextLimit = readonly [key: string, label: string, maximum: number, fallback?: string];
+type InputLimitIssue = { message: string; field?: string };
 
 const requestTextLimits: readonly TextLimit[] = [
   ["productList", "Product details", 12_000],
@@ -34,28 +35,32 @@ function recordOf(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
-function textLimitError(value: unknown, rules: readonly TextLimit[], prefix = "") {
+function textLimitIssue(value: unknown, rules: readonly TextLimit[], prefix = "") {
   const fields = recordOf(value);
   for (const [key, label, maximum, fallback] of rules) {
     const text = trimRfqText(fields[key] || (fallback ? fields[fallback] : undefined));
     if (text.length > maximum) {
-      return `${prefix}${label} exceeds the ${maximum.toLocaleString("en-US")}-character limit. Shorten it and try again; nothing has been submitted.`;
+      return { field: key, message: `${prefix}${label} exceeds the ${maximum.toLocaleString("en-US")}-character limit. Shorten it and try again; nothing has been submitted.` };
     }
   }
-  return "";
+  return null;
+}
+
+export function rfqInputLimitIssue(value: unknown): InputLimitIssue | null {
+  const request = recordOf(value);
+  const items = Array.isArray(request.sourcingListItems) ? request.sourcingListItems : [];
+  if (items.length > maxSourcingListItems) return { message: sourcingListLimitError };
+
+  const requestIssue = textLimitIssue(request, requestTextLimits);
+  if (requestIssue) return requestIssue;
+
+  for (const [index, item] of items.entries()) {
+    const itemIssue = textLimitIssue(item, itemTextLimits, `Item ${index + 1} in the sourcing list: `);
+    if (itemIssue) return { message: itemIssue.message };
+  }
+  return null;
 }
 
 export function rfqInputLimitError(value: unknown) {
-  const request = recordOf(value);
-  const items = Array.isArray(request.sourcingListItems) ? request.sourcingListItems : [];
-  if (items.length > maxSourcingListItems) return sourcingListLimitError;
-
-  const requestError = textLimitError(request, requestTextLimits);
-  if (requestError) return requestError;
-
-  for (const [index, item] of items.entries()) {
-    const itemError = textLimitError(item, itemTextLimits, `Item ${index + 1} in the sourcing list: `);
-    if (itemError) return itemError;
-  }
-  return "";
+  return rfqInputLimitIssue(value)?.message ?? "";
 }

@@ -221,7 +221,9 @@ try {
     ? { status: 409, error: "Reference is already stored." }
     : confirmedReceipt);
   await scenario("10-overlong-text-retained-until-corrected", null, async (page, submissions) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(new URL("/request-quote", baseUrl).toString(), { waitUntil: "networkidle" });
+    await page.getByText("Add more details (optional)", { exact: true }).click();
     const need = page.locator("#sourcing-product-input");
     const accepted = "Q".repeat(11_999) + "Z";
     const tooLong = accepted + "!";
@@ -229,7 +231,13 @@ try {
     await need.fill(tooLong);
     const send = page.getByRole("button", { name: "Send sourcing request", exact: true });
     await send.click();
-    await page.locator("form").getByRole("alert").filter({ hasText: /Product details.*12,000/ }).waitFor();
+    const error = page.locator("form").getByRole("alert").filter({ hasText: /Product details.*12,000/ });
+    await error.waitFor();
+    assert.equal(await error.getAttribute("id"), "sourcing-product-input-error");
+    assert.match(await need.getAttribute("aria-describedby"), /sourcing-product-input-error/);
+    assert.ok(await need.evaluate((field) => field === document.activeElement));
+    const bounds = await error.boundingBox();
+    assert.ok(bounds && bounds.y >= 64 && bounds.y + bounds.height <= 844, "The overlength hint stays in the mobile viewport");
     assert.equal(submissions.length, 0, "Overlong input should not make a POST request");
     assert.equal(await need.inputValue(), tooLong);
     await need.fill(accepted);
@@ -666,6 +674,11 @@ try {
     await form.locator("#sourcing-product-input").fill("QA product requirement");
     await form.locator("#sourcing-email").fill("invalid");
     await checkFieldError("sourcing-email");
+    const longEmail = `${"a".repeat(229)}@example.test`;
+    await form.locator("#sourcing-email").fill(longEmail);
+    await checkFieldError("sourcing-email");
+    assert.match(await form.getByRole("alert").innerText(), /240-character limit/);
+    assert.equal(await form.locator("#sourcing-email").inputValue(), longEmail);
     assert.equal(submissions.length, 0, "Field validation failures must not send requests");
   });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));

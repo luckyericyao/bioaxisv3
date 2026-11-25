@@ -3,7 +3,7 @@ import { getBioAxisRequestId, retireBioAxisRequestId, rotateBioAxisRequestId } f
 import { requestErrorMessage, submitBioAxisRequest, type BioAxisRequestPayload } from "@/lib/submitBioAxisRequest";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 import { hasSourcingNeed, sourcingListLimitError, sourcingNeedError } from "@/lib/sourcingNeed";
-import { rfqInputLimitError } from "@/lib/rfqInputLimits";
+import { rfqInputLimitIssue } from "@/lib/rfqInputLimits";
 import { retainUnsubmittedSourcingItems } from "@/lib/sourcingListStorage";
 import { apiRequestType, createInitialIntakeState, hasValidEmail, initialProductContext } from "./intakeState";
 import type { IntakeState, SourcingIntakeFormProps, SubmitState } from "./types";
@@ -11,6 +11,8 @@ import { clearStoredSourcingSubmission, useSourcingListSession } from "./useSour
 
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 const verificationErrorMessage = "Please complete the verification and try again.";
+type PrimaryFieldName = "sourcing-product-input" | "email";
+type ValidationFailure = { message: string; field?: PrimaryFieldName };
 
 export function useSourcingIntake({
   requestType = "quote",
@@ -33,6 +35,7 @@ export function useSourcingIntake({
   const submittingRef = useRef(false);
   const [state, setState] = useState<IntakeState>(() => createInitialIntakeState(normalizedRequestType, defaultMessage, initialDetails));
   const [error, setError] = useState("");
+  const [invalidField, setInvalidField] = useState<PrimaryFieldName>();
   const [submitted, setSubmitted] = useState<SubmitState | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [requestReferenceConflict, setRequestReferenceConflict] = useState(false);
@@ -119,13 +122,16 @@ export function useSourcingIntake({
     setError("");
   }
 
-  function validate(request: BioAxisRequestPayload) {
-    const inputLimitError = rfqInputLimitError(request);
-    if (inputLimitError) return inputLimitError;
-    if (!hasSourcingNeed({ productList: state.productInput, catalogNumber: state.catalogNumber, message: state.notes, productContext: resolvedProductContext, sourcingListItems })) return sourcingNeedError;
-    if (!hasValidEmail(state.email)) return emailErrorMessage;
-    if (turnstileAvailable && !turnstileToken) return verificationErrorMessage;
-    return "";
+  function validate(request: BioAxisRequestPayload): ValidationFailure | null {
+    const inputLimit = rfqInputLimitIssue(request);
+    if (inputLimit) return {
+      message: inputLimit.message,
+      field: inputLimit.field === "productList" ? "sourcing-product-input" : inputLimit.field === "email" ? "email" : undefined
+    };
+    if (!hasSourcingNeed({ productList: state.productInput, catalogNumber: state.catalogNumber, message: state.notes, productContext: resolvedProductContext, sourcingListItems })) return { message: sourcingNeedError, field: "sourcing-product-input" };
+    if (!hasValidEmail(state.email)) return { message: emailErrorMessage, field: "email" };
+    if (turnstileAvailable && !turnstileToken) return { message: verificationErrorMessage };
+    return null;
   }
 
   function startAnotherRequest() {
@@ -191,19 +197,17 @@ export function useSourcingIntake({
       if (turnstileAvailable && !turnstileToken) {
         trackBioAxisEvent("turnstile_failure", { requestId, reason: "missing_token" });
       }
-      setError(validationError);
+      setInvalidField(validationError.field);
+      setError(validationError.message);
       setSubmitted(null);
-      if (validationError === emailErrorMessage) {
-        const emailInput = event.currentTarget.elements.namedItem("email");
-        if (emailInput instanceof HTMLElement) emailInput.focus();
-      }
-      if (validationError === sourcingNeedError) {
-        const needInput = event.currentTarget.elements.namedItem("sourcing-product-input");
-        if (needInput instanceof HTMLElement) needInput.focus();
+      if (validationError.field) {
+        const input = event.currentTarget.elements.namedItem(validationError.field);
+        if (input instanceof HTMLElement) input.focus();
       }
       return;
     }
 
+    setInvalidField(undefined);
     setError("");
     setRetryReferenceReady(false);
     const storedSubmission = handoffMode === "list" && availableSourcingItems.length && !includeSavedList
@@ -273,8 +277,8 @@ export function useSourcingIntake({
     setIncludeSavedList,
     restoredSessionInput,
     error,
-    emailInvalid: error === emailErrorMessage,
-    needInvalid: error === sourcingNeedError,
+    emailInvalid: Boolean(error) && invalidField === "email",
+    needInvalid: Boolean(error) && invalidField === "sourcing-product-input",
     hasSelectedNeed,
     submitted,
     submitting,
