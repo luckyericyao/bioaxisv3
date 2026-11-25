@@ -1,6 +1,6 @@
 import { getRequestTypeById, requestTypes } from "@/data/requestTypes";
 import { RequestTypeSelector } from "../RequestTypeSelector";
-import { optionalHelperText, timelineOptions } from "./constants";
+import { optionalHelperText, requestInputNames, timelineOptions } from "./constants";
 import { Field, SelectField, TextArea } from "./fields";
 import type { IntakeState, UpdateIntakeField } from "./types";
 import type { ReactNode } from "react";
@@ -10,15 +10,21 @@ export function SourcingDetailFields({
   chips,
   updateField,
   toggleChip,
+  fieldError,
   children
 }: {
   state: IntakeState;
   chips: string[];
   updateField: UpdateIntakeField;
   toggleChip: (chip: string) => void;
+  fieldError: (name: typeof requestInputNames[keyof typeof requestInputNames]) => string | undefined;
   children?: ReactNode;
 }) {
   const selectedRequestType = getRequestTypeById(state.requestType);
+  function fieldProps(key: keyof typeof requestInputNames) {
+    const id = requestInputNames[key];
+    return { id, inlineError: fieldError(id) };
+  }
 
   return (
     <details className="group border border-bioaxis-line bg-bioaxis-panel">
@@ -64,17 +70,17 @@ export function SourcingDetailFields({
             </div>
           </fieldset>
         ) : null}
-        <Field id="sourcing-name" label="Name optional" value={state.name} onChange={(value) => updateField("name", value)} />
-        <Field id="sourcing-company" label="Company or organization optional" value={state.company} onChange={(value) => updateField("company", value)} />
-        <Field id="sourcing-phone" label="Phone optional" value={state.phone} onChange={(value) => updateField("phone", value)} />
-        <Field id="sourcing-role" label="Role or title optional" value={state.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
-        <Field id="sourcing-supplier" label="Current supplier or brand optional" value={state.currentSupplier} onChange={(value) => updateField("currentSupplier", value)} />
-        <Field id="sourcing-catalog" label="Catalog number or SKU optional" value={state.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
-        <Field id="sourcing-quantity" label="Quantity or usage optional" value={state.quantity} onChange={(value) => updateField("quantity", value)} />
-        <SelectField id="sourcing-timeline" label="Timeline optional" value={state.timeline} options={timelineOptions} onChange={(value) => updateField("timeline", value)} />
-        <Field id="sourcing-region" label="Shipping region optional" value={state.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
+        <Field {...fieldProps("name")} label="Name optional" value={state.name} onChange={(value) => updateField("name", value)} />
+        <Field {...fieldProps("organization")} label="Company or organization optional" value={state.company} onChange={(value) => updateField("company", value)} />
+        <Field {...fieldProps("phone")} label="Phone optional" value={state.phone} onChange={(value) => updateField("phone", value)} />
+        <Field {...fieldProps("roleTitle")} label="Role or title optional" value={state.roleTitle} onChange={(value) => updateField("roleTitle", value)} />
+        <Field {...fieldProps("currentSupplier")} label="Current supplier or brand optional" value={state.currentSupplier} onChange={(value) => updateField("currentSupplier", value)} />
+        <Field {...fieldProps("catalogNumber")} label="Catalog number or SKU optional" value={state.catalogNumber} onChange={(value) => updateField("catalogNumber", value)} />
+        <Field {...fieldProps("quantity")} label="Quantity or usage optional" value={state.quantity} onChange={(value) => updateField("quantity", value)} />
+        <SelectField {...fieldProps("timeline")} label="Timeline optional" value={state.timeline} options={timelineOptions} onChange={(value) => updateField("timeline", value)} />
+        <Field {...fieldProps("shippingRegion")} label="Shipping region optional" value={state.shippingRegion} onChange={(value) => updateField("shippingRegion", value)} />
         <TextArea
-          id="sourcing-docs"
+          {...fieldProps("documentationNeeds")}
           label="Required documents optional"
           value={state.requiredDocuments}
           rows={4}
@@ -82,7 +88,7 @@ export function SourcingDetailFields({
           onChange={(value) => updateField("requiredDocuments", value)}
         />
         <TextArea
-          id="sourcing-notes"
+          {...fieldProps("message")}
           label="Notes optional"
           value={state.notes}
           rows={4}

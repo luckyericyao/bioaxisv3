@@ -58,15 +58,18 @@ export function SelectField({
   label,
   value,
   options,
+  inlineError,
   onChange
 }: {
   id: string;
   label: string;
   value: string;
   options: string[];
+  inlineError?: string;
   onChange: (value: string) => void;
 }) {
   const visibleOptions = value && !options.includes(value) ? [value, ...options] : options;
+  const errorId = inlineError ? `${id}-error` : undefined;
   return (
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-semibold  text-bioaxis-steel">
@@ -76,6 +79,8 @@ export function SelectField({
         id={id}
         name={id}
         value={value}
+        aria-invalid={Boolean(errorId) || undefined}
+        aria-describedby={errorId}
         onChange={(event) => onChange(event.target.value)}
         className="field-focus min-h-12 w-full border border-bioaxis-line bg-bioaxis-black px-4 text-base text-bioaxis-text"
       >
@@ -86,6 +91,7 @@ export function SelectField({
           </option>
         ))}
       </select>
+      {inlineError ? <p id={errorId} role="alert" className="mt-2 text-sm text-red-800">{inlineError}</p> : null}
     </div>
   );
 }

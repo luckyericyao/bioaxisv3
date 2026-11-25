@@ -25,7 +25,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const { title = "What do you need?", compact = false, handoffNotice, productFieldLabel, submitLabel,
     successTitle = "Request received", optionalChips, onActivityChange } = props;
   const intake = useSourcingIntake(props);
-  const { state, availableSourcingItems, includeSavedList, setIncludeSavedList, error, emailInvalid, needInvalid, hasSelectedNeed, submitted, submitting,
+  const { state, availableSourcingItems, includeSavedList, setIncludeSavedList, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
@@ -87,12 +87,12 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
           <legend className="sr-only">Request details</legend>
           <TextArea id="sourcing-product-input" label={productFieldLabel ?? "What do you need?"}
             value={state.productInput} rows={compact ? 3 : 4} required={!hasSelectedNeed}
-            inlineError={needInvalid ? error : undefined}
+            inlineError={fieldError("sourcing-product-input")}
             helperText={hasSelectedNeed ? "Your selected product or list is included. Add details only if useful." : "A product name, catalog reference or rough purchasing list is enough."}
             placeholder="Product, catalog reference, list or sourcing need"
             onChange={(value) => updateField("productInput", value)} />
           <Field id="sourcing-email" name="email" label="Email" type="email" value={state.email} required
-            inlineError={emailInvalid ? error : undefined}
+            inlineError={fieldError("email")}
             autoComplete="email" inputMode="email" placeholder="you@organization.com"
             onChange={(value) => updateField("email", value)} />
         </fieldset>
@@ -105,7 +105,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
 
       <fieldset disabled={submitting} className="min-w-0">
         <legend className="sr-only">Optional request details</legend>
-        <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip}>
+        <SourcingDetailFields state={state} chips={chips} updateField={updateField} toggleChip={toggleChip} fieldError={fieldError}>
           <details data-request-starters="true" className="border-t border-bioaxis-line pt-4 md:col-span-2">
             <summary className="flex min-h-11 cursor-pointer items-center text-sm font-medium">Use a request starter</summary>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -119,7 +119,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
 
       <TurnstileWidget resetKey={turnstileResetKey} compact={compact}
         onAvailabilityChange={setTurnstileAvailable} onFailure={handleTurnstileFailure} onTokenChange={setTurnstileToken} />
-      {error && !needInvalid && !emailInvalid ? <div><p id="sourcing-intake-error" role="alert" className="text-red-800">{error}</p>
+      {error && !hasFieldError ? <div><p id="sourcing-intake-error" role="alert" className="text-red-800">{error}</p>
         {requestReferenceConflict ? <button type="button" onClick={rotateRequestReference}
           className="action-secondary mt-3">Use a new request reference</button> : null}</div> : null}
       <div data-submit-actions="true" className="grid justify-items-start gap-3 border-t border-bioaxis-line pt-5">

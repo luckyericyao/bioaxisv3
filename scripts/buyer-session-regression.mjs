@@ -681,6 +681,41 @@ try {
     assert.equal(await form.locator("#sourcing-email").inputValue(), longEmail);
     assert.equal(submissions.length, 0, "Field validation failures must not send requests");
   });
+  await scenario("28-collapsed-optional-field-errors-are-revealed", null, async (page, submissions) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(new URL("/request-quote", baseUrl).href, { waitUntil: "networkidle" });
+    await page.locator("#sourcing-product-input").fill("QA consumables request");
+    await page.locator("#sourcing-email").fill("qa@example.test");
+    const details = page.locator("details").filter({ has: page.locator("#sourcing-docs") });
+    const summary = details.locator(":scope > summary");
+    await summary.press("Enter");
+    const send = page.getByRole("button", { name: "Send sourcing request", exact: true });
+
+    for (const [id, max] of [["sourcing-docs", 1200], ["sourcing-notes", 8000]]) {
+      const field = page.locator(`#${id}`);
+      const original = "Q".repeat(max + 1);
+      await field.fill(original);
+      await summary.press("Enter");
+      assert.equal(await details.getAttribute("open"), null);
+      await send.click();
+      const alert = details.getByRole("alert");
+      await alert.waitFor();
+      assert.equal(await alert.getAttribute("id"), `${id}-error`);
+      assert.equal(await field.getAttribute("aria-describedby"), `${id}-error`);
+      assert.ok(await field.evaluate((node) => node === document.activeElement));
+      const bounds = await alert.boundingBox();
+      assert.ok(bounds && bounds.y >= 64 && bounds.y + bounds.height <= 844, "The optional error stays in the mobile viewport");
+      assert.equal(await field.inputValue(), original);
+      assert.equal(submissions.length, 0);
+      await field.fill(original.slice(0, max));
+    }
+
+    await send.click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.equal(submissions[0].documentationNeeds, "Q".repeat(1200));
+    assert.equal(submissions[0].message, "Q".repeat(8000));
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

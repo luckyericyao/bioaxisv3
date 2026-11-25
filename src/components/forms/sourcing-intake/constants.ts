@@ -38,3 +38,18 @@ export const requestStarterTemplates = [
     value: "Recurring demand for:\nEstimated monthly or annual usage:\nPackaging, lead time, or backup-source requirements:"
   }
 ];
+export const requestInputNames = {
+  productList: "sourcing-product-input",
+  email: "email",
+  name: "sourcing-name",
+  organization: "sourcing-company",
+  phone: "sourcing-phone",
+  roleTitle: "sourcing-role",
+  currentSupplier: "sourcing-supplier",
+  catalogNumber: "sourcing-catalog",
+  quantity: "sourcing-quantity",
+  timeline: "sourcing-timeline",
+  shippingRegion: "sourcing-region",
+  documentationNeeds: "sourcing-docs",
+  message: "sourcing-notes"
+} as const;
