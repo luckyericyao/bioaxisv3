@@ -25,13 +25,16 @@ type SourcingListInput = Omit<
   requestedAction?: string;
 };
 
+type DrawerMode = "review" | "request-edit";
+
 type SourcingListContextValue = {
   items: SourcingListItem[];
   storageNotice: string;
   addItem: (item: SourcingListInput, restoreFocusTo?: HTMLElement | null) => void;
   updateItem: (id: string, patch: Partial<SourcingListItem>) => void;
   removeItem: (id: string) => void;
-  openDrawer: (restoreFocusTo?: HTMLElement | null) => void;
+  openDrawer: (restoreFocusTo?: HTMLElement | null, mode?: DrawerMode) => void;
+  editInvalidItem: (item: Pick<SourcingListItem, "id" | "addedAt">, restoreFocusTo: HTMLElement) => boolean;
 };
 
 type DrawerTextField = "quantity" | "currentSupplier" | "catalogNumber" | "notes";
@@ -65,6 +68,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [items, setItems] = useState<SourcingListItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<DrawerMode>("review");
   const [memoryOnly, setMemoryOnly] = useState(false);
   const [needsReview, setNeedsReview] = useState(false);
   const [revealedItemError, setRevealedItemError] = useState<string | null>(null);
@@ -114,12 +118,13 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     lastActiveElementRef.current = activeElement instanceof HTMLElement ? activeElement : null;
   }, []);
 
-  const openDrawer = useCallback((restoreFocusTo?: HTMLElement | null) => {
+  const openDrawer = useCallback((restoreFocusTo?: HTMLElement | null, mode: DrawerMode = "review") => {
     if (restoreFocusTo) {
       lastActiveElementRef.current = restoreFocusTo;
     } else {
       rememberActiveElement();
     }
+    setDrawerMode(mode);
     setDrawerOpen(true);
   }, [rememberActiveElement]);
 
@@ -132,6 +137,28 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       lastActiveElementRef.current = null;
     });
   }, []);
+
+  const revealItemError = useCallback((item: SourcingListItem) => {
+    const issue = sourcingListItemInputIssue(item);
+    if (!issue) return false;
+    setRevealedItemError(item.id);
+    requestAnimationFrame(() => {
+      const rows = dialogRef.current?.querySelectorAll<HTMLElement>("[data-sourcing-list-item]");
+      const row = rows && Array.from(rows).find((element) => element.dataset.sourcingListItem === item.id);
+      const field = row?.querySelector<HTMLElement>(`[data-item-field="${issue.field}"]`);
+      field?.focus({ preventScroll: true });
+      field?.scrollIntoView({ block: "center" });
+    });
+    return true;
+  }, []);
+
+  const editInvalidItem = useCallback((target: Pick<SourcingListItem, "id" | "addedAt">, restoreFocusTo: HTMLElement) => {
+    syncSavedList();
+    const item = listRef.current.items.find((row) => row.id === target.id && row.addedAt === target.addedAt);
+    if (!item || !revealItemError(item)) return false;
+    openDrawer(restoreFocusTo, "request-edit");
+    return true;
+  }, [openDrawer, revealItemError, syncSavedList]);
 
   useEffect(() => {
     syncSavedList();
@@ -229,9 +256,10 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
       removeItem: (id) => {
         changeList((current) => current.some((item) => item.id === id) ? current.filter((item) => item.id !== id) : current);
       },
-      openDrawer
+      openDrawer,
+      editInvalidItem
     }),
-    [changeList, items, openDrawer, storageNotice]
+    [changeList, editInvalidItem, items, openDrawer, storageNotice]
   );
 
   function fieldProps(item: SourcingListItem, index: number, field: DrawerTextField) {
@@ -250,19 +278,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     const { items: latest, unsaved } = listRef.current;
     if (!latest.length || (latest.length > maxSourcingListItems && (!reviewBatch || unsaved || !stored.available))) return;
     const currentItems = reviewBatch ? latest.slice(0, maxSourcingListItems) : latest;
-    for (const item of currentItems) {
-      const issue = sourcingListItemInputIssue(item);
-      if (!issue) continue;
-      setRevealedItemError(item.id);
-      requestAnimationFrame(() => {
-        const rows = dialogRef.current?.querySelectorAll<HTMLElement>("[data-sourcing-list-item]");
-        const row = rows && Array.from(rows).find((element) => element.dataset.sourcingListItem === item.id);
-        const field = row?.querySelector<HTMLElement>(`[data-item-field="${issue.field}"]`);
-        field?.focus({ preventScroll: true });
-        field?.scrollIntoView({ block: "center" });
-      });
-      return;
-    }
+    if (currentItems.some(revealItemError)) return;
     setRevealedItemError(null);
     const params = new URLSearchParams({
       requestType: "product-list-review",
@@ -309,9 +325,13 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             <div className="flex items-start justify-between gap-4 border-b border-bioaxis-line p-5">
               <div>
                 <p className="text-xs font-semibold  text-bioaxis-accent">Sourcing list</p>
-                <h2 id="sourcing-list-title" className="mt-2 text-2xl font-semibold  text-bioaxis-text">Review items before sending.</h2>
+                <h2 id="sourcing-list-title" className="mt-2 text-2xl font-semibold  text-bioaxis-text">
+                  {drawerMode === "request-edit" ? "Edit saved sourcing items" : "Review items before sending."}
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-bioaxis-muted">
-                  Add quantities, supplier context, sample needs, and documentation needs. BioAxis will carry the list into a structured sourcing request.
+                  {drawerMode === "request-edit"
+                    ? "Changes stay in your sourcing list. Return to the current request when you are done."
+                    : "Add quantities, supplier context, sample needs, and documentation needs. BioAxis will carry the list into a structured sourcing request."}
                 </p>
               </div>
               <button
@@ -398,18 +418,18 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             </div>
 
             <div className="border-t border-bioaxis-line p-5">
-              {remainingItems > 0 ? <p id="sourcing-list-batch-note" role="status" className="mb-3 text-sm text-bioaxis-muted">
+              {drawerMode === "review" && remainingItems > 0 ? <p id="sourcing-list-batch-note" role="status" className="mb-3 text-sm text-bioaxis-muted">
                 {memoryOnly ? `This tab-only list exceeds the ${maxSourcingListItems}-item limit per request.`
                   : `${remainingItems} ${remainingItems === 1 ? "item" : "items"} will stay in the saved list for a separate request.`}
               </p> : null}
               <button
                 type="button"
-                disabled={items.length === 0 || (remainingItems > 0 && memoryOnly)}
-                aria-describedby={remainingItems > 0 ? "sourcing-list-batch-note" : undefined}
-                onClick={() => submitSourcingList(remainingItems > 0)}
+                disabled={drawerMode === "review" && (items.length === 0 || (remainingItems > 0 && memoryOnly))}
+                aria-describedby={drawerMode === "review" && remainingItems > 0 ? "sourcing-list-batch-note" : undefined}
+                onClick={drawerMode === "request-edit" ? closeDrawer : () => submitSourcingList(remainingItems > 0)}
                 className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {remainingItems > 0 && !memoryOnly ? `Review first ${maxSourcingListItems} items` : "Send list for review"}
+                {drawerMode === "request-edit" ? "Back to request" : remainingItems > 0 && !memoryOnly ? `Review first ${maxSourcingListItems} items` : "Send list for review"}
               </button>
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { maxSourcingListItems, sourcingListLimitError } from "./sourcingNeed";
 
 type TextLimit = readonly [key: string, label: string, maximum: number, fallback?: string];
-type InputLimitIssue = { message: string; field?: string };
+type InputLimitIssue = { message: string; field?: string; listItemIndex?: number };
 
 const requestTextLimits: readonly TextLimit[] = [
   ["productList", "Product details", 12_000],
@@ -60,7 +60,7 @@ export function rfqInputLimitIssue(value: unknown): InputLimitIssue | null {
 
   for (const [index, item] of items.entries()) {
     const itemIssue = sourcingListItemInputIssue(item);
-    if (itemIssue) return { message: `Item ${index + 1} in the sourcing list: ${itemIssue.message}` };
+    if (itemIssue) return { message: `Item ${index + 1} in the sourcing list: ${itemIssue.message}`, listItemIndex: index };
   }
   return null;
 }

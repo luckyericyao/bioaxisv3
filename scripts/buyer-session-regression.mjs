@@ -805,6 +805,46 @@ try {
     assert.equal(saved.at(-1).notes, "R".repeat(1201), "An out-of-batch invalid row stays saved and does not block review");
     assert.equal(submissions.length, 0);
   });
+  await scenario("32-direct-rfq-list-errors-open-the-editable-row", seedTwoSourcingItems, async (page, submissions) => {
+    const requestUrl = new URL("/request-quote?requestType=sample", baseUrl).href;
+    await page.goto(requestUrl, { waitUntil: "networkidle" });
+    const input = page.locator("#sourcing-product-input");
+    const email = page.locator("#sourcing-email");
+    const notes = page.locator("#sourcing-notes");
+    await input.fill("QA direct sourcing request");
+    await email.fill("qa@example.test");
+    await page.getByText("Add more details (optional)", { exact: true }).click();
+    await notes.fill("QA request-specific notes");
+    await includeSavedList(page).check();
+    const dialog = await editSavedList(page);
+    const quantity = dialog.getByRole("article", { name: "QA tabs PCR plates", exact: true }).getByLabel("Quantity", { exact: true });
+    await quantity.fill("Q".repeat(121));
+    await dialog.getByRole("button", { name: "Back to request", exact: true }).click();
+    await dialog.waitFor({ state: "hidden" });
+
+    const send = page.getByRole("button", { name: "Send sourcing request", exact: true });
+    await send.click();
+    const error = dialog.getByRole("alert").filter({ hasText: /Quantity exceeds the 120-character limit/ });
+    await error.waitFor();
+    await page.waitForFunction((id) => document.activeElement?.getAttribute("aria-describedby") === id, await error.getAttribute("id"));
+    assert.equal(await quantity.inputValue(), "Q".repeat(121));
+    assert.equal(await quantity.getAttribute("aria-describedby"), await error.getAttribute("id"));
+    assert.equal(await page.locator("#sourcing-intake-error").count(), 0, "The inline drawer error replaces the generic form error");
+    assert.equal(submissions.length, 0);
+
+    await quantity.fill("8 cases");
+    await dialog.getByRole("button", { name: "Back to request", exact: true }).click();
+    await dialog.waitFor({ state: "hidden" });
+    await page.waitForFunction(() => document.activeElement?.textContent.trim() === "Send sourcing request");
+    assert.equal(await input.inputValue(), "QA direct sourcing request");
+    assert.equal(await email.inputValue(), "qa@example.test");
+    assert.equal(await notes.inputValue(), "QA request-specific notes");
+    assert.equal(page.url(), requestUrl, "Returning to the request must keep its original URL and type");
+    assert.equal(await includeSavedList(page).isChecked(), true);
+    assert.equal((await readSavedRows(page))[1].quantity, "8 cases");
+    assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null, "The editor must not replace the current RFQ");
+    assert.equal(submissions.length, 0, "Correcting an attached item must not automatically submit");
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

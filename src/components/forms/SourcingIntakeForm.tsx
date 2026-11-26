@@ -99,7 +99,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
         {availableSourcingItems.length ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
           submitting={submitting} onIncludeChange={setIncludeSavedList}
-          onEdit={(target) => openDrawer(target)} /> : null}
+          onEdit={(target) => openDrawer(target, "request-edit")} /> : null}
         {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>
 
