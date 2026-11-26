@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useRef } from "react";
 import type { BioAxisProductContext } from "@/lib/submitBioAxisRequest";
 import type { SourcingListItem } from "@/lib/sourcingListStorage";
 import { maxSourcingListItems } from "@/lib/sourcingNeed";
@@ -48,34 +48,49 @@ export function RequestContextCard({ productContext }: {
   );
 }
 
-export function SourcingListSummary({ items, included, submitting, onIncludeChange, onEdit }: {
+export function SourcingListSummary({ items, included, includedItems, batchSelected, submitting, onIncludeChange, onSelectBatch, onEdit }: {
   items: SourcingListItem[];
   included: boolean;
+  includedItems: SourcingListItem[];
+  batchSelected: boolean;
   submitting: boolean;
   onIncludeChange: (included: boolean) => void;
+  onSelectBatch?: () => void;
   onEdit?: (target: HTMLButtonElement) => void;
 }) {
   const limitId = useId();
-  const overLimit = included && items.length > maxSourcingListItems;
+  const includeRef = useRef<HTMLInputElement>(null);
+  const displayItems = included ? includedItems : items;
+  const count = displayItems.length;
+  const remainder = items.length - includedItems.length;
+  const overLimit = included && count > maxSourcingListItems;
   return (
     <section data-sourcing-list-summary="true" data-sourcing-list-context="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft px-4 py-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium">Sourcing list: {items.length} {items.length === 1 ? "item" : "items"} {overLimit ? "selected" : included ? "included" : "saved"}</span>
+        <span className="text-sm font-medium">Sourcing list: {count} {count === 1 ? "item" : "items"} {overLimit ? "selected" : included ? "included" : "saved"}</span>
         {onEdit ? <button type="button" aria-haspopup="dialog" onClick={(event) => onEdit(event.currentTarget)}
           className="min-h-11 shrink-0 px-2 text-sm font-medium text-bioaxis-accent">Edit list</button> : null}
       </div>
       <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-        <input type="checkbox" checked={included} disabled={submitting} aria-describedby={overLimit ? limitId : undefined}
+        <input ref={includeRef} type="checkbox" checked={included} disabled={submitting} aria-describedby={overLimit || batchSelected ? limitId : undefined}
           onChange={(event) => onIncludeChange(event.target.checked)} className="field-focus size-4 accent-bioaxis-accent" />
         Include saved sourcing list
       </label>
       {overLimit ? <p id={limitId} role="status" className="mb-2 text-sm text-red-800">
         Up to {maxSourcingListItems} sourcing-list items per request. Your saved list has not changed.
       </p> : null}
+      {overLimit && onSelectBatch ? <button type="button" disabled={submitting} className="action-secondary mb-2"
+        aria-describedby={limitId} onClick={() => { onSelectBatch(); includeRef.current?.focus(); }}>
+        Use first {maxSourcingListItems} items
+      </button> : null}
+      {batchSelected ? <p id={limitId} role="status" className="mb-2 text-sm text-bioaxis-muted">
+        {remainder > 0 ? `${remainder} ${remainder === 1 ? "item stays" : "items stay"} in your list for a separate request.`
+          : "Only the items in your selected batch are included."}
+      </p> : null}
       <details>
-        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">Review saved items</summary>
+        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">{batchSelected ? "Review selected items" : "Review saved items"}</summary>
         <ul className="grid gap-2 border-t border-bioaxis-line pt-3 text-sm">
-          {items.map((item) => <li key={item.id} className="break-words">{item.title}</li>)}
+          {displayItems.map((item) => <li key={item.id} className="break-words">{item.title}</li>)}
         </ul>
       </details>
     </section>

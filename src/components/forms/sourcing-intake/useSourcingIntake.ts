@@ -3,7 +3,7 @@ import { useSourcingList } from "@/components/sourcing/SourcingListProvider";
 import { getBioAxisRequestId, retireBioAxisRequestId, rotateBioAxisRequestId } from "@/lib/clientRequestId";
 import { requestErrorMessage, submitBioAxisRequest, type BioAxisRequestPayload } from "@/lib/submitBioAxisRequest";
 import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
-import { hasSourcingNeed, sourcingListLimitError, sourcingNeedError } from "@/lib/sourcingNeed";
+import { hasSourcingNeed, maxSourcingListItems, sourcingListLimitError, sourcingNeedError } from "@/lib/sourcingNeed";
 import { rfqInputLimitIssue } from "@/lib/rfqInputLimits";
 import { retainUnsubmittedSourcingItems, type SourcingListItem } from "@/lib/sourcingListStorage";
 import { requestInputNames } from "./constants";
@@ -30,7 +30,7 @@ export function useSourcingIntake({
   handoffMode,
   listHandoffId
 }: SourcingIntakeFormProps) {
-  const { editInvalidItem } = useSourcingList();
+  const { editInvalidItem, items: liveSavedList } = useSourcingList();
   const normalizedRequestType = apiRequestType(requestType);
   const startedAtRef = useRef(Date.now());
   const requestIdRef = useRef<string | null>(null);
@@ -72,13 +72,29 @@ export function useSourcingIntake({
   );
   const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
   const [includeListChoice, setIncludeListChoice] = useState<boolean | null>(null);
+  const [selectedBatch, setSelectedBatch] = useState<ReadonlyMap<string, string> | null>(null);
   const includeSavedList = includeListChoice ?? restoredListHandoff;
-  const sourcingListItems = includeSavedList ? availableSourcingItems : [];
+  const sourcingListItems = !includeSavedList ? [] : selectedBatch
+    ? availableSourcingItems.filter((item) => selectedBatch.get(item.id) === item.addedAt)
+    : availableSourcingItems;
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
+  const canSelectBatch = sourcingListItems.length > maxSourcingListItems && sourcingListItems.every(
+    (item) => liveSavedList.some((saved) => saved.id === item.id && saved.addedAt === item.addedAt)
+  );
 
   function setIncludeSavedList(included: boolean) {
     setIncludeListChoice(included);
-    if (!included) setError((current) => current === sourcingListLimitError ? "" : current);
+    if (!included) {
+      setSelectedBatch(null);
+      setError((current) => current === sourcingListLimitError ? "" : current);
+    }
+  }
+
+  function selectSourcingBatch() {
+    if (submittingRef.current || !canSelectBatch) return;
+    // Pin the reviewed rows so later edits cannot silently replace them with new rows.
+    setSelectedBatch(new Map(sourcingListItems.slice(0, maxSourcingListItems).map((item) => [item.id, item.addedAt])));
+    setError((current) => current === sourcingListLimitError ? "" : current);
   }
 
   const trackIntakeStart = useCallback(() => {
@@ -284,6 +300,10 @@ export function useSourcingIntake({
   return {
     state,
     availableSourcingItems,
+    sourcingListItems,
+    hasSelectedBatch: selectedBatch !== null,
+    canSelectBatch,
+    selectSourcingBatch,
     includeSavedList,
     setIncludeSavedList,
     restoredSessionInput,

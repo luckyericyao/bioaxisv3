@@ -25,7 +25,8 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
   const { title = "What do you need?", compact = false, handoffNotice, productFieldLabel, submitLabel,
     successTitle = "Request received", optionalChips, onActivityChange } = props;
   const intake = useSourcingIntake(props);
-  const { state, availableSourcingItems, includeSavedList, setIncludeSavedList, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
+  const { state, availableSourcingItems, sourcingListItems, hasSelectedBatch, canSelectBatch, selectSourcingBatch,
+    includeSavedList, setIncludeSavedList, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
@@ -98,7 +99,8 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
         </fieldset>
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
         {availableSourcingItems.length ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
-          submitting={submitting} onIncludeChange={setIncludeSavedList}
+          includedItems={sourcingListItems} batchSelected={hasSelectedBatch}
+          submitting={submitting} onIncludeChange={setIncludeSavedList} onSelectBatch={canSelectBatch ? selectSourcingBatch : undefined}
           onEdit={(target) => openDrawer(target, "request-edit")} /> : null}
         {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>

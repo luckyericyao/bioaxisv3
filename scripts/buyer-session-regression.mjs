@@ -845,6 +845,52 @@ try {
     assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null, "The editor must not replace the current RFQ");
     assert.equal(submissions.length, 0, "Correcting an attached item must not automatically submit");
   });
+  await scenario("33-oversized-attachment-can-be-batched-in-the-current-request", seedLargeSourcingList, async (page, submissions) => {
+    const requestUrl = new URL("/request-quote?requestType=sample", baseUrl).href;
+    await page.goto(requestUrl, { waitUntil: "networkidle" });
+    const input = page.locator("#sourcing-product-input");
+    const email = page.locator("#sourcing-email");
+    const included = includeSavedList(page);
+    const summary = page.locator("[data-sourcing-list-summary]");
+    const before = await readSavedRows(page);
+    await input.fill("QA existing request details");
+    await email.fill("qa@example.test");
+    await included.check();
+    assert.equal(await summary.getByText("Sourcing list: 31 items selected", { exact: true }).count(), 1);
+    await summary.getByRole("button", { name: "Use first 30 items", exact: true }).press("Enter");
+    await summary.getByText("Sourcing list: 30 items included", { exact: true }).waitFor();
+    assert.equal(await summary.getByRole("status").innerText(), "1 item stays in your list for a separate request.");
+    assert.ok(await included.evaluate((node) => node === document.activeElement), "Selecting a batch must leave keyboard focus in the list controls");
+    assert.deepEqual(await readSavedRows(page), before);
+    assert.equal(page.url(), requestUrl);
+    assert.equal(await email.inputValue(), "qa@example.test");
+    assert.equal(await input.inputValue(), "QA existing request details");
+    assert.equal(submissions.length, 0, "Selecting a batch must not send it");
+
+    const other = await page.context().newPage();
+    try {
+      await other.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+      await other.evaluate(() => {
+        const key = "bioaxis:sourcing-list";
+        const [removed, ...rest] = JSON.parse(localStorage.getItem(key));
+        rest[0].quantity = "updated quantity";
+        rest.push({ ...removed, addedAt: new Date().toISOString() }, { ...removed, id: "qa-new-row", title: "QA new row" });
+        localStorage.setItem(key, JSON.stringify(rest));
+      });
+      await summary.getByText("Sourcing list: 29 items included", { exact: true }).waitFor();
+      assert.equal(await summary.getByRole("status").innerText(), "3 items stay in your list for a separate request.");
+    } finally { await other.close(); }
+
+    await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.equal(submissions[0].requestType, "sample");
+    assert.equal(submissions[0].productList, "QA existing request details");
+    assert.equal(submissions[0].email, "qa@example.test");
+    assert.deepEqual(submissions[0].sourcingListItems.map((item) => item.id), before.slice(1, 30).map((item) => item.id));
+    assert.equal(submissions[0].sourcingListItems[0].quantity, "updated quantity");
+    assert.deepEqual((await readSavedRows(page)).map((item) => item.id), [before[30].id, before[0].id, "qa-new-row"]);
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);
