@@ -72,10 +72,10 @@ export function useSourcingIntake({
   );
   const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
   const [includeListChoice, setIncludeListChoice] = useState<boolean | null>(null);
-  const [selectedBatch, setSelectedBatch] = useState<ReadonlyMap<string, string> | null>(null);
+  const [attachment, setAttachment] = useState<{ rows: ReadonlyMap<string, string>; batched: boolean } | null>(null);
   const includeSavedList = includeListChoice ?? restoredListHandoff;
-  const sourcingListItems = !includeSavedList ? [] : selectedBatch
-    ? availableSourcingItems.filter((item) => selectedBatch.get(item.id) === item.addedAt)
+  const sourcingListItems = !includeSavedList ? [] : attachment
+    ? availableSourcingItems.filter((item) => attachment.rows.get(item.id) === item.addedAt)
     : availableSourcingItems;
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
   const canSelectBatch = sourcingListItems.length > maxSourcingListItems && sourcingListItems.every(
@@ -84,8 +84,11 @@ export function useSourcingIntake({
 
   function setIncludeSavedList(included: boolean) {
     setIncludeListChoice(included);
+    setAttachment(included ? {
+      rows: new Map(availableSourcingItems.map((item) => [item.id, item.addedAt])),
+      batched: false
+    } : null);
     if (!included) {
-      setSelectedBatch(null);
       setError((current) => current === sourcingListLimitError ? "" : current);
     }
   }
@@ -93,7 +96,10 @@ export function useSourcingIntake({
   function selectSourcingBatch() {
     if (submittingRef.current || !canSelectBatch) return;
     // Pin the reviewed rows so later edits cannot silently replace them with new rows.
-    setSelectedBatch(new Map(sourcingListItems.slice(0, maxSourcingListItems).map((item) => [item.id, item.addedAt])));
+    setAttachment({
+      rows: new Map(sourcingListItems.slice(0, maxSourcingListItems).map((item) => [item.id, item.addedAt])),
+      batched: true
+    });
     setError((current) => current === sourcingListLimitError ? "" : current);
   }
 
@@ -301,7 +307,7 @@ export function useSourcingIntake({
     state,
     availableSourcingItems,
     sourcingListItems,
-    hasSelectedBatch: selectedBatch !== null,
+    hasSelectedBatch: attachment?.batched ?? false,
     canSelectBatch,
     selectSourcingBatch,
     includeSavedList,

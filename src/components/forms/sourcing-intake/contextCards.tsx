@@ -64,6 +64,11 @@ export function SourcingListSummary({ items, included, includedItems, batchSelec
   const count = displayItems.length;
   const remainder = items.length - includedItems.length;
   const overLimit = included && count > maxSourcingListItems;
+  const scopeNotice = batchSelected
+    ? remainder > 0 ? `${remainder} ${remainder === 1 ? "item stays" : "items stay"} in your list for a separate request.` : "Only the items in your selected batch are included."
+    : included && !overLimit && remainder > 0
+      ? `${remainder} saved ${remainder === 1 ? "item is" : "items are"} not included. Clear and reselect the checkbox to include the latest list.`
+      : "";
   return (
     <section data-sourcing-list-summary="true" data-sourcing-list-context="true" className="rounded border border-bioaxis-line bg-bioaxis-panelSoft px-4 py-3">
       <div className="flex items-center justify-between gap-3">
@@ -72,7 +77,7 @@ export function SourcingListSummary({ items, included, includedItems, batchSelec
           className="min-h-11 shrink-0 px-2 text-sm font-medium text-bioaxis-accent">Edit list</button> : null}
       </div>
       <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-        <input ref={includeRef} type="checkbox" checked={included} disabled={submitting} aria-describedby={overLimit || batchSelected ? limitId : undefined}
+        <input ref={includeRef} type="checkbox" checked={included} disabled={submitting} aria-describedby={overLimit || scopeNotice ? limitId : undefined}
           onChange={(event) => onIncludeChange(event.target.checked)} className="field-focus size-4 accent-bioaxis-accent" />
         Include saved sourcing list
       </label>
@@ -83,12 +88,9 @@ export function SourcingListSummary({ items, included, includedItems, batchSelec
         aria-describedby={limitId} onClick={() => { onSelectBatch(); includeRef.current?.focus(); }}>
         Use first {maxSourcingListItems} items
       </button> : null}
-      {batchSelected ? <p id={limitId} role="status" className="mb-2 text-sm text-bioaxis-muted">
-        {remainder > 0 ? `${remainder} ${remainder === 1 ? "item stays" : "items stay"} in your list for a separate request.`
-          : "Only the items in your selected batch are included."}
-      </p> : null}
+      {scopeNotice ? <p id={limitId} role="status" className="mb-2 text-sm text-bioaxis-muted">{scopeNotice}</p> : null}
       <details>
-        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">{batchSelected ? "Review selected items" : "Review saved items"}</summary>
+        <summary className="min-h-11 cursor-pointer py-2 text-sm text-bioaxis-muted">{included ? "Review included items" : "Review saved items"}</summary>
         <ul className="grid gap-2 border-t border-bioaxis-line pt-3 text-sm">
           {displayItems.map((item) => <li key={item.id} className="break-words">{item.title}</li>)}
         </ul>

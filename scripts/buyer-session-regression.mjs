@@ -891,6 +891,47 @@ try {
     assert.equal(submissions[0].sourcingListItems[0].quantity, "updated quantity");
     assert.deepEqual((await readSavedRows(page)).map((item) => item.id), [before[30].id, before[0].id, "qa-new-row"]);
   });
+  await scenario("34-ordinary-attachments-do-not-include-unreviewed-items", seedTwoSourcingItems, async (page, submissions) => {
+    await page.goto(new URL("/request-quote", baseUrl).href, { waitUntil: "networkidle" });
+    const include = includeSavedList(page);
+    const summary = page.locator("[data-sourcing-list-summary]");
+    const before = await readSavedRows(page);
+    await include.check();
+    const other = await page.context().newPage();
+    try {
+      await other.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+      const addSavedItem = (id) => other.evaluate((id) => {
+        const key = "bioaxis:sourcing-list";
+        const saved = JSON.parse(localStorage.getItem(key));
+        saved[0].quantity = "18 racks";
+        saved.push({ id, title: `QA ${id}`, href: "/products/liquid-handling", addedAt: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(saved));
+      }, id);
+      await addSavedItem("new-one");
+      const notice = summary.getByRole("status").filter({ hasText: /1 saved item is not included/ });
+      await notice.waitFor();
+      assert.equal(await include.getAttribute("aria-describedby"), await notice.getAttribute("id"));
+      await summary.getByText("Sourcing list: 2 items included", { exact: true }).waitFor();
+      await summary.getByText("Review included items", { exact: true }).click();
+      assert.deepEqual(await summary.getByRole("listitem").allTextContents(), before.map((item) => item.title));
+
+      await include.uncheck();
+      await notice.waitFor({ state: "hidden" });
+      await include.check();
+      await summary.getByText("Sourcing list: 3 items included", { exact: true }).waitFor();
+      await addSavedItem("new-two");
+      await notice.waitFor();
+      assert.deepEqual(await summary.getByRole("listitem").allTextContents(), [...before.map((item) => item.title), "QA new-one"]);
+    } finally { await other.close(); }
+
+    await page.locator("#sourcing-email").fill("qa@example.test");
+    await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.deepEqual(submissions[0].sourcingListItems.map((item) => item.id), [...before.map((item) => item.id), "new-one"]);
+    assert.equal(submissions[0].sourcingListItems[0].quantity, "18 racks", "Edits to an included row remain live");
+    assert.deepEqual((await readSavedRows(page)).map((item) => item.id), ["new-two"]);
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);
