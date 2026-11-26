@@ -758,6 +758,53 @@ try {
     assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null);
     assert.equal(submissions.length, 0);
   });
+  await scenario("31-list-errors-focus-the-item-before-handoff", seedLargeSourcingList, async (page, submissions) => {
+    await page.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    await page.getByRole("button", { name: "Review sourcing list (31)", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    const review = dialog.getByRole("button", { name: "Review first 30 items", exact: true });
+    const fields = [
+      [27, "Quantity", "quantity", 120],
+      [27, "Current supplier", "currentSupplier", 180],
+      [27, "Catalog number", "catalogNumber", 180],
+      [28, "Notes", "notes", 1200]
+    ].map(([number, label, key, max]) => ({
+      number, label, key, max,
+      field: dialog.getByRole("article", { name: `QA sourcing item ${number}`, exact: true }).getByLabel(label, { exact: true })
+    }));
+    for (const { field, max } of fields) await field.fill("Q".repeat(max + 1));
+    const remainder = dialog.getByRole("article", { name: "QA sourcing item 31", exact: true }).getByLabel("Notes", { exact: true });
+    await remainder.fill("R".repeat(1201));
+
+    for (const { number, label, key, max, field } of fields) {
+      await review.click();
+      const error = dialog.getByRole("alert").filter({ hasText: `${label} exceeds` });
+      await error.waitFor();
+      await page.waitForFunction((id) => document.activeElement?.getAttribute("aria-describedby") === id, await error.getAttribute("id"));
+      assert.equal(await field.getAttribute("aria-invalid"), "true");
+      assert.equal(await field.getAttribute("aria-describedby"), await error.getAttribute("id"));
+      assert.equal(await field.inputValue(), "Q".repeat(max + 1));
+      assert.equal((await readSavedRows(page))[number - 1][key], "Q".repeat(max + 1));
+      const scroll = dialog.locator("[data-sourcing-list-scroll]");
+      const bounds = await scroll.boundingBox();
+      const errorBounds = await error.boundingBox();
+      assert.ok(bounds && errorBounds && errorBounds.y >= bounds.y && errorBounds.y + errorBounds.height <= bounds.y + bounds.height,
+        "The error must be visible inside the mobile drawer");
+      assert.equal(new URL(page.url()).pathname, "/products");
+      assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null);
+      await field.fill("Q".repeat(max));
+      await error.waitFor({ state: "hidden" });
+    }
+
+    await review.click();
+    await page.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+    await page.getByText("Sourcing list: 30 items included", { exact: true }).waitFor();
+    const saved = await readSavedRows(page);
+    assert.equal(saved.length, 31);
+    assert.equal(saved.at(-1).notes, "R".repeat(1201), "An out-of-batch invalid row stays saved and does not block review");
+    assert.equal(submissions.length, 0);
+  });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
   console.log(`Buyer-session regression passed: ${evidence.length} local scenarios, saved-list recovery, denied storage/quota/cleanup, preserved intent, visible confirmation, URL/control/result history, overflow protection and stalled receipt recovery. Evidence: ${output}`);

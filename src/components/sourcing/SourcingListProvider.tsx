@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { sourcingListItemInputIssue } from "@/lib/rfqInputLimits";
 import { beginSourcingListHandoff, parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems, type SourcingListItem } from "@/lib/sourcingListStorage";
 import { maxSourcingListItems } from "@/lib/sourcingNeed";
 export type { SourcingListItem } from "@/lib/sourcingListStorage";
@@ -32,6 +33,8 @@ type SourcingListContextValue = {
   removeItem: (id: string) => void;
   openDrawer: (restoreFocusTo?: HTMLElement | null) => void;
 };
+
+type DrawerTextField = "quantity" | "currentSupplier" | "catalogNumber" | "notes";
 
 const storageKey = "bioaxis:sourcing-list";
 const submissionCompleteEvent = "bioaxis:sourcing-list-submitted";
@@ -64,6 +67,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [memoryOnly, setMemoryOnly] = useState(false);
   const [needsReview, setNeedsReview] = useState(false);
+  const [revealedItemError, setRevealedItemError] = useState<string | null>(null);
   const remainingItems = Math.max(items.length - maxSourcingListItems, 0);
   const storageNotice = memoryOnly
     ? "Your list is available in this tab only. Keep it open until you send your request."
@@ -230,12 +234,36 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     [changeList, items, openDrawer, storageNotice]
   );
 
+  function fieldProps(item: SourcingListItem, index: number, field: DrawerTextField) {
+    const issue = revealedItemError === item.id ? sourcingListItemInputIssue(item) : null;
+    const id = `sourcing-list-${index}-${field}`;
+    const error = issue?.field === field ? issue.message : null;
+    return {
+      input: { id, "data-item-field": field, "aria-invalid": error ? true : undefined, "aria-describedby": error ? `${id}-error` : undefined },
+      error
+    };
+  }
+
   function submitSourcingList(reviewBatch: boolean) {
     const stored = readBrowserStorage("localStorage", storageKey);
     syncSavedList(stored);
     const { items: latest, unsaved } = listRef.current;
     if (!latest.length || (latest.length > maxSourcingListItems && (!reviewBatch || unsaved || !stored.available))) return;
     const currentItems = reviewBatch ? latest.slice(0, maxSourcingListItems) : latest;
+    for (const item of currentItems) {
+      const issue = sourcingListItemInputIssue(item);
+      if (!issue) continue;
+      setRevealedItemError(item.id);
+      requestAnimationFrame(() => {
+        const rows = dialogRef.current?.querySelectorAll<HTMLElement>("[data-sourcing-list-item]");
+        const row = rows && Array.from(rows).find((element) => element.dataset.sourcingListItem === item.id);
+        const field = row?.querySelector<HTMLElement>(`[data-item-field="${issue.field}"]`);
+        field?.focus({ preventScroll: true });
+        field?.scrollIntoView({ block: "center" });
+      });
+      return;
+    }
+    setRevealedItemError(null);
     const params = new URLSearchParams({
       requestType: "product-list-review",
       source: "sourcing-list",
@@ -306,7 +334,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
               ) : null}
               <div className="grid gap-4">
                 {items.map((item, itemIndex) => (
-                  <article key={item.id} aria-label={item.title} className="border border-bioaxis-line bg-bioaxis-panel p-4">
+                  <article key={item.id} aria-label={item.title} data-sourcing-list-item={item.id} className="border border-bioaxis-line bg-bioaxis-panel p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="text-base font-semibold text-bioaxis-text">{item.title}</h3>
@@ -340,9 +368,9 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                     </div>
 
                     <div className="mt-4 grid gap-3 md:grid-cols-3">
-                      <DrawerField label="Quantity" value={item.quantity} onChange={(quantity) => value.updateItem(item.id, { quantity })} />
-                      <DrawerField label="Current supplier" value={item.currentSupplier} onChange={(currentSupplier) => value.updateItem(item.id, { currentSupplier })} />
-                      <DrawerField label="Catalog number" value={item.catalogNumber} onChange={(catalogNumber) => value.updateItem(item.id, { catalogNumber })} />
+                      <DrawerField {...fieldProps(item, itemIndex, "quantity")} label="Quantity" value={item.quantity} onChange={(quantity) => value.updateItem(item.id, { quantity })} />
+                      <DrawerField {...fieldProps(item, itemIndex, "currentSupplier")} label="Current supplier" value={item.currentSupplier} onChange={(currentSupplier) => value.updateItem(item.id, { currentSupplier })} />
+                      <DrawerField {...fieldProps(item, itemIndex, "catalogNumber")} label="Catalog number" value={item.catalogNumber} onChange={(catalogNumber) => value.updateItem(item.id, { catalogNumber })} />
                     </div>
                     <label className="mt-4 block">
                       <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">Requested action</span>
@@ -363,15 +391,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
                       <DrawerToggle label="Sample needed" checked={item.sampleNeeded} onChange={(sampleNeeded) => value.updateItem(item.id, { sampleNeeded })} />
                       <DrawerToggle label="Documentation needed" checked={item.documentationNeeded} onChange={(documentationNeeded) => value.updateItem(item.id, { documentationNeeded })} />
                     </div>
-                    <label className="mt-4 block">
-                      <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">Notes</span>
-                      <textarea
-                        value={item.notes}
-                        rows={3}
-                        onChange={(event) => value.updateItem(item.id, { notes: event.target.value })}
-                        className="field-focus w-full resize-y border border-bioaxis-line bg-bioaxis-black px-3 py-2 text-sm text-bioaxis-text"
-                      />
-                    </label>
+                    <DrawerField {...fieldProps(item, itemIndex, "notes")} label="Notes" value={item.notes} onChange={(notes) => value.updateItem(item.id, { notes })} multiline />
                   </article>
                 ))}
               </div>
@@ -409,16 +429,23 @@ export function useSourcingList() {
   return context;
 }
 
-function DrawerField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function DrawerField({ input, error, label, value, onChange, multiline = false }: {
+  input: { id: string; "data-item-field": DrawerTextField; "aria-invalid"?: boolean; "aria-describedby"?: string };
+  error: string | null;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  multiline?: boolean;
+}) {
+  const classes = "field-focus w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text aria-invalid:border-red-600";
   return (
-    <label>
-      <span className="mb-2 block text-xs font-semibold  text-bioaxis-steel">{label}</span>
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="field-focus min-h-11 w-full border border-bioaxis-line bg-bioaxis-black px-3 text-sm text-bioaxis-text"
-      />
-    </label>
+    <div className={multiline ? "mt-4" : undefined}>
+      <label htmlFor={input.id} className="mb-2 block text-xs font-semibold text-bioaxis-steel">{label}</label>
+      {multiline
+        ? <textarea {...input} value={value} rows={3} onChange={(event) => onChange(event.target.value)} className={`${classes} resize-y py-2`} />
+        : <input {...input} value={value} onChange={(event) => onChange(event.target.value)} className={`${classes} min-h-11`} />}
+      {error ? <p id={input["aria-describedby"]} role="alert" className="mt-2 text-xs leading-5 text-red-800">{error}</p> : null}
+    </div>
   );
 }
 

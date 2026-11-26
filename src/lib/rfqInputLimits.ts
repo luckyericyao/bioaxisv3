@@ -35,15 +35,19 @@ function recordOf(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
-function textLimitIssue(value: unknown, rules: readonly TextLimit[], prefix = "") {
+function textLimitIssue(value: unknown, rules: readonly TextLimit[]) {
   const fields = recordOf(value);
   for (const [key, label, maximum, fallback] of rules) {
     const text = trimRfqText(fields[key] || (fallback ? fields[fallback] : undefined));
     if (text.length > maximum) {
-      return { field: key, message: `${prefix}${label} exceeds the ${maximum.toLocaleString("en-US")}-character limit. Shorten it and try again; nothing has been submitted.` };
+      return { field: key, message: `${label} exceeds the ${maximum.toLocaleString("en-US")}-character limit. Shorten it and try again; nothing has been submitted.` };
     }
   }
   return null;
+}
+
+export function sourcingListItemInputIssue(value: unknown) {
+  return textLimitIssue(value, itemTextLimits);
 }
 
 export function rfqInputLimitIssue(value: unknown): InputLimitIssue | null {
@@ -55,8 +59,8 @@ export function rfqInputLimitIssue(value: unknown): InputLimitIssue | null {
   if (requestIssue) return requestIssue;
 
   for (const [index, item] of items.entries()) {
-    const itemIssue = textLimitIssue(item, itemTextLimits, `Item ${index + 1} in the sourcing list: `);
-    if (itemIssue) return { message: itemIssue.message };
+    const itemIssue = sourcingListItemInputIssue(item);
+    if (itemIssue) return { message: `Item ${index + 1} in the sourcing list: ${itemIssue.message}` };
   }
   return null;
 }
