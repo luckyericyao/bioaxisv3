@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { beginSourcingListHandoff, parseSourcingList, readBrowserStorage, writeBrowserStorage, removeBrowserStorage, retainUnsubmittedSourcingItems, type SourcingListItem } from "@/lib/sourcingListStorage";
+import { maxSourcingListItems } from "@/lib/sourcingNeed";
 export type { SourcingListItem } from "@/lib/sourcingListStorage";
 
 type SourcingListInput = Omit<
@@ -63,6 +64,7 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [memoryOnly, setMemoryOnly] = useState(false);
   const [needsReview, setNeedsReview] = useState(false);
+  const remainingItems = Math.max(items.length - maxSourcingListItems, 0);
   const storageNotice = memoryOnly
     ? "Your list is available in this tab only. Keep it open until you send your request."
     : needsReview ? "Some saved items could not be restored. Review your list before sending." : "";
@@ -228,15 +230,17 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
     [changeList, items, openDrawer, storageNotice]
   );
 
-  function submitSourcingList() {
-    syncSavedList();
-    const currentItems = listRef.current.items;
-    if (!currentItems.length) return;
+  function submitSourcingList(reviewBatch: boolean) {
+    const stored = readBrowserStorage("localStorage", storageKey);
+    syncSavedList(stored);
+    const { items: latest, unsaved } = listRef.current;
+    if (!latest.length || (latest.length > maxSourcingListItems && (!reviewBatch || unsaved || !stored.available))) return;
+    const currentItems = reviewBatch ? latest.slice(0, maxSourcingListItems) : latest;
     const params = new URLSearchParams({
       requestType: "product-list-review",
       source: "sourcing-list",
       storedInput: "1",
-      listHandoff: beginSourcingListHandoff(currentItems, !listRef.current.unsaved)
+      listHandoff: beginSourcingListHandoff(currentItems, !unsaved)
     });
 
     setDrawerOpen(false);
@@ -374,13 +378,18 @@ export function SourcingListProvider({ children }: { children: ReactNode }) {
             </div>
 
             <div className="border-t border-bioaxis-line p-5">
+              {remainingItems > 0 ? <p id="sourcing-list-batch-note" role="status" className="mb-3 text-sm text-bioaxis-muted">
+                {memoryOnly ? `This tab-only list exceeds the ${maxSourcingListItems}-item limit per request.`
+                  : `${remainingItems} ${remainingItems === 1 ? "item" : "items"} will stay in the saved list for a separate request.`}
+              </p> : null}
               <button
                 type="button"
-                disabled={items.length === 0}
-                onClick={submitSourcingList}
+                disabled={items.length === 0 || (remainingItems > 0 && memoryOnly)}
+                aria-describedby={remainingItems > 0 ? "sourcing-list-batch-note" : undefined}
+                onClick={() => submitSourcingList(remainingItems > 0)}
                 className="inline-flex min-h-12 w-full items-center justify-center border border-bioaxis-accent bg-bioaxis-accent px-5 text-sm font-semibold  text-bioaxis-black transition hover:bg-transparent hover:text-bioaxis-accent disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Send list for review
+                {remainingItems > 0 && !memoryOnly ? `Review first ${maxSourcingListItems} items` : "Send list for review"}
               </button>
             </div>
           </div>

@@ -64,6 +64,10 @@ function seedTwoSourcingItems() {
   ]));
 }
 
+function seedLargeSourcingList() {
+  localStorage.setItem("bioaxis:sourcing-list", JSON.stringify(Array.from({ length: 31 }, (_, index) => ({ id: `qa-item-${index}`, title: `QA sourcing item ${index + 1}`, href: "/products/liquid-handling", quantity: `${index + 1} racks` }))));
+}
+
 function readSavedRows(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem("bioaxis:sourcing-list") || "[]"));
 }
@@ -152,9 +156,7 @@ try {
     await page.waitForURL((url) => url.searchParams.get("view") === "configurations" && !url.searchParams.has("segment"));
     await waitForFilters(page, cleared, totalCount);
   });
-  await scenario("07-oversized-list-not-partially-submitted", () => {
-    localStorage.setItem("bioaxis:sourcing-list", JSON.stringify(Array.from({ length: 31 }, (_, index) => ({ id: `qa-item-${index}`, title: `QA sourcing item ${index + 1}`, href: "/products/liquid-handling", quantity: `${index + 1} racks` }))));
-  }, async (page, submissions) => {
+  await scenario("07-oversized-list-not-partially-submitted", seedLargeSourcingList, async (page, submissions) => {
     await page.goto(new URL("/request-quote", baseUrl).toString(), { waitUntil: "networkidle" });
     const include = includeSavedList(page);
     const warning = page.locator("[data-sourcing-list-summary]").getByRole("status");
@@ -715,6 +717,46 @@ try {
     assert.equal(submissions.length, 1);
     assert.equal(submissions[0].documentationNeeds, "Q".repeat(1200));
     assert.equal(submissions[0].message, "Q".repeat(8000));
+  });
+  await scenario("29-explicit-large-list-batch-preserves-the-remainder", seedLargeSourcingList, async (page, submissions) => {
+    await page.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    await page.getByRole("button", { name: "Review sourcing list (31)", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    assert.match(await dialog.locator("#sourcing-list-batch-note").innerText(), /1 item will stay in the saved list/);
+    await dialog.getByRole("button", { name: "Review first 30 items", exact: true }).click();
+    await page.waitForURL((url) => url.pathname === "/request-quote" && url.searchParams.has("listHandoff"));
+    await page.getByText("Sourcing list: 30 items included", { exact: true }).waitFor();
+    const before = await readSavedRows(page);
+    assert.equal(before.length, 31);
+    assert.equal(submissions.length, 0, "Reviewing a batch must not submit it");
+
+    await page.locator("#sourcing-email").fill("qa@example.test");
+    await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.deepEqual(submissions[0].sourcingListItems.map((item) => item.id), before.slice(0, 30).map((item) => item.id));
+    assert.deepEqual((await readSavedRows(page)).map((item) => item.id), [before.at(-1).id]);
+  });
+  await scenario("30-tab-only-large-list-is-not-silently-split", seedLargeSourcingList, async (page, submissions) => {
+    await page.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    await page.getByRole("button", { name: "Review sourcing list (31)", exact: true }).click();
+    await page.evaluate(() => {
+      const original = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (this === localStorage && key === "bioaxis:sourcing-list") throw new DOMException("Test-only storage quota", "QuotaExceededError");
+        return original.call(this, key, value);
+      };
+    });
+    const dialog = page.getByRole("dialog");
+    const first = dialog.getByRole("article", { name: "QA sourcing item 1", exact: true });
+    await first.getByLabel("Quantity", { exact: true }).fill("QA tab-only quantity");
+    await dialog.locator("#sourcing-list-batch-note").filter({ hasText: /tab-only list exceeds/ }).waitFor();
+    assert.ok(await dialog.getByRole("button", { name: "Send list for review", exact: true }).isDisabled());
+    assert.equal(await first.getByLabel("Quantity", { exact: true }).inputValue(), "QA tab-only quantity");
+    assert.equal(await page.evaluate(() => sessionStorage.getItem("bioaxis:sourcing-list-handoff")), null);
+    assert.equal(submissions.length, 0);
   });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
