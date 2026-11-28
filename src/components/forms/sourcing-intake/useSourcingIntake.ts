@@ -6,7 +6,7 @@ import { trackBioAxisEvent } from "@/lib/trackBioAxisEvent";
 import { hasSourcingNeed, maxSourcingListItems, sourcingListLimitError, sourcingNeedError } from "@/lib/sourcingNeed";
 import { rfqInputLimitIssue } from "@/lib/rfqInputLimits";
 import { retainUnsubmittedSourcingItems, type SourcingListItem } from "@/lib/sourcingListStorage";
-import { requestInputNames } from "./constants";
+import { missingSourcingListMessage, requestInputNames, savedListCheckboxName } from "./constants";
 import { apiRequestType, createInitialIntakeState, hasValidEmail, initialProductContext } from "./intakeState";
 import type { IntakeState, SourcingIntakeFormProps, SubmitState } from "./types";
 import { clearStoredSourcingSubmission, useSourcingListSession } from "./useSourcingListSession";
@@ -14,7 +14,7 @@ import { clearStoredSourcingSubmission, useSourcingListSession } from "./useSour
 const emailErrorMessage = "Please enter an email so BioAxis can follow up.";
 const verificationErrorMessage = "Please complete the verification and try again.";
 type RequestInputName = typeof requestInputNames[keyof typeof requestInputNames];
-type ValidationFailure = { message: string; field?: RequestInputName; listItem?: SourcingListItem };
+type ValidationFailure = { message: string; field?: RequestInputName; listItem?: SourcingListItem; missingAttachment?: boolean };
 
 export function useSourcingIntake({
   requestType = "quote",
@@ -77,6 +77,7 @@ export function useSourcingIntake({
   const sourcingListItems = !includeSavedList ? [] : attachment
     ? availableSourcingItems.filter((item) => attachment.rows.get(item.id) === item.addedAt)
     : availableSourcingItems;
+  const missingAttachment = includeSavedList && sourcingListItems.length === 0;
   const hasSelectedNeed = hasSourcingNeed({ productContext: resolvedProductContext, sourcingListItems });
   const canSelectBatch = sourcingListItems.length > maxSourcingListItems && sourcingListItems.every(
     (item) => liveSavedList.some((saved) => saved.id === item.id && saved.addedAt === item.addedAt)
@@ -148,6 +149,7 @@ export function useSourcingIntake({
   }
 
   function validate(request: BioAxisRequestPayload): ValidationFailure | null {
+    if (missingAttachment) return { message: missingSourcingListMessage, missingAttachment: true };
     const inputLimit = rfqInputLimitIssue(request);
     if (inputLimit) return {
       message: inputLimit.message,
@@ -227,10 +229,11 @@ export function useSourcingIntake({
       setInvalidField(validationError.field);
       const submitButton = event.currentTarget.querySelector<HTMLButtonElement>('button[type="submit"]');
       const openedListEditor = validationError.listItem && submitButton && editInvalidItem(validationError.listItem, submitButton);
-      setError(openedListEditor ? "" : validationError.message);
+      setError(openedListEditor || validationError.missingAttachment ? "" : validationError.message);
       setSubmitted(null);
-      if (validationError.field) {
-        const input = event.currentTarget.elements.namedItem(validationError.field);
+      const field = validationError.missingAttachment ? savedListCheckboxName : validationError.field;
+      if (field) {
+        const input = event.currentTarget.elements.namedItem(field);
         if (input instanceof HTMLElement) {
           const details = input.closest("details");
           if (details) details.open = true;
@@ -311,6 +314,7 @@ export function useSourcingIntake({
     canSelectBatch,
     selectSourcingBatch,
     includeSavedList,
+    missingAttachment,
     setIncludeSavedList,
     restoredSessionInput,
     error,

@@ -26,7 +26,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
     successTitle = "Request received", optionalChips, onActivityChange } = props;
   const intake = useSourcingIntake(props);
   const { state, availableSourcingItems, sourcingListItems, hasSelectedBatch, canSelectBatch, selectSourcingBatch,
-    includeSavedList, setIncludeSavedList, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
+    includeSavedList, setIncludeSavedList, missingAttachment, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
@@ -98,10 +98,13 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
             onChange={(value) => updateField("email", value)} />
         </fieldset>
         {hasPageContext ? <RequestContextCard productContext={resolvedProductContext} draftReady={Boolean(state.productInput.trim())} compact /> : null}
-        {availableSourcingItems.length ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
+        {availableSourcingItems.length || missingAttachment ? <SourcingListSummary items={availableSourcingItems} included={includeSavedList}
           includedItems={sourcingListItems} batchSelected={hasSelectedBatch}
-          submitting={submitting} onIncludeChange={setIncludeSavedList} onSelectBatch={canSelectBatch ? selectSourcingBatch : undefined}
-          onEdit={(target) => openDrawer(target, "request-edit")} /> : null}
+          submitting={submitting} onIncludeChange={(included) => {
+            setIncludeSavedList(included);
+            if (!included && !availableSourcingItems.length) formRef.current?.querySelector<HTMLTextAreaElement>("#sourcing-product-input")?.focus();
+          }} onSelectBatch={canSelectBatch ? selectSourcingBatch : undefined}
+          onEdit={availableSourcingItems.length ? (target) => openDrawer(target, "request-edit") : undefined} /> : null}
         {storageNotice ? <p role="status" className="helper-text text-bioaxis-muted">{storageNotice}</p> : null}
       </section>
 

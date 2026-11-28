@@ -589,10 +589,11 @@ try {
       await other.getByRole("button", { name: "Added to sourcing list", exact: true }).click();
       await other.getByRole("button", { name: "Remove Filtered 200 µL Pipette Tips", exact: true }).click();
       const list = page.locator("[data-sourcing-list-summary]");
-      await list.waitFor({ state: "hidden" });
+      const emptySelection = list.getByText("Sourcing list: 0 items included", { exact: true });
+      await emptySelection.waitFor();
       assert.equal(await page.evaluate(() => localStorage.getItem("bioaxis:sourcing-list")), null);
       await page.reload({ waitUntil: "networkidle" });
-      assert.equal(await list.count(), 0, "An empty shared list must not restore a deleted reviewed item");
+      await emptySelection.waitFor();
       assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), true);
 
       await other.keyboard.press("Escape");
@@ -601,9 +602,9 @@ try {
       await page.getByRole("button", { name: "Menu", exact: true }).click();
       await page.getByRole("button", { name: "Review sourcing list (1)", exact: true }).waitFor();
       await page.getByRole("button", { name: "Close menu", exact: true }).click();
-      assert.equal(await list.count(), 0, "Re-adding the same product must not automatically attach it to the old draft");
+      await emptySelection.waitFor();
       await page.reload({ waitUntil: "networkidle" });
-      assert.equal(await list.count(), 0, "Reload must not attach a different entry for the same product");
+      await emptySelection.waitFor();
       assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), true);
 
       await other.getByRole("button", { name: "Send list for review", exact: true }).click();
@@ -931,6 +932,42 @@ try {
     assert.deepEqual(submissions[0].sourcingListItems.map((item) => item.id), [...before.map((item) => item.id), "new-one"]);
     assert.equal(submissions[0].sourcingListItems[0].quantity, "18 racks", "Edits to an included row remain live");
     assert.deepEqual((await readSavedRows(page)).map((item) => item.id), ["new-two"]);
+  });
+  await scenario("35-removed-attachment-requires-explicit-acknowledgment", seedTwoSourcingItems, async (page, submissions) => {
+    await page.goto(new URL("/request-quote", baseUrl).href, { waitUntil: "networkidle" });
+    const input = page.locator("#sourcing-product-input");
+    const email = page.locator("#sourcing-email");
+    const include = includeSavedList(page);
+    const summary = page.locator("[data-sourcing-list-summary]");
+    const send = page.getByRole("button", { name: "Send sourcing request", exact: true });
+    await include.check();
+    await input.fill("QA separately typed request");
+    await email.fill("qa@example.test");
+
+    const other = await page.context().newPage();
+    try {
+      await other.goto(new URL("/products", baseUrl).href, { waitUntil: "networkidle" });
+      await other.evaluate(() => localStorage.removeItem("bioaxis:sourcing-list"));
+      const warning = summary.getByRole("status").filter({ hasText: /attached items are no longer/ });
+      await warning.waitFor();
+      assert.equal(await include.isChecked(), true);
+      assert.equal(await include.getAttribute("aria-invalid"), "true");
+      assert.equal(await include.getAttribute("aria-describedby"), await warning.getAttribute("id"));
+      await send.click();
+      assert.ok(await include.evaluate((node) => node === document.activeElement), "The warning and its resolution must receive focus");
+      assert.equal(submissions.length, 0, "Do not silently submit once an intended attachment disappears");
+    } finally { await other.close(); }
+
+    await include.press("Space");
+    await summary.waitFor({ state: "hidden" });
+    assert.ok(await input.evaluate((node) => node === document.activeElement), "Removing the unavailable attachment must keep focus in the request");
+    assert.equal(await input.inputValue(), "QA separately typed request");
+    assert.equal(await email.inputValue(), "qa@example.test");
+    await send.click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.deepEqual(submissions[0].sourcingListItems, []);
+    assert.equal(submissions[0].productList, "QA separately typed request");
   });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");

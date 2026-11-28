@@ -1,6 +1,8 @@
 export const primaryHelperText = "Share a product, reference or sourcing need, then your email.";
 export const contextualHelperText = "BioAxis will include this page context automatically.";
 export const optionalHelperText = "BioAxis will review your request and follow up by email.";
+export const savedListCheckboxName = "includeSavedSourcingList";
+export const missingSourcingListMessage = "The attached items are no longer in your saved list. Clear the checkbox to continue without them.";
 
 export const defaultEquivalentChips = [
   "Format match",
