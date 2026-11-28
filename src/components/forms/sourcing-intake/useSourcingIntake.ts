@@ -70,10 +70,10 @@ export function useSourcingIntake({
       resolvedProductContext.productCategory ||
       resolvedProductContext.productSegment
   );
-  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
+  const { sourcingListItems: availableSourcingItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, listHandoffStatus, handoffSnapshot, resetListHandoff } = useSourcingListSession(setState, handoffMode, listHandoffId);
   const [includeListChoice, setIncludeListChoice] = useState<boolean | null>(null);
   const [attachment, setAttachment] = useState<{ rows: ReadonlyMap<string, string>; batched: boolean } | null>(null);
-  const includeSavedList = includeListChoice ?? restoredListHandoff;
+  const includeSavedList = includeListChoice ?? (listHandoffStatus === "restored");
   const sourcingListItems = !includeSavedList ? [] : attachment
     ? availableSourcingItems.filter((item) => attachment.rows.get(item.id) === item.addedAt)
     : availableSourcingItems;
@@ -315,6 +315,7 @@ export function useSourcingIntake({
     selectSourcingBatch,
     includeSavedList,
     missingAttachment,
+    unavailableListHandoff: listHandoffStatus === "unavailable" && !includeSavedList,
     setIncludeSavedList,
     restoredSessionInput,
     error,

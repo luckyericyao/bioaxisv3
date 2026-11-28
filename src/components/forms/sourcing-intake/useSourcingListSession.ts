@@ -39,7 +39,7 @@ export function clearStoredSourcingSubmission(snapshot: StoredSourcingSubmission
 export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeState>>, handoffMode?: SourcingHandoffMode, listHandoffId?: string) {
   const [sourcingListItems, setSourcingListItems] = useState<SourcingListItem[]>([]);
   const [restoredSessionInput, setRestoredSessionInput] = useState(false);
-  const [restoredListHandoff, setRestoredListHandoff] = useState(false);
+  const [listHandoffStatus, setListHandoffStatus] = useState<"none" | "restored" | "unavailable">("none");
   const { items } = useSourcingList();
   const usingLiveList = useRef(false);
   const reviewedRows = useRef<ReadonlyMap<string, string> | null>(null);
@@ -66,7 +66,7 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
       listHandoffId: selectedHandoff?.id
     };
 
-    setRestoredListHandoff(Boolean(selectedHandoff));
+    setListHandoffStatus(handoffMode !== "list" ? "none" : selectedHandoff ? "restored" : "unavailable");
     setSourcingListItems(restoredItems);
     if (sessionProductList) {
       setRestoredSessionInput(true);
@@ -84,10 +84,13 @@ export function useSourcingListSession(setState: Dispatch<SetStateAction<IntakeS
   function resetListHandoff() {
     reviewedRows.current = null;
     handoffSnapshot.current = { productList: null, items: null };
-    setRestoredListHandoff(false);
+    setListHandoffStatus("none");
     setRestoredSessionInput(false);
     setSourcingListItems(items);
   }
 
-  return { sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput, restoredListHandoff, handoffSnapshot, resetListHandoff };
+  return {
+    sourcingListItems, setSourcingListItems, restoredSessionInput, setRestoredSessionInput,
+    listHandoffStatus, handoffSnapshot, resetListHandoff
+  };
 }

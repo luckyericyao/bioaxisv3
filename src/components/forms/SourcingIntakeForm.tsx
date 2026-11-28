@@ -26,7 +26,7 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
     successTitle = "Request received", optionalChips, onActivityChange } = props;
   const intake = useSourcingIntake(props);
   const { state, availableSourcingItems, sourcingListItems, hasSelectedBatch, canSelectBatch, selectSourcingBatch,
-    includeSavedList, setIncludeSavedList, missingAttachment, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
+    includeSavedList, setIncludeSavedList, missingAttachment, unavailableListHandoff, error, fieldError, hasFieldError, hasSelectedNeed, submitted, submitting,
     requestReferenceConflict, retryReferenceReady, turnstileToken, turnstileResetKey, turnstileAvailable,
     setTurnstileAvailable, setTurnstileToken, resolvedProductContext, hasPageContext, trackIntakeStart,
     handleTurnstileFailure, updateField, toggleChip, applyStarterTemplate, startAnotherRequest,
@@ -84,6 +84,10 @@ export function SourcingIntakeForm(props: SourcingIntakeFormProps) {
       <section className="grid gap-5">
         <h2 id="sourcing-intake-title" className="sr-only">{title}</h2>
         {handoffNotice ? <p role="status" className="text-bioaxis-muted">{handoffNotice}</p> : null}
+        {unavailableListHandoff ? <p role="status" className="text-bioaxis-muted">
+          The sourcing list from this link is not available in this tab.{" "}
+          {availableSourcingItems.length ? "Enter product details below, or choose to include the current saved list." : "Enter product details below to continue."}
+        </p> : null}
         <fieldset disabled={submitting} className="grid min-w-0 gap-5">
           <legend className="sr-only">Request details</legend>
           <TextArea id="sourcing-product-input" label={productFieldLabel ?? "What do you need?"}

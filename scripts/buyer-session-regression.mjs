@@ -536,6 +536,13 @@ try {
       await page.goto(url, { waitUntil: "networkidle" });
       assert.equal(await includeSavedList(page).isChecked(), url === latest);
       assert.equal(await page.locator("#sourcing-product-input").evaluate((field) => field.required), url !== latest);
+      const notice = page.locator("form").getByRole("status").filter({ hasText: /sourcing list from this link/ });
+      if (url === latest) assert.equal(await notice.count(), 0, "A matching handoff must not show unavailable-list guidance");
+      else {
+        assert.match(await notice.innerText(), /choose to include the current saved list/);
+        await includeSavedList(page).check();
+        await notice.waitFor({ state: "hidden" });
+      }
     }
     assert.equal(submissions.length, 0);
   });
@@ -968,6 +975,25 @@ try {
     assert.equal(submissions.length, 1);
     assert.deepEqual(submissions[0].sourcingListItems, []);
     assert.equal(submissions[0].productList, "QA separately typed request");
+  });
+  await scenario("36-unavailable-handoff-without-a-saved-list-guides-manual-entry", null, async (page, submissions) => {
+    const url = new URL(`/request-quote?requestType=sample&source=sourcing-list&storedInput=1&listHandoff=${"4".repeat(32)}`, baseUrl);
+    await page.goto(url.href, { waitUntil: "networkidle" });
+    const notice = page.locator("form").getByRole("status").filter({ hasText: /sourcing list from this link/ });
+    assert.match(await notice.innerText(), /Enter product details below to continue/);
+    assert.equal(await includeSavedList(page).count(), 0, "Do not offer a saved list when none exists");
+    const input = page.locator("#sourcing-product-input");
+    assert.equal(await input.evaluate((field) => field.required), true);
+    await input.fill("QA replacement sample request");
+    await page.locator("#sourcing-email").fill("qa@example.test");
+    await page.getByRole("button", { name: "Send sourcing request", exact: true }).click();
+    await checkConfirmation(page);
+    assert.equal(submissions.length, 1);
+    assert.equal(submissions[0].requestType, "sample");
+    assert.deepEqual(submissions[0].sourcingListItems, []);
+    assert.equal(submissions[0].productList, "QA replacement sample request");
+    await page.getByRole("button", { name: "Start another request", exact: true }).click();
+    assert.equal(await notice.count(), 0, "A fresh draft must not carry the earlier missing-list notice");
   });
   await writeFile(path.join(output, "results.json"), JSON.stringify({ evidence, failures }, null, 2));
   assert.deepEqual(failures, [], "Buyer-session regression failures");
